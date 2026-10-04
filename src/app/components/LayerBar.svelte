@@ -7,7 +7,8 @@
   import VariantTabs from './VariantTabs.svelte';
 
   /** One quiet toolbar over the room: setups, what the map shows, bass note, side view. */
-  const level = (id: LayerId) => LAYERS.find((l) => l.id === id)!.level;
+  const level = (id: LayerId | 'speakers') =>
+    id === 'speakers' ? 'combined' : LAYERS.find((l) => l.id === id)!.level;
   const shape = (l: string) =>
     l === 'physics' ? '●' : l === 'guideline' ? '◆' : l === 'heuristic' ? '▲' : '◇';
   const active = $derived(ui.layer);
@@ -23,11 +24,12 @@
       class="select"
       value={active}
       disabled={modeOn}
-      onchange={(e) => (ui.layer = e.currentTarget.value as LayerId)}
+      onchange={(e) => (ui.layer = e.currentTarget.value as LayerId | 'speakers')}
     >
       {#each LAYERS as layer (layer.id)}
         <option value={layer.id}>{i18n.t(`layer.${layer.id}.name`)}</option>
       {/each}
+      <option value="speakers">{i18n.t('layer.speakers.name')}</option>
     </select>
     <button
       type="button"
@@ -57,7 +59,7 @@
       <span>{i18n.t('map.poorer')}</span>
       <span class="ramp"></span>
       <span>{i18n.t('map.better')}</span>
-      <span class="dimmed">{i18n.t('map.dimmed')}</span>
+      {#if active !== 'speakers'}<span class="dimmed">{i18n.t('map.dimmed')}</span>{/if}
     </div>
   </div>
 {/if}

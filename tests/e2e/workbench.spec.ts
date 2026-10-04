@@ -15,7 +15,7 @@ test('the map shows a heatmap, layers that say what they mean, and a legend', as
   await withResults(page);
   await expect(page.locator('canvas.heat')).toBeVisible();
   const layer = page.getByLabel('Map layer');
-  await expect(layer.locator('option')).toHaveCount(8);
+  await expect(layer.locator('option')).toHaveCount(9); // eight seat layers + the speakers
   await layer.selectOption({ label: 'Bass holes' });
   await expect(page.getByText('Whether a bass note nearly vanishes here')).toBeVisible();
   await expect(page.getByText('Physics', { exact: false }).first()).toBeVisible();
@@ -223,4 +223,31 @@ test('the print sheet has the tape-measure numbers', async ({ page }) => {
   await expect(sheet).toContainText('from the front wall');
   await expect(sheet).toContainText('Left speaker');
   await expect(page.locator('.app')).toBeHidden();
+});
+
+test('the speaker layer shows where the speakers would sound best, mirrored about the seat', async ({
+  page,
+}) => {
+  await withResults(page);
+  await page.getByLabel('Map layer').selectOption({ label: 'Where the speakers go' });
+  await expect(page.getByText(/Where the speakers would sound best/)).toBeVisible();
+  const canvas = page.locator('canvas.heat');
+  await expect(canvas).toBeVisible();
+  // Mirrored: the canvas is twice as wide as the half grid, and not blank.
+  const sample = await canvas.evaluate((el: HTMLCanvasElement) => {
+    const ctx = el.getContext('2d')!;
+    const { data } = ctx.getImageData(0, 0, el.width, el.height);
+    let left = 0;
+    let right = 0;
+    for (let y = 0; y < el.height; y++) {
+      for (let x = 0; x < el.width; x++) {
+        const a = data[(y * el.width + x) * 4 + 3]!;
+        if (a && x < el.width / 2) left++;
+        if (a && x >= el.width / 2) right++;
+      }
+    }
+    return { left, right };
+  });
+  expect(sample.left).toBeGreaterThan(50);
+  expect(sample.right).toBe(sample.left);
 });

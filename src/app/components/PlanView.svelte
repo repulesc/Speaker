@@ -2,7 +2,7 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { scoreWord } from '../findings/text';
-  import { paintField, paintHeat } from '../map/heat';
+  import { paintField, paintHeat, paintSpeakerMap } from '../map/heat';
   import { modeExplorer } from '../state/mode.svelte';
   import { fitFrame, toPx, toWorld } from '../plan/frame';
   import {
@@ -95,9 +95,19 @@
   /** The bass-note explorer replaces the score map while it is on. */
   const field = $derived(ui.modeFrequency !== null ? modeExplorer.field : null);
   const suggested = $derived(field ? null : (candidates[shownIndex] ?? null));
+  /** The speaker-placement layer replaces the seat map: the seat stays, the speakers move. */
+  const speakerGrid = $derived(
+    !field && ui.layer === 'speakers' && result ? result.heatmap.speakers : null,
+  );
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
-    if (heat && layers && !field) paintHeat(heat, layers, layers.values[ui.layer]);
+    if (heat && layers && !field && ui.layer !== 'speakers') {
+      paintHeat(heat, layers, layers.values[ui.layer]);
+    }
+  });
+  let speakerCanvas = $state<HTMLCanvasElement>();
+  $effect(() => {
+    if (speakerCanvas && speakerGrid) paintSpeakerMap(speakerCanvas, speakerGrid);
   });
   let fieldCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
@@ -242,6 +252,16 @@
         )}px; width:{field.grid.nx * field.grid.step * frame.scale}px; height:{field.grid.ny *
           field.grid.step *
           frame.scale}px"
+      ></canvas>
+    {:else if speakerGrid}
+      <canvas
+        bind:this={speakerCanvas}
+        class="heat"
+        aria-hidden="true"
+        style="left:{px(0)}px; top:{py(0)}px; width:{speakerGrid.nx *
+          2 *
+          speakerGrid.step *
+          frame.scale}px; height:{speakerGrid.ny * speakerGrid.step * frame.scale}px"
       ></canvas>
     {:else if showHeat && layers}
       <canvas

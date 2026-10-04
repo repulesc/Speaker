@@ -546,6 +546,10 @@ export const en = {
     },
   },
   layer: {
+    speakers: {
+      name: 'Where the speakers go',
+      what: 'Where the speakers would sound best, with your seat staying where it is. Each spot is where the speaker pair would stand, mirrored about your seat. Brighter is better.',
+    },
     overall: {
       name: 'Overall',
       what: 'How good a seat is here, everything counted equally. Brighter is better.',

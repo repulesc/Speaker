@@ -66,3 +66,27 @@ export function paintField(canvas: HTMLCanvasElement, grid: Grid): void {
   }
   ctx.putImageData(image, 0, 0);
 }
+
+/**
+ * Where the speakers would score best, with the seat staying where it is. The grid covers the left
+ * half (the left speaker's position); the right speaker mirrors it about the seat, so the canvas
+ * is drawn twice as wide, mirrored. Cells the cabinet cannot occupy stay transparent.
+ */
+export function paintSpeakerMap(canvas: HTMLCanvasElement, grid: Grid): void {
+  const { nx, ny, values } = grid;
+  canvas.width = nx * 2;
+  canvas.height = ny;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const image = ctx.createImageData(nx * 2, ny);
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      const v = values[j * nx + i]!;
+      if (Number.isNaN(v)) continue;
+      const [r, g, b] = heatColor(v);
+      image.data.set([r, g, b, 255], (j * nx * 2 + i) * 4);
+      image.data.set([r, g, b, 255], (j * nx * 2 + (nx * 2 - 1 - i)) * 4);
+    }
+  }
+  ctx.putImageData(image, 0, 0);
+}

@@ -549,6 +549,10 @@ export const hu: Messages = {
     },
   },
   layer: {
+    speakers: {
+      name: 'Hová kerüljenek a hangfalak',
+      what: 'Hol szólnának a legjobban a hangfalak, ha az ülőhelyed ott marad, ahol van. Minden pont azt mutatja, hová állna a hangfalpár, tükrözve az ülőhelyed körül. Minél világosabb, annál jobb.',
+    },
     overall: {
       name: 'Összesített',
       what: 'Mennyire jó itt az ülőhely, mindent egyformán számítva. Minél világosabb, annál jobb.',

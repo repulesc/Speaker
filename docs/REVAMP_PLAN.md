@@ -130,3 +130,7 @@ Owner feedback: the speaker placement the app computes was hidden; the heatmap h
 - **Look.** Light by default and dark with the system, the platform's own font (no web fonts), one type scale (12/13/15/17/22 px), one accent colour, segmented controls and grouped lists as in the platform settings apps. Every control is 44 px on touch screens; WCAG AA contrast in both themes (axe).
 
 New Hungarian text to review: `settings.*`, `nav.*`, `suggest.*`, `map.dimmed`, `panel.label`, `panel.done`, `furnishing.title`.
+
+### Speaker placement layer
+
+The map layer menu has a ninth entry, "Where the speakers go": how well the speaker pair would score at each position, with the seat staying where it is (the engine's `speakerHeatmap`: the left speaker over the left half, the right one mirrored about the seat). Brighter is better. It shows the whole landscape behind the single answer on the Best placement card, so a user who cannot put the speakers at the suggested spot can see the next best places. New Hungarian text: `layer.speakers.*`.

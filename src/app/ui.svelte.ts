@@ -12,7 +12,8 @@ let step = $state<StepId>('room');
 let selection = $state<Selection>({ kind: 'none' });
 let boundary = $state<BoundaryId>('left');
 let view = $state<'top' | 'side'>('top');
-let layer = $state<LayerId>('overall');
+/** A seat layer, or 'speakers': where the speakers would score best, the seat staying put. */
+let layer = $state<LayerId | 'speakers'>('overall');
 /** The bass note shown by the room-mode explorer (Hz), or null when it is off. */
 let modeFrequency = $state<number | null>(null);
 /** The other setup drawn over the bass chart (Compare), or null. */
@@ -48,7 +49,7 @@ export const ui = {
   get layer() {
     return layer;
   },
-  set layer(value: LayerId) {
+  set layer(value: LayerId | 'speakers') {
     layer = value;
   },
   get modeFrequency() {
