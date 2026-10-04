@@ -385,6 +385,26 @@ export interface PointExplanation {
   bassResponse: { f: number[]; dB: number[] };
 }
 
+export type EffectSize = 'small' | 'moderate' | 'large';
+
+/**
+ * One piece of treatment or speaker-settings advice (docs/RULE_CATALOGUE.md, T and D rules).
+ * Like findings, display text comes from i18n: `advice.<ruleId>.<variant>`.
+ */
+export interface Advice {
+  ruleId: string;
+  level: EvidenceLevel;
+  concern: Concern;
+  messageKey: string;
+  params: Record<string, number | string>;
+  sources: readonly string[];
+  /** Rough expected benefit, for ordering only (🟡). The first one is "if you can only do one thing". */
+  priority: number;
+  /** Direction is in the message; this is the rough size, never a promise. */
+  effect: EffectSize;
+  location?: Vec3;
+}
+
 export type OutputId = 'bass' | 'reflections' | 'geometry' | 'roomCharacter' | 'speakerAdvice';
 
 export interface ConfidenceReport {
@@ -423,6 +443,8 @@ export interface AnalysisOk extends AnalysisBase {
   candidates: Candidate[];
   /** Seat layers with the speakers where they are now. */
   layers: SeatLayers;
+  /** Treatment (T rules) and speaker settings (D rules), most useful first. */
+  advice: { treatment: Advice[]; settings: Advice[] };
   /** The 38 % rule and the rule of thirds against the seat map. */
   folk: FolkComparison[];
   /** Seat map (goal score, speakers as now) and speaker map (seat as now). */

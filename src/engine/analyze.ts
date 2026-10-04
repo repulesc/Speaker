@@ -3,6 +3,7 @@ import { confidence } from './confidence';
 import { buildContext, currentPlacement } from './context';
 import { RULES } from './rules';
 import { bassCurve } from './rules/P09-bass-response';
+import { advice } from './advice';
 import { folkComparison } from './folk';
 import { fragility, resizedRooms } from './scoring/fragility';
 import { seatLayers, speakerHeatmap } from './scoring/heatmaps';
@@ -85,6 +86,7 @@ export function analyze(
     current,
     candidates,
     layers,
+    advice: advice(ctx, placement, findings),
     folk: folkComparison(layers, ctx.room.L, placement.listener.x),
     heatmap: {
       listener: { x0, y0, step, nx, ny, values: layers.values.goals },
