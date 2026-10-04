@@ -45,6 +45,9 @@
       : undefined,
   );
   const comparedCurve = $derived(compared ? (setups.views[compared.id]?.bass ?? null) : null);
+  $effect(() => {
+    if (compared) void setups.refresh($state.snapshot(workspace.project));
+  });
 
   const fMin = $derived(result?.bassResponse.f[0] ?? 20);
   const fMax = $derived(result?.bassResponse.f.at(-1) ?? 300);

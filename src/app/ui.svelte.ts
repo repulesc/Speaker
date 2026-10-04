@@ -22,6 +22,8 @@ let compareId = $state<string | null>(null);
 let candidate = $state<number | null>(null);
 /** The side view is hidden until asked for (docs/REVAMP_PLAN.md). */
 let sideOpen = $state(false);
+/** The Speakers page's "More details" stays open once opened, for this visit. */
+let speakerDetails = $state(false);
 
 export const ui = {
   get step() {
@@ -29,9 +31,9 @@ export const ui = {
   },
   set step(value: StepId) {
     step = value;
-    // A preview belongs to the home page and a comparison to the Why page; leaving ends them.
+    // A preview belongs to the home page; leaving it ends the preview. A comparison chosen on the
+    // Why page stays on, because it is drawn on the separate Bass page.
     if (value !== 'results') candidate = null;
-    if (value !== 'why') compareId = null;
   },
   get selection() {
     return selection;
@@ -75,6 +77,12 @@ export const ui = {
   },
   set sideOpen(value: boolean) {
     sideOpen = value;
+  },
+  get speakerDetails() {
+    return speakerDetails;
+  },
+  set speakerDetails(value: boolean) {
+    speakerDetails = value;
   },
   /** Which drawing is visible when only one fits (tablet, phone). */
   get view() {

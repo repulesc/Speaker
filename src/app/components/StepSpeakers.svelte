@@ -37,6 +37,7 @@
   import CertaintyChips from './CertaintyChips.svelte';
   import LengthField from './LengthField.svelte';
   import LengthInput from './LengthInput.svelte';
+  import SpeakerTypeIcon from './SpeakerTypeIcon.svelte';
 
   const project = $derived(workspace.project);
   const speaker = $derived(project.speaker);
@@ -169,6 +170,19 @@
   }
 
   const range = $derived<[number, number]>(constraints.listenerYRange ?? [0.5, 4.7]);
+
+  /** The type whose typical values the speaker still has; none once the user changes them. */
+  const chosenType = $derived(
+    SPEAKER_TYPES.find(
+      (t) =>
+        Math.abs((speaker.dimensions.w.value ?? -1) - t.w) < 1e-6 &&
+        Math.abs((speaker.dimensions.h.value ?? -1) - t.h) < 1e-6 &&
+        Math.abs((speaker.dimensions.d.value ?? -1) - t.d) < 1e-6 &&
+        speaker.enclosure.value === t.enclosure &&
+        speaker.portLocation.value === t.portLocation &&
+        speaker.driverLayout.value === t.driverLayout,
+    )?.id ?? null,
+  );
 </script>
 
 <div class="step">
@@ -177,208 +191,46 @@
     <p class="intro">{i18n.t('speakers.intro')}</p>
   </div>
 
+  <!-- Configurator: the closest type, where they stand, what can move. The rest is folded away. -->
   <fieldset>
     <legend>{i18n.t('speakers.type.legend')}</legend>
     <p class="help">{i18n.t('speakers.type.help')}</p>
-    <div class="tiles" role="radiogroup" aria-label={i18n.t('speakers.type.legend')}>
+    <div class="cards" role="radiogroup" aria-label={i18n.t('speakers.type.legend')}>
       {#each SPEAKER_TYPES as type (type.id)}
-        <label class="tile">
+        <label class="card">
           <input
             type="radio"
             name="speaker-type"
             value={type.id}
+            checked={chosenType === type.id}
             onchange={() => workspace.edit((p) => applySpeakerType(p, type.id))}
           />
-          <span class="tile-body">
-            <span class="tile-title">{i18n.t(`speakers.type.${type.id}.name`)}</span>
-            <span class="tile-sub">{i18n.t(`speakers.type.${type.id}.help`)}</span>
-          </span>
+          <SpeakerTypeIcon {type} />
+          <span class="card-title">{i18n.t(`speakers.type.${type.id}.name`)}</span>
+          <span class="card-sub">{i18n.t(`speakers.type.${type.id}.help`)}</span>
+          <svg class="check" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <circle cx="10" cy="10" r="10" />
+            <path d="M5.5 10.5l3 3 6-6.5" />
+          </svg>
         </label>
       {/each}
     </div>
   </fieldset>
 
-  <section class="group" aria-labelledby="describe-title">
-    <h3 id="describe-title">{i18n.t('speakers.describe.title')}</h3>
-    <div class="grid2">
-      <div class="field">
-        <label for="speaker-brand">{i18n.t('speakers.brand')}</label>
-        <input
-          id="speaker-brand"
-          class="input"
-          maxlength="60"
-          value={speaker.brand}
-          onchange={(e) => editSpeaker((s) => void (s.brand = e.currentTarget.value.trim()))}
-        />
-      </div>
-      <div class="field">
-        <label for="speaker-model">{i18n.t('speakers.model')}</label>
-        <input
-          id="speaker-model"
-          class="input"
-          maxlength="60"
-          value={speaker.model}
-          onchange={(e) => editSpeaker((s) => void (s.model = e.currentTarget.value.trim()))}
-        />
-      </div>
-    </div>
-
-    {#each [{ key: 'w', label: 'width' }, { key: 'h', label: 'height' }, { key: 'd', label: 'depth' }] as const as dim (dim.key)}
-      <LengthField
-        id="speaker-{dim.key}"
-        label={i18n.t(`speakers.size.${dim.label}`)}
-        kind="position"
-        value={speaker.dimensions[dim.key]}
-        {system}
-        limits={{ min: 0.02, max: 3 }}
-        onchange={(next) => editSpeaker((s) => void (s.dimensions[dim.key] = next))}
-      />
-    {/each}
-
-    <div class="field">
-      <label for="speaker-port">{i18n.t('speakers.port.label')}</label>
-      <select
-        id="speaker-port"
-        class="input"
-        value={speaker.portLocation.value ?? 'unknown'}
-        onchange={(e) => setKnown('portLocation', e.currentTarget.value)}
-      >
-        {#each ports as v (v)}<option value={v}>{i18n.t(`speakers.port.${v}`)}</option>{/each}
-      </select>
-      <p class="help">{i18n.t('speakers.port.help')}</p>
-    </div>
-
-    <div class="field">
-      <label for="speaker-enclosure">{i18n.t('speakers.enclosure.label')}</label>
-      <select
-        id="speaker-enclosure"
-        class="input"
-        value={speaker.enclosure.value ?? 'unknown'}
-        onchange={(e) => setKnown('enclosure', e.currentTarget.value)}
-      >
-        {#each enclosures as v (v)}<option value={v}>{i18n.t(`speakers.enclosure.${v}`)}</option
-          >{/each}
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="speaker-layout">{i18n.t('speakers.layout.label')}</label>
-      <select
-        id="speaker-layout"
-        class="input"
-        value={speaker.driverLayout.value ?? 'unknown'}
-        onchange={(e) => setKnown('driverLayout', e.currentTarget.value)}
-      >
-        {#each layouts as v (v)}<option value={v}>{i18n.t(`speakers.layout.${v}`)}</option>{/each}
-      </select>
-      <p class="help">{i18n.t('speakers.layout.help')}</p>
-    </div>
-
-    <fieldset>
-      <legend>{i18n.t('speakers.controls.legend')}</legend>
-      <label class="choice"
-        ><input
-          type="checkbox"
-          checked={Boolean(speaker.dsp.treble)}
-          onchange={(e) => toggleDsp('treble', e.currentTarget.checked)}
-        />{i18n.t('speakers.controls.treble')}</label
-      >
-      <label class="choice"
-        ><input
-          type="checkbox"
-          checked={Boolean(speaker.dsp.bass)}
-          onchange={(e) => toggleDsp('bass', e.currentTarget.checked)}
-        />{i18n.t('speakers.controls.bass')}</label
-      >
-      <label class="choice"
-        ><input
-          type="checkbox"
-          checked={Boolean(speaker.dsp.wallDistanceSetting)}
-          onchange={(e) =>
-            editSpeaker(
-              (s) => void (s.dsp.wallDistanceSetting = e.currentTarget.checked || undefined),
-            )}
-        />{i18n.t('speakers.controls.wall')}</label
-      >
-      <label class="choice">
-        <input
-          type="checkbox"
-          checked={Boolean(speaker.minWallDistance)}
-          onchange={(e) =>
-            editSpeaker((s) => {
-              if (e.currentTarget.checked)
-                s.minWallDistance = { value: 0.1, certainty: 'measured' };
-              else delete s.minWallDistance;
-            })}
-        />{i18n.t('speakers.controls.minWall')}
-      </label>
-      {#if speaker.minWallDistance?.value != null}
-        <LengthInput
-          id="speaker-minwall"
-          label={i18n.t('speakers.controls.minWallValue')}
-          value={speaker.minWallDistance.value}
-          {system}
-          limits={{ min: 0, max: 3 }}
-          onchange={(v) =>
-            editSpeaker((s) => void (s.minWallDistance = { value: v, certainty: 'measured' }))}
-        />
-      {/if}
-    </fieldset>
-
-    <details>
-      <summary>{i18n.t('speakers.advanced.summary')}</summary>
-      <div class="field">
-        <label for="speaker-f6">{i18n.t('speakers.advanced.f6')}</label>
-        <p class="help">{i18n.t('speakers.advanced.f6Help')}</p>
-        <input
-          id="speaker-f6"
-          class="input narrow"
-          inputmode="numeric"
-          bind:value={f6Text}
-          onfocus={() => (editingF6 = true)}
-          onblur={commitF6}
-          onkeydown={(e) => e.key === 'Enter' && commitF6()}
-        />
-      </div>
-    </details>
-
-    <div class="actions">
-      <button type="button" class="btn" onclick={saveProfile}>{i18n.t('speakers.file.save')}</button
-      >
-      <button type="button" class="btn" onclick={() => fileInput?.click()}
-        >{i18n.t('speakers.file.load')}</button
-      >
-      <input
-        id="speaker-file"
-        bind:this={fileInput}
-        class="visually-hidden"
-        type="file"
-        accept=".json,application/json"
-        tabindex="-1"
-        aria-hidden="true"
-        onchange={loadProfile}
-      />
-    </div>
-  </section>
-
-  <section class="group" aria-labelledby="placement-title">
-    <h3 id="placement-title">{i18n.t('speakers.placement.title')}</h3>
-    {#if !room}
+  {#if !room}
+    <section class="group">
       <p class="help">{i18n.t('furnishing.needRoom')}</p>
       <button type="button" class="btn" onclick={() => (ui.step = 'room')}
         >{i18n.t('steps.room')}</button
       >
-    {:else}
-      <p class="help">{i18n.t('speakers.placement.help')}</p>
-      <div class="field">
-        <span class="label">{i18n.t('speakers.placement.certainty')}</span>
-        <CertaintyChips
-          name="placement-certainty"
-          value={placementCertainty}
-          onchange={setPlacementCertainty}
-        />
+    </section>
+  {:else}
+    <section class="group" aria-labelledby="placement-title">
+      <div>
+        <h3 id="placement-title">{i18n.t('speakers.placement.title')}</h3>
+        <p class="help">{i18n.t('speakers.placement.help')}</p>
       </div>
-      <div class="grid2">
+      <div class="questions">
         <LengthInput
           id="place-clearance"
           label={i18n.t('speakers.placement.clearance')}
@@ -403,88 +255,13 @@
           limits={{ min: 0, max: Math.max(0, room.H - cab.h) }}
           onchange={(v) => workspace.edit((p) => void setStandHeight(p, v))}
         />
-        <LengthInput
-          id="place-seat"
-          label={i18n.t('speakers.placement.seat')}
-          value={variant.listener.ears.y}
-          {system}
-          limits={{ min: 0.1, max: room.L - 0.1 }}
-          onchange={(y) =>
-            workspace.edit((p) => void moveSeat(p, { y }, { grid: false, keepCertainty: true }))}
-        />
-        <LengthInput
-          id="place-ears"
-          label={i18n.t('speakers.placement.ears')}
-          value={variant.listener.ears.z}
-          {system}
-          limits={{ min: 0.3, max: Math.min(2, room.H - 0.1) }}
-          onchange={(v) => workspace.edit((p) => void setEarHeight(p, v))}
-        />
-        <div class="field">
-          <label for="place-toe">{i18n.t('speakers.placement.toeIn')}</label>
-          <input
-            id="place-toe"
-            class="input"
-            inputmode="decimal"
-            bind:value={toeText}
-            onfocus={() => (editingToe = true)}
-            onblur={commitToe}
-            onkeydown={(e) => e.key === 'Enter' && commitToe()}
-          />
-        </div>
       </div>
-      <p class="help">{i18n.t('speakers.placement.toeInHelp')}</p>
-      <label class="choice">
-        <input
-          type="checkbox"
-          checked={constraints.keepSymmetric}
-          onchange={(e) =>
-            workspace.edit((p) => void (p.constraints.keepSymmetric = e.currentTarget.checked))}
-        />
-        {i18n.t('speakers.placement.mirror')}
-      </label>
-    {/if}
-  </section>
+    </section>
 
-  {#if room}
     <section class="group" aria-labelledby="limits-title">
-      <h3 id="limits-title">{i18n.t('speakers.limits.title')}</h3>
-      <p class="help">{i18n.t('speakers.limits.help')}</p>
-
-      <div class="field">
-        <label for="limit-reach">{i18n.t('speakers.limits.reach')}</label>
-        <input
-          id="limit-reach"
-          type="range"
-          min="0.1"
-          max={Math.max(0.5, room.L / 2)}
-          step="0.05"
-          value={constraints.maxSpeakerDistanceFromWall.value ?? 1.5}
-          oninput={(e) =>
-            workspace.edit(
-              (p) =>
-                void (p.constraints.maxSpeakerDistanceFromWall = {
-                  value: Number(e.currentTarget.value),
-                  certainty: 'estimated',
-                }),
-              { coalesce: 'reach' },
-            )}
-        />
-        <LengthInput
-          id="limit-reach-value"
-          label={i18n.t('speakers.limits.reachValue')}
-          value={constraints.maxSpeakerDistanceFromWall.value ?? 1.5}
-          {system}
-          limits={{ min: 0.1, max: Math.max(0.5, room.L / 2) }}
-          onchange={(v) =>
-            workspace.edit(
-              (p) =>
-                void (p.constraints.maxSpeakerDistanceFromWall = {
-                  value: v,
-                  certainty: 'estimated',
-                }),
-            )}
-        />
+      <div>
+        <h3 id="limits-title">{i18n.t('speakers.limits.title')}</h3>
+        <p class="help">{i18n.t('speakers.limits.help')}</p>
       </div>
 
       <fieldset>
@@ -534,8 +311,272 @@
         />
         {i18n.t('speakers.limits.fixed')}
       </label>
+
+      <div class="field">
+        <label for="limit-reach">{i18n.t('speakers.limits.reach')}</label>
+        <input
+          id="limit-reach"
+          type="range"
+          min="0.1"
+          max={Math.max(0.5, room.L / 2)}
+          step="0.05"
+          value={constraints.maxSpeakerDistanceFromWall.value ?? 1.5}
+          oninput={(e) =>
+            workspace.edit(
+              (p) =>
+                void (p.constraints.maxSpeakerDistanceFromWall = {
+                  value: Number(e.currentTarget.value),
+                  certainty: 'estimated',
+                }),
+              { coalesce: 'reach' },
+            )}
+        />
+        <LengthInput
+          id="limit-reach-value"
+          label={i18n.t('speakers.limits.reachValue')}
+          value={constraints.maxSpeakerDistanceFromWall.value ?? 1.5}
+          {system}
+          limits={{ min: 0.1, max: Math.max(0.5, room.L / 2) }}
+          onchange={(v) =>
+            workspace.edit(
+              (p) =>
+                void (p.constraints.maxSpeakerDistanceFromWall = {
+                  value: v,
+                  certainty: 'estimated',
+                }),
+            )}
+        />
+      </div>
     </section>
   {/if}
+
+  <details class="more" bind:open={ui.speakerDetails}>
+    <summary>
+      <span class="more-title">{i18n.t('speakers.more.summary')}</span>
+      <span class="more-hint">{i18n.t('speakers.more.hint')}</span>
+    </summary>
+
+    <div class="more-body">
+      {#if room}
+        <section class="group" aria-labelledby="seat-title">
+          <h3 id="seat-title">{i18n.t('speakers.placement.seatTitle')}</h3>
+          <div class="field">
+            <span class="label">{i18n.t('speakers.placement.certainty')}</span>
+            <CertaintyChips
+              name="placement-certainty"
+              value={placementCertainty}
+              onchange={setPlacementCertainty}
+            />
+          </div>
+          <div class="grid2">
+            <LengthInput
+              id="place-seat"
+              label={i18n.t('speakers.placement.seat')}
+              value={variant.listener.ears.y}
+              {system}
+              limits={{ min: 0.1, max: room.L - 0.1 }}
+              onchange={(y) =>
+                workspace.edit(
+                  (p) => void moveSeat(p, { y }, { grid: false, keepCertainty: true }),
+                )}
+            />
+            <LengthInput
+              id="place-ears"
+              label={i18n.t('speakers.placement.ears')}
+              value={variant.listener.ears.z}
+              {system}
+              limits={{ min: 0.3, max: Math.min(2, room.H - 0.1) }}
+              onchange={(v) => workspace.edit((p) => void setEarHeight(p, v))}
+            />
+            <div class="field">
+              <label for="place-toe">{i18n.t('speakers.placement.toeIn')}</label>
+              <input
+                id="place-toe"
+                class="input"
+                inputmode="decimal"
+                bind:value={toeText}
+                onfocus={() => (editingToe = true)}
+                onblur={commitToe}
+                onkeydown={(e) => e.key === 'Enter' && commitToe()}
+              />
+            </div>
+          </div>
+          <p class="help">{i18n.t('speakers.placement.toeInHelp')}</p>
+          <label class="choice">
+            <input
+              type="checkbox"
+              checked={constraints.keepSymmetric}
+              onchange={(e) =>
+                workspace.edit((p) => void (p.constraints.keepSymmetric = e.currentTarget.checked))}
+            />
+            {i18n.t('speakers.placement.mirror')}
+          </label>
+        </section>
+      {/if}
+
+      <section class="group" aria-labelledby="describe-title">
+        <h3 id="describe-title">{i18n.t('speakers.describe.title')}</h3>
+        <div class="grid2">
+          <div class="field">
+            <label for="speaker-brand">{i18n.t('speakers.brand')}</label>
+            <input
+              id="speaker-brand"
+              class="input"
+              maxlength="60"
+              value={speaker.brand}
+              onchange={(e) => editSpeaker((s) => void (s.brand = e.currentTarget.value.trim()))}
+            />
+          </div>
+          <div class="field">
+            <label for="speaker-model">{i18n.t('speakers.model')}</label>
+            <input
+              id="speaker-model"
+              class="input"
+              maxlength="60"
+              value={speaker.model}
+              onchange={(e) => editSpeaker((s) => void (s.model = e.currentTarget.value.trim()))}
+            />
+          </div>
+        </div>
+
+        {#each [{ key: 'w', label: 'width' }, { key: 'h', label: 'height' }, { key: 'd', label: 'depth' }] as const as dim (dim.key)}
+          <LengthField
+            id="speaker-{dim.key}"
+            label={i18n.t(`speakers.size.${dim.label}`)}
+            kind="position"
+            value={speaker.dimensions[dim.key]}
+            {system}
+            limits={{ min: 0.02, max: 3 }}
+            onchange={(next) => editSpeaker((s) => void (s.dimensions[dim.key] = next))}
+          />
+        {/each}
+
+        <div class="field">
+          <label for="speaker-port">{i18n.t('speakers.port.label')}</label>
+          <select
+            id="speaker-port"
+            class="input"
+            value={speaker.portLocation.value ?? 'unknown'}
+            onchange={(e) => setKnown('portLocation', e.currentTarget.value)}
+          >
+            {#each ports as v (v)}<option value={v}>{i18n.t(`speakers.port.${v}`)}</option>{/each}
+          </select>
+          <p class="help">{i18n.t('speakers.port.help')}</p>
+        </div>
+
+        <div class="field">
+          <label for="speaker-enclosure">{i18n.t('speakers.enclosure.label')}</label>
+          <select
+            id="speaker-enclosure"
+            class="input"
+            value={speaker.enclosure.value ?? 'unknown'}
+            onchange={(e) => setKnown('enclosure', e.currentTarget.value)}
+          >
+            {#each enclosures as v (v)}<option value={v}>{i18n.t(`speakers.enclosure.${v}`)}</option
+              >{/each}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="speaker-layout">{i18n.t('speakers.layout.label')}</label>
+          <select
+            id="speaker-layout"
+            class="input"
+            value={speaker.driverLayout.value ?? 'unknown'}
+            onchange={(e) => setKnown('driverLayout', e.currentTarget.value)}
+          >
+            {#each layouts as v (v)}<option value={v}>{i18n.t(`speakers.layout.${v}`)}</option
+              >{/each}
+          </select>
+          <p class="help">{i18n.t('speakers.layout.help')}</p>
+        </div>
+
+        <fieldset>
+          <legend>{i18n.t('speakers.controls.legend')}</legend>
+          <label class="choice"
+            ><input
+              type="checkbox"
+              checked={Boolean(speaker.dsp.treble)}
+              onchange={(e) => toggleDsp('treble', e.currentTarget.checked)}
+            />{i18n.t('speakers.controls.treble')}</label
+          >
+          <label class="choice"
+            ><input
+              type="checkbox"
+              checked={Boolean(speaker.dsp.bass)}
+              onchange={(e) => toggleDsp('bass', e.currentTarget.checked)}
+            />{i18n.t('speakers.controls.bass')}</label
+          >
+          <label class="choice"
+            ><input
+              type="checkbox"
+              checked={Boolean(speaker.dsp.wallDistanceSetting)}
+              onchange={(e) =>
+                editSpeaker(
+                  (s) => void (s.dsp.wallDistanceSetting = e.currentTarget.checked || undefined),
+                )}
+            />{i18n.t('speakers.controls.wall')}</label
+          >
+          <label class="choice">
+            <input
+              type="checkbox"
+              checked={Boolean(speaker.minWallDistance)}
+              onchange={(e) =>
+                editSpeaker((s) => {
+                  if (e.currentTarget.checked)
+                    s.minWallDistance = { value: 0.1, certainty: 'measured' };
+                  else delete s.minWallDistance;
+                })}
+            />{i18n.t('speakers.controls.minWall')}
+          </label>
+          {#if speaker.minWallDistance?.value != null}
+            <LengthInput
+              id="speaker-minwall"
+              label={i18n.t('speakers.controls.minWallValue')}
+              value={speaker.minWallDistance.value}
+              {system}
+              limits={{ min: 0, max: 3 }}
+              onchange={(v) =>
+                editSpeaker((s) => void (s.minWallDistance = { value: v, certainty: 'measured' }))}
+            />
+          {/if}
+        </fieldset>
+
+        <div class="field">
+          <label for="speaker-f6">{i18n.t('speakers.advanced.f6')}</label>
+          <p class="help">{i18n.t('speakers.advanced.f6Help')}</p>
+          <input
+            id="speaker-f6"
+            class="input narrow"
+            inputmode="numeric"
+            bind:value={f6Text}
+            onfocus={() => (editingF6 = true)}
+            onblur={commitF6}
+            onkeydown={(e) => e.key === 'Enter' && commitF6()}
+          />
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn" onclick={saveProfile}
+            >{i18n.t('speakers.file.save')}</button
+          >
+          <button type="button" class="btn" onclick={() => fileInput?.click()}
+            >{i18n.t('speakers.file.load')}</button
+          >
+          <input
+            id="speaker-file"
+            bind:this={fileInput}
+            class="visually-hidden"
+            type="file"
+            accept=".json,application/json"
+            tabindex="-1"
+            aria-hidden="true"
+            onchange={loadProfile}
+          />
+        </div>
+      </section>
+    </div>
+  </details>
 </div>
 
 <style>
@@ -566,47 +607,122 @@
     padding: 0;
     font-weight: 600;
   }
-  .tiles {
+  /* Type cards: a drawing, a name, a check when chosen (like a product configurator). */
+  .cards {
     display: grid;
-    gap: 6px;
-    margin-top: 6px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 8px;
   }
-  .tile {
+  .card {
     position: relative;
-    display: block;
-    border: 1px solid var(--grid);
-    border-radius: var(--radius-sm);
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 4px;
+    min-height: 44px;
+    padding: 14px 10px 12px;
+    border-radius: var(--radius-md);
     background: var(--surface);
+    box-shadow: 0 0 0 1px var(--grid);
+    text-align: center;
     cursor: pointer;
+    transition: box-shadow 0.15s ease;
   }
-  .tile input {
+  .card input {
     position: absolute;
-    opacity: 0;
     inset: 0;
     margin: 0;
+    opacity: 0;
     cursor: pointer;
   }
-  .tile:has(input:checked) {
-    border-color: var(--accent);
-    box-shadow: inset 0 0 0 1px var(--accent);
+  .card:has(input:checked) {
+    box-shadow: 0 0 0 2px var(--accent-fill);
   }
-  .tile:has(input:focus-visible) {
+  .card:has(input:focus-visible) {
     outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline-offset: 3px;
   }
-  .tile-body {
+  .card :global(.icon) {
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: var(--text-md);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .card-sub {
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+    line-height: 1.3;
+  }
+  .check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
+  }
+  .check circle {
+    fill: var(--accent-fill);
+  }
+  .check path {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .card:has(input:checked) .check {
+    opacity: 1;
+    transform: none;
+  }
+  .questions {
+    display: grid;
+    gap: 12px;
+  }
+  /* "More details": one quiet row that opens the rest. */
+  .more {
+    border-top: 1px solid var(--grid);
+  }
+  .more summary {
     display: grid;
     gap: 2px;
     min-height: 44px;
-    padding: 8px 12px;
+    padding: 12px 0;
+    cursor: pointer;
+    list-style: none;
   }
-  .tile-title {
-    font-weight: 600;
+  .more summary::-webkit-details-marker {
+    display: none;
+  }
+  .more-title {
     font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--accent);
   }
-  .tile-sub {
+  .more-title::after {
+    content: '›';
+    display: inline-block;
+    margin-left: 6px;
+    transition: transform 0.15s ease;
+  }
+  .more[open] .more-title::after {
+    transform: rotate(90deg);
+  }
+  .more-hint {
     color: var(--ink-muted);
     font-size: var(--text-sm);
+  }
+  .more-body {
+    display: grid;
+    gap: 24px;
+    padding-top: 8px;
   }
   .grid2 {
     display: grid;
@@ -649,13 +765,6 @@
     flex-wrap: wrap;
     gap: 8px;
   }
-  details summary {
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    color: var(--ink-muted);
-  }
   input[type='range'] {
     width: 100%;
     min-height: 44px;
@@ -664,6 +773,13 @@
   @media (max-width: 420px) {
     .grid2 {
       grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .check,
+    .more-title::after {
+      transition: none;
     }
   }
 </style>

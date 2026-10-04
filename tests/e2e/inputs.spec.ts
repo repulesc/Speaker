@@ -1,6 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { fillRoom, goStep, openWhy, savedProject, seatDistance } from './helpers';
+import {
+  fillRoom,
+  goStep,
+  openSpeakerDetails,
+  openWhy,
+  savedProject,
+  seatDistance,
+} from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -181,6 +188,7 @@ test.describe('with a room', () => {
     await page.getByLabel('Distance between the speakers').blur();
     await expect(page.locator('#plan-desc')).toContainText(/Speakers 2\.40\u00a0m apart/);
 
+    await openSpeakerDetails(page);
     await page.getByLabel('Toe-in (degrees)').fill('12');
     await page.getByLabel('Toe-in (degrees)').blur();
     const project = await savedProject(page);
@@ -202,6 +210,7 @@ test.describe('with a room', () => {
 
   test('speaker file: save, change, load', async ({ page }) => {
     await goStep(page, 'Speakers');
+    await openSpeakerDetails(page);
     await page.getByLabel('Brand (for your own reference)').fill('Acme');
     await page.getByLabel('Model (for your own reference)').fill('Studio 5');
     await page.getByLabel('Model (for your own reference)').blur();

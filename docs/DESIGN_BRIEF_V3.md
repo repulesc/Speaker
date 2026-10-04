@@ -54,3 +54,18 @@ Written after the owner tested the redesign (PR #5). **Rule one: do not change a
 
 - **Opus, high:** components, type scale, Best placement card, Speakers configurator, heatmap rendering, room drawing (the design judgment is the hard part).
 - **Sonnet, medium:** moving the remaining pages onto the components, the first-run guide, screenshot tests, Hungarian re-check.
+
+## Status (first pass, Opus)
+
+Done, all tests green (334 unit, 60 browser including a new type-scale test):
+
+- **1 Goals selection:** segmented controls use a separate "thumb" colour (`--thumb`), white on grey in light, light grey on dark, plus weight.
+- **4 Popover:** `Dropdown.svelte` positions its panel `fixed` and keeps it inside the window (left/right and above/below).
+- **6 Type scale:** the sidebar uses 13 / 15 / 22 px only. `tests/e2e/typescale.spec.ts` reads the computed sizes on every sidebar page and fails on a fourth size. Done by mapping each page's sizes onto the scale, not yet by a shared component set (suggestion 1 is still open).
+- **7 Best placement card:** one title; three answer rows (Speakers, Your seat, Bass at that seat); one Apply button with A/B/C as a small segmented control; the two option rows folded into "Options" (shows "Both · Room" when closed).
+- **2 Bass chart:** off the canvas. The card shows a word plus a sparkline; the full chart is its own page, "Bass at your seat". A comparison chosen on the Why page now stays on so it can be seen there.
+- **3 Heatmap:** bicubic resampling at device resolution, soft data edges, the "advised against" mask blurred over half a cell, faint anti-aliased contours at three levels, the ramp floor lifted. No engine change. (The "glow around the best zone" was left out: the contours already mark it, and a glow hid the colours underneath.)
+- **11 Room drawing:** rounded room with a soft shadow and a thin outline, a heavier front wall; speaker and seat numbers appear on hover or selection (room width and length always); speakers as dark top-down cabinets with a light front bar and a dashed aim line (no driver circles: from above you see the top of the box, not the drivers); seat as a soft circle with a facing chevron; furniture as neutral rounded rectangles, hard ones a little darker, no hatching; the dashed suggestion is hidden where the speaker already stands.
+- **5 Speakers configurator:** type cards with a small front-view drawing each (a rear port drawn dashed) and a check mark, derived from the stored values (no card is checked once the sizes are edited); "Where they stand" (three questions); "What can move?" stays visible because it changes the advice; everything else is under "More details", which stays open for the visit once opened.
+
+Still open (suggested for Sonnet, medium): the shared component set (suggestion 1), the first-run guide (9), reference screenshots in the e2e suite (10), and a Hungarian re-read of the new texts on a phone.

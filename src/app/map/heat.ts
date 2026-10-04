@@ -123,7 +123,28 @@ export function smoothField(
       marked[k] = mk;
     }
   }
+  // Marked areas follow the cell grid in steps; blurring over about half a cell rounds the steps off.
+  const radius = Math.max(1, Math.round(scale * 0.5));
+  for (let pass = 0; pass < 2; pass++) boxBlur(marked, width, height, radius);
   return { width, height, value, alpha, marked };
+}
+
+/** In-place separable box blur (running sums), clamped at the edges. */
+function boxBlur(data: Float32Array, width: number, height: number, radius: number): void {
+  const line = new Float32Array(Math.max(width, height));
+  const pass = (count: number, length: number, index: (n: number, i: number) => number) => {
+    for (let n = 0; n < count; n++) {
+      for (let i = 0; i < length; i++) line[i] = data[index(n, i)]!;
+      let sum = 0;
+      for (let i = -radius; i <= radius; i++) sum += line[Math.min(length - 1, Math.max(0, i))]!;
+      for (let i = 0; i < length; i++) {
+        data[index(n, i)] = sum / (2 * radius + 1);
+        sum += line[Math.min(length - 1, i + radius + 1)]! - line[Math.max(0, i - radius)]!;
+      }
+    }
+  };
+  pass(height, width, (y, x) => y * width + x);
+  pass(width, height, (x, y) => y * width + x);
 }
 
 function smoothstep(a: number, b: number, x: number): number {
@@ -133,6 +154,10 @@ function smoothstep(a: number, b: number, x: number): number {
 
 /** Score levels where a faint contour line is drawn (the ramp's visible steps). */
 const CONTOURS = [0.55, 0.7, 0.85];
+/** How much a contour pixel is lightened towards white: faint, so the zones stay calm. */
+const CONTOUR_LIGHTEN = 0.3;
+/** Half the contour line width, in canvas pixels. */
+const CONTOUR_HALF_WIDTH = 1;
 /** Brightness of an area the app advises against: dimmed, not hidden (owner feedback after R5). */
 const DIMMED = 0.5;
 
@@ -155,10 +180,10 @@ function paint(
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const image = ctx.createImageData(width, height);
-  const level = (v: number) => {
-    let n = 0;
-    for (const c of contours) if (v >= c) n++;
-    return n;
+  const valueAt = (x: number, y: number, fallback: number) => {
+    if (x < 0 || y < 0 || x >= width || y >= height) return fallback;
+    const v = value[y * width + x]!;
+    return Number.isNaN(v) ? fallback : v;
   };
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -171,17 +196,21 @@ function paint(
       r *= dim;
       g *= dim;
       b *= dim;
-      // A contour where the level changes towards the right or below: a soft light line.
-      const right = x + 1 < width ? value[k + 1]! : v;
-      const below = y + 1 < height ? value[k + width]! : v;
-      if (
-        contours.length &&
-        ((!Number.isNaN(right) && level(right) !== level(v)) ||
-          (!Number.isNaN(below) && level(below) !== level(v)))
-      ) {
-        r += (255 - r) * 0.35;
-        g += (255 - g) * 0.35;
-        b += (255 - b) * 0.35;
+      // Contours, anti-aliased: distance to the level in pixels, from the local slope.
+      if (contours.length) {
+        const gx = (valueAt(x + 1, y, v) - valueAt(x - 1, y, v)) / 2;
+        const gy = (valueAt(x, y + 1, v) - valueAt(x, y - 1, v)) / 2;
+        const slope = Math.hypot(gx, gy);
+        let line = 0;
+        if (slope > 1e-6) {
+          for (const c of contours) {
+            line = Math.max(line, 1 - Math.abs(v - c) / slope / CONTOUR_HALF_WIDTH);
+          }
+        }
+        const t = CONTOUR_LIGHTEN * Math.max(0, line);
+        r += (255 - r) * t;
+        g += (255 - g) * t;
+        b += (255 - b) * t;
       }
       image.data.set([r, g, b, Math.round(a * 255)], k * 4);
     }

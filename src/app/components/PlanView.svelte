@@ -244,7 +244,13 @@
   );
 </script>
 
-<div class="plan" bind:clientWidth={width} bind:clientHeight={height}>
+<div
+  class="plan"
+  class:show-speaker={selected.kind === 'speaker'}
+  class:show-seat={selected.kind === 'seat'}
+  bind:clientWidth={width}
+  bind:clientHeight={height}
+>
   {#if width > 0 && height > 0}
     {#if field}
       <canvas
@@ -290,18 +296,6 @@
     >
       <title id="plan-title">{i18n.t('plan.label')}</title>
       <desc id="plan-desc">{summary}</desc>
-      <defs>
-        <pattern
-          id="hatch-plan"
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)"
-        >
-          <line x1="0" y1="0" x2="0" y2="6" class="hatch" />
-        </pattern>
-      </defs>
-
       <rect
         class="room"
         class:placeholder={!known}
@@ -310,6 +304,7 @@
         y={py(0)}
         width={W * frame.scale}
         height={L * frame.scale}
+        rx="4"
       />
       {#if !showHeat}
         {#each gridX as g (g)}
@@ -371,7 +366,8 @@
           {@const rear = dimSpeaker.y - cab.d / 2}
           {@const lineX = px(dimSpeaker.x - cab.w / 2) - 14}
           {@const sideY = py(dimSpeaker.y + cab.d / 2) + 18}
-          <g class="dim">
+          <!-- Speaker and seat distances show on hover or selection, so the plan stays calm. -->
+          <g class="dim" data-group="speaker">
             <!-- rear panel to the front wall -->
             <line x1={lineX} y1={py(0)} x2={lineX} y2={py(rear)} />
             <line x1={lineX - 5} y1={py(0)} x2={lineX + 5} y2={py(0)} />
@@ -393,6 +389,8 @@
               x2={px(variant!.speakers.right.base.x)}
               y2={py(0) + 30}
             />
+          </g>
+          <g class="dim" data-group="seat">
             <!-- seat to the front wall -->
             <line
               x1={px(seat.ears.x) + 22}
@@ -446,18 +444,10 @@
               y={py(o.position.y)}
               width={o.size.x * frame.scale}
               height={o.size.y * frame.scale}
+              rx="4"
               class="body"
+              class:hard={o.hard}
             />
-            {#if o.hard}
-              <rect
-                x={px(o.position.x)}
-                y={py(o.position.y)}
-                width={o.size.x * frame.scale}
-                height={o.size.y * frame.scale}
-                fill="url(#hatch-plan)"
-                class="no-pointer"
-              />
-            {/if}
             {#if o.size.x * frame.scale > 56 && o.size.y * frame.scale > 20}
               <text
                 class="item-label"
@@ -495,6 +485,8 @@
           {@const angle = (s.side === 'left' ? -1 : 1) * s.p.toeInDeg}
           {@const cx = px(s.p.base.x)}
           {@const cy = py(s.p.base.y)}
+          {@const w = Math.max(10, cab.w * frame.scale)}
+          {@const d = Math.max(10, cab.d * frame.scale)}
           <g
             class="item speaker"
             class:selected={isSelected}
@@ -522,22 +514,25 @@
                 ),
               )}
           >
+            <!-- Top-down cabinet; the light bar is the front (baffle), the dashed line its aim. -->
             <g transform="rotate({angle} {cx} {cy})">
+              <line class="axis" x1={cx} y1={cy + d / 2} x2={cx} y2={cy + d / 2 + 26} />
               <rect
-                class="body"
+                class="body cabinet"
                 class:default={s.isDefault}
-                x={cx - Math.max(8, cab.w * frame.scale) / 2}
-                y={cy - Math.max(8, cab.d * frame.scale) / 2}
-                width={Math.max(8, cab.w * frame.scale)}
-                height={Math.max(8, cab.d * frame.scale)}
+                x={cx - w / 2}
+                y={cy - d / 2}
+                width={w}
+                height={d}
+                rx="3"
               />
-              <circle class="tweeter" {cx} cy={cy + Math.max(8, cab.d * frame.scale) / 2} r="2.5" />
-              <line
-                class="axis"
-                x1={cx}
-                y1={cy + Math.max(8, cab.d * frame.scale) / 2}
-                x2={cx}
-                y2={cy + Math.max(8, cab.d * frame.scale) / 2 + 22}
+              <rect
+                class="baffle"
+                x={cx - w / 2 + 2.5}
+                y={cy + d / 2 - 4}
+                width={w - 5}
+                height="2"
+                rx="1"
               />
             </g>
           </g>
@@ -545,6 +540,8 @@
 
         {#if seat}
           {@const isSelected = selected.kind === 'seat'}
+          {@const sx = px(seat.ears.x)}
+          {@const sy = py(seat.ears.y)}
           <g
             class="item seat-item"
             class:selected={isSelected}
@@ -574,21 +571,28 @@
             <circle
               class="seat"
               class:default={seat.certainty === 'unknown'}
-              cx={px(seat.ears.x)}
-              cy={py(seat.ears.y)}
-              r="9"
+              cx={sx}
+              cy={sy}
+              r="11"
             />
+            <!-- The listener faces the front wall (the speakers). -->
+            <path class="facing" d="M {sx - 4.5} {sy + 2} L {sx} {sy - 3} L {sx + 4.5} {sy + 2}" />
           </g>
         {/if}
 
         {#if suggested}
           {#each [suggested.speakers.left, suggested.speakers.right] as ghost, i (i)}
+            {@const own = variant?.speakers[i === 0 ? 'left' : 'right'].base}
+            <!-- Already there (e.g. just applied): no dashed copy on top of the speaker. -->
             <rect
+              class:hidden={own !== undefined &&
+                Math.hypot(own.x - ghost.base.x, own.y - ghost.base.y) < 0.01}
               class="ghost"
               x={px(ghost.base.x) - (cab.w * frame.scale) / 2}
               y={py(ghost.base.y) - (cab.d * frame.scale) / 2}
               width={cab.w * frame.scale}
               height={cab.d * frame.scale}
+              rx="3"
             />
           {/each}
           <g
@@ -623,6 +627,7 @@
       {@const sideY = py(dimSpeaker.y + cab.d / 2) + 18}
       <DimLabel
         name={dimName('clearance')}
+        group="speaker"
         value={rear}
         {system}
         limits={{ min: 0, max: L / 2 }}
@@ -632,6 +637,7 @@
       />
       <DimLabel
         name={dimName('side')}
+        group="speaker"
         value={dimSide === 'left' ? dimSpeaker.x : W - dimSpeaker.x}
         {system}
         limits={{ min: cab.w / 2, max: W / 2 }}
@@ -644,6 +650,7 @@
       />
       <DimLabel
         name={dimName('spacing')}
+        group="speaker"
         value={variant.speakers.right.base.x - variant.speakers.left.base.x}
         {system}
         limits={{ min: 0.3, max: W - cab.w }}
@@ -653,6 +660,7 @@
       />
       <DimLabel
         name={dimName('seat')}
+        group="seat"
         value={seat.ears.y}
         {system}
         limits={{ min: 0.1, max: L - 0.1 }}
@@ -662,6 +670,7 @@
       />
       <DimLabel
         name={dimName('width')}
+        group="room"
         kind="room"
         value={W}
         {system}
@@ -672,6 +681,7 @@
       />
       <DimLabel
         name={dimName('length')}
+        group="room"
         kind="room"
         value={L}
         {system}
@@ -726,7 +736,7 @@
     width: min(220px, 20%);
     margin: 0;
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--text-xs);
     line-height: 1.5;
     pointer-events: none;
   }
@@ -738,20 +748,28 @@
     pointer-events: none;
     opacity: 0.88;
   }
+  /* Heat sits under the drawing: same rounded corners and soft shadow as the empty room. */
+  .heat {
+    border-radius: 4px;
+    box-shadow: var(--plan-shadow);
+  }
   .room {
     fill: var(--surface);
-    stroke: var(--line);
-    stroke-width: 1.5;
+    stroke: color-mix(in srgb, var(--ink) 30%, transparent);
+    stroke-width: 1;
+    filter: drop-shadow(var(--plan-shadow));
   }
   .room.heat {
     position: static;
     fill: transparent;
     opacity: 1;
+    filter: none;
+    box-shadow: none;
   }
   .ghost {
-    fill: color-mix(in srgb, var(--accent-fill) 18%, transparent);
+    fill: color-mix(in srgb, var(--accent-fill) 14%, transparent);
     stroke: var(--accent-fill);
-    stroke-width: 2;
+    stroke-width: 1.5;
     stroke-dasharray: 4 3;
     pointer-events: none;
   }
@@ -796,23 +814,25 @@
     stroke: var(--grid);
     stroke-width: 1;
   }
+  /* The room outline is the wall; only the front wall (where the speakers stand) is drawn heavier. */
   .wall {
-    stroke: var(--line);
-    stroke-width: 1.5;
+    stroke: transparent;
+    stroke-width: 1;
   }
   .front {
-    stroke: var(--line);
-    stroke-width: 4;
-    stroke-linecap: square;
+    stroke: var(--ink-muted);
+    stroke-width: 3;
+    stroke-linecap: round;
   }
   .wall.active,
   .front.active {
     stroke: var(--accent);
-    stroke-width: 5;
+    stroke-width: 4;
+    stroke-linecap: round;
   }
   .label {
     fill: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--text-xs);
   }
   .dim line {
     stroke: var(--accent);
@@ -821,13 +841,45 @@
   }
   .dim.muted line {
     stroke: var(--ink-muted);
+    opacity: 0.6;
+  }
+  /*
+   * Speaker and seat numbers appear while the item is hovered or selected (or a number is in use).
+   * Hiding waits a moment, so the pointer can travel from the item to its number.
+   */
+  .plan :global([data-group='speaker']),
+  .plan :global([data-group='seat']) {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.15s ease 0.35s,
+      visibility 0s linear 0.5s;
+  }
+  .plan.show-speaker :global([data-group='speaker']),
+  .plan:has(:global(.speaker:hover)) :global([data-group='speaker']),
+  .plan :global([data-group='speaker']:hover),
+  .plan :global([data-group='speaker']:focus-within),
+  .plan.show-seat :global([data-group='seat']),
+  .plan:has(:global(.seat-item:hover)) :global([data-group='seat']),
+  .plan :global([data-group='seat']:hover),
+  .plan :global([data-group='seat']:focus-within) {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.15s ease,
+      visibility 0s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .plan :global([data-group]) {
+      transition: none !important;
+    }
   }
   .triangle {
     fill: none;
-    stroke: var(--line);
+    stroke: var(--ink-muted);
     stroke-width: 1;
-    stroke-dasharray: 4 4;
-    opacity: 0.55;
+    stroke-dasharray: 3 5;
+    opacity: 0.4;
     pointer-events: none;
   }
   .ring {
@@ -852,21 +904,16 @@
   .body {
     fill: var(--bg);
     stroke: var(--ink);
-    stroke-width: 2;
-  }
-  /* Furniture is see-through, so the map shows what it is like to sit there too. */
-  .object .body {
-    fill: color-mix(in srgb, var(--surface) 30%, transparent);
-    stroke: var(--ink-muted);
     stroke-width: 1.5;
   }
-  .hatch {
-    stroke: var(--ink-muted);
+  /* Furniture: soft, see-through, neutral, so the map shows what it is like to sit there too. */
+  .object .body {
+    fill: color-mix(in srgb, var(--ink) 7%, transparent);
+    stroke: color-mix(in srgb, var(--ink) 28%, transparent);
     stroke-width: 1;
-    opacity: 0.45;
   }
-  .no-pointer {
-    pointer-events: none;
+  .object .body.hard {
+    fill: color-mix(in srgb, var(--ink) 13%, transparent);
   }
   .item-label {
     fill: var(--ink);
@@ -874,28 +921,52 @@
     font-weight: 500;
     pointer-events: none;
   }
+  .cabinet {
+    fill: var(--speaker);
+    stroke: var(--speaker);
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
+  }
+  .cabinet.default {
+    fill: color-mix(in srgb, var(--speaker) 45%, transparent);
+  }
+  .baffle {
+    fill: var(--speaker-baffle);
+    pointer-events: none;
+  }
   .body.default,
   .seat.default {
     stroke-dasharray: 3 3;
   }
-  .tweeter {
-    fill: var(--line);
-  }
   .axis {
-    stroke: var(--line);
+    stroke: var(--ink-muted);
     stroke-width: 1;
-    opacity: 0.6;
+    stroke-dasharray: 2 3;
+    opacity: 0.7;
   }
   .seat {
-    fill: var(--bg);
+    fill: var(--surface);
     stroke: var(--ink);
-    stroke-width: 2;
+    stroke-width: 1.5;
+    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.25));
+  }
+  .facing {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
   }
   .item.selected .body,
   .item:focus-visible .body,
   .item.selected .seat,
   .item:focus-visible .seat {
     stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+  .item.selected .cabinet,
+  .item:focus-visible .cabinet {
+    stroke: var(--accent-fill);
     stroke-width: 3;
   }
   .placeholder-text {
@@ -906,7 +977,7 @@
     padding: 24px;
     text-align: center;
     color: var(--ink-muted);
-    font-size: 15px;
+    font-size: var(--text-md);
     pointer-events: none;
   }
 </style>
