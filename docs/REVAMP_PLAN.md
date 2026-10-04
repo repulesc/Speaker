@@ -73,9 +73,47 @@ The numbered wizard and the welcome card; the confidence meter as a top-bar widg
 |---|---|---|
 | **R0** | **Full audit of the mechanics**: engine physics, scoring, search, robustness, workspace and persistence, import/share security, i18n, accessibility, tests. Output `docs/REVIEW_FINDINGS.md` (severity-ranked, with evidence) and fix everything critical and high. Resolve or re-mark the ⚠ sources that can be checked. **Done:** findings and the R1 proposals in `docs/REVIEW_FINDINGS.md`. | **Opus, xhigh** |
 | R1 | Engine additions: layers, `explainPoint`, sensitivity, mode-field, treatment rules, speaker-settings rules, folk-rule comparison, finding copy keys; validation suite. **Done**, except the copy itself: the finding and advice keys and their parameters are fixed, the EN and HU text for them is R4. Also fixed the audit's M1, M2, M4, M6–M9, M11, L3, L10. | Opus, high |
-| R2 | Workbench UI in the Instrument look: dock, map with heatmap and dimension lines, probe, chart, right panel, phone layout | Sonnet, medium (Opus review) |
-| R3 | Treat tab, Listen tab (log + agreement), room-mode explorer, compare, print sheet, larger furniture | Sonnet medium + Opus for the rules |
-| R4 | EN + HU copy for every finding and rule; Hungarian review by the owner | Sonnet draft, owner review |
-| R5 | Physics audit of the whole product, bad-advice hunt, accessibility, performance, launch | Opus, xhigh |
+| R2 | Workbench UI in the Instrument look: dock, map with heatmap and dimension lines, probe, chart, right panel, phone layout. **Done** (see "R2 status" below). | Sonnet, medium (Opus review) |
+| R3 | Treat tab, room-mode explorer **(done, see "R3 status")**; Listen tab, compare, print sheet, larger furniture **(done, see "R3 status")** | Sonnet medium + Opus for the rules |
+| R4 | EN + HU copy for every finding and rule; Hungarian review by the owner. **Drafted**; owner review open (`npm run hu:review`, steps below) | Sonnet draft, owner review |
+| R5 | Physics audit of the whole product, bad-advice hunt, accessibility, performance, launch. **Done** (`docs/REVIEW_R5.md`); waits on the R4 Hungarian review before launch | Opus, xhigh |
 
 Each phase ends with a deployed preview the owner can click, and updated tests (unit, browser, axe, validation).
+
+## R2 status
+
+Built: the Instrument look (Sora, JetBrains Mono, dark by default, quiet light variant), the one-screen workbench (dock, map, right panel; on phones the dock and panel form a bottom sheet under the map), and:
+
+- **Map:** the seat heatmap under the plan (eight layers, each with its one-line meaning and evidence tag; stretched viridis ramp with a legend), hatched cells where the guidelines advise against sitting, best-spot pins A/B/C (a spot with the same seat as another is nudged aside), a preview of a chosen spot (the map, the ghost speakers and the bass chart switch to it, "Try spot A" applies it as one undo step).
+- **Dimensions on the plan:** speaker to front wall, speaker to side wall, between the speakers, seat to front wall, room width and length. Click a number to type an exact value (same parser and limits as the forms).
+- **Probe:** hover (mouse) or tap/click (pinned) shows the seat score, the most serious position-dependent finding or the weakest layer, and "Move my seat here". The bass chart overlays the probe's curve.
+- **Bass chart:** the predicted shape at the seat, the judged range, axial room modes, overlays for the previewed spot and the probe.
+- **Why panel:** "your setup vs best" with fragility, best spots, findings grouped by concern with severity icon + word and evidence tag in plain sentences (EN and HU for every finding key; values formatted in the user's units), notes behind a toggle, the rules of thumb compared with the map, and the confidence hint.
+- **Side view** hidden until the dock button asks for it; the welcome card, the stepper and the Quick/Detailed choice are gone.
+
+Not in R2 (R3): the Treat and Listen tabs, the room-mode explorer slider, compare setups, print sheet, the bigger furniture palette. The advice rules (T and D) have no text yet (R4); they are not shown.
+
+**New Hungarian text to review** (owner): `finding.*` (about 65 sentences), `layer.*`, `evidence.*`, `severity.*`, `concern.*`, `dock.*`, `panel.*`, `map.*`, `why.*`, `probe.*`, `chart.*`, `words.*`, `folkRule.*`, `next.*`, and `crash.*` / `furnishing.busy.combined` from R0. Hungarian cannot say "the A spot" without the article problem, so spots read "Hely A".
+
+## R3 status (items 1 to 3)
+
+- **Treat tab** (panel tabs "Why" / "Treat"): the engine's treatment advice (T rules) and speaker-settings advice (D rules) as plain sentences in EN and HU, ordered by expected effect. The first is "If you can only do one thing". Each card carries an effect word and an evidence tag; advice with a place on the map is numbered, and the same numbers appear as rings on the plan while the tab is open. Sizes are rough guides, never promises.
+- **Bass-note explorer** ("Bass note" chip in the layer bar): a 20 to 200 Hz slider paints the pressure pattern of one note at ear height (the modal Green's-function model, speakers as they are) in place of the score map, with jump buttons to the three lowest axial resonances and a sentence naming the resonances within 5 % of the note. Computed in the worker (`modeField`). 🔴 physics for the pattern; the model is a rigid-wall rectangular room with damping from the estimated T60, so real rooms differ in detail.
+
+## R3 status (items 4 to 6)
+
+- **Bigger furniture list:** wardrobe, bookcase, piano, equipment rack, large plant, fireplace, standing lamp and subwoofer join the palette, and the free-form "Other object" keeps its name and size. Every object now has a **material** (hard, soft, absorbent). When one is chosen, the absorption follows from the object's exposed surface (top and sides) times 0.0–0.05, 0.15–0.35 or 0.5–0.8 m² sabins per m² 🟡; without a choice the per-kind table applies. These per-kind and per-material numbers are rough estimates (🟡), not sourced measurements, and placed furniture still only raises the room's absorption estimate, never lowers it.
+- **Listen tab:** a short protocol (one change, same three tracks, same volume, then rate), a note form (rating 1 to 5, symptoms S01 to S07, listening time, free text), the notes per setup with a "Try this" tip for each symptom (from the S rules in RULE_CATALOGUE), and an **agreement** line. The agreement compares every pair of rated setups: the one with the higher mean rating should also have the higher app score. Rating gaps under 0.5 and score gaps under 0.05 count as ties (0.05: below what a 5 cm or 5 % input error can change, see fragility). Only ratings given to the setup as it stands count: each note keeps a fingerprint of the positions and objects, and moving anything retires older ratings from the comparison (they stay in the list, marked). When ears and ranking disagree the text says to trust the ears and to re-check what was entered. Notes never change the calculation (🟣 subjective), and stay out of share links unless asked for.
+- **Compare setups:** in the Why tab, pick another setup; its score is shown next to the current one (as words, with "about the same" under 0.05 apart; the same robust score as "Your setup") and its bass curve is drawn on the chart as a dashed line, each at its own seat. Leaving the Why tab ends the comparison.
+- **Print sheet** (Menu, "Print sheet"): an A4 or Letter page with a sketch of the room from above and the tape-measure numbers (rear panel to front wall, centre to the nearest side wall, stand height, toe-in, seat and ear height, distances) for the current setup and for best spot A, plus the top treatment advice and the open problems.
+
+Not built: guided experiments with stored experiment ids (the protocol is text only), the plan sketch of treatment spots on the print sheet.
+
+**More Hungarian text to review** (owner): `tabs.*`, `treat.*`, `mode.*`, `advice.*` (19 keys), `words.gain` / `words.zone`; and for items 4 to 6: `listen.*`, `compare.*`, `print.*`, `furnishing.material.*`, the eight new `object.*` names and `menu.print`.
+
+## R4: how to review the Hungarian (owner)
+
+1. Open `src/i18n/hu.ts` on GitHub and press the pencil icon (or send corrections in a chat with Claude, quoting the old and the new text).
+2. Change only the text between the quotes. Keep every `{name}` placeholder as it is: the app fills in a number or a word there.
+3. When a block (for example `listen: {`) reads well, add a line `  // reviewed` directly above it.
+4. `npm run hu:review` (and CI) shows how many blocks are left.

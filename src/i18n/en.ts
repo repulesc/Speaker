@@ -49,6 +49,7 @@ export const en = {
     share: 'Share link',
     export: 'Export file',
     import: 'Import file',
+    print: 'Print sheet',
     about: 'About and sources',
   },
   share: {
@@ -111,30 +112,7 @@ export const en = {
     'speaker.acousticAxisHeight': 'tweeter height',
     'speaker.driverLayout': 'driver layout',
   },
-  welcome: {
-    title: 'How would you like to start?',
-    intro: 'You can switch at any time. Nothing you enter is lost.',
-    quick: {
-      title: 'Quick start',
-      body: 'Room size, speaker and goals. A first answer in about a minute.',
-    },
-    detailed: {
-      title: 'Detailed setup',
-      body: 'Also walls, furniture and speaker details, for a more reliable result.',
-    },
-  },
-  steps: {
-    label: 'Steps',
-    optional: 'optional',
-    room: 'Room',
-    surfaces: 'Surfaces',
-    furnishing: 'Furnishing',
-    speakers: 'Speakers',
-    goals: 'Goals',
-    results: 'Results',
-    next: 'Next',
-    back: 'Back',
-  },
+  steps: { room: 'Room' },
   field: {
     unusual: 'Is that right? Rooms are usually between {min} and {max}.',
     outOfRange: '{label} must be between {min} and {max}.',
@@ -196,6 +174,7 @@ export const en = {
   surface: {
     'plaster-concrete': 'Plaster or concrete',
     'plaster-brick': 'Plastered brick',
+    'plaster-lath': 'Plaster on wooden lath (old house)',
     'gypsum-stud': 'Plasterboard',
     glass: 'Glass or window',
     'wood-floor': 'Wooden floor',
@@ -275,7 +254,12 @@ export const en = {
     width: 'Width',
     depth: 'Depth',
     height: 'Height',
-    hard: 'Hard surface (reflects sound)',
+    material: {
+      label: 'Material',
+      hard: 'Hard (reflects sound)',
+      soft: 'Soft (upholstery, books, fabric)',
+      absorbent: 'Absorbent (thick porous material)',
+    },
     rotate: 'Rotate 90°',
     remove: 'Remove',
   },
@@ -425,13 +409,10 @@ export const en = {
   results: {
     calculating: 'Calculating…',
     needRoom: 'Tell us the room size and we will have a first answer for you.',
-    summary: 'Where you stand',
     yourSetup: 'Your setup',
     bestFound: 'Best we found',
-    confidence: 'How sure are we',
     counts: 'Red flags: {red} · Cautions: {caution}',
     score: { poor: 'Poor', fair: 'Fair', good: 'Good', veryGood: 'Very good' },
-    more: 'Detailed explanations, the best positions on the plan and the bass chart arrive in the next update.',
   },
   plan: {
     label: 'Top view of the room',
@@ -477,10 +458,599 @@ export const en = {
     'other-speaker': 'Other speaker',
     tv: 'TV',
     desk: 'Desk',
+    wardrobe: 'Wardrobe',
+    bookcase: 'Bookcase',
+    piano: 'Piano',
+    rack: 'Equipment rack',
+    plant: 'Large plant',
+    fireplace: 'Fireplace',
+    lamp: 'Standing lamp',
+    subwoofer: 'Subwoofer',
     custom: 'Other object',
+  },
+  dock: {
+    label: 'Sections',
+    room: 'Room',
+    surfaces: 'Surfaces',
+    furnishing: 'Furniture',
+    speakers: 'Speakers',
+    goals: 'Goals',
+    side: 'Side view',
+  },
+  panel: {
+    close: 'Back to the results',
+    done: 'Show the results',
+  },
+  map: {
+    label: 'Map',
+    hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
+    layerLabel: 'Map layer',
+    poorer: 'Poorer',
+    better: 'Better',
+    flagged: 'Hatched: the guidelines advise against sitting here.',
+    caption: 'Where your seat could go ({where}).',
+    whereNow: 'speakers where they are now',
+    wherePreview: 'speakers at spot {letter}',
+    pin: 'Best spot {letter}. Score {score}.',
+    dimEdit: 'Type an exact value for {name}',
+    dim: {
+      clearance: 'Back of speaker to front wall',
+      spacing: 'Between the speakers',
+      side: 'Speaker to side wall',
+      seat: 'Seat to front wall',
+      width: 'Room width',
+      length: 'Room length',
+    },
+  },
+  layer: {
+    overall: {
+      name: 'Overall',
+      what: 'How good a seat is here, everything counted equally. Brighter is better.',
+    },
+    goals: {
+      name: 'My goals',
+      what: 'The same, weighted by the goals you chose.',
+    },
+    bass: {
+      name: 'Bass evenness',
+      what: 'How even the bass is at this seat. Dark means boomy or thin bass.',
+    },
+    nulls: {
+      name: 'Bass holes',
+      what: 'Whether a bass note nearly vanishes here. Dark means a deep hole.',
+    },
+    frontWall: {
+      name: 'Wall interference',
+      what: 'The dip caused by the wall behind the speakers, as heard here.',
+    },
+    stereo: {
+      name: 'Stereo',
+      what: 'How good the angle and the distances to the two speakers are.',
+    },
+    symmetry: {
+      name: 'Symmetry',
+      what: 'Whether both sides of the room treat the sound alike.',
+    },
+    backWall: {
+      name: 'Back wall',
+      what: 'Dark means too close to the back wall.',
+    },
+  },
+  evidence: {
+    physics: 'Physics',
+    guideline: 'Guideline',
+    heuristic: 'Rule of thumb',
+    subjective: 'By ear',
+  },
+  severity: {
+    'red-flag': 'Red flag',
+    caution: 'Caution',
+    info: 'Note',
+    ok: 'Fine',
+  },
+  concern: {
+    bass: 'Bass',
+    frontWall: 'Wall behind the speakers',
+    reflections: 'Reflections',
+    stereo: 'Stereo picture',
+    room: 'The room',
+    speaker: 'Your speaker',
+    objects: 'Things in the way',
+    rulesOfThumb: 'Rules of thumb',
+  },
+  why: {
+    title: 'Why',
+    setup: 'Your setup',
+    best: 'Best found',
+    tryIt: 'Try spot {letter}',
+    applied: 'Spot {letter} applied. Undo brings your setup back.',
+    spotDetails:
+      'Speakers {front} from the front wall and {spacing} apart. Seat {seat} from the front wall.',
+    preview: 'Showing spot {letter} on the map and in the chart.',
+    stopPreview: 'Back to your setup',
+    spotsTitle: 'Best spots',
+    compromise:
+      'No spot within your limits avoids every serious problem, so these are the least bad. Their red flags are listed below; loosening a limit (what can move) may help.',
+    allFixed:
+      'You marked both the seat and the speakers as fixed, so there is nothing to move. The findings below and the Treat tab still apply.',
+    spotLabel: 'Spot {letter}',
+    moveFirst: 'Moving to the best spot would help most.',
+    alreadyGood: 'Your setup is already close to the best we found.',
+    fragile: {
+      steady: 'Holds up well if things are a few centimetres off.',
+      sensitive: 'Sensitive: small errors in placement or room size change the result a little.',
+      fragile: 'Fragile: this only works if everything is exactly as entered.',
+    },
+    fragileShort: { steady: 'steady', sensitive: 'sensitive', fragile: 'fragile' },
+    problems: 'What to look at',
+    noProblems: 'Nothing to worry about with this setup.',
+    notes: 'Notes',
+    showNotes: 'Show notes ({count})',
+    hideNotes: 'Hide notes',
+    folk: 'Rules of thumb',
+    confidence: 'How sure are we?',
+    confidenceHint:
+      'The more you tell us about the room, the better the advice. Next best: {next}.',
+    disclaimer: 'Guidance, not a guarantee. Your ears have the final say.',
+  },
+  next: {
+    surfaces: 'choose the wall materials',
+    furnishing: 'say how full the room is',
+    room: {
+      width: 'measure the room width',
+      length: 'measure the room length',
+      height: 'measure the ceiling height',
+      construction: 'say what the walls are made of',
+    },
+    speakers: {
+      position: 'measure where the speakers are',
+    },
+    listener: {
+      position: 'measure where you sit',
+    },
+    speaker: {
+      lowFrequencyMinus6dB: 'enter the speaker’s lowest note',
+      directivity: 'describe the speaker’s spread',
+      portLocation: 'say where the speaker’s port is',
+      enclosure: 'say what kind of cabinet the speaker has',
+      acousticAxisHeight: 'measure the tweeter height',
+      driverLayout: 'say how the speaker’s drivers are arranged',
+    },
+  },
+  folkRule: {
+    H01: 'The popular 38% rule',
+    H02: 'The rule of thirds',
+    asGood:
+      '{rule} would put your seat at {seatY}. The map agrees: that spot is about as good as the best one in this row.',
+    close:
+      '{rule} would put your seat at {seatY}. The map says it is close, but {bestY} is a little better.',
+    worse:
+      '{rule} would put your seat at {seatY}. In this room the map says {bestY} is clearly better.',
+    notAllowed:
+      '{rule} would put your seat at {seatY}, but a seat cannot go there (too close to a speaker, or something is in the way).',
+    flag: ' The guidelines advise against that exact spot.',
+  },
+  probe: {
+    title: 'Seat here · {front} from the front wall',
+    moveHere: 'Move my seat here',
+    close: 'Close',
+    notAllowed: 'The seat cannot go here: too close to a speaker, or something is in the way.',
+    flagged: 'The guidelines advise against sitting here.',
+    allFine: 'Nothing stands out here.',
+    weakest: 'Weakest point: {layer}.',
+    score: 'Score: {word}',
+  },
+  chart: {
+    title: 'Bass at your seat',
+    sub: 'predicted shape, not loudness',
+    now: 'Your seat',
+    spot: 'Spot {letter}',
+    modes: 'Room resonances',
+    band: 'Judged range',
+    desc: 'Predicted bass between {from} and {to}: strongest near {peak}, weakest near {dip}.',
+    noData: 'Enter the room size to see the predicted bass.',
+  },
+  words: {
+    gain: {
+      high: 'high',
+      'very-high': 'very high',
+    },
+    zone: {
+      near: 'That counts as close to the wall.',
+      away: 'That counts as away from the wall.',
+    },
+    speaker: {
+      both: 'Both speakers',
+      left: 'Left speaker',
+      right: 'Right speaker',
+    },
+    speakerFrom: { left: 'the left speaker', right: 'the right speaker' },
+    closer: {
+      left: 'the left one',
+      right: 'the right one',
+    },
+    wall: {
+      left: 'left wall',
+      right: 'right wall',
+      front: 'front wall',
+      back: 'back wall',
+      floor: 'floor',
+      ceiling: 'ceiling',
+    },
+    boundary: {
+      front: 'front wall',
+      side: 'side wall',
+      floor: 'floor',
+      ceiling: 'ceiling',
+    },
+    direction: {
+      above: 'above',
+      below: 'below',
+    },
+    source: {
+      manufacturer: 'the manufacturer’s minimum',
+      default: 'a typical minimum',
+    },
+  },
+  finding: {
+    P02: {
+      lowestModes:
+        'The room’s lowest bass notes are about {length} (along the length), {width} (across) and {height} (up and down).',
+    },
+    P04: {
+      frontWall:
+        '{speaker}: the woofer is {distance} from the front wall, so some bass cancels near {frequency}.',
+      aligned:
+        '{speaker}: the woofer is about the same distance from two surfaces ({boundaryA}, {boundaryB}), so their bass dips line up near {frequency}.',
+    },
+    P05: {
+      low: 'Nearby walls add little extra bass to the speakers.',
+      moderate: 'Nearby walls add some bass to the speakers (below about {belowHz}).',
+      high: 'Nearby walls add a lot of bass (below about {belowHz}). It may sound heavy.',
+      'very-high':
+        'The speakers are in or next to a corner: the bass gets a big, uneven boost below about {belowHz}.',
+    },
+    P06: {
+      sideWall:
+        '{speaker}: the first reflection ({boundary}) reaches you {delayMs} after the direct sound. That surface ({surface}) {surfaceClass}.',
+      floor:
+        '{speaker}: the floor reflection reaches you {delayMs} after the direct sound. The floor ({surface}) {surfaceClass}.',
+      ceiling:
+        '{speaker}: the ceiling reflection reaches you {delayMs} after the direct sound. The ceiling ({surface}) {surfaceClass}.',
+      scattering:
+        '{speaker}: the reflection point ({boundary}) is on a surface that scatters sound ({surface}), so a plain reflection is not predicted there.',
+    },
+    P07: {
+      transition:
+        'Below about {frequency} the room’s resonances rule; above it the sound blends more evenly (somewhere between {low} and {high}).',
+    },
+    P08: {
+      dead: 'The room is on the dead side: reverberation about {t60} (between {low} and {high}). Sound is close and dry.',
+      balanced:
+        'The room is in the usual range: reverberation about {t60} (between {low} and {high}).',
+      live: 'The room is on the lively side: reverberation about {t60} (between {low} and {high}). Soft furnishings or curtains would calm it.',
+    },
+    P09: {
+      peak: 'The bass is predicted to boom near {frequency} at this seat, about {db} louder than the rest.',
+      dip: 'The bass is predicted to nearly vanish near {frequency} at this seat, about {db} quieter than the rest.',
+      smooth: 'The predicted bass is even at this seat: no peak or dip over 6 dB.',
+      notScored:
+        'This speaker only plays down to about {lowFrequencyMinus6dB}, too high to judge the room’s bass resonances, so we do not.',
+    },
+    P10: {
+      ratio:
+        'Direct sound and room sound are equal {criticalDistance} from a speaker. You sit {listeningDistance} away, {ratio} times that.',
+    },
+    P11: {
+      coincident:
+        'Several of the room’s lowest bass resonances sit close together (for example {frequencyA} and {frequencyB}), so those notes may boom.',
+      bonello:
+        'The room’s resonances thin out above about {band}, so the bass may sound uneven there.',
+      ituPass: 'The room’s proportions meet the ITU-R recommendation for listening rooms.',
+      ituFail:
+        'The room’s proportions fall outside the ITU-R listening-room recommendation. You cannot change that; it just explains why some rooms are harder.',
+    },
+    G01: {
+      redFlag:
+        'The seat is almost exactly in the middle of the room’s length, where the lowest bass note nearly vanishes. Move it forward or back by about a tenth of the room length.',
+      caution:
+        'The seat is close to the middle of the room’s length ({offsetFraction} of the length away), where some bass is weaker.',
+      ok: 'The seat is a good distance from the middle of the room’s length.',
+      widthNode:
+        'You sit on the centre line, which is also where some side-to-side bass resonances are weak. That is a normal trade-off for a symmetric stereo setup.',
+    },
+    G02: {
+      redFlag:
+        'Your head is only {distance} from the back wall: bass is heavy there and the wall’s reflection arrives almost at once. Move the seat forward.',
+      caution:
+        'Your head is {distance} from the back wall: bass gets heavier and the reflection is early. Sit further forward if you can.',
+      ok: 'The seat has room behind it ({distance} to the back wall).',
+    },
+    G03: {
+      redFlag:
+        'The speakers are very different distances from their side walls (they differ by {difference}), so the stereo image leans to one side.',
+      caution:
+        'The speakers’ side-wall distances differ by {difference}, so the image may lean a little.',
+      ok: 'Both speakers are the same distance from their side walls.',
+      surfaces:
+        'The left wall {left} but the right wall {right}, so the two channels sound slightly different.',
+    },
+    G04: {
+      redFlag:
+        'You and the two speakers form a {angle} angle. Stereo works best near 60°: this is too narrow or too wide.',
+      caution: 'The angle between the speakers is {angle}, a bit off the ideal 60°.',
+      info: 'The angle between the speakers is {angle}, near the ideal 60°.',
+      ok: 'The angle between the speakers is {angle}: close to the ideal 60°.',
+    },
+    G05: {
+      redFlag:
+        'One speaker is {difference} nearer to you than the other (the nearer is {closer}), so the image pulls toward it.',
+      caution: 'One speaker is {difference} nearer to you than the other (the nearer is {closer}).',
+      ok: 'Both speakers are the same distance from your ears.',
+    },
+    G06: {
+      redFlag:
+        '{speaker} sits in a corner, where it excites every bass resonance at full strength. Pull it out.',
+      caution: '{speaker} is close to a corner: expect extra, uneven bass.',
+      ok: 'Neither speaker is near a corner.',
+    },
+    G07: {
+      tooClose:
+        'The speaker’s rear port is {clearance} from the wall; it needs at least {minimum} ({source}).',
+      ok: 'The rear port has enough room ({clearance}; the minimum is {minimum}).',
+      unknownPort:
+        'We do not know where this speaker’s port is. If it is at the back, keep it away from the wall.',
+      matchSetting:
+        'Your speaker has a wall-distance setting: set it for the {clearance} between its back and the wall.',
+    },
+    G08: {
+      redFlag:
+        'Your ears are {angle} {direction} the speakers’ axis, which is too steep: the sound changes. Raise or lower the speakers, or tilt them.',
+      caution:
+        'Your ears are {angle} {direction} the speakers’ axis. A little more level would sound better.',
+      ok: 'The speakers point at about ear height.',
+    },
+    G09: {
+      treatForImaging:
+        'The {boundary} ({surface}) reflects sound to your seat. For a sharper image, treat that spot.',
+      keepForWidth:
+        'The {boundary} ({surface}) reflects sound to your seat, which adds width. Leave it as it is.',
+      bothSchools:
+        'The {boundary} ({surface}) reflects sound to your seat. Some people treat that spot for a sharper image, others keep it for width: try both.',
+    },
+    G10: {
+      obstruction: 'A {object} is between a speaker and your ears and blocks the sound. Move it.',
+      nearbyHard:
+        'A hard object ({object}) is {distance} from {speakerFrom} and adds reflections that blur the sound.',
+      passiveSpeaker:
+        'Another speaker ({object}) is {distance} from {speakerFrom}. It can resonate along: try covering or moving it, and listen.',
+    },
+    H01: {
+      overlay:
+        'A popular rule of thumb puts the seat 38% into the room: {listenerY} here. Where it comes from is unclear.',
+    },
+    H02: {
+      overlay:
+        'The rule of thirds puts the speakers {speakersY} from the front wall and the seat {listenerY}. It is a folk rule.',
+    },
+    H04: {
+      near: 'The woofer is close to the front wall ({distance}): its bass dip is up at {frequency}, mostly out of the way.',
+      middle:
+        'The woofer is {distance} from the front wall: its bass dip falls at {frequency}, where it is most audible. Closer, or much further, is usually better.',
+      far: 'The woofer is far from the front wall ({distance}): the bass dip is low, at {frequency}, and narrow.',
+    },
+    H05: {
+      experiment:
+        'Toe-in is {toeInLeft}°. Without measurements we cannot say what is best: try a few degrees of toe-in and none, and listen.',
+    },
+    H06: {
+      lift: 'The room’s high frequencies die away quickly ({t60}). A small treble lift ({suggestDb}) may help: try it and listen.',
+      cut: 'The room’s high frequencies ring on ({t60}). A small treble cut ({suggestDb}) may help: try it and listen.',
+    },
+  },
+  tabs: {
+    label: 'Panel',
+    why: 'Why',
+    treat: 'Treat',
+    listen: 'Listen',
+  },
+  listen: {
+    title: 'Listen and note',
+    intro:
+      'Your ears are the final test. Change one thing, listen, and write down what you hear. Notes never change what the app calculates.',
+    protocolTitle: 'How to test a change',
+    protocol: {
+      one: 'Change one thing only, for example move the seat 10 cm.',
+      two: 'Play the same three tracks each time: a centred voice, a bass-heavy track and a wide orchestral or ambient recording.',
+      three: 'Keep the volume the same, then rate it.',
+    },
+    adapt: 'Ears adapt over hours. Judge after some time, and compare at the same volume.',
+    formTitle: 'A note for “{setup}”',
+    rating: {
+      legend: 'How did this setup sound?',
+      scale: '1 = poor, 5 = great',
+      value: '{n} of 5',
+    },
+    symptoms: 'What do you hear? (optional)',
+    duration: {
+      legend: 'How long have you listened to this setup?',
+      short: 'Under an hour',
+      hours: 'A few hours',
+      days: 'Days',
+    },
+    text: 'Your note (optional)',
+    save: 'Save note',
+    listTitle: 'Notes for “{setup}”',
+    empty: 'No notes for this setup yet.',
+    delete: 'Delete note',
+    tryThis: 'Try this',
+    earlier:
+      'Rated before the setup last changed, so it no longer counts in the comparison with the app.',
+    symptom: {
+      S01: {
+        name: 'Boomy, heavy bass',
+        try: 'Move your seat about 20 cm forward, or the speakers about 10 cm further from the wall. If your speakers have a wall-compensation setting, turn it on.',
+      },
+      S02: {
+        name: 'Thin, weak bass',
+        try: 'Move your seat 15 cm to either side, or forward or back. If your speakers have a front-wall option, try the “near” and “far” settings.',
+      },
+      S03: {
+        name: 'Vague centre, lacks focus',
+        try: 'Measure the distance from each speaker to your seat with a tape and make them equal. Try turning the speakers in towards you.',
+      },
+      S04: {
+        name: 'Narrow soundstage',
+        try: 'Move each speaker about 10 cm further apart, and turn them in a little less.',
+      },
+      S05: {
+        name: 'Harsh, bright treble',
+        try: 'Turn the speakers in a little less, soften one reflection point with a rug or curtain, or lower the treble by 0.5 dB if you can.',
+      },
+      S06: {
+        name: 'Dull, closed-in',
+        try: 'Check that the tweeters are at ear height, remove anything between the speakers and your seat, or raise the treble by 0.5 dB if you can.',
+      },
+      S07: {
+        name: 'Sound pulls to one side',
+        try: 'Check the balance control first. Then swap the left and right cables at the amplifier: if the pull moves to the other side, the cause is before the speakers (source, amplifier, cable). If it stays, swap the two speakers: if the pull moves with a speaker, it is that speaker; if it stays, it is the room.',
+      },
+    },
+    agreement: {
+      title: 'Your ears and the app',
+      notEnough:
+        'Rate at least two different setups, and the app will tell you whether your ears and its ranking agree.',
+      agree:
+        'So far your ratings agree with the app’s ranking: the setups you liked more are the ones it scores higher.',
+      mixed:
+        'Your ratings agree with the app’s ranking for some pairs of setups and not for others. A few more notes will show a pattern.',
+      disagree:
+        'You liked “{ears}” best, but the app scores “{app}” higher. The app uses a simplified model, so trust your ears here. It may mean that something in the room differs from what you entered (surfaces, furniture, speaker details), so it is worth checking those.',
+    },
+  },
+  compare: {
+    title: 'Compare setups',
+    with: 'Compare with',
+    none: 'None',
+    same: 'Both setups score about the same.',
+    higher: '“{name}” scores higher.',
+    legend: 'Setup “{name}”',
+    chartNote: 'The bass chart shows the other setup as a dashed line, each at its own seat.',
+  },
+  print: {
+    now: 'Your setup now: “{setup}”',
+    best: 'Best spot we found (A)',
+    room: 'Room {width} wide, {length} long, {height} high',
+    frontWall: 'Front wall',
+    wall: { left: 'left', right: 'right' },
+    speaker:
+      '{side}: rear panel {front} from the front wall, centre {sideWall} from the {wall} wall, stand height {height}, toe-in {toeIn}°.',
+    seat: 'Seat: {front} from the front wall, {left} from the left wall, ears at {ears}.',
+    between:
+      'Speakers {between} apart, centre to centre. To your seat: {left} (left) and {right} (right), along the floor.',
+    footer:
+      'These are predictions, not measurements. Move one thing at a time and trust your ears.',
+  },
+  treat: {
+    title: 'Treat the room',
+    intro:
+      'What would help most, in order. Sizes are rough guides, not promises: change one thing, then listen.',
+    first: 'If you can only do one thing',
+    roomTitle: 'Room treatment',
+    settingsTitle: 'Speaker settings',
+    none: 'Nothing to suggest for this setup.',
+    noSettings: 'Nothing to change on the speaker for this setup.',
+    onMap: 'Marked on the map ({n}).',
+    effect: {
+      small: 'Small effect',
+      moderate: 'Moderate effect',
+      large: 'Large effect',
+    },
+  },
+  mode: {
+    chip: 'Bass note',
+    name: 'Bass note',
+    what: 'Where one bass note is loud or silent in your room, with the speakers as they are. Bright is loud, dark is quiet.',
+    frequency: 'Frequency',
+    poorer: 'Quiet',
+    better: 'Loud',
+    near: 'Room resonances near this note: {modes}.',
+    nearNone: 'No room resonance near this note: the pattern comes from many weak ones.',
+    lowest: 'Lowest resonances',
+    axial: 'along the length',
+    axialW: 'across the width',
+    axialH: 'up and down',
+    tangential: 'two pairs of walls',
+    oblique: 'all three wall pairs',
+    jump: 'Jump to {frequency}',
+    aboveTransition:
+      'Above about {frequency} the room’s resonances overlap, so the real pattern differs more from this picture.',
+    caption: 'Bass note at {frequency}: where it is loud or silent (speakers as they are).',
+  },
+  advice: {
+    T01: {
+      absorb:
+        '{speaker}: at the marked spot ({boundary}) its first reflection lands. A porous panel about {thickness} thick, or a diffuser, there sharpens the image.',
+      experiment:
+        '{speaker}: its first reflection lands on a hard surface at the marked spot ({boundary}). Experts disagree about treating it, so try a panel or diffuser there (about {thickness} thick), listen, and keep what you like.',
+    },
+    T02: {
+      rug: 'A thick rug on the floor between the speakers and you, at the marked spot, softens the floor reflection, mainly in the treble (a rug does little for bass). It is cheap: try it.',
+      ceilingPanel:
+        'A panel on the ceiling at the marked spot would cut its reflection. This matters less than the side walls, so it comes later.',
+    },
+    T03: {
+      moveFirst:
+        'The wall behind the speakers cancels bass near {frequency} at your seat. A panel would have to be about {quarterWavelength} deep to cure it, which is rarely practical: moving the speakers (see the best spots) works better.',
+      thickPanel:
+        'The wall behind the speakers cancels bass near {frequency} at your seat. A thick absorber (10 to 20 cm) behind them makes the dip a little shallower, but cannot remove it: that would take a depth of about {quarterWavelength}.',
+    },
+    T04: {
+      corners:
+        'Bass traps in the corners help with the boom near {frequency}. Be realistic: below 100 Hz they must be large and deep, and small foam wedges do very little.',
+    },
+    T05: {
+      soften:
+        'The room is lively (reverberation about {t60}). About {absorption} of extra soft absorption, such as a large rug and heavy curtains, would bring it to about {after}.',
+      liven:
+        'The room is on the dead side (reverberation about {t60}). Taking away about {absorption} of soft absorption, with fewer rugs or curtains, would give about {after}.',
+    },
+    T06: {
+      moveFirst:
+        'Your head is {distance} from the back wall. Move the seat forward if you can: it helps more than any treatment.',
+      absorber:
+        'Your head is {distance} from the back wall and the seat cannot move. Put a thick absorber (at least {thickness}) behind your head.',
+    },
+    D01: {
+      match:
+        'Set the speaker’s wall-distance setting for the {clearance} between its back and the wall. {zone}',
+    },
+    D02: {
+      cut: 'The speakers are close to walls, so the bass is boosted (boundary gain: {gain}). Try one step of bass cut on the speaker ({stepDb}) and listen.',
+    },
+    D03: {
+      lift: 'The room soaks up high frequencies (reverberation {t60}). Try one step of treble lift ({stepDb}) and listen.',
+      cut: 'The room lets high frequencies ring (reverberation {t60}). Try one step of treble cut ({stepDb}) and listen.',
+    },
+    D04: {
+      height:
+        'Your ears are {angle} off the speakers’ axis. Put the speakers’ bases about {baseHeight} above the floor (a stand or desk) so the tweeters are at ear height, or tilt the speakers.',
+      tilt: 'Your ears are {angle} below the speakers’ axis, even with the speakers on the floor. Tilt them slightly down towards you, or sit a little higher.',
+    },
+    D05: {
+      moveOut:
+        'The rear port is {clearance} from the wall but needs {minimum}. Move the speakers out. The manual may say whether port plugs help.',
+      fixed:
+        'The rear port is {clearance} from the wall but needs {minimum}, and the speakers cannot move. Check the manual for port plugs or a setting for placement near a wall.',
+    },
+    D06: {
+      desk: 'Your speaker has a desk mode and the speakers stand on a desk: switch it on.',
+      stand: 'Use the speaker’s stand mode: the speakers are not on a desk.',
+    },
   },
   analysis: {
     updating: 'Updating…',
+    updatingLarge: 'Updating… a room this large takes a few seconds.',
     error: 'Something went wrong calculating this. Your data is safe.',
     copyDetails: 'Copy details',
   },

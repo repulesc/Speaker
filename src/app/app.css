@@ -1,14 +1,19 @@
-/* Shared Blueprint styles (docs/UI_SPEC.md §2). Component-specific layout lives in each component. */
-@import '@fontsource/ibm-plex-sans/400.css';
-@import '@fontsource/ibm-plex-sans/600.css';
-@import '@fontsource/ibm-plex-mono/400.css';
+/* Shared "Instrument" styles (docs/REVAMP_PLAN.md). Component-specific layout lives in each component. */
+@import '@fontsource/sora/latin-400.css';
+@import '@fontsource/sora/latin-600.css';
+@import '@fontsource/sora/latin-ext-400.css';
+@import '@fontsource/sora/latin-ext-600.css';
+@import '@fontsource/jetbrains-mono/latin-400.css';
+@import '@fontsource/jetbrains-mono/latin-500.css';
+@import '@fontsource/jetbrains-mono/latin-ext-400.css';
+@import '@fontsource/jetbrains-mono/latin-ext-500.css';
 @import './tokens.css';
 
 :root {
-  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --radius-sm: 6px;
-  --radius-md: 10px;
+  --font-sans: 'Sora', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --radius-sm: 8px;
+  --radius-md: 14px;
   --gutter: 16px;
   --topbar-h: 56px;
 }
@@ -34,7 +39,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1.5;
   font-variant-numeric: tabular-nums;
   overflow-x: hidden;
@@ -81,7 +86,7 @@ p {
   gap: 8px;
   min-height: 44px;
   padding: 0 16px;
-  border: 1px solid var(--grid);
+  border: 1px solid var(--grid-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
@@ -102,7 +107,8 @@ p {
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
+  font-weight: 600;
 }
 
 .btn.quiet {
@@ -147,7 +153,7 @@ p {
 
 .seg label:has(input:checked) {
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
 }
 
 .seg label:has(input:focus-visible) {
@@ -160,9 +166,9 @@ p {
   min-height: 44px;
   width: 100%;
   padding: 0 12px;
-  border: 1px solid var(--grid);
+  border: 1px solid var(--grid-strong);
   border-radius: var(--radius-sm);
-  background: var(--surface);
+  background: var(--bg);
   color: var(--ink);
   font: inherit;
   font-family: var(--font-mono);
@@ -189,7 +195,7 @@ dialog {
 }
 
 dialog::backdrop {
-  background: rgb(11 22 38 / 0.5);
+  background: rgb(5 8 12 / 0.65);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -198,5 +204,16 @@ dialog::backdrop {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Printing: only the tape-measure sheet (PrintSheet.svelte). */
+@media print {
+  .app,
+  dialog {
+    display: none !important;
+  }
+  body {
+    background: #fff;
   }
 }

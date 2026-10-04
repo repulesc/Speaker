@@ -4,11 +4,8 @@ import { fillRoom, goStep, savedProject, seatDistance } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
-test('journey 1 — quick start: room, speaker, then a first answer within 3 seconds', async ({
-  page,
-}) => {
+test('journey 1 — first answer: room, speaker, then results within 3 seconds', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Quick start/ }).click();
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
@@ -24,7 +21,6 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
   page,
 }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Quick start/ }).click();
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
@@ -48,7 +44,6 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
 test.describe('with a room', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: /Detailed setup/ }).click();
     await fillRoom(page, '4', '5', '2.5');
   });
 
@@ -246,6 +241,7 @@ test.describe('with a room', () => {
   });
 
   test('the side view shows heights and can be used with the keyboard', async ({ page }) => {
+    await page.getByRole('button', { name: 'Side view' }).click(); // hidden until asked for
     const ears = page.getByRole('button', { name: /^Seat\. .* above the floor\. Left and right/ });
     await ears.focus();
     await page.keyboard.press('Shift+ArrowUp');

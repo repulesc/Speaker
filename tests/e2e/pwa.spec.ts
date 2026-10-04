@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { fillRoom } from './helpers';
+import { fillRoom, openSection } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -24,7 +24,6 @@ test('after the first visit the app opens offline, with the saved project', asyn
   context,
 }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Quick start/ }).click();
   await fillRoom(page, '4', '5.2', '2.6');
   await page.getByText('Saved on this device').waitFor();
 
@@ -33,11 +32,13 @@ test('after the first visit the app opens offline, with the saved project', asyn
   await page.reload();
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
   await page.reload();
+  await openSection(page, 'Room'); // a project with a room opens on the results
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00 m');
 
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Your room' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Why' })).toBeVisible();
+  await openSection(page, 'Room');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00 m');
   // The engine runs in a worker that must also come from the cache.
   await expect(page.getByRole('button', { name: /How sure are we/ })).toContainText(

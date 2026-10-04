@@ -1,0 +1,30 @@
+name: Wrong or confusing advice
+description: The app said something that is wrong, misleading or hard to understand.
+labels: ['wrong advice']
+body:
+  - type: textarea
+    id: sentence
+    attributes:
+      label: What did the app say?
+      description: Copy the sentence word for word, and say where it was (Why, Treat, Listen, map, print sheet).
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why do you think it is wrong?
+      description: A measurement, a source (book, page, paper), or what you heard. Any of these helps.
+    validations:
+      required: true
+  - type: textarea
+    id: project
+    attributes:
+      label: Your project
+      description: Paste a share link (Menu → Share link) or attach the exported file (Menu → Export file). Leave listening notes out if you prefer.
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language you used
+      options:
+        - English
+        - Magyar

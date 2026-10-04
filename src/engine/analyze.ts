@@ -81,6 +81,7 @@ export function analyze(
       method: ctx.t60.method,
     },
     bassResponse: { f: Array.from(curve.freqs), dB: Array.from(curve.db) },
+    bassBand: { range: curve.range, scored: curve.scored },
     findings,
     topActions: topActions(findings, current, best),
     current,

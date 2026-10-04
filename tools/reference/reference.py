@@ -95,7 +95,7 @@ def main():
 
     # Sabine per band for Room R: plaster-brick walls and ceiling, wood floor, furnishing 5 m² sabins
     # (×0.5 at 125 Hz, ×0.8 at 250 Hz). Coefficients copied from RULE_CATALOGUE Appendix A.
-    plaster_brick = [0.14, 0.10, 0.06, 0.05, 0.04, 0.03]
+    plaster_brick = [0.013, 0.015, 0.02, 0.03, 0.04, 0.05]  # smooth plaster on brick (R5)
     wood_floor = [0.15, 0.11, 0.10, 0.07, 0.06, 0.07]
     furnishing = [5 * f for f in (0.5, 0.8, 1, 1, 1, 1)]
     W, L, H = ROOM["W"], ROOM["L"], ROOM["H"]

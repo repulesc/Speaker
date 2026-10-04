@@ -225,7 +225,7 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 - **Evidence:** C3 is 1 whenever the rear panel is within 0.3 m and the speaker has a wall setting. For cabinets 0.18–0.3 m deep, that covers every front-wall null between the top of the bass band (145–200 Hz) and 300 Hz. EQ cannot fill a cancellation; a wall setting corrects the bass *gain*.
 - **Proposal:** remove the exception and keep G07's reminder. One line plus a test. It changes rankings for the owner's speaker type.
 
-**M3 · The default wall material carries the wrong data.**
+**M3 · The default wall material carries the wrong data.** **Fixed in R5** (`docs/REVIEW_R5.md`, F1).
 - **Evidence:** "plaster-brick" holds the classic values for rough plaster *on lath* (0.14 at 125 Hz, panel absorption). Plaster on masonry is about 0.01–0.02 at 125 Hz (from memory, ⚠ check against the table). It is the default for the walls and the ceiling, so it sets much of the predicted low-frequency damping.
 - **Proposal:** split it into "plaster on masonry" and "plaster on lath or board", check both rows against the table, then re-check the H3 anchors.
 
@@ -255,7 +255,7 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 - **Evidence:** `dsp: obj({})` accepts anything. It is only read as booleans today, but R1's settings advice will read the ranges.
 - **Proposal:** validate the treble and bass ranges (min ≤ max, step > 0), the booleans, and the placement-mode strings.
 
-**M10 · Large rooms are slow.**
+**M10 · Large rooms are slow.** **R5:** typical rooms are within budget; large rooms now say they take a few seconds.
 - **Evidence:** on a desktop, 12 × 12 × 4 m takes 1.3 s, 15 × 20 × 4 m 2.1 s and 20 × 30 × 6 m 7.9 s; a phone is roughly 3–5 times slower. The budget is 1.5 s on a phone. The engine runs in a worker, so the UI stays responsive.
 - **Proposal:** scale the coarse step with the room size, cap the mode count, or say "large room, this takes a while".
 
@@ -263,14 +263,14 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 - **Evidence:** H06 suggests treble trims from defaults alone. The model's T60 rises with frequency because the furniture factors stay flat above 500 Hz, while soft furnishings usually absorb more there (⚠ source needed).
 - **Proposal:** require some furnishing or surface input before H06 fires; revisit the band factors with a source.
 
-**M12 · No external cross-check yet.**
+**M12 · No external cross-check yet.** **R5:** an image-source cross-check is done (`docs/verification/image-source.md`); a measured room is still open.
 - **Evidence:** TEST_PLAN §4 asks for REW or amroc comparisons in `docs/verification/`. The Python reference implements the same model, so it checks the code, not the model.
 - **Proposal:** owner or R5.
 
 **M13 · Findings have no text yet.**
 - **Evidence:** the UI shows only counts. Already scheduled for R1 (keys) and R4 (copy); listed because it is the user-visible half of H1.
 
-**M14 · The service worker cache grows forever.**
+**M14 · The service worker cache grows forever.** **Fixed in R5.**
 - **Evidence:** old hashed assets are never evicted, so the cache grows with every deploy.
 - **Proposal:** name the cache per build, or prune it on activate.
 
@@ -288,7 +288,7 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 10. G06 measures from the front baffle: a deep cabinet pushed into a corner gets a caution, not a red flag. **Fixed in R1** (measured from the cabinet; found again by the new validation suite).
 11. The monotonic-confidence property varies only the room dimensions, and the weights property checks only C1.
 12. There are no Testing Library component tests, though TEST_PLAN lists them; the e2e tests cover the components.
-13. The Pages deploy has no `concurrency` group, so two quick pushes to `main` could deploy out of order.
+13. The Pages deploy has no `concurrency` group, so two quick pushes to `main` could deploy out of order. **Fixed in R5.**
 14. `importProject` silently ignores an import at the project limit. The caller shows an error first, so this is unreachable today.
 
 ## Checked and found sound

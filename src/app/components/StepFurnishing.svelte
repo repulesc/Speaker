@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Busyness, ObjectKind } from '../../engine/types';
+  import type { Busyness, ObjectKind, ObjectMaterial } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import {
     activeVariant,
@@ -30,8 +30,17 @@
     'other-speaker',
     'tv',
     'desk',
+    'wardrobe',
+    'bookcase',
+    'piano',
+    'rack',
+    'plant',
+    'fireplace',
+    'lamp',
+    'subwoofer',
     'custom',
   ];
+  const MATERIALS: ObjectMaterial[] = ['hard', 'soft', 'absorbent'];
   const busyLevels: Busyness[] = ['bare', 'some', 'busy', 'very-busy'];
   const busyKey = { bare: 'bare', some: 'some', busy: 'busy', 'very-busy': 'veryBusy' } as const;
 
@@ -47,6 +56,14 @@
     'other-speaker': ['reflections', 'view'],
     tv: ['reflections', 'view'],
     desk: ['reflections', 'view'],
+    wardrobe: ['reflections', 'view'],
+    bookcase: ['room', 'view'],
+    piano: ['reflections', 'view'],
+    rack: ['reflections'],
+    plant: ['room'],
+    fireplace: ['reflections'],
+    lamp: ['view'],
+    subwoofer: ['reflections', 'view'],
     custom: ['room', 'reflections', 'view'],
   };
 
@@ -209,14 +226,23 @@
               onchange={(z) => workspace.edit((p) => void resizeObject(p, id, { z }))}
             />
           </div>
-          <label class="choice">
-            <input
-              type="checkbox"
-              checked={selected.hard}
-              onchange={(e) => patch(id, (o) => void (o.hard = e.currentTarget.checked))}
-            />
-            {i18n.t('furnishing.hard')}
-          </label>
+          <div class="field">
+            <label for="object-material">{i18n.t('furnishing.material.label')}</label>
+            <select
+              id="object-material"
+              class="input"
+              value={selected.material ?? (selected.hard ? 'hard' : 'soft')}
+              onchange={(e) =>
+                patch(id, (o) => {
+                  o.material = e.currentTarget.value as ObjectMaterial;
+                  o.hard = o.material === 'hard';
+                })}
+            >
+              {#each MATERIALS as m (m)}
+                <option value={m}>{i18n.t(`furnishing.material.${m}`)}</option>
+              {/each}
+            </select>
+          </div>
           <div class="actions">
             <button
               type="button"
@@ -323,17 +349,6 @@
   }
   .input {
     font-family: var(--font-sans);
-  }
-  .choice {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 44px;
-  }
-  .choice input {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--accent);
   }
   .actions {
     display: flex;

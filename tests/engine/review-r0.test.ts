@@ -233,7 +233,17 @@ describe('H1 · cautions carry information', () => {
 });
 
 describe('H2 · placing furniture never makes the room more reverberant', () => {
-  const kinds: ObjectKind[] = ['bed', 'sofa', 'armchair', 'table', 'shelf', 'custom'];
+  const kinds: ObjectKind[] = [
+    'bed',
+    'sofa',
+    'armchair',
+    'table',
+    'shelf',
+    'wardrobe',
+    'bookcase',
+    'plant',
+    'custom',
+  ];
   const levels: Busyness[] = ['bare', 'some', 'busy', 'very-busy'];
 
   it('the bed example: Room R with some furniture, then a bed is placed', () => {

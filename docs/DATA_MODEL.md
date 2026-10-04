@@ -243,6 +243,7 @@ export interface ListeningNote {
   listenedHours?: number;             // subjective notes after < 1 h are flagged as "early impression"
   text?: string;
   experimentId?: string;              // links a rating to an experiment step
+  setupKey?: string;                  // fingerprint of the setup when rated (positions, objects); older ratings stop counting once it changes
 }
 ```
 

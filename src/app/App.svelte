@@ -2,23 +2,30 @@
   import { onDestroy, onMount } from 'svelte';
   import { i18n } from '../i18n/locale.svelte';
   import AboutDialog from './components/AboutDialog.svelte';
+  import BassChart from './components/BassChart.svelte';
+  import Dock from './components/Dock.svelte';
+  import LayerBar from './components/LayerBar.svelte';
   import Notice from './components/Notice.svelte';
-  import Drawing from './components/Drawing.svelte';
+  import PrintSheet from './components/PrintSheet.svelte';
+  import PlanView from './components/PlanView.svelte';
   import ShareDialog from './components/ShareDialog.svelte';
-  import StepNav from './components/StepNav.svelte';
+  import SideView from './components/SideView.svelte';
   import StepFurnishing from './components/StepFurnishing.svelte';
+  import PanelTabs from './components/PanelTabs.svelte';
   import StepGoals from './components/StepGoals.svelte';
-  import StepResults from './components/StepResults.svelte';
   import StepRoom from './components/StepRoom.svelte';
   import StepSpeakers from './components/StepSpeakers.svelte';
   import StepSurfaces from './components/StepSurfaces.svelte';
-  import Stepper from './components/Stepper.svelte';
   import TopBar from './components/TopBar.svelte';
-  import Welcome from './components/Welcome.svelte';
+  import ListenPanel from './components/ListenPanel.svelte';
+  import TreatPanel from './components/TreatPanel.svelte';
+  import VariantTabs from './components/VariantTabs.svelte';
+  import WhyPanel from './components/WhyPanel.svelte';
   import { downloadText } from './download';
-  import { prefs } from './prefs.svelte';
   import { analysis, projectLabel, showNotice, workspace } from './session.svelte';
   import { ui } from './ui.svelte';
+  import { roomSize } from './plan/placement';
+  import { viewport } from './viewport.svelte';
   import { SIZE_LIMITS } from './state/limits';
   import {
     exportFileName,
@@ -37,6 +44,21 @@
   $effect(() => {
     analysis.run($state.snapshot(workspace.project));
   });
+
+  /** A project that already has a room opens on the results; a new one on the room form. */
+  function openFirstSection() {
+    const { width, length } = workspace.project.room;
+    ui.step = width.value !== null && length.value !== null ? 'results' : 'room';
+  }
+
+  // A new section starts at the top of the panel, not wherever the last one was scrolled to.
+  let panel = $state<HTMLElement>();
+  $effect(() => {
+    void ui.step;
+    if (panel) panel.scrollTop = 0;
+  });
+
+  openFirstSection(); // before the first render, so a reload never flashes the wrong panel
 
   function cycleSheet() {
     sheet = sheet === 'peek' ? 'half' : sheet === 'half' ? 'full' : 'peek';
@@ -109,6 +131,13 @@
   });
 
   onDestroy(() => analysis.dispose());
+
+  /** Big rooms have many more resonances to sum: say why the update takes a while (R5, M10). */
+  const LARGE_ROOM_M2 = 150;
+  const largeRoom = $derived.by(() => {
+    const size = roomSize(workspace.project);
+    return size !== null && size.W * size.L > LARGE_ROOM_M2;
+  });
 </script>
 
 <svelte:window onkeydown={onKeydown} onhashchange={openFromHash} />
@@ -121,16 +150,36 @@
       onshare={() => shareDialog?.show()}
       onexport={exportFile}
       onimport={() => fileInput?.click()}
+      onprint={() => window.print()}
       onabout={() => aboutDialog?.show()}
     />
     <Notice />
 
-    <main class="workspace" data-sheet={sheet}>
-      <section class="drawing">
-        <Drawing />
+    <main class="workbench" data-sheet={sheet}>
+      {#if viewport.wide}<Dock />{/if}
+
+      <section class="map" aria-label={i18n.t('map.label')}>
+        <VariantTabs />
+        <LayerBar />
+        <div class="stage">
+          {#if viewport.compact && ui.sideOpen}
+            <section class="side only" aria-label={i18n.t('plan.sideLabel')}><SideView /></section>
+          {:else}
+            <section class="plan" aria-label={i18n.t('plan.label')}><PlanView /></section>
+            {#if ui.sideOpen}
+              <section class="side" aria-label={i18n.t('plan.sideLabel')}><SideView /></section>
+            {/if}
+          {/if}
+          {#if analysis.busy}
+            <p class="busy" role="status">
+              {i18n.t(largeRoom ? 'analysis.updatingLarge' : 'analysis.updating')}
+            </p>
+          {/if}
+        </div>
+        {#if viewport.wide}<BassChart />{/if}
       </section>
 
-      <section class="panel" id="panel" tabindex="-1">
+      <section class="panel" id="panel" tabindex="-1" bind:this={panel}>
         <button
           type="button"
           class="handle"
@@ -141,21 +190,35 @@
         </button>
 
         <div class="content">
-          <Stepper current={ui.step} onselect={(s) => (ui.step = s)} />
-          {#if !prefs.welcomed}<Welcome />{/if}
-
-          {#if ui.step === 'room'}
-            <StepRoom />
-          {:else if ui.step === 'surfaces'}
-            <StepSurfaces />
-          {:else if ui.step === 'furnishing'}
-            <StepFurnishing />
-          {:else if ui.step === 'speakers'}
-            <StepSpeakers />
-          {:else if ui.step === 'goals'}
-            <StepGoals />
+          {#if !viewport.wide}<Dock />{/if}
+          {#if ui.step === 'results' || ui.step === 'treat' || ui.step === 'listen'}
+            <PanelTabs />
+          {/if}
+          {#if ui.step === 'results'}
+            <WhyPanel />
+            {#if !viewport.wide}<BassChart />{/if}
+          {:else if ui.step === 'treat'}
+            <TreatPanel />
+          {:else if ui.step === 'listen'}
+            <ListenPanel />
           {:else}
-            <StepResults />
+            <button type="button" class="btn back" onclick={() => (ui.step = 'results')}>
+              ← {i18n.t('panel.close')}
+            </button>
+            {#if ui.step === 'room'}
+              <StepRoom />
+            {:else if ui.step === 'surfaces'}
+              <StepSurfaces />
+            {:else if ui.step === 'furnishing'}
+              <StepFurnishing />
+            {:else if ui.step === 'speakers'}
+              <StepSpeakers />
+            {:else if ui.step === 'goals'}
+              <StepGoals />
+            {/if}
+            <button type="button" class="btn primary" onclick={() => (ui.step = 'results')}>
+              {i18n.t('panel.done')}
+            </button>
           {/if}
 
           {#if analysis.error}
@@ -164,13 +227,10 @@
             </div>
           {/if}
 
-          <StepNav current={ui.step} onselect={(s) => (ui.step = s)} />
-
           <footer>
             <p class="save" role="status" data-state={workspace.saveState}>
               {i18n.t(`project.${workspace.saveState}`)}
             </p>
-            <p class="disclaimer">{i18n.t('app.disclaimer')}</p>
           </footer>
         </div>
       </section>
@@ -211,6 +271,7 @@
 />
 <ShareDialog bind:this={shareDialog} />
 <AboutDialog bind:this={aboutDialog} />
+<PrintSheet />
 
 <style>
   .app {
@@ -249,37 +310,75 @@
     border-radius: var(--radius-sm);
   }
 
-  .workspace {
+  /* The workbench: dock, map and panel (docs/REVAMP_PLAN.md). Narrow screens stack them. */
+  .workbench {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
-
-  /* Drawing: faint blueprint grid behind the plan. */
-  .drawing {
+  .map {
     position: sticky;
     top: 0;
     z-index: 1;
-    height: 45dvh;
-    background-color: var(--bg);
-    background-image:
-      linear-gradient(var(--grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-position: -1px -1px;
+    display: flex;
+    flex-direction: column;
+    height: 62dvh;
+    min-width: 0;
+    background: var(--bg);
     border-bottom: 1px solid var(--grid);
   }
-
+  .stage {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .plan {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .side {
+    flex: 0 0 210px;
+    min-height: 0;
+    border-top: 1px solid var(--grid);
+    background: var(--surface);
+  }
+  .side.only {
+    flex: 1 1 0;
+    border-top: 0;
+  }
+  .busy {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    margin: 0;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
   .panel {
     padding: 16px var(--gutter) 32px;
     outline: none;
+    background: var(--panel);
   }
   .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
+    gap: 16px;
     max-width: 40rem;
+  }
+  .back {
+    justify-self: start;
+  }
+  @media (max-width: 1023px) {
+    /* The dock's pressed section toggles back to the results; no extra button needed. */
+    .back {
+      display: none;
+    }
   }
   .handle {
     display: none;
@@ -298,68 +397,64 @@
     border-color: var(--danger);
   }
 
-  /* Desktop: two panes, each scrolling on its own. */
+  /* Desktop: dock | map | panel, the map and the panel each scrolling on their own. */
   @media (min-width: 1024px) {
     .app {
       height: 100dvh;
       min-height: 0;
     }
-    .workspace {
-      flex-direction: row-reverse;
+    .workbench {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr) clamp(360px, 30vw, 420px);
       overflow: hidden;
     }
-    .drawing {
+    .map {
       position: relative;
-      flex: 1;
       height: auto;
       border-bottom: 0;
-      border-left: 1px solid var(--grid);
     }
     .panel {
-      width: clamp(380px, 34vw, 440px);
-      flex: none;
       overflow-y: auto;
-      background: var(--bg);
+      border-left: 1px solid var(--grid);
     }
   }
 
-  /* Phone: the panel is a bottom sheet. The drawing takes whatever space is left above it. */
+  /* Phone: the panel is a bottom sheet under the map; the dock is a scrolling row on top. */
   @media (max-width: 639px) {
     .app {
       height: 100dvh;
       min-height: 0;
     }
-    .workspace {
+    .workbench {
       overflow: hidden;
     }
-    .drawing {
+    .map {
       position: relative;
       flex: 1 1 0;
       height: auto;
-      min-height: 140px;
+      min-height: 200px;
+      border-bottom: 0;
     }
     .panel {
-      flex: 0 0 var(--sheet-h, 52dvh);
+      flex: 0 0 var(--sheet-h, 54dvh);
       overflow-y: auto;
       padding-top: 0;
-      background: var(--bg);
-      border-top: 1px solid var(--line);
+      border-top: 1px solid var(--grid-strong);
       border-radius: var(--radius-md) var(--radius-md) 0 0;
-      box-shadow: 0 -4px 16px rgb(11 22 38 / 0.15);
+      box-shadow: 0 -8px 24px rgb(0 0 0 / 0.35);
       transition: flex-basis 180ms ease-out;
     }
-    .workspace[data-sheet='peek'] {
+    .workbench[data-sheet='peek'] {
       --sheet-h: 132px;
     }
-    .workspace[data-sheet='half'] {
-      --sheet-h: 52dvh;
+    .workbench[data-sheet='half'] {
+      --sheet-h: 54dvh;
     }
-    /* Full: the drawing shrinks to its minimum and the sheet takes the rest. */
-    .workspace[data-sheet='full'] .panel {
+    .workbench[data-sheet='full'] .panel {
       flex: 1 1 auto;
     }
-    .workspace[data-sheet='full'] .drawing {
-      flex: 0 0 140px;
+    .workbench[data-sheet='full'] .map {
+      flex: 0 0 200px;
     }
     .handle {
       position: sticky;
@@ -371,7 +466,7 @@
       width: 100%;
       height: 44px;
       border: 0;
-      background: var(--bg);
+      background: var(--panel);
       cursor: pointer;
     }
     .handle span {

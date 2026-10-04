@@ -1,12 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { fillRoom } from './helpers';
+import { fillRoom, goStep } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Quick start/ }).click();
   await fillRoom(page, '4', '5.2', '2.6');
 });
 
@@ -24,8 +23,9 @@ test('journey 9 — phone: no horizontal scroll, the bottom sheet works', async 
   await expect.poll(async () => (await plan.boundingBox())!.height).toBeGreaterThan(before);
 });
 
-test('phone: every visible control is at least 44 × 44 px', async ({ page }) => {
-  const small = await page.evaluate(() => {
+/** Controls smaller than 44 × 44 px on screen right now. */
+async function smallControls(page: import('@playwright/test').Page) {
+  return page.evaluate(() => {
     const controls = document.querySelectorAll(
       'button, input:not([type=radio]):not([type=checkbox]), label:has(input[type=radio]), summary, a[href]',
     );
@@ -44,7 +44,23 @@ test('phone: every visible control is at least 44 × 44 px', async ({ page }) =>
           `${el.tagName.toLowerCase()} ${el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 20)} ${Math.round(el.getBoundingClientRect().width)}×${Math.round(el.getBoundingClientRect().height)}`,
       );
   });
-  expect(small).toEqual([]);
+}
+
+test('phone: every visible control is at least 44 × 44 px', async ({ page }) => {
+  expect(await smallControls(page)).toEqual([]);
+});
+
+test('phone: the Treat and Listen tabs and the bass-note bar keep 44 px targets (R5)', async ({
+  page,
+}) => {
+  await goStep(page, 'Results');
+  for (const tab of ['Treat', 'Listen']) {
+    await page.getByRole('tab', { name: tab }).click();
+    expect(await smallControls(page), tab).toEqual([]);
+  }
+  await page.getByRole('tab', { name: 'Why' }).click();
+  await page.getByRole('button', { name: 'Bass note' }).click();
+  expect(await smallControls(page), 'bass note').toEqual([]);
 });
 
 test('phone: one drawing at a time, switchable between top and side view', async ({ page }) => {
@@ -52,19 +68,18 @@ test('phone: one drawing at a time, switchable between top and side view', async
   const side = page.getByRole('region', { name: 'Side view of the room' });
   await expect(top).toBeVisible();
   await expect(side).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Side view' }).check({ force: true });
+  await page.getByRole('button', { name: 'Side view' }).click();
   await expect(side).toBeVisible();
   await expect(top).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Top view' }).check({ force: true });
+  await page.getByRole('button', { name: 'Side view' }).click();
   await expect(top).toBeVisible();
 });
 
-test('phone: the new steps fit the screen without sideways scrolling', async ({ page }) => {
-  for (const step of ['Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results']) {
-    await page
-      .getByRole('navigation', { name: 'Steps' })
-      .getByRole('button', { name: new RegExp(`^${step}`) })
-      .click();
+test('phone: every section fits the screen without sideways scrolling', async ({ page }) => {
+  for (const step of ['Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results', 'Listen']) {
+    if (step === 'Listen') {
+      await page.getByRole('tab', { name: 'Listen' }).click();
+    } else await goStep(page, step);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

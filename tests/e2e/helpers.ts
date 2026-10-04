@@ -21,12 +21,27 @@ export async function openMenu(page: Page) {
   await page.getByRole('button', { name: 'Menu' }).click();
 }
 
-/** Opens a step from the stepper (matches names like "Surfaces optional" in Quick mode too). */
+/** Opens a section from the dock (Room, Surfaces, Furniture, Speakers, Goals). */
+export async function openSection(page: Page, name: string) {
+  const button = page
+    .getByRole('navigation', { name: 'Sections' })
+    .getByRole('button', { name, exact: true });
+  if ((await button.getAttribute('aria-pressed')) !== 'true') await button.click();
+}
+
+/** Step names from the old wizard, kept so the journeys read the same: "Results" is the Why panel. */
 export async function goStep(page: Page, name: string) {
-  await page
-    .getByRole('navigation', { name: 'Steps' })
-    .getByRole('button', { name: new RegExp(`^${name}`) })
-    .click();
+  if (name === 'Results') {
+    const done = page.getByRole('button', { name: 'Show the results' });
+    if (await done.count()) await done.click();
+    return;
+  }
+  await openSection(page, name === 'Furnishing' ? 'Furniture' : name);
+}
+
+/** Back to the results ("Why") from a section. */
+export async function showResults(page: Page) {
+  await page.getByRole('button', { name: 'Show the results' }).click();
 }
 
 /** Metres from the front wall in a seat's accessible label, e.g. "Seat. 2.34 m from the front wall". */

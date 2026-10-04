@@ -1,11 +1,27 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
+  import { scoreWord } from '../findings/text';
+  import { paintField, paintHeat } from '../map/heat';
+  import { modeExplorer } from '../state/mode.svelte';
   import { fitFrame, toPx, toWorld } from '../plan/frame';
-  import { cabinet, moveObject, moveSeat, moveSpeaker } from '../plan/placement';
+  import {
+    cabinet,
+    moveObject,
+    moveSeat,
+    moveSpeaker,
+    setSpeakerClearance,
+    setSpeakerSpacing,
+  } from '../plan/placement';
   import { analysis, workspace } from '../session.svelte';
+  import { preview } from '../state/preview.svelte';
+  import { probe } from '../state/probe.svelte';
   import { ui } from '../ui.svelte';
   import { arrowDelta, startDrag } from '../plan/interaction';
+  import { viewport } from '../viewport.svelte';
+  import { ROOM_LIMITS } from '../state/limits';
+  import DimLabel from './DimLabel.svelte';
+  import ProbeCard from './ProbeCard.svelte';
 
   const project = $derived(workspace.project);
 
@@ -13,7 +29,11 @@
   let height = $state(0);
   let svg = $state<SVGSVGElement>();
 
-  const MARGINS = { left: 64, right: 64, top: 48, bottom: 52 };
+  const MARGINS = $derived(
+    viewport.compact
+      ? { left: 16, right: 16, top: 28, bottom: 12 }
+      : { left: 76, right: 84, top: 44, bottom: 56 },
+  );
   const locale = $derived(i18n.locale);
   const system = $derived(project.units);
   const roomW = $derived(project.room.width.value);
@@ -52,6 +72,119 @@
   );
 
   const selected = $derived(ui.selection);
+
+  // ── Map layers, best spots, probe ────────────────────────────────────────
+
+  const result = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
+
+  /** Where the treatment advice points (Treat tab): numbered rings, as listed in the panel. */
+  const adviceRings = $derived(
+    ui.step === 'treat' && result
+      ? result.advice.treatment
+          .filter((a) => a.location)
+          .map((a, i) => ({ n: i + 1, at: a.location! }))
+      : [],
+  );
+  const layers = $derived(preview.layers ?? result?.layers ?? null);
+  const candidates = $derived(result?.candidates.slice(0, 3) ?? []);
+  /** Pins sit on the seat of each spot; spots that share a seat are nudged apart so all stay visible. */
+  const pinOffsets = $derived(
+    candidates.map(
+      (c, i) =>
+        candidates
+          .slice(0, i)
+          .filter(
+            (o) => Math.hypot(o.listener.x - c.listener.x, o.listener.y - c.listener.y) < 0.15,
+          ).length,
+    ),
+  );
+  const previewed = $derived(ui.candidate === null ? null : (candidates[ui.candidate] ?? null));
+  const LETTERS = ['A', 'B', 'C'];
+  const PIN_FILL = ['var(--heat-4)', 'var(--heat-3)', '#8fd5c9'];
+
+  /** The bass-note explorer replaces the score map while it is on. */
+  const field = $derived(ui.modeFrequency !== null ? modeExplorer.field : null);
+  let heat = $state<HTMLCanvasElement>();
+  $effect(() => {
+    if (heat && layers && !field) paintHeat(heat, layers, layers.values[ui.layer]);
+  });
+  let fieldCanvas = $state<HTMLCanvasElement>();
+  $effect(() => {
+    if (fieldCanvas && field) paintField(fieldCanvas, field.grid);
+  });
+
+  // Keep the preview and the probe in step with the project (and with each other).
+  $effect(() => {
+    const snapshot = $state.snapshot(workspace.project);
+    const speakers = previewed ? $state.snapshot(previewed.speakers) : null;
+    void preview.refresh(snapshot, speakers);
+    probe.refresh(snapshot, speakers ?? undefined);
+    void modeExplorer.refresh(snapshot, ui.modeFrequency);
+  });
+
+  /** Runs of red-flag cells per row, for the hatch. */
+  const flaggedRuns = $derived.by(() => {
+    if (!layers) return [];
+    const runs: { x: number; y: number; w: number }[] = [];
+    for (let j = 0; j < layers.ny; j++) {
+      let start = -1;
+      for (let i = 0; i <= layers.nx; i++) {
+        const on = i < layers.nx && layers.redFlag[j * layers.nx + i];
+        if (on && start < 0) start = i;
+        if (!on && start >= 0) {
+          runs.push({ x: start, y: j, w: i - start });
+          start = -1;
+        }
+      }
+    }
+    return runs;
+  });
+  const showHeat = $derived(known && layers !== null);
+
+  const probeAt = $derived(
+    probe.point && probe.explanation
+      ? { x: px(probe.point.x), y: py(probe.point.y), explanation: probe.explanation }
+      : null,
+  );
+
+  function onFloorMove(event: PointerEvent) {
+    if (event.pointerType !== 'mouse' || !known || event.buttons !== 0) return;
+    const w = world(event.clientX, event.clientY);
+    if (w.a >= 0 && w.a <= W && w.b >= 0 && w.b <= L) probe.hover(w.a, w.b);
+    else probe.leave();
+  }
+
+  function onFloorClick(event: MouseEvent) {
+    if (!known || (event.target as Element).closest('.item, .pin')) return;
+    const w = world(event.clientX, event.clientY);
+    if (w.a >= 0 && w.a <= W && w.b >= 0 && w.b <= L) probe.pin(w.a, w.b);
+    else probe.clear();
+    ui.select({ kind: 'none' });
+  }
+
+  /** Shows a best spot on the map and in the panel (again: back to the current setup). */
+  function choose(i: number) {
+    const next = ui.candidate === i ? null : i;
+    ui.step = 'results'; // leaving another section clears the preview, so set it after
+    ui.candidate = next;
+  }
+
+  function moveSeatToProbe() {
+    const at = probe.point;
+    if (!at) return;
+    workspace.edit((p) => void moveSeat(p, at, { grid: false }));
+    probe.clear();
+  }
+
+  // ── Dimensions (click a number to type an exact value) ──────────────────
+
+  const dimSide = $derived<'left' | 'right'>(selected.kind === 'speaker' ? selected.side : 'left');
+  const dimSpeaker = $derived(variant ? variant.speakers[dimSide].base : null);
+  const showDims = $derived(known && !viewport.compact);
+  const dimName = (key: string) => i18n.t(`map.dim.${key}`);
+  const exact = { grid: false, keepCertainty: true } as const;
+  const setRoom = (dim: 'width' | 'length', metres: number) =>
+    workspace.edit((p) => void (p.room[dim] = { value: metres, certainty: 'measured' }));
 
   const summary = $derived.by(() => {
     if (!known || !variant || roomW === null || roomL === null) return i18n.t('plan.placeholder');
@@ -125,7 +258,38 @@
 
 <div class="plan" bind:clientWidth={width} bind:clientHeight={height}>
   {#if width > 0 && height > 0}
-    <svg bind:this={svg} {width} {height} role="group" aria-labelledby="plan-title plan-desc">
+    {#if field}
+      <canvas
+        bind:this={fieldCanvas}
+        class="heat"
+        aria-hidden="true"
+        style="left:{px(field.grid.x0 - field.grid.step / 2)}px; top:{py(
+          field.grid.y0 - field.grid.step / 2,
+        )}px; width:{field.grid.nx * field.grid.step * frame.scale}px; height:{field.grid.ny *
+          field.grid.step *
+          frame.scale}px"
+      ></canvas>
+    {:else if showHeat && layers}
+      <canvas
+        bind:this={heat}
+        class="heat"
+        aria-hidden="true"
+        style="left:{px(0)}px; top:{py(0)}px; width:{layers.nx *
+          layers.step *
+          frame.scale}px; height:{layers.ny * layers.step * frame.scale}px"
+      ></canvas>
+    {/if}
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions, a11y_click_events_have_key_events -->
+    <svg
+      bind:this={svg}
+      {width}
+      {height}
+      role="group"
+      aria-labelledby="plan-title plan-desc"
+      onpointermove={onFloorMove}
+      onpointerleave={() => probe.leave()}
+      onclick={onFloorClick}
+    >
       <title id="plan-title">{i18n.t('plan.label')}</title>
       <desc id="plan-desc">{summary}</desc>
       <defs>
@@ -138,22 +302,46 @@
         >
           <line x1="0" y1="0" x2="0" y2="6" class="hatch" />
         </pattern>
+        <pattern
+          id="hatch-flag"
+          width="7"
+          height="7"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(-45)"
+        >
+          <line x1="0" y1="0" x2="0" y2="7" class="flag-line" />
+        </pattern>
       </defs>
 
       <rect
         class="room"
         class:placeholder={!known}
+        class:heat={showHeat}
         x={px(0)}
         y={py(0)}
         width={W * frame.scale}
         height={L * frame.scale}
       />
-      {#each gridX as g (g)}
-        <line class="grid" x1={px(g)} y1={py(0)} x2={px(g)} y2={py(L)} />
-      {/each}
-      {#each gridY as g (g)}
-        <line class="grid" x1={px(0)} y1={py(g)} x2={px(W)} y2={py(g)} />
-      {/each}
+      {#if !showHeat}
+        {#each gridX as g (g)}
+          <line class="grid" x1={px(g)} y1={py(0)} x2={px(g)} y2={py(L)} />
+        {/each}
+        {#each gridY as g (g)}
+          <line class="grid" x1={px(0)} y1={py(g)} x2={px(W)} y2={py(g)} />
+        {/each}
+      {/if}
+      {#if layers && !field}
+        {#each flaggedRuns as r (r.y * 1000 + r.x)}
+          <rect
+            class="flagged"
+            x={px(r.x * layers.step)}
+            y={py(r.y * layers.step)}
+            width={r.w * layers.step * frame.scale}
+            height={layers.step * frame.scale}
+            fill="url(#hatch-flag)"
+          />
+        {/each}
+      {/if}
 
       <!-- Walls: the selected one (Surfaces step) is highlighted. -->
       <line
@@ -193,21 +381,57 @@
       >
 
       {#if known}
-        <g class="dim">
+        <!-- Room size: the numbers are typed over these lines (hidden on a phone: no room). -->
+        <g class="dim muted" class:hidden={!showDims}>
           <line x1={px(0)} y1={py(L) + 22} x2={px(W)} y2={py(L) + 22} />
           <line x1={px(0)} y1={py(L) + 16} x2={px(0)} y2={py(L) + 28} />
           <line x1={px(W)} y1={py(L) + 16} x2={px(W)} y2={py(L) + 28} />
-          <text x={px(W / 2)} y={py(L) + 42} text-anchor="middle">{fmtRoom(W)}</text>
           <line x1={px(W) + 22} y1={py(0)} x2={px(W) + 22} y2={py(L)} />
           <line x1={px(W) + 16} y1={py(0)} x2={px(W) + 28} y2={py(0)} />
           <line x1={px(W) + 16} y1={py(L)} x2={px(W) + 28} y2={py(L)} />
-          <text
-            x={px(W) + 44}
-            y={py(L / 2)}
-            text-anchor="middle"
-            transform="rotate(90 {px(W) + 44} {py(L / 2)})">{fmtRoom(L)}</text
-          >
         </g>
+        {#if showDims && dimSpeaker && seat}
+          {@const rear = dimSpeaker.y - cab.d / 2}
+          {@const lineX = px(dimSpeaker.x - cab.w / 2) - 14}
+          {@const sideY = py(dimSpeaker.y + cab.d / 2) + 18}
+          <g class="dim">
+            <!-- rear panel to the front wall -->
+            <line x1={lineX} y1={py(0)} x2={lineX} y2={py(rear)} />
+            <line x1={lineX - 5} y1={py(0)} x2={lineX + 5} y2={py(0)} />
+            <line x1={lineX - 5} y1={py(rear)} x2={lineX + 5} y2={py(rear)} />
+            <!-- speaker to its side wall -->
+            <line
+              x1={dimSide === 'left' ? px(0) : px(dimSpeaker.x)}
+              y1={sideY}
+              x2={dimSide === 'left' ? px(dimSpeaker.x) : px(W)}
+              y2={sideY}
+            />
+            <line x1={px(0)} y1={sideY - 5} x2={px(0)} y2={sideY + 5} />
+            <line x1={px(dimSpeaker.x)} y1={sideY - 5} x2={px(dimSpeaker.x)} y2={sideY + 5} />
+            <line x1={px(W)} y1={sideY - 5} x2={px(W)} y2={sideY + 5} />
+            <!-- between the speakers -->
+            <line
+              x1={px(variant!.speakers.left.base.x)}
+              y1={py(0) + 30}
+              x2={px(variant!.speakers.right.base.x)}
+              y2={py(0) + 30}
+            />
+            <!-- seat to the front wall -->
+            <line
+              x1={px(seat.ears.x) + 22}
+              y1={py(0)}
+              x2={px(seat.ears.x) + 22}
+              y2={py(seat.ears.y)}
+            />
+            <line x1={px(seat.ears.x) + 17} y1={py(0)} x2={px(seat.ears.x) + 27} y2={py(0)} />
+            <line
+              x1={px(seat.ears.x) + 17}
+              y1={py(seat.ears.y)}
+              x2={px(seat.ears.x) + 27}
+              y2={py(seat.ears.y)}
+            />
+          </g>
+        {/if}
 
         {#each objects as o (o.id)}
           {@const isSelected = selected.kind === 'object' && selected.id === o.id}
@@ -277,6 +501,13 @@
             )} {px(b!.p.base.x)},{py(b!.p.base.y + cab.d / 2)}"
           />
         {/if}
+
+        {#each adviceRings as r (r.n)}
+          <g class="advice-ring" aria-hidden="true">
+            <circle cx={px(r.at.x)} cy={py(r.at.y)} r="11" />
+            <text x={px(r.at.x)} y={py(r.at.y) + 4} text-anchor="middle">{r.n}</text>
+          </g>
+        {/each}
 
         {#each reflectionRings as f (f.messageKey + String(f.params.speaker) + String(f.params.boundary))}
           <circle class="ring" cx={px(f.location!.x)} cy={py(f.location!.y)} r="9" />
@@ -372,8 +603,145 @@
             />
           </g>
         {/if}
+
+        {#if previewed}
+          {#each [previewed.speakers.left, previewed.speakers.right] as ghost, i (i)}
+            <rect
+              class="ghost"
+              x={px(ghost.base.x) - (cab.w * frame.scale) / 2}
+              y={py(ghost.base.y) - (cab.d * frame.scale) / 2}
+              width={cab.w * frame.scale}
+              height={cab.d * frame.scale}
+            />
+          {/each}
+        {/if}
+        {#each field ? [] : candidates as c, i (i)}
+          <g
+            class="pin"
+            class:chosen={ui.candidate === i}
+            role="button"
+            tabindex="0"
+            aria-pressed={ui.candidate === i}
+            aria-label={i18n.t('map.pin', {
+              letter: LETTERS[i]!,
+              score: i18n.t(`results.score.${scoreWord(c.score)}`),
+            })}
+            onclick={() => choose(i)}
+            onkeydown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                choose(i);
+              }
+            }}
+          >
+            <circle
+              cx={px(c.listener.x) + pinOffsets[i]! * 22}
+              cy={py(c.listener.y)}
+              r="13"
+              fill={PIN_FILL[i]}
+            />
+            <text
+              x={px(c.listener.x) + pinOffsets[i]! * 22}
+              y={py(c.listener.y) + 4.5}
+              text-anchor="middle">{LETTERS[i]}</text
+            >
+          </g>
+        {/each}
       {/if}
     </svg>
+
+    {#if showDims && dimSpeaker && seat && variant}
+      {@const rear = dimSpeaker.y - cab.d / 2}
+      {@const sideY = py(dimSpeaker.y + cab.d / 2) + 18}
+      <DimLabel
+        name={dimName('clearance')}
+        value={rear}
+        {system}
+        limits={{ min: 0, max: L / 2 }}
+        x={Math.max(44, px(dimSpeaker.x - cab.w / 2) - 14 - 34)}
+        y={py(rear / 2)}
+        onchange={(v) => workspace.edit((p) => void setSpeakerClearance(p, v))}
+      />
+      <DimLabel
+        name={dimName('side')}
+        value={dimSide === 'left' ? dimSpeaker.x : W - dimSpeaker.x}
+        {system}
+        limits={{ min: cab.w / 2, max: W / 2 }}
+        x={dimSide === 'left' ? px(dimSpeaker.x / 2) : px((dimSpeaker.x + W) / 2)}
+        y={sideY + 15}
+        onchange={(v) =>
+          workspace.edit(
+            (p) => void moveSpeaker(p, dimSide, { x: dimSide === 'left' ? v : W - v }, exact),
+          )}
+      />
+      <DimLabel
+        name={dimName('spacing')}
+        value={variant.speakers.right.base.x - variant.speakers.left.base.x}
+        {system}
+        limits={{ min: 0.3, max: W - cab.w }}
+        x={px((variant.speakers.left.base.x + variant.speakers.right.base.x) / 2)}
+        y={py(0) + 30 - 14}
+        onchange={(v) => workspace.edit((p) => void setSpeakerSpacing(p, v))}
+      />
+      <DimLabel
+        name={dimName('seat')}
+        value={seat.ears.y}
+        {system}
+        limits={{ min: 0.1, max: L - 0.1 }}
+        x={px(seat.ears.x) + 22 + 40}
+        y={py(seat.ears.y / 2)}
+        onchange={(y) => workspace.edit((p) => void moveSeat(p, { y }, exact))}
+      />
+      <DimLabel
+        name={dimName('width')}
+        kind="room"
+        value={W}
+        {system}
+        limits={ROOM_LIMITS.width}
+        x={px(W / 2)}
+        y={py(L) + 40}
+        onchange={(v) => setRoom('width', v)}
+      />
+      <DimLabel
+        name={dimName('length')}
+        kind="room"
+        value={L}
+        {system}
+        limits={ROOM_LIMITS.length}
+        x={px(W) + 22 + 44}
+        y={py(L / 2)}
+        onchange={(v) => setRoom('length', v)}
+      />
+    {/if}
+
+    {#if field}
+      <p class="hint">
+        {i18n.t('mode.caption', { frequency: `${Math.round(field.frequency)} Hz` })}
+      </p>
+    {:else if showDims && layers}
+      <p class="hint">
+        {i18n.t('map.caption', {
+          where:
+            ui.candidate === null
+              ? i18n.t('map.whereNow')
+              : i18n.t('map.wherePreview', { letter: LETTERS[ui.candidate]! }),
+        })}
+        {i18n.t('map.hint')}
+      </p>
+    {/if}
+
+    {#if probeAt && !field}
+      <ProbeCard
+        explanation={probeAt.explanation}
+        {system}
+        pinned={probe.pinned}
+        x={probeAt.x}
+        y={probeAt.y}
+        bounds={{ width, height }}
+        onmove={moveSeatToProbe}
+        onclose={() => probe.clear()}
+      />
+    {/if}
     {#if !known}
       <p class="placeholder-text">{i18n.t('plan.placeholder')}</p>
     {/if}
@@ -388,13 +756,87 @@
     min-height: 140px;
   }
   svg {
+    position: absolute;
+    inset: 0;
     display: block;
     touch-action: none;
+  }
+  .hint {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+    width: min(220px, 20%);
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+  .hidden {
+    display: none;
+  }
+  .heat {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.94;
   }
   .room {
     fill: var(--surface);
     stroke: var(--line);
     stroke-width: 1.5;
+  }
+  .room.heat {
+    position: static;
+    fill: transparent;
+    opacity: 1;
+  }
+  .flagged {
+    pointer-events: none;
+  }
+  .flag-line {
+    stroke: #fff;
+    stroke-width: 1.5;
+    opacity: 0.55;
+  }
+  .ghost {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2;
+    stroke-dasharray: 4 3;
+    pointer-events: none;
+  }
+  .advice-ring {
+    pointer-events: none;
+  }
+  .advice-ring circle {
+    fill: var(--bg);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .advice-ring text {
+    fill: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pin {
+    cursor: pointer;
+    outline: none;
+  }
+  .pin circle {
+    stroke: #0b0f14;
+    stroke-width: 2;
+  }
+  .pin text {
+    fill: #0b0f14;
+    font-weight: 600;
+    font-size: 13px;
+    pointer-events: none;
+  }
+  .pin.chosen circle,
+  .pin:focus-visible circle {
+    stroke: var(--ink);
+    stroke-width: 3;
   }
   .room.placeholder {
     stroke-dasharray: 6 5;
@@ -419,15 +861,18 @@
     stroke: var(--accent);
     stroke-width: 5;
   }
-  .label,
-  .dim text {
+  .label {
     fill: var(--ink-muted);
     font-family: var(--font-mono);
     font-size: 12px;
   }
   .dim line {
+    stroke: var(--accent);
+    stroke-width: 1;
+    pointer-events: none;
+  }
+  .dim.muted line {
     stroke: var(--ink-muted);
-    stroke-width: 0.75;
   }
   .triangle {
     fill: none;
@@ -457,9 +902,9 @@
     cursor: grabbing;
   }
   .body {
-    fill: var(--surface);
-    stroke: var(--line);
-    stroke-width: 1.5;
+    fill: var(--bg);
+    stroke: var(--ink);
+    stroke-width: 2;
   }
   .object .body {
     stroke: var(--ink-muted);
@@ -491,8 +936,8 @@
     opacity: 0.6;
   }
   .seat {
-    fill: var(--surface);
-    stroke: var(--accent);
+    fill: var(--bg);
+    stroke: var(--ink);
     stroke-width: 2;
   }
   .item.selected .body,

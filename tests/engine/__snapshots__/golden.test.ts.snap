@@ -4,7 +4,7 @@ exports[`golden scenarios > 4 m cube: stacked modes are a caution; confidence is
 {
   "candidates": [
     {
-      "score": 0.92,
+      "score": 0.88,
       "seat": [
         2,
         1.75,
@@ -16,19 +16,7 @@ exports[`golden scenarios > 4 m cube: stacked modes are a caution; confidence is
       "speakersY": 0.6,
     },
     {
-      "score": 0.88,
-      "seat": [
-        2,
-        2.35,
-      ],
-      "speakersX": [
-        0.9,
-        3.1,
-      ],
-      "speakersY": 0.5,
-    },
-    {
-      "score": 0.88,
+      "score": 0.83,
       "seat": [
         2,
         1.6,
@@ -39,8 +27,20 @@ exports[`golden scenarios > 4 m cube: stacked modes are a caution; confidence is
       ],
       "speakersY": 0.2,
     },
+    {
+      "score": 0.82,
+      "seat": [
+        2,
+        2.25,
+      ],
+      "speakersX": [
+        0.9,
+        3.1,
+      ],
+      "speakersY": 0.5,
+    },
   ],
-  "current": 0.65,
+  "current": 0.58,
   "findings": [
     "caution P09.peak",
     "caution P09.dip",
@@ -75,19 +75,19 @@ exports[`golden scenarios > Room R, default speaker: avoids the midpoint, shows 
 {
   "candidates": [
     {
-      "score": 0.89,
+      "score": 0.86,
       "seat": [
         2,
-        1.7,
+        1.65,
       ],
       "speakersX": [
-        1.35,
-        2.65,
+        1.4,
+        2.6,
       ],
       "speakersY": 0.5,
     },
     {
-      "score": 0.87,
+      "score": 0.83,
       "seat": [
         2,
         2.2,
@@ -99,20 +99,21 @@ exports[`golden scenarios > Room R, default speaker: avoids the midpoint, shows 
       "speakersY": 0.5,
     },
     {
-      "score": 0.86,
+      "score": 0.82,
       "seat": [
         2,
-        2.2,
+        1.9,
       ],
       "speakersX": [
-        1.25,
-        2.75,
+        1.3,
+        2.7,
       ],
-      "speakersY": 0.9,
+      "speakersY": 0.5,
     },
   ],
-  "current": 0.61,
+  "current": 0.55,
   "findings": [
+    "caution P09.peak",
     "caution P09.dip",
     "caution P11.coincident",
     "caution G04.caution",
@@ -128,7 +129,6 @@ exports[`golden scenarios > Room R, default speaker: avoids the midpoint, shows 
     "info P06.ceiling",
     "info P07.transition",
     "info P08.balanced",
-    "info P09.peak",
     "info P10.ratio",
     "info P11.ituPass",
     "info G01.widthNode",
@@ -216,7 +216,7 @@ exports[`golden scenarios > long narrow room 3 × 8 × 2.5 m: a good stereo angl
 {
   "candidates": [
     {
-      "score": 0.93,
+      "score": 0.88,
       "seat": [
         1.5,
         2.1,
@@ -228,7 +228,19 @@ exports[`golden scenarios > long narrow room 3 × 8 × 2.5 m: a good stereo angl
       "speakersY": 0.55,
     },
     {
-      "score": 0.92,
+      "score": 0.88,
+      "seat": [
+        1.5,
+        1.5,
+      ],
+      "speakersX": [
+        0.8,
+        2.2,
+      ],
+      "speakersY": 0.2,
+    },
+    {
+      "score": 0.87,
       "seat": [
         1.5,
         1.9,
@@ -239,20 +251,8 @@ exports[`golden scenarios > long narrow room 3 × 8 × 2.5 m: a good stereo angl
       ],
       "speakersY": 0.5,
     },
-    {
-      "score": 0.91,
-      "seat": [
-        1.5,
-        1.45,
-      ],
-      "speakersX": [
-        0.85,
-        2.15,
-      ],
-      "speakersY": 0.2,
-    },
   ],
-  "current": 0.68,
+  "current": 0.64,
   "findings": [
     "caution P09.dip",
     "caution G01.caution",
@@ -287,10 +287,10 @@ exports[`golden scenarios > rear port with a manufacturer minimum: caution now, 
 {
   "candidates": [
     {
-      "score": 0.89,
+      "score": 0.86,
       "seat": [
         2,
-        1.7,
+        1.65,
       ],
       "speakersX": [
         1.35,
@@ -299,7 +299,7 @@ exports[`golden scenarios > rear port with a manufacturer minimum: caution now, 
       "speakersY": 0.5,
     },
     {
-      "score": 0.87,
+      "score": 0.83,
       "seat": [
         2,
         2.2,
@@ -311,19 +311,19 @@ exports[`golden scenarios > rear port with a manufacturer minimum: caution now, 
       "speakersY": 0.5,
     },
     {
-      "score": 0.86,
+      "score": 0.82,
       "seat": [
         2,
-        2.2,
+        1.9,
       ],
       "speakersX": [
-        1.25,
-        2.75,
+        1.3,
+        2.7,
       ],
-      "speakersY": 0.9,
+      "speakersY": 0.55,
     },
   ],
-  "current": 0.45,
+  "current": 0.4,
   "findings": [
     "caution P09.dip",
     "caution P11.coincident",
@@ -358,7 +358,19 @@ exports[`golden scenarios > seat fixed against the back wall: red flag, and the 
 {
   "candidates": [
     {
-      "score": 0.68,
+      "score": 0.62,
+      "seat": [
+        2,
+        4.8,
+      ],
+      "speakersX": [
+        0.55,
+        3.45,
+      ],
+      "speakersY": 0.8,
+    },
+    {
+      "score": 0.61,
       "seat": [
         2,
         4.8,
@@ -367,34 +379,22 @@ exports[`golden scenarios > seat fixed against the back wall: red flag, and the 
         0.25,
         3.75,
       ],
-      "speakersY": 0.85,
+      "speakersY": 0.8,
     },
     {
-      "score": 0.67,
+      "score": 0.61,
       "seat": [
         2,
         4.8,
       ],
       "speakersX": [
-        0.45,
-        3.55,
+        0.75,
+        3.25,
       ],
       "speakersY": 0.85,
-    },
-    {
-      "score": 0.66,
-      "seat": [
-        2,
-        4.8,
-      ],
-      "speakersX": [
-        0.7,
-        3.3,
-      ],
-      "speakersY": 0.9,
     },
   ],
-  "current": 0.38,
+  "current": 0.35,
   "findings": [
     "red-flag G02.redFlag",
     "red-flag G04.redFlag",
@@ -430,7 +430,31 @@ exports[`golden scenarios > the busy room: wall-setting reminder, passive speake
 {
   "candidates": [
     {
-      "score": 0.88,
+      "score": 0.82,
+      "seat": [
+        1.8,
+        1.4,
+      ],
+      "speakersX": [
+        1.15,
+        2.45,
+      ],
+      "speakersY": 0.2,
+    },
+    {
+      "score": 0.82,
+      "seat": [
+        1.8,
+        1.7,
+      ],
+      "speakersX": [
+        1.1,
+        2.5,
+      ],
+      "speakersY": 0.4,
+    },
+    {
+      "score": 0.81,
       "seat": [
         1.8,
         1.9,
@@ -441,33 +465,10 @@ exports[`golden scenarios > the busy room: wall-setting reminder, passive speake
       ],
       "speakersY": 0.7,
     },
-    {
-      "score": 0.87,
-      "seat": [
-        1.8,
-        1.6,
-      ],
-      "speakersX": [
-        1.15,
-        2.45,
-      ],
-      "speakersY": 0.4,
-    },
-    {
-      "score": 0.85,
-      "seat": [
-        1.8,
-        3.15,
-      ],
-      "speakersX": [
-        0.75,
-        2.85,
-      ],
-      "speakersY": 0.75,
-    },
   ],
-  "current": 0.61,
+  "current": 0.6,
   "findings": [
+    "caution P09.dip",
     "caution G03.surfaces",
     "caution G04.caution",
     "caution G10.passiveSpeaker",
@@ -483,7 +484,7 @@ exports[`golden scenarios > the busy room: wall-setting reminder, passive speake
     "info P06.ceiling",
     "info P07.transition",
     "info P08.dead",
-    "info P09.dip",
+    "info P09.peak",
     "info P10.ratio",
     "info P11.ituPass",
     "info G01.widthNode",
@@ -502,19 +503,19 @@ exports[`golden scenarios > tiny room 2.5 × 3 × 2.4 m: the 1 m listening dista
 {
   "candidates": [
     {
-      "score": 0.87,
+      "score": 0.84,
       "seat": [
         1.25,
         1.7,
       ],
       "speakersX": [
-        0.7,
-        1.8,
+        0.65,
+        1.85,
       ],
       "speakersY": 0.55,
     },
     {
-      "score": 0.86,
+      "score": 0.8,
       "seat": [
         1.25,
         2.35,
@@ -526,19 +527,19 @@ exports[`golden scenarios > tiny room 2.5 × 3 × 2.4 m: the 1 m listening dista
       "speakersY": 1.4,
     },
     {
-      "score": 0.83,
+      "score": 0.79,
       "seat": [
         1.25,
-        1.75,
+        2.4,
       ],
       "speakersX": [
-        0.5,
-        2,
+        0.55,
+        1.95,
       ],
-      "speakersY": 0.5,
+      "speakersY": 1.15,
     },
   ],
-  "current": 0.52,
+  "current": 0.43,
   "findings": [
     "caution P09.peak",
     "caution P09.dip",

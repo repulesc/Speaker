@@ -1,5 +1,12 @@
 import { DEFAULTS } from '../../engine/presets/defaults';
-import type { Certainty, ObjectKind, Project, RoomObject, SetupVariant } from '../../engine/types';
+import type {
+  Certainty,
+  ObjectKind,
+  Placement,
+  Project,
+  RoomObject,
+  SetupVariant,
+} from '../../engine/types';
 import { newId } from '../state/ids';
 
 /**
@@ -158,6 +165,25 @@ export function rotateObject(project: Project, id: string): boolean {
   return true;
 }
 
+/** Moves the speakers and the seat to a best-spot candidate (heights and toe-in stay as they are). */
+export function applyCandidate(project: Project, placement: Placement): void {
+  const variant = activeVariant(project);
+  for (const side of ['left', 'right'] as const) {
+    const base = placement.speakers[side].base;
+    variant.speakers[side].base = {
+      x: round(base.x),
+      y: round(base.y),
+      z: variant.speakers[side].base.z,
+    };
+    variant.speakers[side].certainty = 'estimated';
+  }
+  const ears = placement.listener;
+  variant.listener = {
+    ears: { x: round(ears.x), y: round(ears.y), z: variant.listener.ears.z },
+    certainty: 'estimated',
+  };
+}
+
 // ── Typed-field setters (step 4): exact values, no grid snapping ───────────
 
 const EXACT: MoveOptions = { grid: false, keepCertainty: true };
@@ -225,6 +251,14 @@ export const OBJECT_DEFAULTS: Record<
   'other-speaker': { x: 0.25, y: 0.3, z: 0.9, hard: true },
   tv: { x: 1.2, y: 0.1, z: 0.7, hard: true },
   desk: { x: 1.4, y: 0.7, z: 0.75, hard: true },
+  wardrobe: { x: 1.2, y: 0.6, z: 2.0, hard: true },
+  bookcase: { x: 0.9, y: 0.3, z: 2.0, hard: false },
+  piano: { x: 1.5, y: 0.65, z: 1.2, hard: true },
+  rack: { x: 0.5, y: 0.45, z: 0.8, hard: true },
+  plant: { x: 0.5, y: 0.5, z: 1.2, hard: false },
+  fireplace: { x: 1.2, y: 0.4, z: 1.1, hard: true },
+  lamp: { x: 0.35, y: 0.35, z: 1.6, hard: true },
+  subwoofer: { x: 0.4, y: 0.4, z: 0.45, hard: true },
   custom: { x: 0.6, y: 0.6, z: 0.6, hard: false },
 };
 

@@ -22,6 +22,8 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run check:size
+      - name: Hungarian text still to review (report only)
+        run: npm run hu:review
       - name: Install browser for end-to-end tests
         run: npx playwright install --with-deps chromium
       - name: End-to-end and accessibility tests
@@ -39,6 +41,10 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: check
     runs-on: ubuntu-latest
+    # Two quick pushes to main deploy in order, never side by side (R0 L13).
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     permissions:
       pages: write
       id-token: write

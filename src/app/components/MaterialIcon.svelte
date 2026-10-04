@@ -17,6 +17,8 @@
     <path
       d="M2.5 10h27M2.5 18h27M2.5 26h27M10 2.5v7.5M22 2.5v7.5M16 10v8M4 10v8M28 10v8M10 18v8M22 18v8"
     />
+  {:else if preset === 'plaster-lath'}
+    <path d="M2.5 8h27M2.5 14h27M2.5 20h27M2.5 26h27" stroke-dasharray="5 2" />
   {:else if preset === 'gypsum-stud'}
     <path d="M9 2.5v27M16 2.5v27M23 2.5v27" stroke-dasharray="2 3" />
   {:else if preset === 'glass'}

@@ -1,4 +1,4 @@
-import { BUSYNESS_ABSORPTION_PER_M2, OBJECT_ABSORPTION } from './presets/objects';
+import { BUSYNESS_ABSORPTION_PER_M2, objectAbsorption } from './presets/objects';
 import { DEFAULTS } from './presets/defaults';
 import { roomModes } from './rules/P02-room-modes';
 import { speedOfSound } from './rules/P01-speed-of-sound';
@@ -104,7 +104,7 @@ export function furnishingAbsorption(variant: SetupVariant, floorArea: number): 
   const [lo, hi] = BUSYNESS_ABSORPTION_PER_M2[variant.busyness?.value ?? 'some'];
   const placed = variant.objects.reduce<[number, number]>(
     (sum, o) => {
-      const [a, b] = o.absorptionRange ?? OBJECT_ABSORPTION[o.kind];
+      const [a, b] = objectAbsorption(o);
       return [sum[0] + a, sum[1] + b];
     },
     [0, 0],
