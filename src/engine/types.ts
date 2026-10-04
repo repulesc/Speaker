@@ -423,6 +423,8 @@ export interface AnalysisOk extends AnalysisBase {
   t60: { bands: BandValues; mid: number; low: number; high: number; method: 'sabine' | 'eyring' };
   /** Smoothed relative response at the current seat, normalised to 0 dB median. */
   bassResponse: { f: number[]; dB: number[] };
+  /** The frequency range the bass is judged over, and whether it is judged at all (P09). */
+  bassBand: { range: [number, number]; scored: boolean };
   findings: Finding[];
   topActions: Action[];
   current: Candidate;

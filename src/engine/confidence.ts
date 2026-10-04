@@ -114,6 +114,11 @@ function inputs(project: Project): InputSpec[] {
   ];
 }
 
+/** The paths that can come back as `nextBestInput.path` (the UI has a sentence for each). */
+export function confidenceInputPaths(project: Project): string[] {
+  return inputs(project).map((spec) => spec.path);
+}
+
 function perOutput(specs: InputSpec[]): Record<OutputId, number> {
   const result = {} as Record<OutputId, number>;
   for (const output of Object.keys(OUTPUT_WEIGHT) as OutputId[]) {

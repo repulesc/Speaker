@@ -1,12 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { fillRoom } from './helpers';
+import { fillRoom, goStep } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Quick start/ }).click();
   await fillRoom(page, '4', '5.2', '2.6');
 });
 
@@ -52,19 +51,16 @@ test('phone: one drawing at a time, switchable between top and side view', async
   const side = page.getByRole('region', { name: 'Side view of the room' });
   await expect(top).toBeVisible();
   await expect(side).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Side view' }).check({ force: true });
+  await page.getByRole('button', { name: 'Side view' }).click();
   await expect(side).toBeVisible();
   await expect(top).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Top view' }).check({ force: true });
+  await page.getByRole('button', { name: 'Side view' }).click();
   await expect(top).toBeVisible();
 });
 
-test('phone: the new steps fit the screen without sideways scrolling', async ({ page }) => {
+test('phone: every section fits the screen without sideways scrolling', async ({ page }) => {
   for (const step of ['Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results']) {
-    await page
-      .getByRole('navigation', { name: 'Steps' })
-      .getByRole('button', { name: new RegExp(`^${step}`) })
-      .click();
+    await goStep(page, step);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

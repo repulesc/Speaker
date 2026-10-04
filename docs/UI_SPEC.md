@@ -1,5 +1,7 @@
 # UI Specification (v1): "Blueprint"
 
+> **R2 note.** The look and layout described below were replaced by the "Instrument" workbench (docs/REVAMP_PLAN.md, "R2 status"): one screen with a dock, a map and a right panel instead of the six-step wizard. Sections that talk about steps, the stepper, Quick/Detailed mode and the welcome card are historical; the accessibility, units, input and phone rules still apply.
+
 Status: Phase 0 draft. Wireframes are described in words; visual mockups come at the start of Phase 2.
 
 ## 1. Design intent
@@ -43,7 +45,7 @@ All tokens are CSS custom properties on `:root`, redefined for dark mode via `pr
 
 ### Typography
 
-- **IBM Plex Sans** (UI text) and **IBM Plex Mono** (numbers, dimensions on the drawing). The technical feel matches Blueprint, the fonts have a complete Hungarian character set, and they are licensed under the SIL OFL. **Self-hosted** (no Google Fonts request, for privacy), subset to Latin + Latin Extended-A, `font-display: swap`.
+- **(R2) Sora** (UI text) and **JetBrains Mono** (numbers, dimensions on the map), replacing IBM Plex. Both have Latin Extended (Hungarian ő, ű), are licensed under the SIL OFL, and are **self-hosted** (no Google Fonts request, for privacy) through `@fontsource`, `font-display: swap`. Dark "Instrument" is the default look; the light theme is a quiet variant (docs/REVAMP_PLAN.md).
 - Scale: 13 / 15 / 17 (body) / 20 / 26 / 34 px, line height 1.5 body, 1.25 headings. Base body size 17 px, for older users.
 - Numbers use tabular figures (`font-variant-numeric: tabular-nums`).
 

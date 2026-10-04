@@ -3,20 +3,20 @@ import { readFileSync } from 'node:fs';
 import { encodeShare } from '../../src/app/state/share';
 import { messageKeys, MESSAGES, translate } from '../../src/i18n/translate';
 import { makeProject } from '../fixtures/projects';
-import { fillRoom, openMenu, savedProject } from './helpers';
+import { fillRoom, openMenu, openSection, savedProject } from './helpers';
 
 // Metric by default, English UI.
 test.use({ locale: 'en-GB' });
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Quick start/ }).click();
 });
 
 test('autosave: values survive a reload', async ({ page }) => {
   await fillRoom(page, '4', '5.2', '2.6');
   await savedProject(page);
   await page.reload();
+  await openSection(page, 'Room'); // a project with a room opens on the results
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
   await expect(page.getByLabel('Length', { exact: true })).toHaveValue('5.20\u00a0m');
 });
@@ -156,17 +156,18 @@ test('journey 8 — blocked storage: the app works and says nothing is saved', a
   });
   const page = await context.newPage();
   await page.goto('/');
-  await page.getByRole('button', { name: /Quick start/ }).click();
   await fillRoom(page, '4', '5', '2.5');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
   await expect(page.getByText('Not saved: your browser blocks storage')).toBeVisible();
   await context.close();
 });
 
-test('journey 10 — keyboard only: reach the first field, type, and move to the next step', async ({
+test('journey 10 — keyboard only: skip to the panel, type, and open the results', async ({
   page,
 }) => {
-  for (let i = 0; i < 40; i++) {
+  await page.keyboard.press('Tab'); // the skip link comes first
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 12; i++) {
     await page.keyboard.press('Tab');
     if (await page.evaluate(() => document.activeElement?.id === 'room-width')) break;
   }
@@ -175,10 +176,10 @@ test('journey 10 — keyboard only: reach the first field, type, and move to the
   await page.keyboard.press('Enter');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
 
-  const next = page.getByRole('button', { name: 'Next' });
-  await next.focus();
+  const done = page.getByRole('button', { name: 'Show the results' });
+  await done.focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Surfaces' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Why' })).toBeVisible();
 });
 
 test('undo and redo with the keyboard', async ({ page }) => {

@@ -8,6 +8,7 @@ import {
   moveSpeaker,
   rotateObject,
   setEarHeight,
+  applyCandidate,
   setSpeakerClearance,
   setSpeakerSpacing,
   setStandHeight,
@@ -148,6 +149,29 @@ describe('objects', () => {
     expect(pos.y).toBeCloseTo(4.2, 6);
     const clash = pos.x < 1.8 && pos.x + 0.8 > 0.2 && pos.y < 5 && pos.y + 0.8 > 3;
     expect(clash).toBe(false);
+  });
+});
+
+describe('applyCandidate', () => {
+  it('moves speakers and seat to a best spot, keeping heights and toe-in', () => {
+    const p = project();
+    const v = activeVariant(p);
+    v.speakers.left.toeInDeg = 7;
+    const z = v.speakers.left.base.z;
+    applyCandidate(p, {
+      speakers: {
+        left: { base: { x: 1.35, y: 0.5, z: 0 }, toeInDeg: 0 },
+        right: { base: { x: 2.65, y: 0.5, z: 0 }, toeInDeg: 0 },
+      },
+      listener: { x: 2, y: 1.65, z: 0 },
+    });
+    expect(v.speakers.left.base).toEqual({ x: 1.35, y: 0.5, z });
+    expect(v.speakers.right.base.x).toBe(2.65);
+    expect(v.speakers.left.toeInDeg).toBe(7);
+    expect(v.listener.ears).toMatchObject({ x: 2, y: 1.65 });
+    expect(v.listener.ears.z).not.toBe(0);
+    expect(v.speakers.left.certainty).toBe('estimated');
+    expect(v.listener.certainty).toBe('estimated');
   });
 });
 

@@ -117,30 +117,7 @@ export const hu: Messages = {
     'speaker.acousticAxisHeight': 'a magassugárzó magassága',
     'speaker.driverLayout': 'a hangszórók elrendezése',
   },
-  welcome: {
-    title: 'Hogyan szeretnél kezdeni?',
-    intro: 'Bármikor válthatsz, és semmi nem vész el abból, amit megadtál.',
-    quick: {
-      title: 'Gyors indulás',
-      body: 'Helyiségméret, hangfal és célok. Egy első válasz körülbelül egy perc alatt.',
-    },
-    detailed: {
-      title: 'Részletes beállítás',
-      body: 'Falak, bútorok és hangfalrészletek is, megbízhatóbb eredményért.',
-    },
-  },
-  steps: {
-    label: 'Lépések',
-    optional: 'nem kötelező',
-    room: 'Helyiség',
-    surfaces: 'Felületek',
-    furnishing: 'Berendezés',
-    speakers: 'Hangfalak',
-    goals: 'Célok',
-    results: 'Eredmény',
-    next: 'Tovább',
-    back: 'Vissza',
-  },
+  steps: { room: 'Helyiség' },
   field: {
     unusual: 'Biztos, hogy jó? A helyiségek általában {min} és {max} között vannak.',
     outOfRange: '{label}: {min} és {max} közötti értéket adj meg.',
@@ -427,13 +404,10 @@ export const hu: Messages = {
   results: {
     calculating: 'Számolás…',
     needRoom: 'Add meg a helyiség méretét, és máris kapsz egy első választ.',
-    summary: 'Hol tartasz?',
     yourSetup: 'A jelenlegi elrendezésed',
     bestFound: 'A legjobb, amit találtunk',
-    confidence: 'Mennyire vagyunk biztosak',
-    counts: 'Kerülendő: {red} · Figyelem: {caution}',
+    counts: 'Piros zászló: {red} · Figyelem: {caution}',
     score: { poor: 'Gyenge', fair: 'Közepes', good: 'Jó', veryGood: 'Nagyon jó' },
-    more: 'A részletes magyarázatok, a legjobb helyek a rajzon és a basszusgrafikon a következő frissítéssel érkeznek.',
   },
   plan: {
     label: 'A helyiség felülnézetben',
@@ -481,6 +455,378 @@ export const hu: Messages = {
     tv: 'TV',
     desk: 'Íróasztal',
     custom: 'Egyéb tárgy',
+  },
+  dock: {
+    label: 'Szakaszok',
+    room: 'Helyiség',
+    surfaces: 'Felületek',
+    furnishing: 'Bútorok',
+    speakers: 'Hangfalak',
+    goals: 'Céljaid',
+    side: 'Oldalnézet',
+  },
+  panel: {
+    close: 'Vissza az eredményekhez',
+    done: 'Eredmények mutatása',
+  },
+  map: {
+    label: 'Térkép',
+    hint: 'Húzz bármit. A térkép mozgatás közben újrarajzolódik. Kattints egy számra, és pontos értéket írhatsz be.',
+    layerLabel: 'Térképréteg',
+    poorer: 'Gyengébb',
+    better: 'Jobb',
+    flagged: 'Satírozva: az irányelvek szerint ide nem érdemes leülni.',
+    caption: 'Hová kerülhet az ülőhelyed ({where}).',
+    whereNow: 'a hangfalak most is itt vannak',
+    wherePreview: 'hangfalak: Hely {letter}',
+    pin: 'Legjobb hely: {letter}. Pontszám: {score}.',
+    dimEdit: 'Pontos érték megadása: {name}',
+    dim: {
+      clearance: 'Hangfal hátulja és az elülső fal',
+      spacing: 'A két hangfal távolsága',
+      side: 'Hangfal és az oldalfal',
+      seat: 'Ülőhely és az elülső fal',
+      width: 'A helyiség szélessége',
+      length: 'A helyiség hossza',
+    },
+  },
+  layer: {
+    overall: {
+      name: 'Összesített',
+      what: 'Mennyire jó itt az ülőhely, mindent egyformán számítva. Minél világosabb, annál jobb.',
+    },
+    goals: {
+      name: 'A céljaid',
+      what: 'Ugyanez, a kiválasztott céljaid szerint súlyozva.',
+    },
+    bass: {
+      name: 'Basszus egyenletessége',
+      what: 'Mennyire egyenletes a basszus ezen az ülőhelyen. A sötét dörmögő vagy vékony basszust jelent.',
+    },
+    nulls: {
+      name: 'Basszuslyukak',
+      what: 'Eltűnik-e itt egy basszushang. A sötét mély lyukat jelent.',
+    },
+    frontWall: {
+      name: 'Falról jövő interferencia',
+      what: 'A hangfalak mögötti fal okozta mélypont, ahogy itt hallod.',
+    },
+    stereo: {
+      name: 'Sztereó',
+      what: 'Mennyire jó a szög és a távolság a két hangfalhoz.',
+    },
+    symmetry: {
+      name: 'Szimmetria',
+      what: 'A helyiség két oldala egyformán kezeli-e a hangot.',
+    },
+    backWall: {
+      name: 'Hátsó fal',
+      what: 'A sötét azt jelenti, hogy túl közel vagy a hátsó falhoz.',
+    },
+  },
+  evidence: {
+    physics: 'Fizika',
+    guideline: 'Irányelv',
+    heuristic: 'Ökölszabály',
+    subjective: 'Füllel',
+  },
+  severity: {
+    'red-flag': 'Piros zászló',
+    caution: 'Figyelem',
+    info: 'Megjegyzés',
+    ok: 'Rendben',
+  },
+  concern: {
+    bass: 'Basszus',
+    frontWall: 'A hangfalak mögötti fal',
+    reflections: 'Visszaverődések',
+    stereo: 'Sztereó kép',
+    room: 'A helyiség',
+    speaker: 'A hangfalad',
+    objects: 'Útban lévő tárgyak',
+    rulesOfThumb: 'Ökölszabályok',
+  },
+  why: {
+    title: 'Miért',
+    setup: 'A jelenlegi elrendezés',
+    best: 'A legjobb, amit találtunk',
+    tryIt: 'Hely {letter} kipróbálása',
+    applied: 'Hely {letter} beállítva. A visszavonás visszaadja az eredetit.',
+    spotDetails:
+      'Hangfalak {front} távolságra az elülső faltól, egymástól {spacing}. Ülőhely {seat} az elülső faltól.',
+    preview: 'Hely {letter} látszik a térképen és a diagramon.',
+    stopPreview: 'Vissza a jelenlegi elrendezéshez',
+    spotsTitle: 'Legjobb helyek',
+    spotLabel: 'Hely {letter}',
+    moveFirst: 'A legjobb helyre költözés segítene a legtöbbet.',
+    alreadyGood: 'Az elrendezésed már közel van a legjobbhoz, amit találtunk.',
+    fragile: {
+      steady: 'Jól tartja magát, ha pár centit tévedsz.',
+      sensitive:
+        'Érzékeny: a kis elhelyezési vagy méretbeli hibák kicsit változtatnak az eredményen.',
+      fragile: 'Törékeny: ez csak akkor működik, ha minden pontosan úgy van, ahogy megadtad.',
+    },
+    fragileShort: { steady: 'stabil', sensitive: 'érzékeny', fragile: 'törékeny' },
+    problems: 'Amire érdemes ránézni',
+    noProblems: 'Ezzel az elrendezéssel nincs aggasztó.',
+    notes: 'Megjegyzések',
+    showNotes: 'Megjegyzések mutatása ({count})',
+    hideNotes: 'Megjegyzések elrejtése',
+    folk: 'Ökölszabályok',
+    confidence: 'Mennyire biztosak vagyunk?',
+    confidenceHint:
+      'Minél többet árulsz el a helyiségről, annál jobb a tanács. Következő legjobb lépés: {next}.',
+    disclaimer: 'Útmutatás, nem garancia. A füled dönt.',
+  },
+  next: {
+    surfaces: 'válaszd ki a falak anyagát',
+    furnishing: 'add meg, mennyire teli a helyiség',
+    room: {
+      width: 'mérd meg a helyiség szélességét',
+      length: 'mérd meg a helyiség hosszát',
+      height: 'mérd meg a belmagasságot',
+      construction: 'add meg, miből vannak a falak',
+    },
+    speakers: {
+      position: 'mérd meg, hol vannak a hangfalak',
+    },
+    listener: {
+      position: 'mérd meg, hol ülsz',
+    },
+    speaker: {
+      lowFrequencyMinus6dB: 'add meg a hangfal legmélyebb hangját',
+      directivity: 'add meg a hangfal sugárzási szögét',
+      portLocation: 'add meg, hol van a hangfal basszusnyílása',
+      enclosure: 'add meg a hangfal doboztípusát',
+      acousticAxisHeight: 'mérd meg a magassugárzó magasságát',
+      driverLayout: 'add meg a hangfal hangszóróinak elrendezését',
+    },
+  },
+  folkRule: {
+    H01: 'A népszerű 38%-os szabály',
+    H02: 'A harmadok szabálya',
+    asGood:
+      '{rule} szerint az ülőhelyed {seatY} lenne. A térkép egyetért: ez a hely majdnem olyan jó, mint a legjobb ebben a sorban.',
+    close:
+      '{rule} szerint az ülőhelyed {seatY} lenne. A térkép szerint ez közel van, de a(z) {bestY} egy kicsit jobb.',
+    worse:
+      '{rule} szerint az ülőhelyed {seatY} lenne. Ebben a helyiségben a térkép szerint a(z) {bestY} egyértelműen jobb.',
+    notAllowed:
+      '{rule} szerint az ülőhelyed {seatY} lenne, de oda nem kerülhet ülőhely (túl közel van egy hangfalhoz, vagy valami útban van).',
+    flag: ' Az irányelvek szerint pont ide nem érdemes ülni.',
+  },
+  probe: {
+    title: 'Ülőhely itt · {front} az elülső faltól',
+    moveHere: 'Ülőhelyem ide',
+    close: 'Bezárás',
+    notAllowed: 'Ide nem kerülhet ülőhely: túl közel van egy hangfalhoz, vagy valami útban van.',
+    flagged: 'Az irányelvek szerint ide nem érdemes leülni.',
+    allFine: 'Itt semmi nem kiugró.',
+    weakest: 'Leggyengébb pont: {layer}.',
+    score: 'Pontszám: {word}',
+  },
+  chart: {
+    title: 'Basszus az ülőhelyeden',
+    sub: 'a várható alak, nem a hangerő',
+    now: 'Az ülőhelyed',
+    spot: 'Hely {letter}',
+    modes: 'A helyiség rezonanciái',
+    band: 'Értékelt tartomány',
+    desc: 'Várható basszus {from} és {to} között: legerősebb {peak} körül, leggyengébb {dip} körül.',
+    noData: 'Add meg a helyiség méretét, és látni fogod a várható basszust.',
+  },
+  words: {
+    speaker: {
+      both: 'Mindkét hangfal',
+      left: 'Bal hangfal',
+      right: 'Jobb hangfal',
+    },
+    speakerFrom: { left: 'a bal hangfaltól', right: 'a jobb hangfaltól' },
+    closer: {
+      left: 'a bal',
+      right: 'a jobb',
+    },
+    wall: {
+      left: 'bal fal',
+      right: 'jobb fal',
+      front: 'elülső fal',
+      back: 'hátsó fal',
+      floor: 'padló',
+      ceiling: 'mennyezet',
+    },
+    boundary: {
+      front: 'elülső fal',
+      side: 'oldalfal',
+      floor: 'padló',
+      ceiling: 'mennyezet',
+    },
+    direction: {
+      above: 'felett',
+      below: 'alatt',
+    },
+    source: {
+      manufacturer: 'a gyártó előírása',
+      default: 'egy tipikus minimum',
+    },
+  },
+  finding: {
+    P02: {
+      lowestModes:
+        'A helyiség legmélyebb basszushangjai kb. {length} (hosszirányban), {width} (szélességben) és {height} (magasságban).',
+    },
+    P04: {
+      frontWall:
+        '{speaker}: a mélysugárzó {distance} távolságra van az elülső faltól, ezért némi basszus kioltódik {frequency} körül.',
+      aligned:
+        '{speaker}: a mélysugárzó nagyjából egyforma távolságra van két felülettől ({boundaryA}, {boundaryB}), ezért a basszusmélypontjaik egybeesnek {frequency} körül.',
+    },
+    P05: {
+      low: 'A közeli falak alig adnak plusz basszust a hangfalaknak.',
+      moderate: 'A közeli falak némi plusz basszust adnak a hangfalaknak (kb. {belowHz} alatt).',
+      high: 'A közeli falak sok plusz basszust adnak (kb. {belowHz} alatt). Nehéznek hallatszhat.',
+      'very-high':
+        'A hangfalak sarokban vagy sarok mellett vannak: a basszus erősen és egyenetlenül megemelkedik kb. {belowHz} alatt.',
+    },
+    P06: {
+      sideWall:
+        '{speaker}: az első visszaverődés ({boundary}) {delayMs} késéssel ér hozzád a közvetlen hang után. Az a felület ({surface}) {surfaceClass}.',
+      floor:
+        '{speaker}: a padlóról visszaverődő hang {delayMs} késéssel ér hozzád a közvetlen hang után. A padló ({surface}) {surfaceClass}.',
+      ceiling:
+        '{speaker}: a mennyezetről visszaverődő hang {delayMs} késéssel ér hozzád a közvetlen hang után. A mennyezet ({surface}) {surfaceClass}.',
+      scattering:
+        '{speaker}: a visszaverődés pontja ({boundary}) olyan felületen van, amely szórja a hangot ({surface}), ezért ott egyszerű visszaverődést nem jósolunk.',
+    },
+    P07: {
+      transition:
+        'Kb. {frequency} alatt a helyiség rezonanciái uralkodnak, felette a hang egyenletesebben keveredik (valahol {low} és {high} között).',
+    },
+    P08: {
+      dead: 'A helyiség a tompa oldalon van: az utózengés kb. {t60} ({low} és {high} között). A hang közeli és száraz.',
+      balanced:
+        'A helyiség a szokásos tartományban van: az utózengés kb. {t60} ({low} és {high} között).',
+      live: 'A helyiség a visszhangos oldalon van: az utózengés kb. {t60} ({low} és {high} között). Puha bútorok vagy függönyök megnyugtatnák.',
+    },
+    P09: {
+      peak: 'Ezen az ülőhelyen a basszus {frequency} körül dörmögni fog, kb. {db}-lel hangosabban a többinél.',
+      dip: 'Ezen az ülőhelyen a basszus {frequency} körül szinte eltűnik, kb. {db}-lel halkabb a többinél.',
+      smooth:
+        'A várható basszus egyenletes ezen az ülőhelyen: nincs 6 dB-nél nagyobb csúcs vagy mélypont.',
+      notScored:
+        'Ez a hangfal csak kb. {lowFrequencyMinus6dB} fölött szól, ami túl magas ahhoz, hogy a helyiség basszusrezonanciáit megítéljük, ezért nem is tesszük.',
+    },
+    P10: {
+      ratio:
+        'A közvetlen és a szobahang a hangfaltól {criticalDistance} távolságra egyforma. Te {listeningDistance} távolságra ülsz, ennek {ratio}-szeresére.',
+    },
+    P11: {
+      coincident:
+        'A helyiség néhány legmélyebb basszusrezonanciája közel esik egymáshoz (például {frequencyA} és {frequencyB}), ezért ezek a hangok dörmöghetnek.',
+      bonello:
+        'A helyiség rezonanciái kb. {band} fölött ritkulnak, ezért a basszus ott egyenetlen lehet.',
+      ituPass: 'A helyiség arányai megfelelnek az ITU-R hallgatószobákra vonatkozó ajánlásának.',
+      ituFail:
+        'A helyiség arányai kívül esnek az ITU-R hallgatószoba-ajánlásán. Ezen nem tudsz változtatni, csak megmagyarázza, miért nehezebb néhány helyiség.',
+    },
+    G01: {
+      redFlag:
+        'Az ülőhely majdnem pontosan a helyiség hosszának felénél van, ahol a legmélyebb basszushang szinte eltűnik. Told előre vagy hátra a helyiség hosszának nagyjából tizedével.',
+      caution:
+        'Az ülőhely közel van a helyiség hosszának feléhez (a hossz {offsetFraction}-ára), ahol némely basszus gyengébb.',
+      ok: 'Az ülőhely jó messze van a helyiség hosszának felétől.',
+      widthNode:
+        'A középvonalon ülsz, ahol néhány oldalirányú basszusrezonancia is gyenge. Ez a szimmetrikus sztereó beállítás szokásos kompromisszuma.',
+    },
+    G02: {
+      redFlag:
+        'A fejed csak {distance} távolságra van a hátsó faltól: a basszus ott nehéz, és a fal visszaverődése szinte azonnal megérkezik. Told előre az ülőhelyet.',
+      caution:
+        'A fejed {distance} távolságra van a hátsó faltól: a basszus nehezebb lesz, és korán érkezik a visszaverődés. Ülj előrébb, ha tudsz.',
+      ok: 'Az ülőhely mögött van hely ({distance} a hátsó faltól).',
+    },
+    G03: {
+      redFlag:
+        'A hangfalak nagyon különböző távolságra vannak az oldalfalaiktól (a különbség {difference}), ezért a sztereó kép az egyik oldalra dől.',
+      caution:
+        'A hangfalak oldalfaltól mért távolsága között {difference} a különbség, ezért a kép kicsit megdőlhet.',
+      ok: 'Mindkét hangfal egyforma távolságra van az oldalfalától.',
+      surfaces:
+        'A bal fal {left}, a jobb fal viszont {right}, ezért a két csatorna egy kicsit másképp szól.',
+    },
+    G04: {
+      redFlag:
+        'Te és a két hangfal {angle} szöget zártok be. A sztereó 60° körül működik a legjobban: ez túl szűk vagy túl széles.',
+      caution: 'A hangfalak közötti szög {angle}, kicsit eltér az ideális 60°-tól.',
+      info: 'A hangfalak közötti szög {angle}, közel az ideális 60°-hoz.',
+      ok: 'A hangfalak közötti szög {angle}: közel az ideális 60°-hoz.',
+    },
+    G05: {
+      redFlag:
+        'Az egyik hangfal közelebb van hozzád, mint a másik (közelebb: {closer}; a különbség {difference}), ezért a kép odahúz.',
+      caution:
+        'Az egyik hangfal közelebb van hozzád, mint a másik (közelebb: {closer}; a különbség {difference}).',
+      ok: 'Mindkét hangfal egyforma távolságra van a füledtől.',
+    },
+    G06: {
+      redFlag:
+        '{speaker} sarokban áll, ahol minden basszusrezonanciát teljes erővel gerjeszt. Húzd ki onnan.',
+      caution: '{speaker} közel van egy sarokhoz: extra, egyenetlen basszusra számíthatsz.',
+      ok: 'Egyik hangfal sincs sarok közelében.',
+    },
+    G07: {
+      tooClose:
+        'A hangfal hátsó basszusnyílása {clearance} távolságra van a faltól; legalább {minimum} kell neki ({source}).',
+      ok: 'A hátsó nyílásnak elég helye van ({clearance}; a minimum {minimum}).',
+      unknownPort:
+        'Nem tudjuk, hol van a hangfal basszusnyílása. Ha hátul van, tartsd távol a faltól.',
+      matchSetting:
+        'A hangfalad rendelkezik fal-távolság beállítással: állítsd be a hátulja és a fal közötti {clearance} távolságra.',
+    },
+    G08: {
+      redFlag:
+        'A füled {angle}-kal a hangfalak tengelye {direction} van, ami túl meredek: a hang megváltozik. Emeld vagy told lejjebb a hangfalakat, vagy döntsd meg őket.',
+      caution:
+        'A füled {angle}-kal a hangfalak tengelye {direction} van. Egy kicsivel egyenlőbb magasságban jobban szólna.',
+      ok: 'A hangfalak nagyjából fülmagasságba néznek.',
+    },
+    G09: {
+      treatForImaging:
+        'A(z) {boundary} ({surface}) visszaveri a hangot az ülőhelyedre. Élesebb képért kezeld azt a pontot.',
+      keepForWidth:
+        'A(z) {boundary} ({surface}) visszaveri a hangot az ülőhelyedre, ami szélességet ad. Hagyd úgy, ahogy van.',
+      bothSchools:
+        'A(z) {boundary} ({surface}) visszaveri a hangot az ülőhelyedre. Van, aki élesebb képért kezeli azt a pontot, más a szélesség miatt meghagyja: próbáld ki mindkettőt.',
+    },
+    G10: {
+      obstruction:
+        'Egy tárgy ({object}) van a hangfal és a füled között, és eltakarja a hangot. Told arrébb.',
+      nearbyHard:
+        'Egy kemény tárgy ({object}) {distance} távolságra van {speakerFrom}, és visszaverődésekkel elmossa a hangot.',
+      passiveSpeaker:
+        'Egy másik hangfal ({object}) {distance} távolságra van {speakerFrom}. Együtt rezeghet: próbáld meg letakarni vagy arrébb tenni, és hallgasd meg.',
+    },
+    H01: {
+      overlay:
+        'Egy népszerű ökölszabály szerint az ülőhely a helyiség 38%-ánál van: itt ez {listenerY}. Hogy honnan ered, nem világos.',
+    },
+    H02: {
+      overlay:
+        'A harmadok szabálya szerint a hangfalak {speakersY} távolságra vannak az elülső faltól, az ülőhely pedig {listenerY}. Ez egy népi szabály.',
+    },
+    H04: {
+      near: 'A mélysugárzó közel van az elülső falhoz ({distance}): a basszusmélypont magasan, {frequency} körül van, nagyjából útból.',
+      middle:
+        'A mélysugárzó {distance} távolságra van az elülső faltól: a basszusmélypont {frequency} körül esik, ahol a leghallhatóbb. Közelebb, vagy sokkal messzebb általában jobb.',
+      far: 'A mélysugárzó messze van az elülső faltól ({distance}): a basszusmélypont mély, {frequency} körül, és keskeny.',
+    },
+    H05: {
+      experiment:
+        'A befelé fordítás {toeInLeft}°. Mérések nélkül nem tudjuk megmondani, mi a legjobb: próbálj ki pár fok befelé fordítást és anélkül is, és hallgasd meg.',
+    },
+    H06: {
+      lift: 'A helyiség magas hangjai gyorsan elhalnak ({t60}). Egy kis magashang-emelés ({suggestDb}) segíthet: próbáld ki, és hallgasd meg.',
+      cut: 'A helyiség magas hangjai sokáig csengenek ({t60}). Egy kis magashang-csökkentés ({suggestDb}) segíthet: próbáld ki, és hallgasd meg.',
+    },
   },
   analysis: {
     updating: 'Frissítés…',

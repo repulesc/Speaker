@@ -18,15 +18,17 @@ async function expectAccessible(page: Page) {
 for (const scheme of ['light', 'dark'] as const) {
   test.describe(`${scheme} theme`, () => {
     test.use({ colorScheme: scheme });
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript((theme) => localStorage.setItem('spa:theme', theme), scheme);
+    });
 
-    test('welcome card and empty room', async ({ page }) => {
+    test('empty workbench', async ({ page }) => {
       await page.goto('/');
       await expectAccessible(page);
     });
 
     test('filled room, menu and meter open', async ({ page }) => {
       await page.goto('/');
-      await page.getByRole('button', { name: /Quick start/ }).click();
       await fillRoom(page, '4', '5.2', '2.6');
       await page.getByLabel('Width', { exact: true }).fill('banana');
       await page.getByLabel('Width', { exact: true }).blur();
@@ -53,13 +55,15 @@ test('dialogs', async ({ page }) => {
 const STEPS = ['Room', 'Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results'];
 
 for (const scheme of ['light', 'dark'] as const) {
-  test.describe(`every step, ${scheme} theme`, () => {
+  test.describe(`every section, ${scheme} theme`, () => {
     test.use({ colorScheme: scheme });
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript((theme) => localStorage.setItem('spa:theme', theme), scheme);
+    });
 
     test('with a filled room, a patch, an object and a second setup', async ({ page }) => {
       test.setTimeout(90_000); // seven full accessibility scans
       await page.goto('/');
-      await page.getByRole('button', { name: /Detailed setup/ }).click();
       await fillRoom(page, '4', '5', '2.5');
 
       // Give the later steps something to show: a patch, an object, a second setup.

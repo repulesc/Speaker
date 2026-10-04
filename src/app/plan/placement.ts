@@ -1,5 +1,12 @@
 import { DEFAULTS } from '../../engine/presets/defaults';
-import type { Certainty, ObjectKind, Project, RoomObject, SetupVariant } from '../../engine/types';
+import type {
+  Certainty,
+  ObjectKind,
+  Placement,
+  Project,
+  RoomObject,
+  SetupVariant,
+} from '../../engine/types';
 import { newId } from '../state/ids';
 
 /**
@@ -156,6 +163,25 @@ export function rotateObject(project: Project, id: string): boolean {
   object.size = { x: object.size.y, y: object.size.x, z: object.size.z };
   moveObject(project, id, {}, { grid: false });
   return true;
+}
+
+/** Moves the speakers and the seat to a best-spot candidate (heights and toe-in stay as they are). */
+export function applyCandidate(project: Project, placement: Placement): void {
+  const variant = activeVariant(project);
+  for (const side of ['left', 'right'] as const) {
+    const base = placement.speakers[side].base;
+    variant.speakers[side].base = {
+      x: round(base.x),
+      y: round(base.y),
+      z: variant.speakers[side].base.z,
+    };
+    variant.speakers[side].certainty = 'estimated';
+  }
+  const ears = placement.listener;
+  variant.listener = {
+    ears: { x: round(ears.x), y: round(ears.y), z: variant.listener.ears.z },
+    certainty: 'estimated',
+  };
 }
 
 // ── Typed-field setters (step 4): exact values, no grid snapping ───────────

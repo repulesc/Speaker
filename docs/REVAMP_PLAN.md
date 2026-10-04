@@ -73,9 +73,24 @@ The numbered wizard and the welcome card; the confidence meter as a top-bar widg
 |---|---|---|
 | **R0** | **Full audit of the mechanics**: engine physics, scoring, search, robustness, workspace and persistence, import/share security, i18n, accessibility, tests. Output `docs/REVIEW_FINDINGS.md` (severity-ranked, with evidence) and fix everything critical and high. Resolve or re-mark the ⚠ sources that can be checked. **Done:** findings and the R1 proposals in `docs/REVIEW_FINDINGS.md`. | **Opus, xhigh** |
 | R1 | Engine additions: layers, `explainPoint`, sensitivity, mode-field, treatment rules, speaker-settings rules, folk-rule comparison, finding copy keys; validation suite. **Done**, except the copy itself: the finding and advice keys and their parameters are fixed, the EN and HU text for them is R4. Also fixed the audit's M1, M2, M4, M6–M9, M11, L3, L10. | Opus, high |
-| R2 | Workbench UI in the Instrument look: dock, map with heatmap and dimension lines, probe, chart, right panel, phone layout | Sonnet, medium (Opus review) |
+| R2 | Workbench UI in the Instrument look: dock, map with heatmap and dimension lines, probe, chart, right panel, phone layout. **Done** (see "R2 status" below). | Sonnet, medium (Opus review) |
 | R3 | Treat tab, Listen tab (log + agreement), room-mode explorer, compare, print sheet, larger furniture | Sonnet medium + Opus for the rules |
 | R4 | EN + HU copy for every finding and rule; Hungarian review by the owner | Sonnet draft, owner review |
 | R5 | Physics audit of the whole product, bad-advice hunt, accessibility, performance, launch | Opus, xhigh |
 
 Each phase ends with a deployed preview the owner can click, and updated tests (unit, browser, axe, validation).
+
+## R2 status
+
+Built: the Instrument look (Sora, JetBrains Mono, dark by default, quiet light variant), the one-screen workbench (dock, map, right panel; on phones the dock and panel form a bottom sheet under the map), and:
+
+- **Map:** the seat heatmap under the plan (eight layers, each with its one-line meaning and evidence tag; stretched viridis ramp with a legend), hatched cells where the guidelines advise against sitting, best-spot pins A/B/C (a spot with the same seat as another is nudged aside), a preview of a chosen spot (the map, the ghost speakers and the bass chart switch to it, "Try spot A" applies it as one undo step).
+- **Dimensions on the plan:** speaker to front wall, speaker to side wall, between the speakers, seat to front wall, room width and length. Click a number to type an exact value (same parser and limits as the forms).
+- **Probe:** hover (mouse) or tap/click (pinned) shows the seat score, the most serious position-dependent finding or the weakest layer, and "Move my seat here". The bass chart overlays the probe's curve.
+- **Bass chart:** the predicted shape at the seat, the judged range, axial room modes, overlays for the previewed spot and the probe.
+- **Why panel:** "your setup vs best" with fragility, best spots, findings grouped by concern with severity icon + word and evidence tag in plain sentences (EN and HU for every finding key; values formatted in the user's units), notes behind a toggle, the rules of thumb compared with the map, and the confidence hint.
+- **Side view** hidden until the dock button asks for it; the welcome card, the stepper and the Quick/Detailed choice are gone.
+
+Not in R2 (R3): the Treat and Listen tabs, the room-mode explorer slider, compare setups, print sheet, the bigger furniture palette. The advice rules (T and D) have no text yet (R4); they are not shown.
+
+**New Hungarian text to review** (owner): `finding.*` (about 65 sentences), `layer.*`, `evidence.*`, `severity.*`, `concern.*`, `dock.*`, `panel.*`, `map.*`, `why.*`, `probe.*`, `chart.*`, `words.*`, `folkRule.*`, `next.*`, and `crash.*` / `furnishing.busy.combined` from R0. Hungarian cannot say "the A spot" without the article problem, so spots read "Hely A".

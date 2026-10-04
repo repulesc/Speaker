@@ -21,17 +21,17 @@ export function projectLabel(name: string): string {
 
 export const analysis = new AnalysisRunner();
 
+/** What the right panel shows: the findings ("results"), or one section's form (docs/REVAMP_PLAN.md). */
 export type StepId = 'room' | 'surfaces' | 'furnishing' | 'speakers' | 'goals' | 'results';
-export const STEPS: readonly StepId[] = [
+export type SectionId = Exclude<StepId, 'results'>;
+/** The dock, top to bottom. */
+export const SECTIONS: readonly SectionId[] = [
   'room',
   'surfaces',
   'furnishing',
   'speakers',
   'goals',
-  'results',
 ];
-/** Steps that Quick mode treats as optional: they only sharpen the result. */
-export const OPTIONAL_IN_QUICK: readonly StepId[] = ['surfaces', 'furnishing'];
 
 /** Transient message under the top bar (import results, errors). */
 export const notice = $state<
