@@ -82,6 +82,19 @@ V3 first pass is merged (see the status section at the end of `docs/DESIGN_BRIEF
 - Bundle under 150 KB gzip (now about 115 KB).
 - Every new rule or estimate needs a formula, a cited source, an evidence level and tests; mark anything unverified.
 
+## Fun and personality (owner's answers, 4 October, late)
+
+The owner is tired of archaic, scientific-looking, poorly designed sites and wants the experience to be likeable, not sweaty.
+
+- **Faces:** a friendly face (a mood for the whole setup, for example a calm smile for "Good") on the **Best placement card** only. Not on the seat marker, not in tooltips. Opus shows both styles on the real card (custom-drawn minimal faces in the site's own style, and system emoji) and the owner chooses by looking. The mood must come from the real score, never be invented.
+- **Tiny celebrations:** subtle moments of delight (the map glows when a great spot is found, speakers glide into place). No confetti, nothing kitsch. Respect "reduce motion".
+- **Not now:** guess-first, room personality line, sound-taste quiz. Opus may still propose them in its open mandate.
+- **Sound-based ideas** (hearing the room, finding the dead spot by ear, try-this-move-then-compare): the owner chose "none for now" in this round, after earlier choosing guided listening tests. Treat sound features as a later release and confirm with the owner before building the guided tests.
+
+## Name
+
+Working name: **Stanza** (the owner's favourite: sounds good, uncommon, not a feminine name). Keep it until something better comes up. Caveats to check before launch: Stanza is also the name of a Stanford natural-language Python library and, I believe, of an old e-reader app; check domains and trademarks. The name lives only in `src/app/config.ts`.
+
 ## Open mandate for Opus (the owner asked for this explicitly)
 
 Beyond the list above, think out of the box about the whole site. Re-evaluate what is here, find what is missing, and propose.
