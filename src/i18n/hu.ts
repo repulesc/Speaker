@@ -53,6 +53,7 @@ export const hu: Messages = {
     share: 'Megosztási link',
     export: 'Exportálás fájlba',
     import: 'Importálás fájlból',
+    print: 'Nyomtatható lap',
     about: 'Névjegy és források',
   },
   share: {
@@ -263,7 +264,12 @@ export const hu: Messages = {
     width: 'Szélesség',
     depth: 'Mélység',
     height: 'Magasság',
-    hard: 'Kemény felület (visszaveri a hangot)',
+    material: {
+      label: 'Anyag',
+      hard: 'Kemény (visszaveri a hangot)',
+      soft: 'Puha (kárpit, könyvek, textil)',
+      absorbent: 'Hangelnyelő (vastag, porózus anyag)',
+    },
     rotate: 'Elforgatás 90°-kal',
     remove: 'Eltávolítás',
   },
@@ -454,6 +460,14 @@ export const hu: Messages = {
     'other-speaker': 'Másik hangfal',
     tv: 'TV',
     desk: 'Íróasztal',
+    wardrobe: 'Gardrób',
+    bookcase: 'Könyvespolc',
+    piano: 'Zongora',
+    rack: 'Hi-fi állvány',
+    plant: 'Nagy növény',
+    fireplace: 'Kandalló',
+    lamp: 'Állólámpa',
+    subwoofer: 'Mélynyomó',
     custom: 'Egyéb tárgy',
   },
   dock: {
@@ -840,6 +854,103 @@ export const hu: Messages = {
     label: 'Panel',
     why: 'Miért',
     treat: 'Javítás',
+    listen: 'Hallgatás',
+  },
+  listen: {
+    title: 'Hallgatás és jegyzet',
+    intro:
+      'A füled a végső próba. Változtass egyetlen dolgot, hallgass, és írd le, mit hallasz. A jegyzetek soha nem változtatják meg, amit az app számol.',
+    protocolTitle: 'Így próbálj ki egy változtatást',
+    protocol: {
+      one: 'Csak egy dolgot változtass, például told el az ülőhelyet 10 cm-rel.',
+      two: 'Mindig ugyanazt a három számot játszd: egy középre szőtt hangot, egy basszusos számot és egy tágas zenekari vagy ambient felvételt.',
+      three: 'Tartsd ugyanazon a hangerőn, és utána értékeld.',
+    },
+    adapt: 'A fül órák alatt hozzászokik. Egy kis idő után ítélj, és azonos hangerőn hasonlíts.',
+    formTitle: 'Jegyzet ehhez: „{setup}”',
+    rating: {
+      legend: 'Milyen volt ez a beállítás?',
+      scale: '1 = gyenge, 5 = nagyszerű',
+      value: '{n} az 5-ből',
+    },
+    symptoms: 'Mit hallasz? (nem kötelező)',
+    duration: {
+      legend: 'Mióta hallgatod ezt a beállítást?',
+      short: 'Egy óránál rövidebb ideje',
+      hours: 'Pár órája',
+      days: 'Napok óta',
+    },
+    text: 'A jegyzeted (nem kötelező)',
+    save: 'Jegyzet mentése',
+    listTitle: 'Jegyzetek ehhez: „{setup}”',
+    empty: 'Ehhez a beállításhoz még nincs jegyzet.',
+    delete: 'Jegyzet törlése',
+    tryThis: 'Próbáld ki',
+    symptom: {
+      S01: {
+        name: 'Dörmögő, nehéz basszus',
+        try: 'Told az ülőhelyet kb. 20 cm-rel előrébb, vagy a hangfalakat kb. 10 cm-rel távolabb a faltól. Ha a hangfalaidon van falkompenzáció, kapcsold be.',
+      },
+      S02: {
+        name: 'Vékony, gyenge basszus',
+        try: 'Told az ülőhelyet 15 cm-rel oldalra, előre vagy hátra. Ha a hangfalaidon van elülső fal beállítás, próbáld ki a „közel” és a „távol” állást.',
+      },
+      S03: {
+        name: 'Elmosódott közép, hiányzik a fókusz',
+        try: 'Mérd meg mérőszalaggal a távolságot minden hangfaltól az ülőhelyedig, és tedd egyenlővé. Próbáld meg befordítani a hangfalakat feléd.',
+      },
+      S04: {
+        name: 'Szűk hangszínpad',
+        try: 'Told szét a hangfalakat egyenként kb. 10 cm-rel, és fordítsd be őket egy kicsit kevésbé.',
+      },
+      S05: {
+        name: 'Éles, harsány magasak',
+        try: 'Fordítsd be a hangfalakat egy kicsit kevésbé, puhítsd meg az egyik visszaverődési pontot szőnyeggel vagy függönnyel, vagy ha tudod, vedd vissza a magasakat 0,5 dB-lel.',
+      },
+      S06: {
+        name: 'Tompa, zárt hang',
+        try: 'Ellenőrizd, hogy a magassugárzók fülmagasságban vannak-e, vedd el, ami a hangfalak és az ülőhelyed között van, vagy ha tudod, emeld a magasakat 0,5 dB-lel.',
+      },
+      S07: {
+        name: 'A hang az egyik oldalra húz',
+        try: 'Cseréld meg a bal és a jobb kábelt: ha a húzás követi a kábelt, akkor a hangfal vagy az erősítő a ludas; ha marad, akkor a szoba.',
+      },
+    },
+    agreement: {
+      title: 'A füled és az app',
+      notEnough:
+        'Értékelj legalább két különböző beállítást, és az app megmondja, hogy a füled és az ő rangsora egyezik-e.',
+      agree:
+        'Eddig az értékeléseid egyeznek az app rangsorával: amelyik beállítást jobban szeretted, azt az app is magasabbra pontozza.',
+      mixed:
+        'Az értékeléseid néhány beállításpárnál egyeznek az app rangsorával, másoknál nem. Még néhány jegyzet megmutatja a mintát.',
+      disagree:
+        'Neked a „{ears}” tetszett a legjobban, de az app a(z) „{app}” beállítást pontozza magasabbra. Az app egyszerűsített modellt használ, ezért itt bízz a füledben. Lehet, hogy a szobában valami másmilyen, mint amit megadtál (felületek, bútorok, hangfal adatok), érdemes ezeket átnézni.',
+    },
+  },
+  compare: {
+    title: 'Beállítások összehasonlítása',
+    with: 'Összehasonlítás ezzel',
+    none: 'Nincs',
+    same: 'A két beállítás nagyjából egyformán pontozódik.',
+    higher: 'A(z) „{name}” pontozódik magasabbra.',
+    legend: '„{name}” beállítás',
+    chartNote:
+      'A basszus grafikonon a másik beállítás szaggatott vonallal látszik, mindegyik a saját ülőhelyénél.',
+  },
+  print: {
+    now: 'A mostani beállításod: „{setup}”',
+    best: 'A legjobb talált hely (A)',
+    room: 'Szoba: {width} széles, {length} hosszú, {height} magas',
+    frontWall: 'Elülső fal',
+    wall: { left: 'bal', right: 'jobb' },
+    speaker:
+      '{side}: a hátlap {front} az elülső faltól, a közepe {sideWall} a(z) {wall} faltól, állvány magassága {height}, befordítás {toeIn}°.',
+    seat: 'Ülőhely: {front} az elülső faltól, {left} a bal faltól, a füled {height} magasan.',
+    between:
+      'A hangfalak {between} távolságra vannak egymástól, középponttól középpontig. Az ülőhelyedig: {left} (bal) és {right} (jobb), a padló mentén.',
+    footer:
+      'Ezek előrejelzések, nem mérések. Egyszerre csak egy dolgot változtass, és bízz a füledben.',
   },
   treat: {
     title: 'A helyiség javítása',

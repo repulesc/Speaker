@@ -251,6 +251,14 @@ export const OBJECT_DEFAULTS: Record<
   'other-speaker': { x: 0.25, y: 0.3, z: 0.9, hard: true },
   tv: { x: 1.2, y: 0.1, z: 0.7, hard: true },
   desk: { x: 1.4, y: 0.7, z: 0.75, hard: true },
+  wardrobe: { x: 1.2, y: 0.6, z: 2.0, hard: true },
+  bookcase: { x: 0.9, y: 0.3, z: 2.0, hard: false },
+  piano: { x: 1.5, y: 0.65, z: 1.2, hard: true },
+  rack: { x: 0.5, y: 0.45, z: 0.8, hard: true },
+  plant: { x: 0.5, y: 0.5, z: 1.2, hard: false },
+  fireplace: { x: 1.2, y: 0.4, z: 1.1, hard: true },
+  lamp: { x: 0.35, y: 0.35, z: 1.6, hard: true },
+  subwoofer: { x: 0.4, y: 0.4, z: 0.45, hard: true },
   custom: { x: 0.6, y: 0.6, z: 0.6, hard: false },
 };
 

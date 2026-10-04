@@ -3,13 +3,16 @@
   import type { TabId } from '../session.svelte';
   import { ui } from '../ui.svelte';
 
-  const tabs: TabId[] = ['results', 'treat'];
-  const label = (tab: TabId) => i18n.t(tab === 'results' ? 'tabs.why' : 'tabs.treat');
+  const tabs: TabId[] = ['results', 'treat', 'listen'];
+  const label = (tab: TabId) => i18n.t(`tabs.${tab === 'results' ? 'why' : tab}`);
 
   function onkeydown(event: KeyboardEvent) {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
     event.preventDefault();
-    ui.step = ui.step === 'results' ? 'treat' : 'results';
+    const i = tabs.indexOf(ui.step as TabId);
+    const next = (i + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+    ui.step = tabs[next]!;
+    document.getElementById(`tab-${ui.step}`)?.focus();
   }
 </script>
 
@@ -18,6 +21,7 @@
     <button
       type="button"
       role="tab"
+      id="tab-{tab}"
       aria-selected={ui.step === tab}
       tabindex={ui.step === tab ? 0 : -1}
       onclick={() => (ui.step = tab)}>{label(tab)}</button

@@ -206,3 +206,14 @@ dialog::backdrop {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Printing: only the tape-measure sheet (PrintSheet.svelte). */
+@media print {
+  .app,
+  dialog {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

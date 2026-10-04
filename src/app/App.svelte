@@ -6,6 +6,7 @@
   import Dock from './components/Dock.svelte';
   import LayerBar from './components/LayerBar.svelte';
   import Notice from './components/Notice.svelte';
+  import PrintSheet from './components/PrintSheet.svelte';
   import PlanView from './components/PlanView.svelte';
   import ShareDialog from './components/ShareDialog.svelte';
   import SideView from './components/SideView.svelte';
@@ -16,6 +17,7 @@
   import StepSpeakers from './components/StepSpeakers.svelte';
   import StepSurfaces from './components/StepSurfaces.svelte';
   import TopBar from './components/TopBar.svelte';
+  import ListenPanel from './components/ListenPanel.svelte';
   import TreatPanel from './components/TreatPanel.svelte';
   import VariantTabs from './components/VariantTabs.svelte';
   import WhyPanel from './components/WhyPanel.svelte';
@@ -140,6 +142,7 @@
       onshare={() => shareDialog?.show()}
       onexport={exportFile}
       onimport={() => fileInput?.click()}
+      onprint={() => window.print()}
       onabout={() => aboutDialog?.show()}
     />
     <Notice />
@@ -178,7 +181,7 @@
 
         <div class="content">
           {#if !viewport.wide}<Dock />{/if}
-          {#if ui.step === 'results' || ui.step === 'treat'}
+          {#if ui.step === 'results' || ui.step === 'treat' || ui.step === 'listen'}
             <PanelTabs />
           {/if}
           {#if ui.step === 'results'}
@@ -186,6 +189,8 @@
             {#if !viewport.wide}<BassChart />{/if}
           {:else if ui.step === 'treat'}
             <TreatPanel />
+          {:else if ui.step === 'listen'}
+            <ListenPanel />
           {:else}
             <button type="button" class="btn back" onclick={() => (ui.step = 'results')}>
               ← {i18n.t('panel.close')}
@@ -256,6 +261,7 @@
 />
 <ShareDialog bind:this={shareDialog} />
 <AboutDialog bind:this={aboutDialog} />
+<PrintSheet />
 
 <style>
   .app {

@@ -59,8 +59,10 @@ test('phone: one drawing at a time, switchable between top and side view', async
 });
 
 test('phone: every section fits the screen without sideways scrolling', async ({ page }) => {
-  for (const step of ['Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results']) {
-    await goStep(page, step);
+  for (const step of ['Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results', 'Listen']) {
+    if (step === 'Listen') {
+      await page.getByRole('tab', { name: 'Listen' }).click();
+    } else await goStep(page, step);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

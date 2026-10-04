@@ -97,7 +97,18 @@ export type ObjectKind =
   | 'other-speaker'
   | 'tv'
   | 'desk'
+  | 'wardrobe'
+  | 'bookcase'
+  | 'piano'
+  | 'rack'
+  | 'plant'
+  | 'fireplace'
+  | 'lamp'
+  | 'subwoofer'
   | 'custom';
+
+/** What an object is made of, as far as sound goes: how much sound it takes up. */
+export type ObjectMaterial = 'hard' | 'soft' | 'absorbent';
 
 /** Axis-aligned box. `position` is the min corner; `size` is the extent along x, y, z. */
 export interface RoomObject {
@@ -107,6 +118,8 @@ export interface RoomObject {
   size: Vec3;
   /** Absorption area range (m² sabins, mid bands). Defaults by kind when absent. */
   absorptionRange?: [number, number];
+  /** The user's choice of material; when set, the absorption follows from the object's surface. */
+  material?: ObjectMaterial;
   hard: boolean;
   label?: string;
 }

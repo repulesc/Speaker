@@ -49,6 +49,7 @@ export const en = {
     share: 'Share link',
     export: 'Export file',
     import: 'Import file',
+    print: 'Print sheet',
     about: 'About and sources',
   },
   share: {
@@ -252,7 +253,12 @@ export const en = {
     width: 'Width',
     depth: 'Depth',
     height: 'Height',
-    hard: 'Hard surface (reflects sound)',
+    material: {
+      label: 'Material',
+      hard: 'Hard (reflects sound)',
+      soft: 'Soft (upholstery, books, fabric)',
+      absorbent: 'Absorbent (thick porous material)',
+    },
     rotate: 'Rotate 90°',
     remove: 'Remove',
   },
@@ -451,6 +457,14 @@ export const en = {
     'other-speaker': 'Other speaker',
     tv: 'TV',
     desk: 'Desk',
+    wardrobe: 'Wardrobe',
+    bookcase: 'Bookcase',
+    piano: 'Piano',
+    rack: 'Equipment rack',
+    plant: 'Large plant',
+    fireplace: 'Fireplace',
+    lamp: 'Standing lamp',
+    subwoofer: 'Subwoofer',
     custom: 'Other object',
   },
   dock: {
@@ -833,6 +847,102 @@ export const en = {
     label: 'Panel',
     why: 'Why',
     treat: 'Treat',
+    listen: 'Listen',
+  },
+  listen: {
+    title: 'Listen and note',
+    intro:
+      'Your ears are the final test. Change one thing, listen, and write down what you hear. Notes never change what the app calculates.',
+    protocolTitle: 'How to test a change',
+    protocol: {
+      one: 'Change one thing only, for example move the seat 10 cm.',
+      two: 'Play the same three tracks each time: a centred voice, a bass-heavy track and a wide orchestral or ambient recording.',
+      three: 'Keep the volume the same, then rate it.',
+    },
+    adapt: 'Ears adapt over hours. Judge after some time, and compare at the same volume.',
+    formTitle: 'A note for “{setup}”',
+    rating: {
+      legend: 'How did this setup sound?',
+      scale: '1 = poor, 5 = great',
+      value: '{n} of 5',
+    },
+    symptoms: 'What do you hear? (optional)',
+    duration: {
+      legend: 'How long have you listened to this setup?',
+      short: 'Under an hour',
+      hours: 'A few hours',
+      days: 'Days',
+    },
+    text: 'Your note (optional)',
+    save: 'Save note',
+    listTitle: 'Notes for “{setup}”',
+    empty: 'No notes for this setup yet.',
+    delete: 'Delete note',
+    tryThis: 'Try this',
+    symptom: {
+      S01: {
+        name: 'Boomy, heavy bass',
+        try: 'Move your seat about 20 cm forward, or the speakers about 10 cm further from the wall. If your speakers have a wall-compensation setting, turn it on.',
+      },
+      S02: {
+        name: 'Thin, weak bass',
+        try: 'Move your seat 15 cm to either side, or forward or back. If your speakers have a front-wall option, try the “near” and “far” settings.',
+      },
+      S03: {
+        name: 'Vague centre, lacks focus',
+        try: 'Measure the distance from each speaker to your seat with a tape and make them equal. Try turning the speakers in towards you.',
+      },
+      S04: {
+        name: 'Narrow soundstage',
+        try: 'Move each speaker about 10 cm further apart, and turn them in a little less.',
+      },
+      S05: {
+        name: 'Harsh, bright treble',
+        try: 'Turn the speakers in a little less, soften one reflection point with a rug or curtain, or lower the treble by 0.5 dB if you can.',
+      },
+      S06: {
+        name: 'Dull, closed-in',
+        try: 'Check that the tweeters are at ear height, remove anything between the speakers and your seat, or raise the treble by 0.5 dB if you can.',
+      },
+      S07: {
+        name: 'Sound pulls to one side',
+        try: 'Swap the left and right cables: if the pull follows the cable, it is the speaker or amplifier; if it stays, it is the room.',
+      },
+    },
+    agreement: {
+      title: 'Your ears and the app',
+      notEnough:
+        'Rate at least two different setups, and the app will tell you whether your ears and its ranking agree.',
+      agree:
+        'So far your ratings agree with the app’s ranking: the setups you liked more are the ones it scores higher.',
+      mixed:
+        'Your ratings agree with the app’s ranking for some pairs of setups and not for others. A few more notes will show a pattern.',
+      disagree:
+        'You liked “{ears}” best, but the app scores “{app}” higher. The app uses a simplified model, so trust your ears here. It may mean that something in the room differs from what you entered (surfaces, furniture, speaker details), so it is worth checking those.',
+    },
+  },
+  compare: {
+    title: 'Compare setups',
+    with: 'Compare with',
+    none: 'None',
+    same: 'Both setups score about the same.',
+    higher: '“{name}” scores higher.',
+    legend: 'Setup “{name}”',
+    chartNote: 'The bass chart shows the other setup as a dashed line, each at its own seat.',
+  },
+  print: {
+    now: 'Your setup now: “{setup}”',
+    best: 'Best spot we found (A)',
+    room: 'Room {width} wide, {length} long, {height} high',
+    frontWall: 'Front wall',
+    wall: { left: 'left', right: 'right' },
+    speaker:
+      '{side}: rear panel {front} from the front wall, centre {sideWall} from the {wall} wall, stand height {height}, toe-in {toeIn}°.',
+    seat: 'Seat: {front} from the front wall, {left} from the left wall, ears at {height}.',
+    between:
+      'Speakers {between} apart, centre to centre. To your seat: {left} (left) and {right} (right), along the floor.',
+    footer:
+      'These are predictions, not measurements. Move one thing at a time and trust your ears.',
   },
   treat: {
     title: 'Treat the room',

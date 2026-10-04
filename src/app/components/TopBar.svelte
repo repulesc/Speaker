@@ -13,10 +13,11 @@
     onshare: () => void;
     onexport: () => void;
     onimport: () => void;
+    onprint: () => void;
     onabout: () => void;
   }
 
-  let { onshare, onexport, onimport, onabout }: Props = $props();
+  let { onshare, onexport, onimport, onprint, onabout }: Props = $props();
 
   let renaming = $state(false);
   let nameDraft = $state('');
@@ -197,6 +198,14 @@
               close();
               onimport();
             }}>{i18n.t('menu.import')}</button
+          >
+          <button
+            type="button"
+            class="btn"
+            onclick={() => {
+              close();
+              onprint();
+            }}>{i18n.t('menu.print')}</button
           >
         </div>
         {#if viewport.compact}

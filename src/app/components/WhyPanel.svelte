@@ -7,6 +7,7 @@
   import { applyCandidate, cabinet } from '../plan/placement';
   import { analysis, projectLabel, showNotice, workspace } from '../session.svelte';
   import { ui } from '../ui.svelte';
+  import ComparePanel from './ComparePanel.svelte';
   import FindingCard from './FindingCard.svelte';
 
   const result = $derived(analysis.result);
@@ -170,6 +171,8 @@
         <p class="card">{i18n.t('why.noProblems')}</p>
       {/each}
     </section>
+
+    <ComparePanel />
 
     {#if ok.folk.length > 0}
       <section aria-labelledby="folk-title">

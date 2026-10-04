@@ -147,3 +147,57 @@ test('the bass-note explorer shows a pressure pattern and the resonances near th
   await chip.click();
   await expect(page.getByText('Poorer')).toBeVisible();
 });
+
+test('furniture: a bigger palette and a material for any object', async ({ page }) => {
+  await withResults(page);
+  await goStep(page, 'Furnishing');
+  await page.getByRole('button', { name: '+ Piano' }).click();
+  await page.getByRole('button', { name: '+ Bookcase' }).click();
+  const material = page.getByLabel('Material');
+  await expect(material).toBeVisible();
+  await material.selectOption('absorbent');
+  await expect(material).toHaveValue('absorbent');
+  await page.getByRole('button', { name: '+ Other object' }).click();
+  await expect(page.getByLabel('Material')).toHaveValue('soft');
+});
+
+test('the Listen tab saves a rated note, shows the tip and the agreement text', async ({
+  page,
+}) => {
+  await withResults(page);
+  await page.getByRole('tab', { name: 'Listen' }).click();
+  await expect(page.getByRole('heading', { name: 'Listen and note' })).toBeVisible();
+  await expect(page.getByTestId('agreement')).toContainText('Rate at least two');
+  await page.getByRole('radio', { name: '4 of 5' }).check({ force: true });
+  await page.getByLabel('Boomy, heavy bass').check();
+  await page.getByLabel('Your note (optional)').fill('after an evening');
+  await page.getByRole('button', { name: 'Save note' }).click();
+  await expect(page.getByText('after an evening')).toBeVisible();
+  await expect(page.getByText(/Move your seat about 20 cm forward/)).toBeVisible();
+  const text = await page.locator('#panel').innerText();
+  expect(text).not.toMatch(/\blisten\.[A-Za-z]/);
+  await page.getByRole('button', { name: 'Delete note' }).click();
+  await expect(page.getByText('No notes for this setup yet.')).toBeVisible();
+});
+
+test('compare: a second setup appears as a dashed line and a verdict', async ({ page }) => {
+  await withResults(page);
+  await expect(page.getByRole('heading', { name: 'Compare setups' })).toHaveCount(0);
+  await page.getByRole('button', { name: '+ New setup' }).click();
+  await goStep(page, 'Results');
+  await page.getByLabel('Compare with').selectOption({ index: 1 });
+  await expect(page.getByTestId('compare-scores')).toBeVisible();
+  await expect(page.locator('path.line.other')).toHaveCount(1);
+  await page.getByLabel('Compare with').selectOption('');
+  await expect(page.locator('path.line.other')).toHaveCount(0);
+});
+
+test('the print sheet has the tape-measure numbers', async ({ page }) => {
+  await withResults(page);
+  await page.emulateMedia({ media: 'print' });
+  const sheet = page.locator('.print-sheet');
+  await expect(sheet).toBeVisible();
+  await expect(sheet).toContainText('from the front wall');
+  await expect(sheet).toContainText('Left speaker');
+  await expect(page.locator('.app')).toBeHidden();
+});

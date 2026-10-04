@@ -98,6 +98,8 @@ test('Treat tab and bass-note explorer', async ({ page }) => {
   await goStep(page, 'Results');
   await page.getByRole('tab', { name: 'Treat' }).click();
   await expectAccessible(page);
+  await page.getByRole('tab', { name: 'Listen' }).click();
+  await expectAccessible(page);
   await page.getByRole('tab', { name: 'Why' }).click();
   await page.getByRole('button', { name: 'Bass note' }).click();
   await expectAccessible(page);

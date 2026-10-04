@@ -23,9 +23,9 @@ export const analysis = new AnalysisRunner();
 
 /** What the right panel shows: the findings ("results"), or one section's form (docs/REVAMP_PLAN.md). */
 export type StepId =
-  'room' | 'surfaces' | 'furnishing' | 'speakers' | 'goals' | 'results' | 'treat';
+  'room' | 'surfaces' | 'furnishing' | 'speakers' | 'goals' | 'results' | 'treat' | 'listen';
 /** The panel's own views (tabs); every other step is a form opened from the dock. */
-export type TabId = 'results' | 'treat';
+export type TabId = 'results' | 'treat' | 'listen';
 export type SectionId = Exclude<StepId, TabId>;
 /** The dock, top to bottom. */
 export const SECTIONS: readonly SectionId[] = [

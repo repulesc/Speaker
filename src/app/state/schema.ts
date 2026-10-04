@@ -40,6 +40,14 @@ const OBJECT_KINDS = [
   'other-speaker',
   'tv',
   'desk',
+  'wardrobe',
+  'bookcase',
+  'piano',
+  'rack',
+  'plant',
+  'fireplace',
+  'lamp',
+  'subwoofer',
   'custom',
 ] as const;
 
@@ -58,6 +66,7 @@ const object = obj({
   position: vec3,
   size: obj({ x: num(0, 50), y: num(0, 50), z: num(0, 50) }),
   absorptionRange: optional(range(num(0, 100))),
+  material: optional(oneOf(['hard', 'soft', 'absorbent'])),
   hard: bool,
   label: optional(str(SIZE_LIMITS.name)),
 });

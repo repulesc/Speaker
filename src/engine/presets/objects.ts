@@ -1,4 +1,4 @@
-import type { Busyness, ObjectKind } from '../types';
+import type { Busyness, ObjectKind, RoomObject, ObjectMaterial } from '../types';
 
 /**
  * Absorption area per object, m² sabins at mid bands, as a [low, high] range.
@@ -15,11 +15,40 @@ export const OBJECT_ABSORPTION: Record<ObjectKind, [number, number]> = {
   'other-speaker': [0, 0],
   tv: [0, 0],
   desk: [0, 0],
+  wardrobe: [0.2, 0.6],
+  bookcase: [0.3, 0.9],
+  piano: [0, 0.3],
+  rack: [0, 0],
+  plant: [0.1, 0.3],
+  fireplace: [0, 0],
+  lamp: [0, 0],
+  subwoofer: [0, 0],
   custom: [0, 0.5],
 };
 
 /** Objects a listener may sit on or in (not treated as an obstruction for the seat). */
 export const SEAT_KINDS: readonly ObjectKind[] = ['bed', 'sofa', 'armchair'];
+
+/**
+ * Absorption per m² of exposed surface (top and sides), m² sabins at mid bands, as [low, high], for
+ * an object whose material the user chose. 🟡 estimates from typical coefficients: a hard body
+ * takes almost nothing, upholstery or books about a quarter, thick porous material over half.
+ */
+export const MATERIAL_ABSORPTION_PER_M2: Record<ObjectMaterial, [number, number]> = {
+  hard: [0, 0.05],
+  soft: [0.15, 0.35],
+  absorbent: [0.5, 0.8],
+};
+
+/** Absorption area of one object: the chosen material applied to its surface, else the kind's table. */
+export function objectAbsorption(o: RoomObject): [number, number] {
+  if (o.absorptionRange) return o.absorptionRange;
+  if (!o.material) return OBJECT_ABSORPTION[o.kind];
+  const { x, y, z } = o.size;
+  const surface = x * y + 2 * (x + y) * z;
+  const [lo, hi] = MATERIAL_ABSORPTION_PER_M2[o.material];
+  return [lo * surface, hi * surface];
+}
 
 /** Hard by default: reflect and obstruct (G10). */
 export const HARD_KINDS: readonly ObjectKind[] = [
@@ -29,6 +58,10 @@ export const HARD_KINDS: readonly ObjectKind[] = [
   'other-speaker',
   'tv',
   'desk',
+  'piano',
+  'rack',
+  'fireplace',
+  'subwoofer',
 ];
 
 /**
