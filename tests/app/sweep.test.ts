@@ -122,7 +122,7 @@ const projectArb = fc
 /** Text that would make a reader stop trusting the app. */
 const NONSENSE = /NaN|Infinity|undefined|null|\{|\}/;
 /** A negative length or distance in any unit. */
-const NEGATIVE_LENGTH = /[-−]\s?\d[\d.,\s]*( )?(m|cm|ft|in|′|″)(?![a-z])/;
+const NEGATIVE_LENGTH = /[-−]\s?\d[\d.,\s]*(\u00a0)?(m|cm|ft|in|′|″)(?![a-z])/;
 
 const finite = (x: number) => Number.isFinite(x);
 
