@@ -1,4 +1,4 @@
-import type { SeatLayers } from '../../engine/types';
+import type { Grid, SeatLayers } from '../../engine/types';
 
 /** Heat ramp, poorer → better: viridis (lightness-ordered, colour-blind safe). Same as the tokens. */
 const STOPS = ['#440154', '#31688e', '#21908c', '#5dc863', '#fde725'].map((hex) => [
@@ -44,6 +44,22 @@ export function paintHeat(
     const [r, g, b] = heatColor(v);
     const dim = layers.redFlag[i] ? 0.55 : 1;
     image.data.set([r * dim, g * dim, b * dim, 255], i * 4);
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
+/** Pressure pattern of one bass note: loud is bright, −40 dB or quieter is the darkest. */
+export function paintField(canvas: HTMLCanvasElement, grid: Grid): void {
+  const { nx, ny, values } = grid;
+  canvas.width = nx;
+  canvas.height = ny;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const image = ctx.createImageData(nx, ny);
+  for (let i = 0; i < nx * ny; i++) {
+    // Map −40…0 dB onto the same ramp as the scores, so "brighter" always reads the same way.
+    const [r, g, b] = heatColor(RAMP_FLOOR + (1 - RAMP_FLOOR) * ((values[i]! + 40) / 40));
+    image.data.set([r, g, b, 255], i * 4);
   }
   ctx.putImageData(image, 0, 0);
 }

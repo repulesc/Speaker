@@ -1,10 +1,11 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { analyze } from '../../src/engine/analyze';
 import { confidenceInputPaths } from '../../src/engine/confidence';
+import { adviceMessageKeys } from '../../src/engine/advice';
 import { buildContext } from '../../src/engine/context';
 import { findingMessageKeys, RULES } from '../../src/engine/rules';
-import type { Finding, Project } from '../../src/engine/types';
-import { findingText, findingValues, scoreWord } from '../../src/app/findings/text';
+import type { Advice, Finding, Project } from '../../src/engine/types';
+import { adviceText, findingText, findingValues, scoreWord } from '../../src/app/findings/text';
 import { i18n } from '../../src/i18n/locale.svelte';
 import { MESSAGES, messageKeys, translate } from '../../src/i18n/translate';
 import { busyRoom } from '../fixtures/busy-room';
@@ -112,6 +113,46 @@ const sampleFor = (key: string) => {
   const [rule] = key.split('.');
   return SAMPLE[`${rule}.*`];
 };
+
+/** Typical values for every piece of advice. */
+const ADVICE_SAMPLE: Record<string, Record<string, number | string>> = {
+  'T01.*': { speaker: 'left', boundary: 'left', thickness: 0.05 },
+  'T03.*': { frequency: 120, quarterWavelength: 0.71 },
+  'T04.corners': { frequency: 68.6 },
+  'T05.*': { t60: 0.8, after: 0.57, absorption: 5 },
+  'T06.moveFirst': { distance: 0.25, thickness: 0.1 },
+  'T06.absorber': { distance: 0.25, thickness: 0.1 },
+  'D01.match': { clearance: 0.35, zone: 'away' },
+  'D02.cut': { gain: 'high', stepDb: -0.5 },
+  'D03.*': { t60: 0.2, stepDb: 0.5 },
+  'D04.height': { baseHeight: 0.9, angle: 12 },
+  'D05.moveOut': { clearance: 0.1, minimum: 0.2 },
+};
+
+describe('advice texts', () => {
+  it('every piece of advice renders from typical values, in both languages and unit systems', () => {
+    const lookup = (key: string) =>
+      ADVICE_SAMPLE[key] ?? ADVICE_SAMPLE[`${key.split('.')[0]}.*`] ?? {};
+    for (const locale of ['en', 'hu'] as const) {
+      i18n.locale = locale;
+      for (const system of ['metric', 'imperial'] as const) {
+        for (const full of adviceMessageKeys()) {
+          const key = full.replace('advice.', '');
+          const a = {
+            ruleId: key.split('.')[0],
+            messageKey: full,
+            params: lookup(key),
+          } as unknown as Advice;
+          const text = adviceText(a, system);
+          expect(text, `${locale} ${full}`).not.toMatch(/\{\w+\}/);
+          expect(text, `${locale} ${full}`).not.toMatch(/NaN|undefined|Infinity/);
+          expect(text).not.toBe(full);
+        }
+      }
+    }
+    i18n.locale = 'en';
+  });
+});
 
 describe('finding texts', () => {
   it('every key renders from typical values, in both languages and both unit systems', () => {

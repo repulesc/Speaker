@@ -91,3 +91,14 @@ for (const scheme of ['light', 'dark'] as const) {
     });
   });
 }
+
+test('Treat tab and bass-note explorer', async ({ page }) => {
+  await page.goto('/');
+  await fillRoom(page, '4', '5', '2.5');
+  await goStep(page, 'Results');
+  await page.getByRole('tab', { name: 'Treat' }).click();
+  await expectAccessible(page);
+  await page.getByRole('tab', { name: 'Why' }).click();
+  await page.getByRole('button', { name: 'Bass note' }).click();
+  await expectAccessible(page);
+});

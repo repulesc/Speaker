@@ -1,0 +1,107 @@
+<script lang="ts">
+  import type { Advice } from '../../engine/types';
+  import { i18n } from '../../i18n/locale.svelte';
+  import { adviceText } from '../findings/text';
+  import { analysis, workspace } from '../session.svelte';
+
+  const result = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
+  const system = $derived(workspace.project.units);
+  const treatment = $derived(result?.advice.treatment ?? []);
+  const settings = $derived(result?.advice.settings ?? []);
+
+  const LEVEL_ICON = { physics: '●', guideline: '◆', heuristic: '▲', subjective: '◇' } as const;
+  /** Advice with a spot on the map is numbered in list order; the map shows the same numbers. */
+  const marker = (a: Advice) => treatment.filter((t) => t.location).indexOf(a) + 1;
+  const keyOf = (a: Advice) =>
+    a.messageKey + String(a.params.speaker ?? '') + String(a.params.boundary ?? '');
+</script>
+
+{#snippet card(a: Advice, first: boolean)}
+  <article class="card" class:first>
+    <p class="meta">
+      <span>{LEVEL_ICON[a.level]} {i18n.t(`evidence.${a.level}`)}</span>
+      <span>{i18n.t(`treat.effect.${a.effect}`)}</span>
+    </p>
+    <p class="text">{adviceText(a, system)}</p>
+    {#if a.location}<p class="meta">{i18n.t('treat.onMap', { n: marker(a) })}</p>{/if}
+  </article>
+{/snippet}
+
+<div class="treat">
+  <h2>{i18n.t('treat.title')}</h2>
+  <p class="muted">{i18n.t('treat.intro')}</p>
+
+  {#if !result}
+    <p class="card" role="status">{i18n.t('results.calculating')}</p>
+  {:else}
+    <section aria-labelledby="treat-room">
+      <h3 id="treat-room">{i18n.t('treat.roomTitle')}</h3>
+      {#each treatment as a, i (keyOf(a))}
+        {#if i === 0}<p class="first-label">{i18n.t('treat.first')}</p>{/if}
+        {@render card(a, i === 0)}
+      {:else}
+        <p class="card">{i18n.t('treat.none')}</p>
+      {/each}
+    </section>
+
+    <section aria-labelledby="treat-settings">
+      <h3 id="treat-settings">{i18n.t('treat.settingsTitle')}</h3>
+      {#each settings as a (keyOf(a))}
+        {@render card(a, false)}
+      {:else}
+        <p class="card">{i18n.t('treat.noSettings')}</p>
+      {/each}
+    </section>
+  {/if}
+</div>
+
+<style>
+  .treat {
+    display: grid;
+    gap: 14px;
+  }
+  section {
+    display: grid;
+    gap: 8px;
+  }
+  h3 {
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .muted {
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+  .first-label {
+    margin: 0;
+    color: var(--accent);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .card {
+    display: grid;
+    gap: 6px;
+    padding: 12px 14px;
+    border: 1px solid var(--grid-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+  .card.first {
+    border-color: var(--accent);
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 12px;
+  }
+  .text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+</style>

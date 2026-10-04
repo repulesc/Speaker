@@ -1,4 +1,4 @@
-import type { Finding } from '../../engine/types';
+import type { Advice, Finding } from '../../engine/types';
 import { i18n } from '../../i18n/locale.svelte';
 import {
   formatAngle,
@@ -24,6 +24,9 @@ const LENGTHS = new Set([
   'criticalDistance',
   'listenerY',
   'speakersY',
+  'quarterWavelength',
+  'thickness',
+  'baseHeight',
 ]);
 const FREQUENCIES = new Set([
   'frequency',
@@ -70,6 +73,8 @@ function display(
       return i18n.t(`surface.class.${value}`);
     if (name === 'boundaryA' || name === 'boundaryB') return i18n.t(`words.boundary.${value}`);
     if (name === 'minimumSource') return i18n.t(`words.source.${value}`);
+    if (name === 'gain') return i18n.t(`words.gain.${value}`);
+    if (name === 'zone') return i18n.t(`words.zone.${value}`);
     if (name === 'object') return word(`object.${value}`, value);
     if (WALLS.has(name)) return i18n.t(`words.wall.${value}`);
     return value;
@@ -78,13 +83,16 @@ function display(
     return formatFrequency(value, locale, true);
   if (rule === 'P07' && (name === 'low' || name === 'high'))
     return formatFrequency(value, locale, true);
-  if (['t60', 'low', 'high'].includes(name)) return seconds(value, locale);
+  if (['t60', 'low', 'high', 'after'].includes(name)) return seconds(value, locale);
   if (FREQUENCIES.has(name)) return formatFrequency(value, locale, true);
   if (LENGTHS.has(name)) return formatLength(value, system, 'position', locale);
   switch (name) {
     case 'db':
     case 'levelDb':
       return formatDb(Math.abs(value), locale);
+    case 'absorption':
+      return `${plain(value, locale)}\u00a0m²`;
+    case 'stepDb':
     case 'suggestDb':
       return `${value > 0 ? '+' : '−'}${formatDb(Math.abs(value), locale)}`;
     case 'angle':
@@ -129,4 +137,9 @@ export function scoreWord(score: number): 'poor' | 'fair' | 'good' | 'veryGood' 
   if (score < 0.7) return 'fair';
   if (score < 0.85) return 'good';
   return 'veryGood';
+}
+
+/** The sentence for a piece of advice (docs/RULE_CATALOGUE.md, T and D rules). */
+export function adviceText(a: Advice, system: LengthSystem): string {
+  return i18n.t(a.messageKey, findingValues(a.ruleId, a.params, system, i18n.locale));
 }

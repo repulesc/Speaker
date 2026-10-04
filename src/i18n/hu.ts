@@ -636,6 +636,14 @@ export const hu: Messages = {
     noData: 'Add meg a helyiség méretét, és látni fogod a várható basszust.',
   },
   words: {
+    gain: {
+      high: 'nagy',
+      'very-high': 'nagyon nagy',
+    },
+    zone: {
+      near: 'Ez a falhoz közelinek számít.',
+      away: 'Ez a faltól távolinak számít.',
+    },
     speaker: {
       both: 'Mindkét hangfal',
       left: 'Bal hangfal',
@@ -826,6 +834,104 @@ export const hu: Messages = {
     H06: {
       lift: 'A helyiség magas hangjai gyorsan elhalnak ({t60}). Egy kis magashang-emelés ({suggestDb}) segíthet: próbáld ki, és hallgasd meg.',
       cut: 'A helyiség magas hangjai sokáig csengenek ({t60}). Egy kis magashang-csökkentés ({suggestDb}) segíthet: próbáld ki, és hallgasd meg.',
+    },
+  },
+  tabs: {
+    label: 'Panel',
+    why: 'Miért',
+    treat: 'Javítás',
+  },
+  treat: {
+    title: 'A helyiség javítása',
+    intro:
+      'Mi segítene a legtöbbet, sorrendben. A méretek durva tájékoztatók, nem ígéretek: változtass meg egyszerre egy dolgot, aztán hallgasd meg.',
+    first: 'Ha csak egy dolgot tudsz megtenni',
+    roomTitle: 'Hangtechnikai kezelés',
+    settingsTitle: 'A hangfal beállításai',
+    none: 'Ehhez az elrendezéshez nincs javaslatunk.',
+    noSettings: 'Ehhez az elrendezéshez nincs mit változtatni a hangfalon.',
+    onMap: 'A térképen jelölve ({n}).',
+    effect: {
+      small: 'Kis hatás',
+      moderate: 'Közepes hatás',
+      large: 'Nagy hatás',
+    },
+  },
+  mode: {
+    chip: 'Basszushang',
+    name: 'Basszushang',
+    what: 'Hol hangos és hol néma egy basszushang a helyiségedben, a hangfalakkal úgy, ahogy most állnak. A világos hangos, a sötét halk.',
+    frequency: 'Frekvencia',
+    poorer: 'Halk',
+    better: 'Hangos',
+    near: 'Helyiségrezonanciák e hang közelében: {modes}.',
+    nearNone: 'E hang közelében nincs helyiségrezonancia: a mintázatot sok gyenge rezonancia adja.',
+    lowest: 'A legmélyebb rezonanciák',
+    axial: 'hosszirányban',
+    axialW: 'szélességben',
+    axialH: 'magasságban',
+    tangential: 'két falpár között',
+    oblique: 'mindhárom falpár között',
+    jump: 'Ugrás: {frequency}',
+    caption:
+      'Basszushang {frequency}-en: hol hangos és hol néma (a hangfalak úgy, ahogy most állnak).',
+  },
+  advice: {
+    T01: {
+      absorb:
+        '{speaker}: a jelölt ponton ({boundary}) érkezik az első visszaverődése. Egy kb. {thickness} vastag porózus panel vagy egy diffúzor ott élesebbé teszi a képet.',
+      experiment:
+        '{speaker}: az első visszaverődése egy kemény felületre érkezik a jelölt ponton ({boundary}). A szakértők nem értenek egyet abban, hogy kezelni kell-e, ezért próbálj ki ott egy panelt vagy diffúzort (kb. {thickness} vastagot), hallgasd meg, és tartsd meg, ami tetszik.',
+    },
+    T02: {
+      rug: 'A hangfalak és közted, a jelölt ponton lévő szőnyeg csökkenti a padlóról jövő visszaverődést. Olcsó, és általában segít.',
+      ceilingPanel:
+        'A mennyezeten a jelölt ponton lévő panel csökkentené a visszaverődését. Ez kevésbé számít, mint az oldalfalak, ezért később jön.',
+    },
+    T03: {
+      moveFirst:
+        'A hangfalak mögötti fal kioltja a basszust {frequency} körül az ülőhelyeden. Egy panelnek kb. {quarterWavelength} mélynek kellene lennie, hogy megszüntesse, ami ritkán kivitelezhető: a hangfalak áthelyezése (lásd a legjobb helyeket) jobban működik.',
+      thickPanel:
+        'A hangfalak mögötti fal kioltja a basszust {frequency} körül az ülőhelyeden. Egy vastag elnyelő (10–20 cm) mögöttük kicsit laposabbá teszi a mélypontot, de meg nem szünteti: ahhoz kb. {quarterWavelength} mélység kellene.',
+    },
+    T04: {
+      corners:
+        'A sarkokba tett basszuscsapdák segítenek a {frequency} körüli dörmögésen. Légy reális: 100 Hz alatt nagynak és mélynek kell lenniük, a kis habszivacs ékek alig tesznek valamit.',
+    },
+    T05: {
+      soften:
+        'A helyiség visszhangos (az utózengés kb. {t60}). Kb. {absorption} extra puha elnyelés, például egy nagy szőnyeg és vastag függönyök, kb. {after}-re vinné le.',
+      liven:
+        'A helyiség a tompa oldalon van (az utózengés kb. {t60}). Kb. {absorption} puha elnyelés elvétele, kevesebb szőnyeggel vagy függönnyel, kb. {after}-et adna.',
+    },
+    T06: {
+      moveFirst:
+        'A fejed {distance} távolságra van a hátsó faltól. Told előre az ülőhelyet, ha tudod: ez többet segít, mint bármilyen kezelés.',
+      absorber:
+        'A fejed {distance} távolságra van a hátsó faltól, és az ülőhely nem mozdítható. Tegyél egy vastag elnyelőt (legalább {thickness}) a fejed mögé.',
+    },
+    D01: {
+      match:
+        'Állítsd be a hangfal fal-távolság beállítását a hátulja és a fal közötti {clearance} távolságra. {zone}',
+    },
+    D02: {
+      cut: 'A hangfalak közel vannak a falakhoz, ezért a basszus megemelkedik (falhatás: {gain}). Próbálj ki egy lépés basszuscsökkentést a hangfalon ({stepDb}), és hallgasd meg.',
+    },
+    D03: {
+      lift: 'A helyiség elnyeli a magas hangokat (utózengés: {t60}). Próbálj ki egy lépés magashang-emelést ({stepDb}), és hallgasd meg.',
+      cut: 'A helyiségben a magas hangok sokáig csengenek (utózengés: {t60}). Próbálj ki egy lépés magashang-csökkentést ({stepDb}), és hallgasd meg.',
+    },
+    D04: {
+      height:
+        'A füled {angle}-kal eltér a hangfalak tengelyétől. Tedd a hangfalak alját kb. {baseHeight} magasra a padlótól (állvány vagy asztal), hogy a magassugárzók fülmagasságban legyenek, vagy döntsd meg a hangfalakat.',
+    },
+    D05: {
+      moveOut:
+        'A hátsó basszusnyílás {clearance} távolságra van a faltól, de {minimum} kell neki. Húzd ki a hangfalakat. A kézikönyv megmondhatja, segítenek-e a nyílásdugók.',
+    },
+    D06: {
+      desk: 'A hangfalad rendelkezik asztali móddal, és a hangfalak asztalon állnak: kapcsold be.',
+      stand: 'Használd a hangfal állvány módját: a hangfalak nem asztalon állnak.',
     },
   },
   analysis: {

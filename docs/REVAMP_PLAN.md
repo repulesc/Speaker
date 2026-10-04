@@ -74,7 +74,7 @@ The numbered wizard and the welcome card; the confidence meter as a top-bar widg
 | **R0** | **Full audit of the mechanics**: engine physics, scoring, search, robustness, workspace and persistence, import/share security, i18n, accessibility, tests. Output `docs/REVIEW_FINDINGS.md` (severity-ranked, with evidence) and fix everything critical and high. Resolve or re-mark the ⚠ sources that can be checked. **Done:** findings and the R1 proposals in `docs/REVIEW_FINDINGS.md`. | **Opus, xhigh** |
 | R1 | Engine additions: layers, `explainPoint`, sensitivity, mode-field, treatment rules, speaker-settings rules, folk-rule comparison, finding copy keys; validation suite. **Done**, except the copy itself: the finding and advice keys and their parameters are fixed, the EN and HU text for them is R4. Also fixed the audit's M1, M2, M4, M6–M9, M11, L3, L10. | Opus, high |
 | R2 | Workbench UI in the Instrument look: dock, map with heatmap and dimension lines, probe, chart, right panel, phone layout. **Done** (see "R2 status" below). | Sonnet, medium (Opus review) |
-| R3 | Treat tab, Listen tab (log + agreement), room-mode explorer, compare, print sheet, larger furniture | Sonnet medium + Opus for the rules |
+| R3 | Treat tab, room-mode explorer **(done, see "R3 status")**; Listen tab (log + agreement), compare, print sheet, larger furniture (not started) | Sonnet medium + Opus for the rules |
 | R4 | EN + HU copy for every finding and rule; Hungarian review by the owner | Sonnet draft, owner review |
 | R5 | Physics audit of the whole product, bad-advice hunt, accessibility, performance, launch | Opus, xhigh |
 
@@ -94,3 +94,11 @@ Built: the Instrument look (Sora, JetBrains Mono, dark by default, quiet light v
 Not in R2 (R3): the Treat and Listen tabs, the room-mode explorer slider, compare setups, print sheet, the bigger furniture palette. The advice rules (T and D) have no text yet (R4); they are not shown.
 
 **New Hungarian text to review** (owner): `finding.*` (about 65 sentences), `layer.*`, `evidence.*`, `severity.*`, `concern.*`, `dock.*`, `panel.*`, `map.*`, `why.*`, `probe.*`, `chart.*`, `words.*`, `folkRule.*`, `next.*`, and `crash.*` / `furnishing.busy.combined` from R0. Hungarian cannot say "the A spot" without the article problem, so spots read "Hely A".
+
+## R3 status (items 1 to 3)
+
+- **Treat tab** (panel tabs "Why" / "Treat"): the engine's treatment advice (T rules) and speaker-settings advice (D rules) as plain sentences in EN and HU, ordered by expected effect. The first is "If you can only do one thing". Each card carries an effect word and an evidence tag; advice with a place on the map is numbered, and the same numbers appear as rings on the plan while the tab is open. Sizes are rough guides, never promises.
+- **Bass-note explorer** ("Bass note" chip in the layer bar): a 20 to 200 Hz slider paints the pressure pattern of one note at ear height (the modal Green's-function model, speakers as they are) in place of the score map, with jump buttons to the three lowest axial resonances and a sentence naming the resonances within 5 % of the note. Computed in the worker (`modeField`). 🔴 physics for the pattern; the model is a rigid-wall rectangular room with damping from the estimated T60, so real rooms differ in detail.
+- Not yet: Listen tab, compare setups, print sheet, bigger furniture list.
+
+**More Hungarian text to review** (owner): `tabs.*`, `treat.*`, `mode.*`, `advice.*` (19 keys), `words.gain` / `words.zone`.

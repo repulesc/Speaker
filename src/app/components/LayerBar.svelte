@@ -3,12 +3,14 @@
   import { LAYERS } from '../../engine/scoring/heatmaps';
   import { i18n } from '../../i18n/locale.svelte';
   import { ui } from '../ui.svelte';
+  import ModeBar from './ModeBar.svelte';
 
   const layers = LAYERS;
   const level = (id: LayerId) => layers.find((l) => l.id === id)!.level;
   const shape = (l: string) =>
     l === 'physics' ? '●' : l === 'guideline' ? '◆' : l === 'heuristic' ? '▲' : '◇';
   const active = $derived(ui.layer);
+  const modeOn = $derived(ui.modeFrequency !== null);
 </script>
 
 <div class="bar">
@@ -26,20 +28,33 @@
       </label>
     {/each}
   </div>
+  <button
+    type="button"
+    class="note"
+    class:on={modeOn}
+    aria-pressed={modeOn}
+    onclick={() => (ui.modeFrequency = modeOn ? null : 60)}
+  >
+    {i18n.t('mode.chip')}
+  </button>
 </div>
-<div class="info">
-  <p class="what" role="status">
-    {#if level(active) !== 'combined'}
-      <span class="tag">{shape(level(active))} {i18n.t(`evidence.${level(active)}`)}</span>
-    {/if}
-    {i18n.t(`layer.${active}.what`)}
-  </p>
-  <div class="legend" aria-hidden="true">
-    <span>{i18n.t('map.poorer')}</span>
-    <span class="ramp"></span>
-    <span>{i18n.t('map.better')}</span>
+{#if modeOn}
+  <ModeBar />
+{:else}
+  <div class="info">
+    <p class="what" role="status">
+      {#if level(active) !== 'combined'}
+        <span class="tag">{shape(level(active))} {i18n.t(`evidence.${level(active)}`)}</span>
+      {/if}
+      {i18n.t(`layer.${active}.what`)}
+    </p>
+    <div class="legend" aria-hidden="true">
+      <span>{i18n.t('map.poorer')}</span>
+      <span class="ramp"></span>
+      <span>{i18n.t('map.better')}</span>
+    </div>
   </div>
-</div>
+{/if}
 
 <style>
   .bar {
@@ -69,6 +84,21 @@
     cursor: pointer;
     white-space: nowrap;
   }
+  .note {
+    flex: none;
+    min-height: 44px;
+    margin: 0 0 4px 8px;
+    padding: 0 14px;
+    border: 1px solid var(--grid-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .note.on,
   label.on {
     background: var(--accent);
     border-color: var(--accent);
@@ -128,6 +158,7 @@
     );
   }
   @media (min-width: 1024px) {
+    .note,
     label {
       min-height: 36px;
     }

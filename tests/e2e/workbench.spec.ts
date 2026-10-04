@@ -112,3 +112,38 @@ test('Hungarian: findings and the map speak Hungarian, with no keys leaking', as
   const body = await page.locator('body').innerText();
   expect(body).not.toMatch(/finding\.[A-Z]\d\d|\{\w+\}/);
 });
+
+test('the Treat tab lists advice in order, with no raw keys', async ({ page }) => {
+  await withResults(page);
+  const tabs = page.getByRole('tablist', { name: 'Panel' });
+  await tabs.getByRole('tab', { name: 'Treat' }).click();
+  await expect(page.getByRole('heading', { name: 'Treat the room' })).toBeVisible();
+  await expect(page.getByText('If you can only do one thing')).toBeVisible();
+  const text = await page.locator('#panel').innerText();
+  expect(text).not.toMatch(/\b(advice|treat|finding)\.[A-Za-z0-9]+/);
+  await tabs.getByRole('tab', { name: 'Why' }).click();
+  await expect(page.getByTestId('score-best')).toBeVisible();
+});
+
+test('the bass-note explorer shows a pressure pattern and the resonances near the note', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await fillRoom(page, '4', '5', '2.5');
+  await goStep(page, 'Results');
+  await expect(page.getByTestId('score-best')).toBeVisible();
+  const chip = page.getByRole('button', { name: 'Bass note' });
+  await expect(chip).toHaveAttribute('aria-pressed', 'false');
+  await chip.click();
+  await expect(chip).toHaveAttribute('aria-pressed', 'true');
+  const slider = page.getByRole('slider', { name: 'Frequency' });
+  await expect(slider).toBeVisible();
+  await expect(page.getByText(/Bass note at 60 Hz/)).toBeVisible();
+  await page
+    .getByRole('button', { name: /^Jump to \d+ Hz$/ })
+    .first()
+    .click();
+  await expect(page.getByText(/Room resonances near this note/)).toBeVisible();
+  await chip.click();
+  await expect(page.getByText('Poorer')).toBeVisible();
+});

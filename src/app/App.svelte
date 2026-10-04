@@ -10,11 +10,13 @@
   import ShareDialog from './components/ShareDialog.svelte';
   import SideView from './components/SideView.svelte';
   import StepFurnishing from './components/StepFurnishing.svelte';
+  import PanelTabs from './components/PanelTabs.svelte';
   import StepGoals from './components/StepGoals.svelte';
   import StepRoom from './components/StepRoom.svelte';
   import StepSpeakers from './components/StepSpeakers.svelte';
   import StepSurfaces from './components/StepSurfaces.svelte';
   import TopBar from './components/TopBar.svelte';
+  import TreatPanel from './components/TreatPanel.svelte';
   import VariantTabs from './components/VariantTabs.svelte';
   import WhyPanel from './components/WhyPanel.svelte';
   import { downloadText } from './download';
@@ -176,9 +178,14 @@
 
         <div class="content">
           {#if !viewport.wide}<Dock />{/if}
+          {#if ui.step === 'results' || ui.step === 'treat'}
+            <PanelTabs />
+          {/if}
           {#if ui.step === 'results'}
             <WhyPanel />
             {#if !viewport.wide}<BassChart />{/if}
+          {:else if ui.step === 'treat'}
+            <TreatPanel />
           {:else}
             <button type="button" class="btn back" onclick={() => (ui.step = 'results')}>
               ← {i18n.t('panel.close')}

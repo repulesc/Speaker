@@ -632,6 +632,14 @@ export const en = {
     noData: 'Enter the room size to see the predicted bass.',
   },
   words: {
+    gain: {
+      high: 'high',
+      'very-high': 'very high',
+    },
+    zone: {
+      near: 'That counts as close to the wall.',
+      away: 'That counts as away from the wall.',
+    },
     speaker: {
       both: 'Both speakers',
       left: 'Left speaker',
@@ -819,6 +827,103 @@ export const en = {
     H06: {
       lift: 'The room’s high frequencies die away quickly ({t60}). A small treble lift ({suggestDb}) may help: try it and listen.',
       cut: 'The room’s high frequencies ring on ({t60}). A small treble cut ({suggestDb}) may help: try it and listen.',
+    },
+  },
+  tabs: {
+    label: 'Panel',
+    why: 'Why',
+    treat: 'Treat',
+  },
+  treat: {
+    title: 'Treat the room',
+    intro:
+      'What would help most, in order. Sizes are rough guides, not promises: change one thing, then listen.',
+    first: 'If you can only do one thing',
+    roomTitle: 'Room treatment',
+    settingsTitle: 'Speaker settings',
+    none: 'Nothing to suggest for this setup.',
+    noSettings: 'Nothing to change on the speaker for this setup.',
+    onMap: 'Marked on the map ({n}).',
+    effect: {
+      small: 'Small effect',
+      moderate: 'Moderate effect',
+      large: 'Large effect',
+    },
+  },
+  mode: {
+    chip: 'Bass note',
+    name: 'Bass note',
+    what: 'Where one bass note is loud or silent in your room, with the speakers as they are. Bright is loud, dark is quiet.',
+    frequency: 'Frequency',
+    poorer: 'Quiet',
+    better: 'Loud',
+    near: 'Room resonances near this note: {modes}.',
+    nearNone: 'No room resonance near this note: the pattern comes from many weak ones.',
+    lowest: 'Lowest resonances',
+    axial: 'along the length',
+    axialW: 'across the width',
+    axialH: 'up and down',
+    tangential: 'two pairs of walls',
+    oblique: 'all three wall pairs',
+    jump: 'Jump to {frequency}',
+    caption: 'Bass note at {frequency}: where it is loud or silent (speakers as they are).',
+  },
+  advice: {
+    T01: {
+      absorb:
+        '{speaker}: at the marked spot ({boundary}) its first reflection lands. A porous panel about {thickness} thick, or a diffuser, there sharpens the image.',
+      experiment:
+        '{speaker}: its first reflection lands on a hard surface at the marked spot ({boundary}). Experts disagree about treating it, so try a panel or diffuser there (about {thickness} thick), listen, and keep what you like.',
+    },
+    T02: {
+      rug: 'A rug on the floor between the speakers and you, at the marked spot, cuts the floor reflection. It is cheap and usually helps.',
+      ceilingPanel:
+        'A panel on the ceiling at the marked spot would cut its reflection. This matters less than the side walls, so it comes later.',
+    },
+    T03: {
+      moveFirst:
+        'The wall behind the speakers cancels bass near {frequency} at your seat. A panel would have to be about {quarterWavelength} deep to cure it, which is rarely practical: moving the speakers (see the best spots) works better.',
+      thickPanel:
+        'The wall behind the speakers cancels bass near {frequency} at your seat. A thick absorber (10 to 20 cm) behind them makes the dip a little shallower, but cannot remove it: that would take a depth of about {quarterWavelength}.',
+    },
+    T04: {
+      corners:
+        'Bass traps in the corners help with the boom near {frequency}. Be realistic: below 100 Hz they must be large and deep, and small foam wedges do very little.',
+    },
+    T05: {
+      soften:
+        'The room is lively (reverberation about {t60}). About {absorption} of extra soft absorption, such as a large rug and heavy curtains, would bring it to about {after}.',
+      liven:
+        'The room is on the dead side (reverberation about {t60}). Taking away about {absorption} of soft absorption, with fewer rugs or curtains, would give about {after}.',
+    },
+    T06: {
+      moveFirst:
+        'Your head is {distance} from the back wall. Move the seat forward if you can: it helps more than any treatment.',
+      absorber:
+        'Your head is {distance} from the back wall and the seat cannot move. Put a thick absorber (at least {thickness}) behind your head.',
+    },
+    D01: {
+      match:
+        'Set the speaker’s wall-distance setting for the {clearance} between its back and the wall. {zone}',
+    },
+    D02: {
+      cut: 'The speakers are close to walls, so the bass is boosted (boundary gain: {gain}). Try one step of bass cut on the speaker ({stepDb}) and listen.',
+    },
+    D03: {
+      lift: 'The room soaks up high frequencies (reverberation {t60}). Try one step of treble lift ({stepDb}) and listen.',
+      cut: 'The room lets high frequencies ring (reverberation {t60}). Try one step of treble cut ({stepDb}) and listen.',
+    },
+    D04: {
+      height:
+        'Your ears are {angle} off the speakers’ axis. Put the speakers’ bases about {baseHeight} above the floor (a stand or desk) so the tweeters are at ear height, or tilt the speakers.',
+    },
+    D05: {
+      moveOut:
+        'The rear port is {clearance} from the wall but needs {minimum}. Move the speakers out. The manual may say whether port plugs help.',
+    },
+    D06: {
+      desk: 'Your speaker has a desk mode and the speakers stand on a desk: switch it on.',
+      stand: 'Use the speaker’s stand mode: the speakers are not on a desk.',
     },
   },
   analysis: {

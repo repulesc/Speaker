@@ -2,7 +2,8 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { scoreWord } from '../findings/text';
-  import { paintHeat } from '../map/heat';
+  import { paintField, paintHeat } from '../map/heat';
+  import { modeExplorer } from '../state/mode.svelte';
   import { fitFrame, toPx, toWorld } from '../plan/frame';
   import {
     cabinet,
@@ -75,6 +76,15 @@
   // ── Map layers, best spots, probe ────────────────────────────────────────
 
   const result = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
+
+  /** Where the treatment advice points (Treat tab): numbered rings, as listed in the panel. */
+  const adviceRings = $derived(
+    ui.step === 'treat' && result
+      ? result.advice.treatment
+          .filter((a) => a.location)
+          .map((a, i) => ({ n: i + 1, at: a.location! }))
+      : [],
+  );
   const layers = $derived(preview.layers ?? result?.layers ?? null);
   const candidates = $derived(result?.candidates.slice(0, 3) ?? []);
   /** Pins sit on the seat of each spot; spots that share a seat are nudged apart so all stay visible. */
@@ -92,9 +102,15 @@
   const LETTERS = ['A', 'B', 'C'];
   const PIN_FILL = ['var(--heat-4)', 'var(--heat-3)', '#8fd5c9'];
 
+  /** The bass-note explorer replaces the score map while it is on. */
+  const field = $derived(ui.modeFrequency !== null ? modeExplorer.field : null);
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
-    if (heat && layers) paintHeat(heat, layers, layers.values[ui.layer]);
+    if (heat && layers && !field) paintHeat(heat, layers, layers.values[ui.layer]);
+  });
+  let fieldCanvas = $state<HTMLCanvasElement>();
+  $effect(() => {
+    if (fieldCanvas && field) paintField(fieldCanvas, field.grid);
   });
 
   // Keep the preview and the probe in step with the project (and with each other).
@@ -103,6 +119,7 @@
     const speakers = previewed ? $state.snapshot(previewed.speakers) : null;
     void preview.refresh(snapshot, speakers);
     probe.refresh(snapshot, speakers ?? undefined);
+    void modeExplorer.refresh(snapshot, ui.modeFrequency);
   });
 
   /** Runs of red-flag cells per row, for the hatch. */
@@ -241,7 +258,16 @@
 
 <div class="plan" bind:clientWidth={width} bind:clientHeight={height}>
   {#if width > 0 && height > 0}
-    {#if showHeat && layers}
+    {#if field}
+      <canvas
+        bind:this={fieldCanvas}
+        class="heat"
+        aria-hidden="true"
+        style="left:{px(field.grid.x0)}px; top:{py(field.grid.y0)}px; width:{field.grid.nx *
+          field.grid.step *
+          frame.scale}px; height:{field.grid.ny * field.grid.step * frame.scale}px"
+      ></canvas>
+    {:else if showHeat && layers}
       <canvas
         bind:this={heat}
         class="heat"
@@ -302,7 +328,7 @@
           <line class="grid" x1={px(0)} y1={py(g)} x2={px(W)} y2={py(g)} />
         {/each}
       {/if}
-      {#if layers}
+      {#if layers && !field}
         {#each flaggedRuns as r (r.y * 1000 + r.x)}
           <rect
             class="flagged"
@@ -474,6 +500,13 @@
           />
         {/if}
 
+        {#each adviceRings as r (r.n)}
+          <g class="advice-ring" aria-hidden="true">
+            <circle cx={px(r.at.x)} cy={py(r.at.y)} r="11" />
+            <text x={px(r.at.x)} y={py(r.at.y) + 4} text-anchor="middle">{r.n}</text>
+          </g>
+        {/each}
+
         {#each reflectionRings as f (f.messageKey + String(f.params.speaker) + String(f.params.boundary))}
           <circle class="ring" cx={px(f.location!.x)} cy={py(f.location!.y)} r="9" />
         {/each}
@@ -580,7 +613,7 @@
             />
           {/each}
         {/if}
-        {#each candidates as c, i (i)}
+        {#each field ? [] : candidates as c, i (i)}
           <g
             class="pin"
             class:chosen={ui.candidate === i}
@@ -679,7 +712,11 @@
       />
     {/if}
 
-    {#if showDims && layers}
+    {#if field}
+      <p class="hint">
+        {i18n.t('mode.caption', { frequency: `${Math.round(field.frequency)} Hz` })}
+      </p>
+    {:else if showDims && layers}
       <p class="hint">
         {i18n.t('map.caption', {
           where:
@@ -691,7 +728,7 @@
       </p>
     {/if}
 
-    {#if probeAt}
+    {#if probeAt && !field}
       <ProbeCard
         explanation={probeAt.explanation}
         {system}
@@ -765,6 +802,20 @@
     stroke-width: 2;
     stroke-dasharray: 4 3;
     pointer-events: none;
+  }
+  .advice-ring {
+    pointer-events: none;
+  }
+  .advice-ring circle {
+    fill: var(--bg);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .advice-ring text {
+    fill: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
   }
   .pin {
     cursor: pointer;

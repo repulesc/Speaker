@@ -13,6 +13,8 @@ let selection = $state<Selection>({ kind: 'none' });
 let boundary = $state<BoundaryId>('left');
 let view = $state<'top' | 'side'>('top');
 let layer = $state<LayerId>('overall');
+/** The bass note shown by the room-mode explorer (Hz), or null when it is off. */
+let modeFrequency = $state<number | null>(null);
 /** Index of the best-spot candidate being previewed on the map, or null for the current setup. */
 let candidate = $state<number | null>(null);
 /** The side view is hidden until asked for (docs/REVAMP_PLAN.md). */
@@ -45,6 +47,12 @@ export const ui = {
   },
   set layer(value: LayerId) {
     layer = value;
+  },
+  get modeFrequency() {
+    return modeFrequency;
+  },
+  set modeFrequency(value: number | null) {
+    modeFrequency = value;
   },
   get candidate() {
     return candidate;
