@@ -35,8 +35,16 @@ export const THRESHOLDS = {
   /** C8: score for a reflection the goal would rather not have. */
   reflectionMismatchScore: 0.5,
   absorbedForWidthScore: 0.7,
-  /** Search constraints. */
-  minListeningDistance: 1.0,
+  /** Search constraints. Closer than this is not a listening seat at all (desk near-field). */
+  minListeningDistance: 0.6,
+  /**
+   * Preferred minimum distance from each speaker for ordinary room listening (🟡 heuristic, owner
+   * feedback after R5: spots 1–1.2 m away read as a desk setup). ITU-R BS.1116 puts reference
+   * listeners about 2–4 m away; 1.5 m is a lower bound that small rooms can still meet.
+   */
+  roomListeningDistance: 1.5,
+  /** The seat map scores every cell at least this far from a speaker. */
+  minScoredDistance: 0.3,
   /** Listener at least this far in front of the speaker baffles (m). */
   minListenerAhead: 0.5,
   candidateSeparation: 0.2,

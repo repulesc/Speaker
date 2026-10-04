@@ -301,6 +301,17 @@
     color: var(--ink-muted);
     text-decoration: underline;
   }
+  /* The palette is long: compact chips on desktop, finger-sized on touch screens. */
+  .adds .btn {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: var(--text-sm);
+  }
+  @media (pointer: coarse), (max-width: 1023px) {
+    .adds .btn {
+      min-height: 44px;
+    }
+  }
   .adds,
   .olist {
     display: flex;

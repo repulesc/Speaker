@@ -1,27 +1,23 @@
-/* Shared "Instrument" styles (docs/REVAMP_PLAN.md). Component-specific layout lives in each component. */
-@import '@fontsource/sora/latin-400.css';
-@import '@fontsource/sora/latin-600.css';
-@import '@fontsource/sora/latin-ext-400.css';
-@import '@fontsource/sora/latin-ext-600.css';
-@import '@fontsource/jetbrains-mono/latin-400.css';
-@import '@fontsource/jetbrains-mono/latin-500.css';
-@import '@fontsource/jetbrains-mono/latin-ext-400.css';
-@import '@fontsource/jetbrains-mono/latin-ext-500.css';
+/*
+ * Shared styles. System font, one type scale, one accent, grouped lists in the style of the
+ * platform settings apps (owner feedback after R5). Component layout lives in each component.
+ */
 @import './tokens.css';
 
 :root {
-  --font-sans: 'Sora', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* Type scale: caption, footnote, body, headline, title. Nothing else. */
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 22px;
   --radius-sm: 8px;
-  --radius-md: 14px;
+  --radius-md: 12px;
   --gutter: 16px;
-  --topbar-h: 56px;
-}
-
-@media (min-width: 640px) {
-  :root {
-    --gutter: 24px;
-  }
 }
 
 *,
@@ -39,22 +35,34 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: var(--text-md);
+  line-height: 1.45;
   font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   line-height: 1.25;
   margin: 0;
   font-weight: 600;
 }
 
+h1 {
+  font-size: var(--text-xl);
+}
 h2 {
-  font-size: 20px;
+  font-size: var(--text-xl);
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-size: var(--text-lg);
+}
+h4 {
+  font-size: var(--text-md);
 }
 
 p {
@@ -78,24 +86,25 @@ p {
   border: 0;
 }
 
-/* Buttons */
+/* Buttons: tinted by default, filled for the one main action, plain for links. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   min-height: 44px;
   padding: 0 16px;
-  border: 1px solid var(--grid-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--ink);
+  border: 0;
+  border-radius: 10px;
+  background: var(--fill);
+  color: var(--accent);
   font: inherit;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .btn:hover:not(:disabled) {
-  border-color: var(--accent);
+  filter: brightness(0.96);
 }
 
 .btn:disabled {
@@ -105,42 +114,39 @@ p {
 }
 
 .btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-fill);
   color: var(--on-accent);
   font-weight: 600;
 }
 
 .btn.quiet {
-  border-color: transparent;
   background: transparent;
 }
 
-/* Segmented control (radio buttons styled as one bar). */
+/* Segmented control: a grey track with a raised thumb. */
 .seg {
   display: inline-flex;
-  border: 1px solid var(--grid);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  overflow: hidden;
+  padding: 2px;
+  gap: 2px;
+  border-radius: 9px;
+  background: var(--fill);
 }
 
 .seg label {
   position: relative;
+  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: 40px;
   min-width: 44px;
   padding: 0 12px;
+  border-radius: 7px;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
   cursor: pointer;
-  color: var(--ink-muted);
-  border-left: 1px solid var(--grid);
-  font-size: 15px;
-}
-
-.seg label:first-child {
-  border-left: 0;
+  white-space: nowrap;
 }
 
 .seg input {
@@ -152,13 +158,21 @@ p {
 }
 
 .seg label:has(input:checked) {
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  font-weight: 600;
 }
 
 .seg label:has(input:focus-visible) {
   outline: 2px solid var(--accent);
-  outline-offset: -3px;
+  outline-offset: -2px;
+}
+
+/* Touch screens get 44 px targets everywhere (WCAG 2.5.8 and the platform guidelines). */
+@media (pointer: coarse), (max-width: 1023px) {
+  .seg label {
+    min-height: 44px;
+  }
 }
 
 /* Text inputs */
@@ -166,12 +180,16 @@ p {
   min-height: 44px;
   width: 100%;
   padding: 0 12px;
-  border: 1px solid var(--grid-strong);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--fill);
   color: var(--ink);
   font: inherit;
-  font-family: var(--font-mono);
+}
+
+.input:focus {
+  border-color: var(--accent);
+  background: var(--surface);
 }
 
 .input[aria-invalid='true'] {
@@ -180,22 +198,76 @@ p {
 
 .card {
   background: var(--surface);
-  border: 1px solid var(--grid);
+  border: 0;
   border-radius: var(--radius-md);
   padding: 16px;
 }
 
+/* Grouped list rows, as in the platform settings apps. */
+.list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.list > li + li {
+  border-top: 1px solid var(--grid);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.row:hover {
+  background: var(--fill);
+}
+
+.row .value {
+  margin-inline-start: auto;
+  color: var(--ink-muted);
+  text-align: end;
+}
+
+.row .chevron {
+  color: var(--ink-muted);
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+
+.group-title {
+  margin: 0 0 6px 16px;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
 dialog {
   max-width: min(32rem, calc(100vw - 32px));
-  border: 1px solid var(--grid);
-  border-radius: var(--radius-md);
+  border: 0;
+  border-radius: 14px;
   background: var(--surface);
   color: var(--ink);
   padding: 24px;
+  box-shadow: var(--shadow);
 }
 
 dialog::backdrop {
-  background: rgb(5 8 12 / 0.65);
+  background: rgb(0 0 0 / 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {

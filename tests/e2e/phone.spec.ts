@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { fillRoom, goStep } from './helpers';
+import { fillRoom, goStep, openSection } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -50,15 +50,13 @@ test('phone: every visible control is at least 44 × 44 px', async ({ page }) =>
   expect(await smallControls(page)).toEqual([]);
 });
 
-test('phone: the Treat and Listen tabs and the bass-note bar keep 44 px targets (R5)', async ({
-  page,
-}) => {
+test('phone: home, result pages and the bass-note bar keep 44 px targets', async ({ page }) => {
   await goStep(page, 'Results');
-  for (const tab of ['Treat', 'Listen']) {
-    await page.getByRole('tab', { name: tab }).click();
-    expect(await smallControls(page), tab).toEqual([]);
+  expect(await smallControls(page), 'home').toEqual([]);
+  for (const row of ['Why this result', 'Improve the room', 'Listening notes']) {
+    await openSection(page, row);
+    expect(await smallControls(page), row).toEqual([]);
   }
-  await page.getByRole('tab', { name: 'Why' }).click();
   await page.getByRole('button', { name: 'Bass note' }).click();
   expect(await smallControls(page), 'bass note').toEqual([]);
 });
@@ -77,9 +75,8 @@ test('phone: one drawing at a time, switchable between top and side view', async
 
 test('phone: every section fits the screen without sideways scrolling', async ({ page }) => {
   for (const step of ['Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results', 'Listen']) {
-    if (step === 'Listen') {
-      await page.getByRole('tab', { name: 'Listen' }).click();
-    } else await goStep(page, step);
+    if (step === 'Listen') await openSection(page, 'Listening notes');
+    else await goStep(page, step);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
@@ -92,8 +89,8 @@ test('phone: every section fits the screen without sideways scrolling', async ({
   }
 });
 
-test('phone: language and units live in the menu', async ({ page }) => {
-  await page.getByRole('button', { name: 'Menu' }).click();
+test('phone: language and units live in the settings menu', async ({ page }) => {
+  await page.getByRole('button', { name: 'Settings' }).click();
   await expect(page.getByRole('radio', { name: 'HU' })).toBeAttached();
   await expect(page.getByRole('radio', { name: 'ft' })).toBeAttached();
 });

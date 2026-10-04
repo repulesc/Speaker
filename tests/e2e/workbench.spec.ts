@@ -1,22 +1,22 @@
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, goStep, savedProject } from './helpers';
+import { fillRoom, goHome, goStep, openMenu, openSection, openWhy, savedProject } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
-/** A room with the default speakers, open on the results ("Why"). */
+/** A room with the default speakers, open on the home page with the best placement. */
 async function withResults(page: Page) {
   await page.goto('/');
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
-  await expect(page.getByTestId('score-best')).toBeVisible();
+  await expect(page.getByTestId('suggestion')).toBeVisible();
 }
 
 test('the map shows a heatmap, layers that say what they mean, and a legend', async ({ page }) => {
   await withResults(page);
   await expect(page.locator('canvas.heat')).toBeVisible();
-  const layers = page.getByRole('radiogroup', { name: 'Map layer' }).getByRole('radio');
-  await expect(layers).toHaveCount(8);
-  await page.getByRole('radio', { name: 'Bass holes' }).check({ force: true });
+  const layer = page.getByLabel('Map layer');
+  await expect(layer.locator('option')).toHaveCount(8);
+  await layer.selectOption({ label: 'Bass holes' });
   await expect(page.getByText('Whether a bass note nearly vanishes here')).toBeVisible();
   await expect(page.getByText('Physics', { exact: false }).first()).toBeVisible();
   await expect(page.getByText('Poorer')).toBeVisible();
@@ -36,6 +36,7 @@ test('the findings are readable sentences, grouped, with their evidence level', 
   page,
 }) => {
   await withResults(page);
+  await openWhy(page);
   const counts = page.getByTestId('finding-counts');
   await expect(counts).toHaveText(/Red flags: \d+ · Cautions: \d+/);
   const first = page.locator('article').first();
@@ -45,24 +46,44 @@ test('the findings are readable sentences, grouped, with their evidence level', 
   expect(body).not.toMatch(/finding\.[A-Z]\d\d|advice\.[A-Z]\d\d|\{\w+\}/);
 });
 
-test('best spots: preview on the map, try one, undo brings the setup back', async ({ page }) => {
+test('best placement: shown first, other options, apply, and undo brings the setup back', async ({
+  page,
+}) => {
   await withResults(page);
   const before = (await savedProject(page)).variants[0].listener.ears.y;
-  await page.getByRole('button', { name: /^Spot A/ }).click();
-  await expect(page.getByText('Showing spot A on the map and in the chart.')).toBeVisible();
-  await expect(page.getByText(/speakers .* from the front wall and .* apart/i)).toBeVisible();
+  const answer = page.getByTestId('suggestion');
+  await expect(answer).toContainText(/from the front wall/);
+  await expect(answer).toContainText(/apart/);
+  await page.getByRole('button', { name: /^Option B/ }).click();
+  await expect(page.getByRole('button', { name: /^Option B/ })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await page.getByRole('button', { name: /^Option A/ }).click();
 
-  await page.getByRole('button', { name: 'Try spot A' }).last().click();
-  await expect(page.getByRole('status').filter({ hasText: 'Spot A applied' })).toBeVisible();
+  await page.getByRole('button', { name: 'Apply', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Placement applied' })).toBeVisible();
   const moved = (await savedProject(page)).variants[0];
   expect(moved.listener.ears.y).not.toBeCloseTo(before, 2);
   expect(moved.speakers.left.certainty).toBe('estimated');
 
-  await page.locator('h2').first().click();
+  await page.getByRole('heading', { name: 'Best placement' }).click();
   await page.keyboard.press('Control+z');
   await expect
     .poll(async () => (await savedProject(page)).variants[0].listener.ears.y)
     .toBeCloseTo(before, 2);
+});
+
+test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({ page }) => {
+  await withResults(page);
+  await page.getByRole('radio', { name: 'Speakers' }).check({ force: true });
+  await expect(page.getByTestId('suggestion')).toContainText('Stay where they are');
+  const project = await savedProject(page);
+  expect(project.constraints.listenerFixed).toBe(true);
+  await page.getByRole('radio', { name: 'Desk' }).check({ force: true });
+  await expect
+    .poll(async () => (await savedProject(page)).constraints.listeningDistance)
+    .toBe('near');
 });
 
 test('the probe: click the map to see why, then move the seat there', async ({ page }) => {
@@ -105,9 +126,12 @@ test('click a number on the map to type an exact value', async ({ page }) => {
 
 test('Hungarian: findings and the map speak Hungarian, with no keys leaking', async ({ page }) => {
   await withResults(page);
+  await openMenu(page);
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
+  await page.keyboard.press('Escape');
+  await openSection(page, 'Miért ez az eredmény');
   await expect(page.getByRole('heading', { name: 'Miért' })).toBeVisible();
-  await expect(page.getByRole('radiogroup', { name: 'Térképréteg' })).toBeVisible();
+  await expect(page.getByLabel('Térképréteg')).toBeVisible();
   await expect(page.locator('article').first()).toContainText(/Piros zászló|Figyelem/);
   const body = await page.locator('body').innerText();
   expect(body).not.toMatch(/finding\.[A-Z]\d\d|\{\w+\}/);
@@ -115,14 +139,13 @@ test('Hungarian: findings and the map speak Hungarian, with no keys leaking', as
 
 test('the Treat tab lists advice in order, with no raw keys', async ({ page }) => {
   await withResults(page);
-  const tabs = page.getByRole('tablist', { name: 'Panel' });
-  await tabs.getByRole('tab', { name: 'Treat' }).click();
+  await openSection(page, 'Improve the room');
   await expect(page.getByRole('heading', { name: 'Treat the room' })).toBeVisible();
   await expect(page.getByText('If you can only do one thing')).toBeVisible();
   const text = await page.locator('#panel').innerText();
   expect(text).not.toMatch(/\b(advice|treat|finding)\.[A-Za-z0-9]+/);
-  await tabs.getByRole('tab', { name: 'Why' }).click();
-  await expect(page.getByTestId('score-best')).toBeVisible();
+  await goHome(page);
+  await expect(page.getByTestId('suggestion')).toBeVisible();
 });
 
 test('the bass-note explorer shows a pressure pattern and the resonances near the note', async ({
@@ -131,7 +154,7 @@ test('the bass-note explorer shows a pressure pattern and the resonances near th
   await page.goto('/');
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
-  await expect(page.getByTestId('score-best')).toBeVisible();
+  await expect(page.getByTestId('suggestion')).toBeVisible();
   const chip = page.getByRole('button', { name: 'Bass note' });
   await expect(chip).toHaveAttribute('aria-pressed', 'false');
   await chip.click();
@@ -165,7 +188,7 @@ test('the Listen tab saves a rated note, shows the tip and the agreement text', 
   page,
 }) => {
   await withResults(page);
-  await page.getByRole('tab', { name: 'Listen' }).click();
+  await openSection(page, 'Listening notes');
   await expect(page.getByRole('heading', { name: 'Listen and note' })).toBeVisible();
   await expect(page.getByTestId('agreement')).toContainText('Rate at least two');
   await page.getByRole('radio', { name: '4 of 5' }).check({ force: true });
@@ -184,7 +207,7 @@ test('compare: a second setup appears as a dashed line and a verdict', async ({ 
   await withResults(page);
   await expect(page.getByRole('heading', { name: 'Compare setups' })).toHaveCount(0);
   await page.getByRole('button', { name: '+ New setup' }).click();
-  await goStep(page, 'Results');
+  await openWhy(page);
   await page.getByLabel('Compare with').selectOption({ index: 1 });
   await expect(page.getByTestId('compare-scores')).toBeVisible();
   await expect(page.locator('path.line.other')).toHaveCount(1);

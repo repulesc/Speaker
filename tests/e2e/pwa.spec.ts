@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { fillRoom, openSection } from './helpers';
+import { fillRoom, goHome, openSection } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -37,10 +37,12 @@ test('after the first visit the app opens offline, with the saved project', asyn
 
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Why' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Best placement' })).toBeVisible();
   await openSection(page, 'Room');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00 m');
   // The engine runs in a worker that must also come from the cache.
+  await goHome(page);
+  await expect(page.getByTestId('suggestion')).toBeVisible();
   await expect(page.getByRole('button', { name: /How sure are we/ })).toContainText(
     'First impression',
   );

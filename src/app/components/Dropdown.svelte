@@ -57,14 +57,26 @@
     z-index: 20;
     display: grid;
     gap: 12px;
-    min-width: 15rem;
-    max-width: min(22rem, calc(100vw - 32px));
-    box-shadow: 0 6px 20px rgb(11 22 38 / 0.18);
+    width: max-content;
+    min-width: 17rem;
+    max-width: min(22rem, calc(100vw - 24px));
+    padding: 12px;
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow:
+      var(--shadow),
+      0 0 0 1px var(--grid);
   }
   .panel.start {
     left: 0;
   }
   .panel.end {
     right: 0;
+  }
+  .dropdown :global(.gear) {
+    width: 44px;
+    padding: 0;
+    background: none;
+    color: var(--accent);
   }
 </style>

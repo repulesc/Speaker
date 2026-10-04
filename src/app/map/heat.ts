@@ -27,6 +27,9 @@ export function heatColor(score: number): [number, number, number] {
  * app red-flags itself are drawn dimmed with a hatch on top, so "bright" never means "advisable"
  * where the guidelines say no (docs/REVIEW_FINDINGS.md, M6).
  */
+/** Brightness of a cell the app advises against (dimmed, not hidden: owner feedback after R5). */
+const DIMMED = 0.45;
+
 export function paintHeat(
   canvas: HTMLCanvasElement,
   layers: SeatLayers,
@@ -42,7 +45,7 @@ export function paintHeat(
     const v = values[i]!;
     if (Number.isNaN(v)) continue;
     const [r, g, b] = heatColor(v);
-    const dim = layers.redFlag[i] ? 0.55 : 1;
+    const dim = layers.redFlag[i] ? DIMMED : 1;
     image.data.set([r * dim, g * dim, b * dim, 255], i * 4);
   }
   ctx.putImageData(image, 0, 0);

@@ -18,30 +18,52 @@ export async function savedProject(page: Page) {
 }
 
 export async function openMenu(page: Page) {
-  await page.getByRole('button', { name: 'Menu' }).click();
+  await page.getByRole('button', { name: 'Settings' }).click();
 }
 
-/** Opens a section from the dock (Room, Surfaces, Furniture, Speakers, Goals). */
+/** The sidebar's home page: the best placement and the list of everything. */
+export async function goHome(page: Page) {
+  const back = page.getByRole('button', { name: 'Back', exact: true });
+  if (await back.count()) await back.click();
+}
+
+/** Opens a row of the sidebar's home list (Room, Surfaces, Furniture, …, Why this result). */
 export async function openSection(page: Page, name: string) {
-  const button = page
-    .getByRole('navigation', { name: 'Sections' })
-    .getByRole('button', { name, exact: true });
-  if ((await button.getAttribute('aria-pressed')) !== 'true') await button.click();
+  const heading = SECTION_TITLES[name];
+  if (
+    heading &&
+    (await page.getByRole('heading', { name: heading, exact: true, level: 2 }).count())
+  )
+    return;
+  await goHome(page);
+  await page
+    .locator('#panel .list')
+    .getByRole('button', { name: new RegExp(`^${name}(\\s|$)`) })
+    .click();
 }
 
-/** Step names from the old wizard, kept so the journeys read the same: "Results" is the Why panel. */
+const SECTION_TITLES: Record<string, string> = {
+  Room: 'Your room',
+  Surfaces: 'Surfaces',
+  Furniture: 'Furniture',
+  Speakers: 'Speakers',
+  Goals: 'What matters to you',
+};
+
+/** Step names from the old wizard, kept so the journeys read the same: "Results" is the home page. */
 export async function goStep(page: Page, name: string) {
-  if (name === 'Results') {
-    const done = page.getByRole('button', { name: 'Show the results' });
-    if (await done.count()) await done.click();
-    return;
-  }
+  if (name === 'Results') return goHome(page);
   await openSection(page, name === 'Furnishing' ? 'Furniture' : name);
 }
 
-/** Back to the results ("Why") from a section. */
+/** Back to the home page from a section. */
 export async function showResults(page: Page) {
-  await page.getByRole('button', { name: 'Show the results' }).click();
+  await goHome(page);
+}
+
+/** The findings page ("Why this result"). */
+export async function openWhy(page: Page) {
+  await openSection(page, 'Why this result');
 }
 
 /** Metres from the front wall in a seat's accessible label, e.g. "Seat. 2.34 m from the front wall". */

@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, goStep, openMenu } from './helpers';
+import { fillRoom, goStep, openMenu, openSection, openWhy } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -41,7 +41,9 @@ for (const scheme of ['light', 'dark'] as const) {
 
 test('Hungarian', async ({ page }) => {
   await page.goto('/');
+  await openMenu(page);
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
+  await page.keyboard.press('Escape');
   await expectAccessible(page);
 });
 
@@ -92,15 +94,17 @@ for (const scheme of ['light', 'dark'] as const) {
   });
 }
 
-test('Treat tab and bass-note explorer', async ({ page }) => {
+test('home, Why, Treat, Listen and the bass-note explorer', async ({ page }) => {
   await page.goto('/');
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
-  await page.getByRole('tab', { name: 'Treat' }).click();
+  await expectAccessible(page); // home: the best placement and the list
+  await openWhy(page);
   await expectAccessible(page);
-  await page.getByRole('tab', { name: 'Listen' }).click();
+  await openSection(page, 'Improve the room');
   await expectAccessible(page);
-  await page.getByRole('tab', { name: 'Why' }).click();
+  await openSection(page, 'Listening notes');
+  await expectAccessible(page);
   await page.getByRole('button', { name: 'Bass note' }).click();
   await expectAccessible(page);
 });

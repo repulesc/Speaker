@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { analyze } from '../../src/engine/analyze';
-import { buildContext, currentPlacement, type AnalysisContext } from '../../src/engine/context';
+import {
+  acousticCentre,
+  buildContext,
+  currentPlacement,
+  type AnalysisContext,
+} from '../../src/engine/context';
+import { distance } from '../../src/engine/math/geometry';
 import { RULES } from '../../src/engine/rules';
 import { G04 } from '../../src/engine/rules/G04-stereo-angle';
 import { G10 } from '../../src/engine/rules/G10-objects';
@@ -383,5 +389,73 @@ describe('L3 · a project without a busy-ness answer counts its furniture as unk
     expect(confidence(missing, buildContext(missing)).overall).toBe(
       confidence(unknownAnswer, buildContext(unknownAnswer)).overall,
     );
+  });
+});
+
+describe('owner feedback after R5: listening distance', () => {
+  const minDistance = (p: ReturnType<typeof makeProject>) => {
+    const a = analyze(p) as AnalysisOk;
+    const speaker = buildContext(p)!.speaker;
+    return Math.min(
+      ...a.candidates.flatMap((c) =>
+        (['left', 'right'] as const).map((s) =>
+          distance(acousticCentre(c.speakers[s], speaker), c.listener),
+        ),
+      ),
+    );
+  };
+
+  it('room listening keeps every best spot at least 1.5 m from both speakers', () => {
+    expect(minDistance(makeProject({ W: 3.6, L: 4.4, H: 2.6 }))).toBeGreaterThanOrEqual(1.5 - 1e-9);
+  });
+
+  it('"close" (desk) lets the search come nearer, never closer than 0.6 m', () => {
+    const p = makeProject({ W: 3.6, L: 4.4, H: 2.6 });
+    p.constraints.listeningDistance = 'near';
+    expect(minDistance(p)).toBeGreaterThanOrEqual(0.6 - 1e-9);
+  });
+
+  it('a rear-ported speaker is never suggested closer to the wall than its port needs', () => {
+    const p = makeProject({ W: 3.6, L: 4.4, H: 2.6, clearance: 0.05 });
+    const ctx = buildContext(p)!;
+    expect(ctx.speaker.portLocation).toBe('rear');
+    for (const c of (analyze(p) as AnalysisOk).candidates) {
+      expect(c.speakers.left.base.y - ctx.speaker.depth / 2).toBeGreaterThanOrEqual(
+        ctx.speaker.minRearClearance - 1e-9,
+      );
+    }
+  });
+
+  it('the seat map has no holes behind or under furniture', () => {
+    const p = makeProject({ W: 3.6, L: 4.4, H: 2.6, standZ: 0 });
+    p.variants[0]!.objects = [
+      {
+        id: 'bed',
+        kind: 'bed',
+        position: { x: 0, y: 2.4, z: 0 },
+        size: { x: 1.6, y: 2, z: 0.5 },
+        hard: false,
+      },
+      {
+        id: 't',
+        kind: 'table',
+        position: { x: 1.8, y: 2.0, z: 0 },
+        size: { x: 1.2, y: 0.7, z: 0.75 },
+        hard: true,
+      },
+    ];
+    const a = analyze(p) as AnalysisOk;
+    const { values, nx, ny, x0, y0, step, redFlag } = a.layers;
+    const speakerY = buildContext(p)!.variant.speakers.left.base.y;
+    for (let j = 0; j < ny; j++) {
+      for (let i = 0; i < nx; i++) {
+        const y = y0 + j * step;
+        // Well in front of the speakers, every cell has a score.
+        if (y > speakerY + 1) expect(Number.isNaN(values.overall[j * nx + i]!)).toBe(false);
+      }
+    }
+    // Behind the table the seat is blocked: scored, but hatched.
+    const cell = Math.round((2.9 - y0) / step) * nx + Math.round((2.4 - x0) / step);
+    expect(redFlag[cell]).toBe(true);
   });
 });

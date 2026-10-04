@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { fillRoom, goStep, savedProject, seatDistance } from './helpers';
+import { fillRoom, goStep, openWhy, savedProject, seatDistance } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -11,10 +11,12 @@ test('journey 1 — first answer: room, speaker, then results within 3 seconds',
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
   await goStep(page, 'Results');
 
-  await expect(page.getByTestId('confidence-word')).toBeVisible({ timeout: 3000 });
+  await expect(page.getByTestId('suggestion')).toBeVisible({ timeout: 3000 });
+  await expect(page.getByTestId('score-current')).toBeAttached();
+  await expect(page.getByTestId('score-best')).toBeAttached();
+  await openWhy(page);
+  await expect(page.getByTestId('confidence-word')).toBeVisible();
   await expect(page.getByTestId('finding-counts')).toHaveText(/Red flags: \d+ · Cautions: \d+/);
-  await expect(page.getByTestId('score-current')).toBeVisible();
-  await expect(page.getByTestId('score-best')).toBeVisible();
 });
 
 test('journey 2 — edit without restart: change the ceiling, results follow, nothing is lost', async ({
@@ -25,13 +27,13 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
   await goStep(page, 'Speakers');
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
   await goStep(page, 'Results');
-  await expect(page.getByTestId('confidence-word')).toBeVisible();
+  await expect(page.getByTestId('suggestion')).toBeVisible();
 
   await goStep(page, 'Room');
   await page.getByLabel('Ceiling height').fill('3.2');
   await page.getByLabel('Ceiling height').blur();
   await goStep(page, 'Results');
-  await expect(page.getByTestId('confidence-word')).toBeVisible();
+  await expect(page.getByTestId('suggestion')).toBeVisible();
 
   await expect(page.locator('#plan-desc')).toContainText('4.00');
   await goStep(page, 'Room');
