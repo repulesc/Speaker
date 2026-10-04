@@ -36,6 +36,11 @@ The owner wants Opus to have real freedom, without surprises.
 - **Confidence:** quiet, one small word near the result; details open on tap.
 - **Unknown values:** use a typical value, label it "typical", keep going; the confidence word reflects it.
 
+- **Heatmap colour scale:** relative by default (colours stretch from this room's worst to its best, so the map is vivid and the best area glows), always with one honest word for the absolute level ("Best here: Fair"). An "absolute scale" switch for enthusiasts under "show details".
+- **Default map when only the speakers move:** the speaker-placement map (how good each spot is for the speakers, the seat staying put), with the movement zone outlined. The seat map stays available as a layer.
+- **Survey look (desktop):** a calm centered card, one question at a time ("2 of 4"), then a reveal: the room and heatmap fade in at the end. Not the "room builds as you answer" variant.
+- **Typeface:** the system font, as now (San Francisco on a Mac). No web font.
+
 ## The owner's feedback, in order
 
 1. **Settings icon:** replace the cog with the three-lines menu icon (friendlier, less industrial).
