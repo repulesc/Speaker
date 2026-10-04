@@ -168,6 +168,13 @@ p {
   outline-offset: -2px;
 }
 
+/* Touch screens get 44 px targets everywhere (WCAG 2.5.8 and the platform guidelines). */
+@media (pointer: coarse), (max-width: 1023px) {
+  .seg label {
+    min-height: 44px;
+  }
+}
+
 /* Text inputs */
 .input {
   min-height: 44px;

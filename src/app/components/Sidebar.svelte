@@ -82,7 +82,12 @@
 <div class="sidebar">
   <header class="head">
     <SettingsMenu {...props} />
-    <p class="name" title={projectLabel(project.name)}>{projectLabel(project.name)}</p>
+    <div class="title">
+      <p class="name" title={projectLabel(project.name)}>{projectLabel(project.name)}</p>
+      <p class="save" role="status" data-state={workspace.saveState}>
+        {i18n.t(`project.${workspace.saveState}`)}
+      </p>
+    </div>
     <div class="history">
       <button
         type="button"
@@ -108,9 +113,6 @@
       {@render rows(['why', 'treat', 'listen'], i18n.t('nav.results'), 'nav-results')}
       <div class="foot">
         <ConfidenceMeter report={analysis.result?.confidence ?? null} />
-        <p class="save" role="status" data-state={workspace.saveState}>
-          {i18n.t(`project.${workspace.saveState}`)}
-        </p>
       </div>
     {:else}
       <button type="button" class="back" onclick={() => (ui.step = 'results')}>
@@ -158,7 +160,7 @@
   }
   .head {
     position: sticky;
-    top: 0;
+    top: var(--sheet-handle, 0px);
     z-index: 3;
     display: flex;
     align-items: center;
@@ -169,8 +171,15 @@
     backdrop-filter: saturate(180%) blur(16px);
     border-bottom: 1px solid var(--grid);
   }
-  .name {
+  .title {
     flex: 1;
+    min-width: 0;
+  }
+  .save {
+    color: var(--ink-muted);
+    font-size: var(--text-xs);
+  }
+  .name {
     min-width: 0;
     overflow: hidden;
     font-size: var(--text-md);

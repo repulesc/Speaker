@@ -121,6 +121,11 @@
     box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
     font-weight: 600;
   }
+  @media (pointer: coarse), (max-width: 1023px) {
+    .tab {
+      min-height: 44px;
+    }
+  }
   .actions {
     display: flex;
     align-items: center;

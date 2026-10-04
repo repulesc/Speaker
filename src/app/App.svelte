@@ -303,6 +303,7 @@
     font-size: var(--text-sm);
   }
   .panel {
+    --sheet-handle: 44px;
     flex: 0 0 var(--sheet-h, 54dvh);
     overflow-y: auto;
     outline: none;
@@ -329,7 +330,7 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 28px;
+    height: 44px;
     border: 0;
     background: var(--bg);
     cursor: pointer;
@@ -347,6 +348,7 @@
       flex-direction: row;
     }
     .panel {
+      --sheet-handle: 0px;
       flex: 0 0 380px;
       border-top: 0;
       border-right: 1px solid var(--grid);

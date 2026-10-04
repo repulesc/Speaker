@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { encodeShare } from '../../src/app/state/share';
 import { messageKeys, MESSAGES, translate } from '../../src/i18n/translate';
 import { makeProject } from '../fixtures/projects';
-import { fillRoom, openMenu, openSection, savedProject } from './helpers';
+import { fillRoom, goHome, openMenu, openSection, savedProject } from './helpers';
 
 // Metric by default, English UI.
 test.use({ locale: 'en-GB' });
@@ -25,7 +25,9 @@ test('journey 4 — units: switch to imperial, type feet and inches, stored in m
   page,
 }) => {
   await fillRoom(page, '4', '5', '2.5');
+  await openMenu(page);
   await page.getByRole('radio', { name: 'ft' }).check({ force: true });
+  await page.keyboard.press('Escape');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('13′\u00a01½″');
 
   await page.getByLabel('Length', { exact: true }).fill(`11'6"`);
@@ -54,11 +56,13 @@ test('units: bad input is explained, out-of-range is rejected, unusual is allowe
 });
 
 test('journey 5 — language: Hungarian shows no English UI text', async ({ page }) => {
+  await openMenu(page);
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
+  await page.keyboard.press('Escape');
   await expect(page.locator('html')).toHaveAttribute('lang', 'hu');
   await expect(page.getByRole('heading', { name: 'A helyiséged' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Menü' }).click();
+  await page.getByRole('button', { name: 'Beállítások' }).click();
   const text = await page.locator('body').innerText();
   const leaks = messageKeys(MESSAGES.en)
     .map((key) => ({ key, en: translate('en', key), hu: translate('hu', key) }))
@@ -106,7 +110,7 @@ test('a crafted share link is refused, and the app still works after a reload', 
   await page.goto('/' + (await encodeShare(project)));
   await expect(page.getByRole('alert')).toContainText('could not be read');
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Menu' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
   expect(errors).toEqual([]);
   await context.close();
 });
@@ -176,10 +180,10 @@ test('journey 10 — keyboard only: skip to the panel, type, and open the result
   await page.keyboard.press('Enter');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
 
-  const done = page.getByRole('button', { name: 'Show the results' });
+  const done = page.getByRole('button', { name: 'Done' });
   await done.focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Why' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Best placement' })).toBeVisible();
 });
 
 test('undo and redo with the keyboard', async ({ page }) => {
@@ -193,29 +197,33 @@ test('undo and redo with the keyboard', async ({ page }) => {
 
 test('confidence meter explains what would improve things', async ({ page }) => {
   await fillRoom(page, '4', '5', '2.5');
+  await goHome(page);
   await page.getByRole('button', { name: /How sure are we/ }).click();
   await expect(page.getByText('What would improve this?').first()).toBeVisible();
   await expect(page.getByText(/Tell us more about/)).toBeVisible();
 });
 
 test('projects: new, switch, rename and delete', async ({ page }) => {
+  const header = page.locator('#panel header');
   await fillRoom(page, '4', '5', '2.5');
-  await page.getByRole('button', { name: /Current project/ }).click();
+  await openMenu(page);
   await page.getByRole('button', { name: 'Rename', exact: true }).click();
   await page.getByLabel('Project name').fill('Living room');
-  await page.getByRole('button', { name: 'Rename', exact: true }).click();
-  await expect(page.getByRole('button', { name: /Current project: Living room/ })).toBeVisible();
+  await page.getByLabel('Project name').press('Enter');
+  await expect(header).toContainText('Living room');
+  await page.keyboard.press('Escape');
 
-  await page.getByRole('button', { name: /Current project/ }).click();
+  await openMenu(page);
   await page.getByRole('button', { name: 'New project' }).click();
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('');
 
-  await page.getByRole('button', { name: /Current project/ }).click();
+  await openMenu(page);
   await page.getByRole('button', { name: 'Living room' }).click();
+  await openSection(page, 'Room');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
 
   page.once('dialog', (d) => void d.accept());
-  await page.getByRole('button', { name: /Current project/ }).click();
+  await openMenu(page);
   await page.getByRole('button', { name: 'Delete' }).click();
-  await expect(page.getByRole('button', { name: /Current project: Untitled room/ })).toBeVisible();
+  await expect(header).toContainText('Untitled room');
 });

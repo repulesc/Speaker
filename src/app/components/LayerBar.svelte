@@ -153,6 +153,12 @@
       var(--heat-4)
     );
   }
+  @media (pointer: coarse), (max-width: 1023px) {
+    .select,
+    .toggle {
+      min-height: 44px;
+    }
+  }
   @media (max-width: 1023px) {
     .bar {
       flex-wrap: wrap;

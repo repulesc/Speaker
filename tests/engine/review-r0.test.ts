@@ -415,6 +415,17 @@ describe('owner feedback after R5: listening distance', () => {
     expect(minDistance(p)).toBeGreaterThanOrEqual(0.6 - 1e-9);
   });
 
+  it('a rear-ported speaker is never suggested closer to the wall than its port needs', () => {
+    const p = makeProject({ W: 3.6, L: 4.4, H: 2.6, clearance: 0.05 });
+    const ctx = buildContext(p)!;
+    expect(ctx.speaker.portLocation).toBe('rear');
+    for (const c of (analyze(p) as AnalysisOk).candidates) {
+      expect(c.speakers.left.base.y - ctx.speaker.depth / 2).toBeGreaterThanOrEqual(
+        ctx.speaker.minRearClearance - 1e-9,
+      );
+    }
+  });
+
   it('the seat map has no holes behind or under furniture', () => {
     const p = makeProject({ W: 3.6, L: 4.4, H: 2.6, standZ: 0 });
     p.variants[0]!.objects = [

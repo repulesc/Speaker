@@ -219,6 +219,7 @@ export interface Constraints {
   listenerYRange?: [Metres, Metres];           // e.g. sofa can move only within this band
   listenerFixed: boolean;                      // seat cannot move at all
   keepSymmetric: boolean;                      // default true
+  listeningDistance?: 'room' | 'near';         // room: best spots 1.5 m or more away (default); near: desk, 0.6 m
 }
 ```
 

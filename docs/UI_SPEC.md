@@ -45,7 +45,8 @@ All tokens are CSS custom properties on `:root`, redefined for dark mode via `pr
 
 ### Typography
 
-- **(R2) Sora** (UI text) and **JetBrains Mono** (numbers, dimensions on the map), replacing IBM Plex. Both have Latin Extended (Hungarian ő, ű), are licensed under the SIL OFL, and are **self-hosted** (no Google Fonts request, for privacy) through `@fontsource`, `font-display: swap`. Dark "Instrument" is the default look; the light theme is a quiet variant (docs/REVAMP_PLAN.md).
+- **(After R5)** The platform's own font (San Francisco on Apple devices, Segoe UI on Windows, Roboto on Android) through the system font stack; no web fonts. Replaces the R2 choice below. Light by default, dark with the system. See REVAMP_PLAN, "After owner testing of R5".
+- **(R2, replaced) Sora** (UI text) and **JetBrains Mono** (numbers, dimensions on the map), replacing IBM Plex. Both have Latin Extended (Hungarian ő, ű), are licensed under the SIL OFL, and are **self-hosted** (no Google Fonts request, for privacy) through `@fontsource`, `font-display: swap`. Dark "Instrument" is the default look; the light theme is a quiet variant (docs/REVAMP_PLAN.md).
 - Scale: 13 / 15 / 17 (body) / 20 / 26 / 34 px, line height 1.5 body, 1.25 headings. Base body size 17 px, for older users.
 - Numbers use tabular figures (`font-variant-numeric: tabular-nums`).
 
@@ -194,7 +195,7 @@ Popular rules of thumb (38%, thirds) appear as an optional "Show rules of thumb"
 - **Drag on the plan:** pointer and touch. Snapping to 5 cm, to the room centreline and to mirror positions (a light haptic on phones where supported).
 - **Keyboard:** every draggable item is focusable. Arrows move 1 cm, Shift+Arrow 10 cm. Every drag has an equivalent form field.
 - **Recompute:** debounced 150 ms after the last edit, run in a Web Worker. While computing, the old results stay visible with a subtle "updating" bar, so nothing goes blank.
-- **Dimension labels** on the drawing in Plex Mono, in the chosen units.
+- **Dimension labels** on the drawing in the UI font with tabular figures, in the chosen units.
 - **Hover / focus linking:** hovering a finding highlights its geometry (reflection point, wall, seat), and vice versa.
 
 ## 9. Empty, error and edge states

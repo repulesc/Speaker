@@ -117,3 +117,16 @@ Not built: guided experiments with stored experiment ids (the protocol is text o
 2. Change only the text between the quotes. Keep every `{name}` placeholder as it is: the app fills in a number or a word there.
 3. When a block (for example `listen: {`) reads well, add a line `  // reviewed` directly above it.
 4. `npm run hu:review` (and CI) shows how many blocks are left.
+
+## After owner testing of R5: redesign and placement fixes
+
+Owner feedback: the speaker placement the app computes was hidden; the heatmap had holes around furniture; best spots sat 1–1.2 m from the speakers; the interface was scattered over three sides and looked like "a CRT in a sci-fi film". Decisions and what was built:
+
+- **Best placement first.** The sidebar opens on a "Best placement" card: where the speakers go (distance from the front wall to the back of the speaker, spacing) and where the seat goes (distance from the front wall and from the speakers), "Apply", and options A/B/C. Two choices sit on the card: what to place (both, speakers only for a fixed seat such as a bed or sofa, seat only) and the listening distance (room: 1.5 m or more; desk: close). The suggested speakers (dashed) and seat (A) are always drawn on the map.
+- **Listening distance** (`constraints.listeningDistance`, 🟡): room listening keeps every best spot 1.5 m or more from both speakers; "desk" allows down to 0.6 m. A room too small for 1.5 m gets the best closer spot, and the card says so.
+- **Rear ports** always keep their clearance in the search (default 0.2 m unless the manual says otherwise), so the app never suggests what its own G07 caution warns about.
+- **Seat map without holes.** Every seat in front of the speakers is scored; blocked or occupied seats and red-flagged ones are dimmed (not hidden or hatched). Furniture is drawn see-through.
+- **Layout.** One sidebar (left on wide screens, a bottom sheet on phones) holds everything you set and read: a settings menu at the top left (language, units, theme, projects, share, export, import, print, about), the best placement, then grouped lists for the room sections and the result pages (Why this result, Improve the room, Listening notes), each opening as its own page with "Back". The rest of the screen is the room, with one small toolbar (setups, map layer, bass note, side view). The top bar, the dock and the tabs are gone.
+- **Look.** Light by default and dark with the system, the platform's own font (no web fonts), one type scale (12/13/15/17/22 px), one accent colour, segmented controls and grouped lists as in the platform settings apps. Every control is 44 px on touch screens; WCAG AA contrast in both themes (axe).
+
+New Hungarian text to review: `settings.*`, `nav.*`, `suggest.*`, `map.dimmed`, `panel.label`, `panel.done`, `furnishing.title`.

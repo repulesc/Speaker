@@ -155,3 +155,9 @@ Caps limit an output's confidence however complete the inputs are:
   - mirror-symmetric rooms give mirror-symmetric heatmaps;
   - raising a goal weight never changes a physics component value;
   - removing all goals reproduces the default ranking.
+
+## After owner testing of R5
+
+- **Preferred listening distance.** The search keeps both speakers at least 1.5 m from the seat unless the user chooses "desk" (0.6 m). It tries, in order: red-flag-free and far enough; red-flag-free and closer (`closer` on the candidates); then the least bad (`compromise`). 🟡 heuristic; ITU-R BS.1116 places reference listeners 2–4 m away.
+- **Rear ports** keep their clearance in the search (the manufacturer's minimum, else 0.2 m).
+- **Seat layers** are scored wherever the seat is in front of both speakers and at least 0.3 m from them. Blocked, occupied and red-flagged cells keep their score and are marked (dimmed on the map).
