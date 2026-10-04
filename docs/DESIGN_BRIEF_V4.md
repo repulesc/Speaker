@@ -31,6 +31,11 @@ The owner wants Opus to have real freedom, without surprises.
 - **Layout (desktop):** Opus proposes. Mock up sidebar-left with the map on the right (as now) and floating cards over a full-screen map; the owner chooses.
 - **Wording tone:** undecided. Show 2 or 3 example versions (for example the Best placement card and one survey screen in a friendly-and-short, a neutral-and-precise and a warm voice) and let the owner pick by reading.
 
+- **Devices:** equal in principle, but the owner works on a Mac and the precise heatmap is a desktop tool: design desktop first, make the phone a clean, working version (not a gimmick). Keep the existing phone tests passing.
+- **Theme:** follow the visitor's device, with a switch in the menu (as now).
+- **Confidence:** quiet, one small word near the result; details open on tap.
+- **Unknown values:** use a typical value, label it "typical", keep going; the confidence word reflects it.
+
 ## The owner's feedback, in order
 
 1. **Settings icon:** replace the cog with the three-lines menu icon (friendlier, less industrial).
