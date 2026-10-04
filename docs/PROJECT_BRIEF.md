@@ -1,7 +1,18 @@
 # Speaker Placement Advisor: Project Brief
 
-Status: **decisions locked after brainstorming; no code written yet.**
-Audience: the next Claude session (Opus, high effort) and the project owner.
+Status: **decisions locked after brainstorming. Phase 0 specification written, awaiting owner review.**
+Audience: Claude sessions working on this project, and the project owner.
+
+Phase 0 documents:
+
+- [RULE_CATALOGUE](RULE_CATALOGUE.md)
+- [DATA_MODEL](DATA_MODEL.md)
+- [SCORING](SCORING.md)
+- [UI_SPEC](UI_SPEC.md)
+- [I18N_AND_UNITS](I18N_AND_UNITS.md)
+- [TEST_PLAN](TEST_PLAN.md)
+- [ROADMAP](ROADMAP.md)
+- [OPEN_QUESTIONS](OPEN_QUESTIONS.md)
 
 ## 1. Vision
 
@@ -108,7 +119,7 @@ Each claim carries its evidence badge and an expandable "why, and the source". T
 
 Used as one realistic test profile; the app itself stays universal.
 
-- KEF LSX II LT speakers (owner wrote "LSX LT2"; **verify the exact model and specs**). Uni-Q driver with wide, even dispersion. Digital EQ with treble, bass extension and wall and desk placement settings. Owner believes toe-in is not required. Verify, don't assume.
+- KEF LSX II LT speakers (owner wrote "LSX LT2"). Data gathered so far, including a **rear bass-reflex port**, is in TEST_PLAN §7; it is still unverified against KEF primary sources. Uni-Q driver with wide, even dispersion. Digital EQ with treble, bass extension and wall and desk placement settings. Owner believes toe-in is not required. Verify, don't assume.
 - One side wall fully covered in CDs (irregular, partly diffusing).
 - Opposite side: radiator and window in a corner, outside the first-reflection point.
 - Behind the speakers: two large canvases, no glass.
