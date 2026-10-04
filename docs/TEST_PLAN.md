@@ -83,6 +83,8 @@ The model must not be checked only against itself.
 
 The snapshot holds the top 3 candidates (positions rounded to 5 cm), their scores (2 decimals) and the finding IDs. Changes require explicit review.
 
+> **Status (R0).** Implemented in `tests/engine/golden.test.ts`, snapshots in `tests/engine/__snapshots__/`. Each scenario also asserts its purpose from the table. Added: a satellite speaker (−6 dB at 160 Hz), whose bass is not scored. The regressions for every R0 fix are in `tests/engine/review-r0.test.ts`, named after the findings in `docs/REVIEW_FINDINGS.md`. Hostile files and links are covered in `tests/app/projectFile.test.ts`, `tests/app/share.test.ts` and an end-to-end test that opens a crafted link.
+
 ## 6. End-to-end journeys (Playwright)
 
 1. **Quick start:** open → choose Quick → enter 5 × 4 × 2.5 m → choose a speaker → Results show at least one finding and a confidence word, within 3 s.
@@ -97,6 +99,8 @@ The snapshot holds the top 3 candidates (positions rounded to 5 cm), their score
 10. **Keyboard only:** complete Quick start without a mouse.
 
 > **Status (M3).** Journeys 1–10 are implemented in `tests/e2e/` (journeys 1 and 3 with the M3 results summary and setup switching; the full comparison follows in M4). Beyond the plan: dragging and keyboard moves, every input step, the speaker file round trip, offline use, phone layout checks, and axe scans of every step in light and dark.
+>
+> **Gaps found in R0** (`docs/REVIEW_FINDINGS.md`): no component tests with Testing Library (the e2e tests cover the components instead); the external cross-checks of §4 (`docs/verification/`) are not done yet; the monotonic-confidence property only varies the room dimensions.
 
 ## 7. The busy room: test profile
 

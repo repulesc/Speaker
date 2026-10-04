@@ -1,5 +1,6 @@
 import { wooferCentre, type AnalysisContext } from '../context';
 import type { Finding, SpeakerPlacement } from '../types';
+import { bassBand } from './P09-bass-response';
 import { ASSUMPTION, makeFinding, type RuleDef } from './rule';
 
 /**
@@ -71,17 +72,16 @@ export const P04: RuleDef = {
       );
       const aligned = alignedBoundaries(d);
       if (aligned) {
+        const frequency = boundaryNullHz((d[aligned[0]] + d[aligned[1]]) / 2, ctx.c);
+        // Inside the modelled bass band the full model (P09) already shows the combined dip, and
+        // scores it: there this is an explanation. Above it, nothing else covers it.
+        const severity = frequency > bassBand(ctx).range[1] ? 'caution' : 'info';
         findings.push(
           makeFinding(
             P04,
             'aligned',
-            'caution',
-            {
-              speaker,
-              boundaryA: aligned[0],
-              boundaryB: aligned[1],
-              frequency: boundaryNullHz((d[aligned[0]] + d[aligned[1]]) / 2, ctx.c),
-            },
+            severity,
+            { speaker, boundaryA: aligned[0], boundaryB: aligned[1], frequency },
             { assumptions: [ASSUMPTION.freeFieldSingleBoundary] },
           ),
         );

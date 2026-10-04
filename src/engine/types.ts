@@ -111,7 +111,7 @@ export interface RoomObject {
   label?: string;
 }
 
-/** Quick-mode shortcut used instead of individual objects. */
+/** How full the room is: a shortcut for the furniture, as absorption per m² of floor. */
 export type Busyness = 'bare' | 'some' | 'busy' | 'very-busy';
 
 // ── Speakers ──────────────────────────────────────────────────────────────
@@ -221,7 +221,7 @@ export interface SetupVariant {
   speakers: { left: SpeakerPlacement; right: SpeakerPlacement };
   listener: Listener;
   objects: RoomObject[];
-  /** Used when `objects` is empty (Quick mode). */
+  /** How full the room is; placed objects can raise this estimate, never lower it. */
   busyness?: Known<Busyness>;
 }
 

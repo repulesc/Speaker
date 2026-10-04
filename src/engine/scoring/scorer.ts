@@ -6,7 +6,7 @@ import { sideDistanceDifference } from '../rules/G03-symmetry';
 import { boundaryNullHz } from '../rules/P04-boundary-interference';
 import { firstReflections, isNearSide } from '../rules/P06-reflections';
 import {
-  bassRange,
+  bassBand,
   buildBassModel,
   PER_OCTAVE,
   responseDb,
@@ -30,6 +30,8 @@ export interface ScoreResult {
  */
 export class Scorer {
   readonly model: BassModel;
+  /** The goal weights, with C1 and C2 dropped when the speaker leaves no bass band to judge. */
+  readonly weights: Record<ComponentId, number>;
   private readonly range: [number, number];
   /** Index range of the model frequencies inside the scoring range. */
   private readonly kLo: number;
@@ -40,7 +42,9 @@ export class Scorer {
     readonly settings: ScoringSettings,
     truncation?: number,
   ) {
-    this.range = bassRange(ctx);
+    const band = bassBand(ctx);
+    this.range = band.range;
+    this.weights = band.scored ? settings.weights : withoutBass(settings.weights);
     // Extend by the smoothing half-window so smoothing near the edges sees real data.
     const margin = 2 ** (1 / 12);
     this.model = buildBassModel(ctx, this.range[0] / margin, this.range[1] * margin, truncation);
@@ -176,8 +180,9 @@ export class Scorer {
     };
     const breakdown = (Object.keys(values) as ComponentId[]).map((componentId) => ({
       componentId,
-      value: values[componentId],
-      weight: this.settings.weights[componentId],
+      // A degenerate input (e.g. the seat on a speaker) must never read as a good score.
+      value: Number.isFinite(values[componentId]) ? values[componentId] : 0,
+      weight: this.weights[componentId],
     }));
     const score = breakdown.reduce((sum, b) => sum + b.value * b.weight, 0);
     return { score, breakdown };
@@ -185,6 +190,13 @@ export class Scorer {
 }
 
 const ORIGIN: Vec3 = { x: 0, y: 0, z: 0 };
+
+function withoutBass(weights: Record<ComponentId, number>): Record<ComponentId, number> {
+  const w = { ...weights, C1: 0, C2: 0 };
+  const total = Object.values(w).reduce((a, b) => a + b, 0);
+  for (const id of Object.keys(w) as ComponentId[]) w[id] /= total;
+  return w;
+}
 
 function average(values: number[]): number {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 1;

@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { encodeShare } from '../../src/app/state/share';
 import { messageKeys, MESSAGES, translate } from '../../src/i18n/translate';
+import { makeProject } from '../fixtures/projects';
 import { fillRoom, openMenu, savedProject } from './helpers';
 
 // Metric by default, English UI.
@@ -89,6 +91,24 @@ test('journey 6 — share: a link opens an identical project for someone else', 
   await expect(other.getByLabel('Length', { exact: true })).toHaveValue('5.20\u00a0m');
   expect(other.url()).not.toContain('#p='); // the link is cleaned from the address bar
   await friend.close();
+});
+
+test('a crafted share link is refused, and the app still works after a reload', async ({
+  browser,
+}) => {
+  // Two setups with one id used to break the page for good (R0 audit, finding C3).
+  const project = makeProject();
+  project.variants.push({ ...structuredClone(project.variants[0]!), name: 'Copy' });
+  const context = await browser.newContext({ locale: 'en-GB' });
+  const page = await context.newPage();
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/' + (await encodeShare(project)));
+  await expect(page.getByRole('alert')).toContainText('could not be read');
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Menu' })).toBeVisible();
+  expect(errors).toEqual([]);
+  await context.close();
 });
 
 test('journey 7 — export and import round-trip; a corrupt file is rejected without harm', async ({

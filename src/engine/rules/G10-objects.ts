@@ -62,33 +62,20 @@ export const G10: RuleDef = {
         makeFinding(G10, 'obstruction', 'red-flag', { object: blocker.label ?? blocker.kind }),
       );
     }
-    for (const side of ['left', 'right'] as const) {
-      const cab = cabinetBox(placement.speakers[side], ctx);
-      for (const o of ctx.objects) {
-        const d = cabinetDistance(cab, o);
-        const object = o.label ?? o.kind;
-        const location = { ...o.position };
-        if (o.kind === 'other-speaker' && d < 1.0) {
-          findings.push(
-            makeFinding(
-              G10,
-              'passiveSpeaker',
-              'caution',
-              { speaker: side, object, distance: d },
-              { location },
-            ),
-          );
-        } else if (o.hard && d < 0.3) {
-          findings.push(
-            makeFinding(
-              G10,
-              'nearbyHard',
-              'caution',
-              { speaker: side, object, distance: d },
-              { location },
-            ),
-          );
-        }
+    // One finding per object, for the nearer speaker.
+    const cabinets = (['left', 'right'] as const).map(
+      (side) => [side, cabinetBox(placement.speakers[side], ctx)] as const,
+    );
+    for (const o of ctx.objects) {
+      const [speaker, distance] = cabinets
+        .map(([side, cab]) => [side, cabinetDistance(cab, o)] as const)
+        .reduce((a, b) => (b[1] < a[1] ? b : a));
+      const params = { speaker, object: o.label ?? o.kind, distance };
+      const extras = { location: { ...o.position } };
+      if (o.kind === 'other-speaker' && distance < 1.0) {
+        findings.push(makeFinding(G10, 'passiveSpeaker', 'caution', params, extras));
+      } else if (o.hard && distance < 0.3) {
+        findings.push(makeFinding(G10, 'nearbyHard', 'caution', params, extras));
       }
     }
     return findings;

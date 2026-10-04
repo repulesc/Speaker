@@ -32,12 +32,15 @@ export const HARD_KINDS: readonly ObjectKind[] = [
 ];
 
 /**
- * Quick-mode "busy-ness" shortcut → total furnishing absorption range (m² sabins, mid bands).
- * Heuristic mapping (🟡), deliberately wide.
+ * "Busy-ness" → furnishing absorption per m² of floor (m² sabins, mid bands), as a [low, high]
+ * range. Heuristic mapping (🟡), deliberately wide. Anchored so that a 4 × 5 × 2.5 m room with the
+ * default surfaces lands in the typical domestic range of 0.3–0.6 s (DEFAULTS.t60Range): about
+ * 1.1 s bare, 0.56 s with some furniture, 0.37 s busy and 0.28 s very busy. Per floor area because
+ * larger rooms hold more furniture (R0 audit: fixed amounts made big rooms read as "live").
  */
-export const BUSYNESS_ABSORPTION: Record<Busyness, [number, number]> = {
-  bare: [0, 2],
-  some: [3, 7],
-  busy: [6, 12],
-  'very-busy': [10, 18],
+export const BUSYNESS_ABSORPTION_PER_M2: Record<Busyness, [number, number]> = {
+  bare: [0, 0.2],
+  some: [0.3, 0.6],
+  busy: [0.5, 0.9],
+  'very-busy': [0.7, 1.2],
 };

@@ -114,4 +114,4 @@ Delivered: all five input steps (Room, Surfaces, Furnishing, Speakers, Goals) pl
 
 ## Revamp (decided after owner testing): see [REVAMP_PLAN.md](REVAMP_PLAN.md)
 
-The old M4–M6 above are replaced by phases R0–R5 in REVAMP_PLAN: a full audit first (R0), then engine additions (R1), the dark "Instrument" workbench with heatmaps, probe and explanations (R2), treatment advisor, listening log and room-mode explorer (R3), copy (R4) and a final audit (R5).
+The old M4–M6 above are replaced by phases R0–R5 in REVAMP_PLAN: a full audit first (R0, done: `docs/REVIEW_FINDINGS.md`), then engine additions (R1), the dark "Instrument" workbench with heatmaps, probe and explanations (R2), treatment advisor, listening log and room-mode explorer (R3), copy (R4) and a final audit (R5).

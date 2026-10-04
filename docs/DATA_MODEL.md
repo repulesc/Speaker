@@ -4,7 +4,7 @@ Status: implemented in M1. **`src/engine/types.ts` is now the source of truth**;
 
 Changes made while implementing (M1):
 - `Surfaces.baseCertainty`: whether each base material was chosen by the user or is a default (drives confidence).
-- `SetupVariant.busyness`: the Quick-mode "busy-ness" shortcut, used when no objects are placed.
+- `SetupVariant.busyness`: the "busy-ness" shortcut. **(R0)** Always used, as absorption per m² of floor ("some" when unknown); placed objects raise it when they add up to more, and never lower it (`docs/REVIEW_FINDINGS.md`, H2 and H3).
 - `Constraints.speakersFixed` alongside `listenerFixed`.
 - `SpeakerPlacement.certainty` (optional, default "estimated").
 - `Project.speaker` holds the profile itself (no model database in v1).

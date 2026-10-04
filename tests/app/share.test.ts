@@ -31,6 +31,15 @@ describe('share links', () => {
     expect(withNotes.ok && withNotes.project.notes).toHaveLength(1);
   });
 
+  it('refuses a link whose setups share an id (it used to blank the app for good)', async () => {
+    const project = busyRoom();
+    project.variants.push({ ...structuredClone(project.variants[0]!), name: 'Copy' });
+    expect(await decodeShare(await encodeShare(project))).toMatchObject({
+      ok: false,
+      reason: 'invalid',
+    });
+  });
+
   it('detects share fragments', () => {
     expect(hasShare('#p=abc')).toBe(true);
     expect(hasShare('#other')).toBe(false);

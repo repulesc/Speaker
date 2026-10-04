@@ -7,6 +7,7 @@ import {
   readProject,
   serializeProject,
 } from '../../src/app/state/projectFile';
+import type { Project } from '../../src/engine/types';
 import { busyRoom } from '../fixtures/busy-room';
 import { makeProject } from '../fixtures/projects';
 
@@ -101,6 +102,76 @@ describe('project files', () => {
     expect(readProject(JSON.parse(JSON.stringify(p)))).toMatchObject({
       ok: false,
       reason: 'invalid',
+    });
+  });
+
+  describe('rejects well-formed files that would break the app (R0 audit C3, H5)', () => {
+    const object = {
+      id: 'o',
+      kind: 'table',
+      position: { x: 1, y: 3, z: 0 },
+      size: { x: 1, y: 0.6, z: 0.75 },
+      hard: true,
+    } as const;
+    const patch = { id: 'p', boundary: 'left', u: 0, v: 0, width: 1, height: 1 } as const;
+    const note = { id: 'n', createdAt: 'x', variantId: 'v1', symptoms: [] };
+    const cases: [string, (p: Project) => void][] = [
+      ['two setups with one id', (p) => p.variants.push({ ...p.variants[0]!, name: 'Copy' })],
+      ['two objects with one id', (p) => (p.variants[0]!.objects = [object, { ...object }])],
+      [
+        'two surface patches with one id',
+        (p) =>
+          (p.surfaces.patches = [
+            { ...patch, preset: 'glass' },
+            { ...patch, preset: 'curtain-heavy' },
+          ]),
+      ],
+      ['two notes with one id', (p) => (p.notes = [note, { ...note }])],
+      ['no setups at all', (p) => (p.variants = [])],
+      [
+        'a surface map without the floor',
+        (p) => delete (p.surfaces.base as Partial<Record<string, string>>).floor,
+      ],
+      [
+        'a certainty map without the ceiling',
+        (p) => delete (p.surfaces.baseCertainty as Partial<Record<string, string>>).ceiling,
+      ],
+      [
+        'custom absorption with two bands instead of six',
+        (p) =>
+          p.surfaces.patches.push({
+            ...patch,
+            preset: 'custom',
+            customAbsorption: [
+              0.5, 0.5,
+            ] as unknown as Project['surfaces']['patches'][0]['customAbsorption'],
+          }),
+      ],
+      [
+        'an absorption range with one value',
+        (p) =>
+          p.variants[0]!.objects.push({
+            ...object,
+            absorptionRange: [5] as unknown as [number, number],
+          }),
+      ],
+      [
+        'an absorption range from high to low',
+        (p) => p.variants[0]!.objects.push({ ...object, absorptionRange: [3, 1] }),
+      ],
+      ['a seat range from far to near', (p) => (p.constraints.listenerYRange = [4, 1])],
+      [
+        'an empty seat range',
+        (p) => (p.constraints.listenerYRange = [] as unknown as [number, number]),
+      ],
+    ];
+    it.each(cases)('%s', (_, mutate) => {
+      const p = makeProject();
+      mutate(p);
+      expect(readProject(JSON.parse(JSON.stringify(p)))).toMatchObject({
+        ok: false,
+        reason: 'invalid',
+      });
     });
   });
 

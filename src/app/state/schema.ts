@@ -3,13 +3,16 @@ import { ROOM_LIMITS, SIZE_LIMITS } from './limits';
 import {
   arr,
   bool,
+  distinctIds,
   known,
   num,
   obj,
   oneOf,
   optional,
+  range,
   record,
   str,
+  tuple,
   vec3,
   type Check,
 } from './validate';
@@ -41,7 +44,7 @@ const OBJECT_KINDS = [
 ] as const;
 
 const text = str(SIZE_LIMITS.text);
-const bands: Check = arr(num(0, 1), 6);
+const bands: Check = tuple(num(0, 1), 6);
 
 const placement = obj({
   base: vec3,
@@ -54,7 +57,7 @@ const object = obj({
   kind: oneOf(OBJECT_KINDS),
   position: vec3,
   size: obj({ x: num(0, 50), y: num(0, 50), z: num(0, 50) }),
-  absorptionRange: optional(arr(num(0, 100), 2)),
+  absorptionRange: optional(range(num(0, 100))),
   hard: bool,
   label: optional(str(SIZE_LIMITS.name)),
 });
@@ -64,7 +67,7 @@ const variant = obj({
   name: str(SIZE_LIMITS.name),
   speakers: obj({ left: placement, right: placement }),
   listener: obj({ ears: vec3, certainty: oneOf(CERTAINTY) }),
-  objects: arr(object, SIZE_LIMITS.objects),
+  objects: distinctIds(arr(object, SIZE_LIMITS.objects)),
   busyness: optional(known(oneOf(['bare', 'some', 'busy', 'very-busy']))),
 });
 
@@ -130,33 +133,35 @@ export const projectSchema: Check = obj({
     ),
   }),
   surfaces: obj({
-    base: record(oneOf(PRESETS), BOUNDARIES),
-    baseCertainty: record(oneOf(CERTAINTY), BOUNDARIES),
-    patches: arr(patch, SIZE_LIMITS.patches),
+    base: record(oneOf(PRESETS), BOUNDARIES, { complete: true }),
+    baseCertainty: record(oneOf(CERTAINTY), BOUNDARIES, { complete: true }),
+    patches: distinctIds(arr(patch, SIZE_LIMITS.patches)),
   }),
   speaker: speakerSchema,
   constraints: obj({
     speakerWall: oneOf(['front']),
     maxSpeakerDistanceFromWall: known(num(0, 10)),
-    listenerYRange: optional(arr(num(0, 100), 2)),
+    listenerYRange: optional(range(num(0, 100))),
     listenerFixed: bool,
     speakersFixed: bool,
     keepSymmetric: bool,
   }),
   goals: obj({ weights: record(oneOf([0, 1, 2]), GOALS) }),
-  variants: arr(variant, SIZE_LIMITS.variants),
+  variants: distinctIds(arr(variant, SIZE_LIMITS.variants, 1)),
   activeVariantId: str(SIZE_LIMITS.name),
-  notes: arr(
-    obj({
-      id: str(SIZE_LIMITS.name),
-      createdAt: str(40),
-      variantId: str(SIZE_LIMITS.name),
-      symptoms: arr(oneOf(['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07']), 7),
-      rating: optional(oneOf([1, 2, 3, 4, 5])),
-      listenedHours: optional(num(0, 10_000)),
-      text: optional(text),
-      experimentId: optional(str(SIZE_LIMITS.name)),
-    }),
-    SIZE_LIMITS.notes,
+  notes: distinctIds(
+    arr(
+      obj({
+        id: str(SIZE_LIMITS.name),
+        createdAt: str(40),
+        variantId: str(SIZE_LIMITS.name),
+        symptoms: arr(oneOf(['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07']), 7),
+        rating: optional(oneOf([1, 2, 3, 4, 5])),
+        listenedHours: optional(num(0, 10_000)),
+        text: optional(text),
+        experimentId: optional(str(SIZE_LIMITS.name)),
+      }),
+      SIZE_LIMITS.notes,
+    ),
   ),
 });

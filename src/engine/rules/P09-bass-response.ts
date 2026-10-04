@@ -1,5 +1,5 @@
 import { wooferCentre, type AnalysisContext } from '../context';
-import type { Placement, Vec3 } from '../types';
+import type { Finding, Placement, Vec3 } from '../types';
 import { ASSUMPTION, makeFinding, type RuleDef } from './rule';
 
 /**
@@ -224,11 +224,26 @@ export function extremes(
  */
 export const BASS_SCORING_MAX_HZ = 200;
 
-/** Frequency range used for scoring and findings: from max(lowLimit, f6) up to ≈ Schroeder (≤ 200 Hz). */
-export function bassRange(ctx: AnalysisContext, lowLimit = 30): [number, number] {
+/**
+ * Narrowest band worth judging (🟡 calibration). A speaker whose −6 dB point leaves less than half
+ * an octave of the modal band (a small satellite) hardly excites the room modes: its bass is not
+ * scored and P09 makes no claim.
+ */
+const MIN_BAND_OCTAVES = 0.5;
+
+export interface BassBand {
+  /** Frequency range for scoring and findings. Never empty: at least half an octave wide. */
+  range: [number, number];
+  /** False when the speaker leaves too little of the modal band to judge the bass. */
+  scored: boolean;
+}
+
+/** From max(lowLimit, f6) up to ≈ Schroeder (≤ 200 Hz). */
+export function bassBand(ctx: AnalysisContext, lowLimit = 30): BassBand {
   const fLo = Math.max(lowLimit, ctx.speaker.f6);
   const fHi = Math.min(Math.max(ctx.schroeder.value, 2 * fLo), BASS_SCORING_MAX_HZ, ctx.bassMaxHz);
-  return [fLo, fHi];
+  const lowestStart = fHi / 2 ** MIN_BAND_OCTAVES;
+  return { range: [Math.min(fLo, lowestStart), fHi], scored: fLo <= lowestStart };
 }
 
 function medianOf(values: number[]): number {
@@ -237,11 +252,10 @@ function medianOf(values: number[]): number {
   return sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
 }
 
-export interface BassCurve {
+export interface BassCurve extends BassBand {
   freqs: Float64Array;
   /** 1/6-octave smoothed, normalised so the median over the scoring range is 0 dB. */
   db: Float64Array;
-  range: [number, number];
 }
 
 export function bassCurve(
@@ -251,38 +265,48 @@ export function bassCurve(
 ): BassCurve {
   const coupling = sourceCoupling(model, speakerSources(placement, ctx), ctx);
   const smoothed = smoothDb(responseDb(model, coupling, placement.listener, ctx));
-  const range = bassRange(ctx);
+  const { range, scored } = bassBand(ctx);
   const inRange = Array.from(smoothed).filter((_, k) => {
     const f = model.freqs[k]!;
     return f >= range[0] && f <= range[1];
   });
   const median = medianOf(inRange);
-  return { freqs: model.freqs, db: smoothed.map((v) => v - median), range };
+  return { freqs: model.freqs, db: smoothed.map((v) => v - median), range, scored };
 }
 
-/** Peaks or dips larger than this (dB re median) are reported. Calibration choice (🟡), = C2. */
+/**
+ * Peaks or dips beyond REPORT_DB (dB re median) are reported; beyond CAUTION_DB they are a
+ * caution. Calibration choices (🟡). Nearly every seat in a real room has a 6 dB peak or dip
+ * somewhere below 200 Hz (R0 audit: even the best spot found had one in 7 of 9 test rooms), so
+ * 6–10 dB is information, not a warning.
+ */
 const REPORT_DB = 6;
+const CAUTION_DB = 10;
 
 export const P09: RuleDef = {
   id: 'P09',
   level: 'physics',
   sources: ['KUT', 'EVP'],
-  variants: ['peak', 'dip', 'smooth'],
+  variants: ['peak', 'dip', 'smooth', 'notScored'],
   evaluate(ctx, placement) {
     const curve = bassCurve(ctx, placement);
+    if (!curve.scored) {
+      return [makeFinding(P09, 'notScored', 'info', { lowFrequencyMinus6dB: ctx.speaker.f6 })];
+    }
     const { peak, dip } = extremes(curve.freqs, curve.db, 0, curve.range[0], curve.range[1]);
     const assumptions = [
       ASSUMPTION.rigidRectangular,
       ASSUMPTION.pointSource,
       ASSUMPTION.uniformDamping,
     ];
-    const findings = [];
+    const severity = (db: number) => (Math.abs(db) > CAUTION_DB ? 'caution' : 'info');
+    const findings: Finding[] = [];
     if (peak.db > REPORT_DB) {
       findings.push(
         makeFinding(
           P09,
           'peak',
-          'caution',
+          severity(peak.db),
           { frequency: peak.frequency, db: peak.db },
           { assumptions },
         ),
@@ -293,7 +317,7 @@ export const P09: RuleDef = {
         makeFinding(
           P09,
           'dip',
-          'caution',
+          severity(dip.db),
           { frequency: dip.frequency, db: dip.db },
           { assumptions },
         ),

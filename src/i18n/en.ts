@@ -255,7 +255,8 @@ export const en = {
     busy: {
       legend: 'How full is the room?',
       help: 'A quick estimate is enough. Or place your furniture below for more detail.',
-      ignored: 'You have placed furniture below, so that is used instead of this estimate.',
+      combined:
+        'Furniture you place below counts too: we use whichever of the two soaks up more sound.',
       bare: 'Bare',
       some: 'Some furniture',
       busy: 'Busy',
@@ -482,6 +483,13 @@ export const en = {
     updating: 'Updating…',
     error: 'Something went wrong calculating this. Your data is safe.',
     copyDetails: 'Copy details',
+  },
+  crash: {
+    title: 'This project cannot be shown',
+    body: 'Something in it confused the app. Your other projects are safe. Save this one as a file if you want to keep it, then start a new project.',
+    export: 'Export file',
+    newProject: 'Start a new project',
+    details: 'Technical details',
   },
   sheet: {
     expand: 'Show more',

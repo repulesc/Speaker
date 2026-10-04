@@ -1,0 +1,569 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`golden scenarios > 4 m cube: stacked modes are a caution; confidence is that of any valid room 1`] = `
+{
+  "candidates": [
+    {
+      "score": 0.92,
+      "seat": [
+        2,
+        1.75,
+      ],
+      "speakersX": [
+        1.35,
+        2.65,
+      ],
+      "speakersY": 0.6,
+    },
+    {
+      "score": 0.91,
+      "seat": [
+        2,
+        1.7,
+      ],
+      "speakersX": [
+        1.3,
+        2.7,
+      ],
+      "speakersY": 0.4,
+    },
+    {
+      "score": 0.9,
+      "seat": [
+        2,
+        2.3,
+      ],
+      "speakersX": [
+        0.9,
+        3.1,
+      ],
+      "speakersY": 0.45,
+    },
+  ],
+  "current": 0.65,
+  "findings": [
+    "caution P09.peak",
+    "caution P09.dip",
+    "caution P11.coincident",
+    "info P02.lowestModes",
+    "info P04.frontWall",
+    "info P04.aligned",
+    "info P05.low",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P07.transition",
+    "info P08.live",
+    "info P10.ratio",
+    "info P11.bonello",
+    "info P11.ituFail",
+    "info G01.widthNode",
+    "info G09.bothSchools",
+    "info G09.bothSchools",
+    "info H01.overlay",
+    "info H02.overlay",
+    "info H04.middle",
+    "info H05.experiment",
+  ],
+}
+`;
+
+exports[`golden scenarios > Room R, default speaker: avoids the midpoint, shows the 68.6 Hz coincidence 1`] = `
+{
+  "candidates": [
+    {
+      "score": 0.9,
+      "seat": [
+        2,
+        1.65,
+      ],
+      "speakersX": [
+        1.35,
+        2.65,
+      ],
+      "speakersY": 0.4,
+    },
+    {
+      "score": 0.89,
+      "seat": [
+        2,
+        2.1,
+      ],
+      "speakersX": [
+        1.15,
+        2.85,
+      ],
+      "speakersY": 0.45,
+    },
+    {
+      "score": 0.88,
+      "seat": [
+        2,
+        1.9,
+      ],
+      "speakersX": [
+        1.3,
+        2.7,
+      ],
+      "speakersY": 0.4,
+    },
+  ],
+  "current": 0.61,
+  "findings": [
+    "caution P09.dip",
+    "caution P11.coincident",
+    "caution G04.caution",
+    "info P02.lowestModes",
+    "info P04.frontWall",
+    "info P04.aligned",
+    "info P05.low",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P07.transition",
+    "info P08.balanced",
+    "info P09.peak",
+    "info P10.ratio",
+    "info P11.ituPass",
+    "info G01.widthNode",
+    "info G09.bothSchools",
+    "info G09.bothSchools",
+    "info H01.overlay",
+    "info H02.overlay",
+    "info H04.middle",
+    "info H05.experiment",
+  ],
+}
+`;
+
+exports[`golden scenarios > a satellite speaker (−6 dB at 160 Hz): bass not scored, everything else still works 1`] = `
+{
+  "candidates": [
+    {
+      "score": 0.98,
+      "seat": [
+        2,
+        3.45,
+      ],
+      "speakersX": [
+        0.35,
+        3.65,
+      ],
+      "speakersY": 0.5,
+    },
+    {
+      "score": 0.98,
+      "seat": [
+        2,
+        3.85,
+      ],
+      "speakersX": [
+        0.35,
+        3.65,
+      ],
+      "speakersY": 0.9,
+    },
+    {
+      "score": 0.98,
+      "seat": [
+        2,
+        3.7,
+      ],
+      "speakersX": [
+        0.3,
+        3.7,
+      ],
+      "speakersY": 0.65,
+    },
+  ],
+  "current": 0.85,
+  "findings": [
+    "caution P11.coincident",
+    "caution G04.caution",
+    "info P02.lowestModes",
+    "info P04.frontWall",
+    "info P04.aligned",
+    "info P05.low",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P07.transition",
+    "info P08.balanced",
+    "info P09.notScored",
+    "info P10.ratio",
+    "info P11.ituPass",
+    "info G01.widthNode",
+    "info G09.bothSchools",
+    "info G09.bothSchools",
+    "info H01.overlay",
+    "info H02.overlay",
+    "info H04.middle",
+    "info H05.experiment",
+  ],
+}
+`;
+
+exports[`golden scenarios > long narrow room 3 × 8 × 2.5 m: a good stereo angle is still reachable 1`] = `
+{
+  "candidates": [
+    {
+      "score": 0.94,
+      "seat": [
+        1.5,
+        1.9,
+      ],
+      "speakersX": [
+        0.7,
+        2.3,
+      ],
+      "speakersY": 0.45,
+    },
+    {
+      "score": 0.93,
+      "seat": [
+        1.5,
+        2.1,
+      ],
+      "speakersX": [
+        0.65,
+        2.35,
+      ],
+      "speakersY": 0.5,
+    },
+    {
+      "score": 0.92,
+      "seat": [
+        1.5,
+        1.6,
+      ],
+      "speakersX": [
+        0.9,
+        2.1,
+      ],
+      "speakersY": 0.45,
+    },
+  ],
+  "current": 0.71,
+  "findings": [
+    "caution P09.dip",
+    "caution G01.caution",
+    "caution G04.caution",
+    "info P02.lowestModes",
+    "info P04.frontWall",
+    "info P04.aligned",
+    "info P05.moderate",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P07.transition",
+    "info P08.balanced",
+    "info P10.ratio",
+    "info P11.bonello",
+    "info P11.ituFail",
+    "info G01.widthNode",
+    "info G09.bothSchools",
+    "info G09.bothSchools",
+    "info H01.overlay",
+    "info H02.overlay",
+    "info H04.middle",
+    "info H05.experiment",
+  ],
+}
+`;
+
+exports[`golden scenarios > rear port with a manufacturer minimum: caution now, minimum kept by every candidate 1`] = `
+{
+  "candidates": [
+    {
+      "score": 0.88,
+      "seat": [
+        2,
+        1.7,
+      ],
+      "speakersX": [
+        1.4,
+        2.6,
+      ],
+      "speakersY": 0.55,
+    },
+    {
+      "score": 0.86,
+      "seat": [
+        2,
+        2.2,
+      ],
+      "speakersX": [
+        1.25,
+        2.75,
+      ],
+      "speakersY": 0.9,
+    },
+    {
+      "score": 0.85,
+      "seat": [
+        2,
+        2.2,
+      ],
+      "speakersX": [
+        1.2,
+        2.8,
+      ],
+      "speakersY": 0.55,
+    },
+  ],
+  "current": 0.48,
+  "findings": [
+    "caution P09.dip",
+    "caution P11.coincident",
+    "caution G04.caution",
+    "caution G07.tooClose",
+    "info P02.lowestModes",
+    "info P04.frontWall",
+    "info P05.moderate",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P07.transition",
+    "info P08.balanced",
+    "info P09.peak",
+    "info P10.ratio",
+    "info P11.ituPass",
+    "info G01.widthNode",
+    "info G09.bothSchools",
+    "info G09.bothSchools",
+    "info H01.overlay",
+    "info H02.overlay",
+    "info H04.middle",
+    "info H05.experiment",
+  ],
+}
+`;
+
+exports[`golden scenarios > seat fixed against the back wall: red flag, and the best speaker spots for that seat 1`] = `
+{
+  "candidates": [
+    {
+      "score": 0.69,
+      "seat": [
+        2,
+        4.8,
+      ],
+      "speakersX": [
+        0.25,
+        3.75,
+      ],
+      "speakersY": 0.5,
+    },
+    {
+      "score": 0.68,
+      "seat": [
+        2,
+        4.8,
+      ],
+      "speakersX": [
+        0.25,
+        3.75,
+      ],
+      "speakersY": 0.85,
+    },
+    {
+      "score": 0.67,
+      "seat": [
+        2,
+        4.8,
+      ],
+      "speakersX": [
+        0.45,
+        3.55,
+      ],
+      "speakersY": 0.85,
+    },
+  ],
+  "current": 0.38,
+  "findings": [
+    "red-flag G02.redFlag",
+    "red-flag G04.redFlag",
+    "caution P09.peak",
+    "caution P09.dip",
+    "caution P11.coincident",
+    "info P02.lowestModes",
+    "info P04.frontWall",
+    "info P04.aligned",
+    "info P05.low",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P07.transition",
+    "info P08.balanced",
+    "info P10.ratio",
+    "info P11.ituPass",
+    "info G01.widthNode",
+    "info G09.bothSchools",
+    "info G09.bothSchools",
+    "info H01.overlay",
+    "info H02.overlay",
+    "info H04.middle",
+    "info H05.experiment",
+  ],
+}
+`;
+
+exports[`golden scenarios > the busy room: wall-setting reminder, passive speaker, dead room → treble lift to try 1`] = `
+{
+  "candidates": [
+    {
+      "score": 0.93,
+      "seat": [
+        1.8,
+        1.65,
+      ],
+      "speakersX": [
+        1.1,
+        2.5,
+      ],
+      "speakersY": 0.35,
+    },
+    {
+      "score": 0.9,
+      "seat": [
+        1.8,
+        1.75,
+      ],
+      "speakersX": [
+        1.15,
+        2.45,
+      ],
+      "speakersY": 0.55,
+    },
+    {
+      "score": 0.88,
+      "seat": [
+        1.8,
+        1.4,
+      ],
+      "speakersX": [
+        1.25,
+        2.35,
+      ],
+      "speakersY": 0.35,
+    },
+  ],
+  "current": 0.61,
+  "findings": [
+    "caution G03.surfaces",
+    "caution G04.caution",
+    "caution G10.passiveSpeaker",
+    "info P02.lowestModes",
+    "info P04.frontWall",
+    "info P04.aligned",
+    "info P05.low",
+    "info P06.scattering",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P07.transition",
+    "info P08.dead",
+    "info P09.dip",
+    "info P10.ratio",
+    "info P11.ituPass",
+    "info G01.widthNode",
+    "info G07.matchSetting",
+    "info G09.bothSchools",
+    "info H01.overlay",
+    "info H02.overlay",
+    "info H04.middle",
+    "info H05.experiment",
+    "info H06.lift",
+  ],
+}
+`;
+
+exports[`golden scenarios > tiny room 2.5 × 3 × 2.4 m: the 1 m listening distance is kept 1`] = `
+{
+  "candidates": [
+    {
+      "score": 0.89,
+      "seat": [
+        1.25,
+        1.75,
+      ],
+      "speakersX": [
+        0.6,
+        1.9,
+      ],
+      "speakersY": 0.5,
+    },
+    {
+      "score": 0.86,
+      "seat": [
+        1.25,
+        2.35,
+      ],
+      "speakersX": [
+        0.65,
+        1.85,
+      ],
+      "speakersY": 1.4,
+    },
+    {
+      "score": 0.84,
+      "seat": [
+        1.25,
+        1.75,
+      ],
+      "speakersX": [
+        0.4,
+        2.1,
+      ],
+      "speakersY": 0.45,
+    },
+  ],
+  "current": 0.53,
+  "findings": [
+    "caution P09.peak",
+    "caution P09.dip",
+    "caution P11.coincident",
+    "caution G04.caution",
+    "info P02.lowestModes",
+    "info P04.frontWall",
+    "info P05.moderate",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P06.sideWall",
+    "info P06.floor",
+    "info P06.ceiling",
+    "info P07.transition",
+    "info P08.balanced",
+    "info P10.ratio",
+    "info P11.ituFail",
+    "info G01.widthNode",
+    "info G09.bothSchools",
+    "info G09.bothSchools",
+    "info H01.overlay",
+    "info H02.overlay",
+    "info H04.middle",
+    "info H05.experiment",
+  ],
+}
+`;

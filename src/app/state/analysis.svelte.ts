@@ -5,7 +5,8 @@ const DEBOUNCE_MS = 150;
 
 /**
  * Runs the engine in a Web Worker, 150 ms after the last edit. The previous result stays visible
- * while a new one is computed, so nothing flashes blank (docs/UI_SPEC.md §8).
+ * while a new one is computed, so nothing flashes blank (docs/UI_SPEC.md §8). A failed run clears
+ * it: an old result next to an error would describe a project that no longer exists.
  */
 export class AnalysisRunner {
   result = $state<Analysis | null>(null);
@@ -45,6 +46,7 @@ export class AnalysisRunner {
       this.busy = false;
       if ('error' in response) {
         this.error = response.error;
+        this.result = null;
       } else {
         this.error = null;
         this.result = response.analysis;
@@ -58,6 +60,7 @@ export class AnalysisRunner {
     if (id !== this.#latest) return;
     this.busy = false;
     this.error = error instanceof Error ? error.message : String(error);
+    this.result = null;
   }
 
   dispose(): void {

@@ -71,7 +71,7 @@ The numbered wizard and the welcome card; the confidence meter as a top-bar widg
 
 | Phase | What | Model / effort |
 |---|---|---|
-| **R0** | **Full audit of the mechanics**: engine physics, scoring, search, robustness, workspace and persistence, import/share security, i18n, accessibility, tests. Output `docs/REVIEW_FINDINGS.md` (severity-ranked, with evidence) and fix everything critical and high. Resolve or re-mark the ⚠ sources that can be checked. | **Opus, xhigh** |
+| **R0** | **Full audit of the mechanics**: engine physics, scoring, search, robustness, workspace and persistence, import/share security, i18n, accessibility, tests. Output `docs/REVIEW_FINDINGS.md` (severity-ranked, with evidence) and fix everything critical and high. Resolve or re-mark the ⚠ sources that can be checked. **Done:** findings and the R1 proposals in `docs/REVIEW_FINDINGS.md`. | **Opus, xhigh** |
 | R1 | Engine additions: layers, `explainPoint`, sensitivity, mode-field, treatment rules, speaker-settings rules, folk-rule comparison, finding copy keys; validation suite | Opus, high |
 | R2 | Workbench UI in the Instrument look: dock, map with heatmap and dimension lines, probe, chart, right panel, phone layout | Sonnet, medium (Opus review) |
 | R3 | Treat tab, Listen tab (log + agreement), room-mode explorer, compare, print sheet, larger furniture | Sonnet medium + Opus for the rules |

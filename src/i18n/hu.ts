@@ -261,7 +261,8 @@ export const hu: Messages = {
     busy: {
       legend: 'Mennyire teli van a helyiség?',
       help: 'Elég egy gyors becslés. Vagy helyezd el lent a bútorokat a pontosabb eredményért.',
-      ignored: 'Lent már elhelyeztél bútorokat, ezért ezt használjuk a becslés helyett.',
+      combined:
+        'A lent elhelyezett bútorok is számítanak: a kettő közül azt vesszük, amelyik több hangot nyel el.',
       bare: 'Üres',
       some: 'Kevés bútor',
       busy: 'Zsúfolt',
@@ -485,6 +486,13 @@ export const hu: Messages = {
     updating: 'Frissítés…',
     error: 'Valami elromlott a számításnál. Az adataid biztonságban vannak.',
     copyDetails: 'Részletek másolása',
+  },
+  crash: {
+    title: 'Ezt a projektet nem tudjuk megjeleníteni',
+    body: 'Valami összezavarta az alkalmazást. A többi projekted biztonságban van. Ha meg akarod tartani, mentsd el fájlba, aztán kezdj egy új projektet.',
+    export: 'Exportálás fájlba',
+    newProject: 'Új projekt indítása',
+    details: 'Technikai részletek',
   },
   sheet: {
     expand: 'Több mutatása',
