@@ -1,22 +1,211 @@
 import type { Messages } from './types';
 
-/** Hungarian messages, informal register (tegezés). Native review pending (OPEN_QUESTIONS Q5). */
+/** Hungarian messages, informal register (tegezés). Native review pending (OPEN_QUESTIONS). */
 export const hu: Messages = {
   app: {
-    title: 'Speaker Placement Advisor',
     tagline: 'Találd meg a hangfalak és a hallgatási pont jó helyét, a teremakusztika alapján.',
-    status: 'Fejlesztés alatt: az akusztikai motor kész, a képernyők következnek.',
+    skipToContent: 'Ugrás a tartalomra',
+    disclaimer: 'Iránymutatás, nem garancia. A végső szó a füledé.',
   },
   language: {
     label: 'Nyelv',
     en: 'English',
     hu: 'Magyar',
   },
+  theme: {
+    label: 'Megjelenés',
+    auto: 'Az eszközöd szerint',
+    light: 'Világos',
+    dark: 'Sötét',
+  },
   units: {
+    label: 'Mértékegység',
+    metric: 'Metrikus (m, cm)',
+    imperial: 'Angolszász (láb, hüvelyk)',
     error: {
       invalid: 'Ezt a hosszt nem értjük. Próbáld így: 3,5 m, 350 cm vagy 11′ 6″.',
       notPositive: 'A hossznak nullánál nagyobbnak kell lennie.',
-      ambiguousFeetInches: 'Így gondoltad: {feet}′ {inches}″?',
+      ambiguousFeetInches: 'A lábhoz és a hüvelykhez jel kell, például 11′ 6″ vagy 11 ft 6 in.',
     },
+  },
+  project: {
+    untitled: 'Névtelen helyiség',
+    copySuffix: 'másolat',
+    switcher: 'Projektek',
+    current: 'Aktuális projekt',
+    new: 'Új projekt',
+    duplicate: 'Másolat készítése',
+    rename: 'Átnevezés',
+    renameLabel: 'A projekt neve',
+    delete: 'Törlés',
+    deleteConfirm: 'Törlöd ezt: „{name}”? Ez nem vonható vissza.',
+    saved: 'Elmentve ezen az eszközön',
+    unsaved: 'Mentés…',
+    unavailable:
+      'Nincs mentés: a böngésződ letiltja a tárolást. Használd az exportálást, hogy ne vesszen el a munkád.',
+    failed:
+      'A mentés nem sikerült, lehet, hogy betelt a tárhely. Használd az exportálást, hogy ne vesszen el a munkád.',
+  },
+  menu: {
+    label: 'Menü',
+    undo: 'Visszavonás',
+    redo: 'Újra',
+    share: 'Megosztási link',
+    export: 'Exportálás fájlba',
+    import: 'Importálás fájlból',
+    about: 'Névjegy és források',
+  },
+  share: {
+    title: 'A beállítás megosztása',
+    privacy:
+      'A teljes beállítás magában a linkben van. Semmi nem megy ki szerverre, és a linket megnyitó mindenki saját másolatot kap.',
+    includeNotes: 'A hallgatási jegyzeteim is kerüljenek bele',
+    copy: 'Link másolása',
+    copied: 'A link a vágólapon van',
+    copyFailed: 'Nem sikerült automatikusan másolni. Jelöld ki a linket, és másold ki kézzel.',
+    linkLabel: 'Megosztási link',
+    close: 'Bezárás',
+  },
+  import: {
+    success: 'Megnyitottuk a(z) „{name}” projektet új projektként.',
+    error: {
+      notJson: 'Ez nem olvasható projektfájl.',
+      tooBig: 'Ez a fájl vagy link túl nagy ahhoz, hogy projekt legyen.',
+      notAProject: 'Ebben a fájlban vagy linkben nincs projekt.',
+      newerVersion: 'Ezt a projektet az alkalmazás újabb verziója készítette.',
+      invalid: 'A projektet nem sikerült beolvasni: {detail}',
+      tooMany: 'Túl sok mentett projekted van. Előbb törölj egyet.',
+    },
+    dismiss: 'Bezárás',
+  },
+  confidence: {
+    label: 'Mennyire vagyunk biztosak?',
+    step: {
+      1: 'Durva tipp',
+      2: 'Első benyomás',
+      3: 'Megbízható',
+      4: 'Részletes',
+      5: 'Mérések nélkül ennél jobb nem lehet',
+    },
+    hintTitle: 'Mivel lenne pontosabb?',
+    hint: 'Mondj többet erről: „{input}”, és biztosabbak leszünk.',
+    nothingMore: 'Nincs mit hozzátenni: ennél biztosabb a megadott adatokból nem lehet.',
+    capsTitle: 'A modell korlátai',
+    cap: {
+      nonRectangular: 'A helyiséged nem téglalap alakú, ezért csak nagyon durva képet tudunk adni.',
+      outOfModel:
+        'A helyiségedben olyan jellemzők vannak, amelyeket nem tudunk modellezni. A basszuseredményeket csak tájékoztatásnak vedd.',
+      lightweightWalls:
+        'A könnyűszerkezetes falakon kiszökik a basszus, ezért a basszusbecslés kevésbé megbízható.',
+      lowConfidenceSurface:
+        'Keveset tudunk azokról a felületekről, ahová az első visszaverődések érkeznek.',
+    },
+  },
+  input: {
+    'room.width': 'a helyiség szélessége',
+    'room.length': 'a helyiség hossza',
+    'room.height': 'a belmagasság',
+    'room.construction': 'a falak szerkezete',
+    'speakers.position': 'a hangfalak helye',
+    'listener.position': 'az ülőhely helye',
+    surfaces: 'a falfelületek',
+    furnishing: 'a berendezés',
+    'speaker.lowFrequencyMinus6dB': 'a hangfal mélyleadása',
+    'speaker.directivity': 'a hangfal sugárzási képe',
+    'speaker.portLocation': 'a basszusnyílás helye',
+    'speaker.enclosure': 'a hangfal háztípusa',
+    'speaker.acousticAxisHeight': 'a magassugárzó magassága',
+    'speaker.driverLayout': 'a hangszórók elrendezése',
+  },
+  welcome: {
+    title: 'Hogyan szeretnél kezdeni?',
+    intro: 'Bármikor válthatsz, és semmi nem vész el abból, amit megadtál.',
+    quick: {
+      title: 'Gyors indulás',
+      body: 'Helyiségméret, hangfal és célok. Egy első válasz körülbelül egy perc alatt.',
+    },
+    detailed: {
+      title: 'Részletes beállítás',
+      body: 'Falak, bútorok és hangfalrészletek is, megbízhatóbb eredményért.',
+    },
+  },
+  steps: {
+    label: 'Lépések',
+    optional: 'nem kötelező',
+    room: 'Helyiség',
+    surfaces: 'Felületek',
+    furnishing: 'Berendezés',
+    speakers: 'Hangfalak',
+    goals: 'Célok',
+    results: 'Eredmény',
+    next: 'Tovább',
+    back: 'Vissza',
+    comingSoon: 'Ez a lépés a következő frissítéssel érkezik.',
+  },
+  field: {
+    unusual: 'Biztos, hogy jó? A helyiségek általában {min} és {max} között vannak.',
+    outOfRange: '{label}: {min} és {max} közötti értéket adj meg.',
+    neededToStart: 'Az induláshoz kell',
+    certainty: {
+      label: 'Mennyire vagy biztos benne?',
+      measured: 'Lemértem',
+      estimated: 'Becslés',
+      unknown: 'Nem tudom',
+    },
+  },
+  room: {
+    title: 'A helyiséged',
+    intro: 'Elég a durva érték is. Jelöld, mennyire vagy biztos benne, és később pontosíthatod.',
+    width: 'Szélesség',
+    length: 'Hossz',
+    height: 'Belmagasság',
+    widthHelp: 'Faltól falig, a helyiség keresztirányában.',
+    lengthHelp: 'A hangfalak mögötti faltól a hátad mögötti falig.',
+    heightHelp: 'Padlótól a mennyezetig.',
+    construction: {
+      legend: 'A falak főként…',
+      solid: 'Tömör szerkezetűek (tégla, beton)',
+      lightweight: 'Könnyűszerkezetesek (gipszkarton)',
+      unknown: 'Nem tudom',
+      help: 'A könnyűszerkezetes falakon átszökik a basszus, ezért a basszusbecslés kevésbé biztos.',
+    },
+    outOfModel: {
+      legend: 'Van a helyiségben ezek közül valami?',
+      help: 'Ezeket nem tudjuk modellezni, ezért kevésbé bízhatunk a basszuseredményekben.',
+      'open-doorway': 'Nagy, nyitott ajtónyílás',
+      'open-plan-connection': 'Nyílás egy másik helyiségbe',
+      alcove: 'Beugró vagy fülke',
+      'slanted-ceiling': 'Ferde mennyezet',
+      'non-rectangular': 'Nem igazán téglalap alakú',
+    },
+    temperature: {
+      summary: 'Haladó: a helyiség hőmérséklete',
+      label: 'Hőmérséklet',
+      help: 'A hang melegebb levegőben kicsit gyorsabban terjed. Ha üresen hagyod, 20 °C-ot feltételezünk.',
+    },
+  },
+  plan: {
+    label: 'A helyiség felülnézetben',
+    placeholder: 'Add meg a helyiség méretét, és itt megjelenik.',
+    frontWall: 'Elülső fal (hangfalak)',
+    seat: 'Ülőhely',
+    speaker: 'Hangfal',
+    summary:
+      'A helyiség {width} széles és {length} hosszú. A hangfalak {spacing} távolságra vannak egymástól. Az ülőhely {distance} távolságra van a hangfalaktól.',
+  },
+  analysis: {
+    updating: 'Frissítés…',
+    error: 'Valami elromlott a számításnál. Az adataid biztonságban vannak.',
+    copyDetails: 'Részletek másolása',
+  },
+  sheet: {
+    expand: 'Több mutatása',
+    collapse: 'Kevesebb mutatása',
+  },
+  about: {
+    title: 'Névjegy',
+    body: 'Az alkalmazás bevett teremakusztikai ismeretekkel javasol hangfal- és ülőhelyet, és megmondja, mennyire biztos a dolgában. Iránymutatás, nem garancia.',
+    sources:
+      'Minden szabály és a hozzá tartozó források a projekt szabálykatalógusában találhatók.',
   },
 };

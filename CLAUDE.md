@@ -15,4 +15,6 @@ Free, open-source, local-first web app (TypeScript strict + Vite + Svelte, stati
 
 ## Commands
 
-`npm test` · `npm run check` · `npm run lint` · `npm run build`. Run all four before pushing; CI runs the same.
+`npm test` · `npm run check` · `npm run lint` · `npm run build` · `npm run check:size` · `npm run test:e2e` (needs a Chromium; set `PW_CHROMIUM` if it is not the Playwright default). Run them before pushing; CI runs the same.
+
+The product name lives only in `src/app/config.ts`. Untitled projects have an empty `name`; show `projectLabel(name)`.

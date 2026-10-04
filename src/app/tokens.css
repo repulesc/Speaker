@@ -42,12 +42,3 @@
   --danger: #f97066;
   color-scheme: dark;
 }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: system-ui, sans-serif; /* IBM Plex Sans, self-hosted, arrives in M2 */
-  font-size: 17px;
-  line-height: 1.5;
-}

@@ -2,7 +2,7 @@
 
 A free, open-source web app that helps anyone place loudspeakers and choose a listening seat in a rectangular room, using established room acoustics, and that is honest about what it doesn't know.
 
-**Status:** M1 done (acoustics engine). The screens come next. See [docs/ROADMAP.md](docs/ROADMAP.md).
+**Status:** M1 (acoustics engine) and M2 (app shell, units, languages, saving and sharing) are done. The input steps come next (M3). See [docs/ROADMAP.md](docs/ROADMAP.md). See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Where to read first
 
@@ -21,7 +21,11 @@ npm test         # unit, property and reference tests
 npm run check    # type check (svelte-check)
 npm run lint     # ESLint + Prettier
 npm run build    # production build into dist/
+npm run check:size  # JavaScript budget (150 KB gzip), after a build
+npm run test:e2e    # browser tests and accessibility checks (builds first)
 ```
+
+End-to-end tests need a Chromium. In CI it is installed with `npx playwright install chromium`; if you already have one, set `PW_CHROMIUM` to its path.
 
 The independent physics reference (Python + NumPy) lives in `tools/reference/`. Run `python3 tools/reference/reference.py` to regenerate `tests/fixtures/reference.json`, and only deliberately.
 
@@ -33,10 +37,11 @@ src/engine/   pure TypeScript acoustics engine (no UI, i18n or storage imports)
   scoring/    score components, search, robustness, heatmaps
 src/units/    length parsing and formatting (SI inside, units only at the edge)
 src/i18n/     English and Hungarian messages
-src/app/      Svelte UI
+src/app/      Svelte UI (components/, state/ for projects, saving, sharing)
+tests/e2e/    Playwright journeys and axe checks
 tests/        Vitest tests and fixtures
 ```
 
 ## License
 
-Code: MIT. Rule catalogue and docs: CC BY 4.0. (License files arrive at launch; see OPEN_QUESTIONS Q2.)
+Code: MIT ([LICENSE](LICENSE)). Rule catalogue and docs: CC BY 4.0 ([LICENSE-docs](LICENSE-docs)). Copyright holder: "Speaker Placement Advisor contributors".

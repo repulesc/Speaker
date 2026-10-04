@@ -15,9 +15,10 @@ describe('i18n', () => {
   });
 
   it('fills placeholders and falls back to the key', () => {
-    expect(translate('en', 'units.error.ambiguousFeetInches', { feet: 11, inches: 6 })).toBe(
-      'Did you mean 11′ 6″?',
+    expect(translate('en', 'import.success', { name: 'Den' })).toBe(
+      'Opened “Den” as a new project.',
     );
+    expect(translate('hu', 'import.success', { name: 'Nappali' })).toContain('„Nappali”');
     expect(translate('hu', 'no.such.key')).toBe('no.such.key');
   });
 

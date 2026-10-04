@@ -9,18 +9,17 @@ Status: end of Phase 0. Questions are numbered so you can answer them by number.
 | # | Decision |
 |---|---|
 | Q1 | The owner's measurements are **not needed**: the product is universal. TEST_PLAN §7 uses a synthetic "busy room" built from the owner's description. |
+| Q2 | License files use "Speaker Placement Advisor contributors" as the holder (done in M2). |
+| Q3 | App name: decided later, after the product and site exist. It lives in `src/app/config.ts` only. |
 | Q4 | Hungarian register: **informal (tegezés)**. Final. |
+| Q5 | The owner reviews all Hungarian strings. |
 | Q6 | **No speaker model database at launch.** Users describe their own speaker; generic type presets help. |
 | Q7 | Desk / near-field setups: **after v1**, first item in ROADMAP "Later". The owner wants them. |
 | Q8–Q12 | Recommendations accepted by default when the owner said "proceed": rules of thumb shown but not scored; default thresholds labelled "rule of thumb"; the five goals; shape-and-word evidence tags; the "busy-ness" shortcut. Can be revisited at any time. |
 
-### Still open (not blocking M1)
+### Still open
 
-| # | Question | Recommendation | Blocks |
-|---|---|---|---|
-| Q2 | **Copyright holder name** for the MIT and CC BY license files (your real name, a pseudonym, or "Speaker Placement Advisor contributors"). | your choice | M6 |
-| Q3 | **App name.** Working title "Speaker Placement Advisor". A shorter brand name usable in both languages? | one short name for both languages | M2 (title, PWA manifest) |
-| Q5 | **Hungarian reviewer:** will you review all Hungarian strings, or nominate someone? | you, at each milestone | M5 |
+None. Everything from Phase 0 is decided or deferred.
 
 ## B. Technical decisions to confirm at the start of M1
 

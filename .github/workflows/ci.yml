@@ -21,6 +21,13 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run build
+      - run: npm run check:size
+      - name: Install browser for end-to-end tests
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end and accessibility tests
+        run: npx playwright test
+        env:
+          CI: 'true'
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         with:

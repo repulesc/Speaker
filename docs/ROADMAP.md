@@ -25,7 +25,11 @@ Delivered: scaffold and CI, units module, all v1 rules except H03, scoring, sear
   - a full analysis runs in under 1.5 s in a worker (CI timing on the standard runner, with margin);
   - zero dependencies in `src/engine/` besides TypeScript.
 
-## M2 · App shell, i18n, units, persistence (Sonnet, medium effort)
+## M2 · App shell, i18n, units, persistence (Sonnet, medium effort): ✅ done, one check open
+
+Delivered: Blueprint tokens and self-hosted IBM Plex fonts, light and dark themes, top bar, stepper, desktop / tablet / phone layouts with a bottom sheet, EN and HU shell strings, unit fields with certainty chips, the Room step, live plan drawing, autosave, projects, undo and redo, export and import, share links, confidence meter (engine in a worker), PWA with offline support, the app name in one place, licenses, 22 end-to-end tests (including axe accessibility checks), a bundle-size guard (49 KB gzip), and CI with Pages deploy.
+
+**Still open:** "the deployed preview URL works on an iPhone". It needs this branch merged to `main` and Pages switched on (Settings → Pages → Source: GitHub Actions); it can't be verified from the development sandbox.
 
 - **Scope:**
   - Blueprint design tokens, self-hosted fonts, light and dark themes;
@@ -35,10 +39,10 @@ Delivered: scaffold and CI, units module, all v1 rules except H03, scoring, sear
   - autosave, projects, export and import, share link;
   - GitHub Pages deploy gated on CI.
 - **Acceptance:**
-  - E2E journeys 4–9 pass;
-  - axe shows no serious violations;
-  - initial JS ≤ 150 KB gzip;
-  - the deployed preview URL works on an iPhone.
+  - E2E journeys 4–9 pass ✅;
+  - axe shows no serious violations ✅;
+  - initial JS ≤ 150 KB gzip ✅ (49 KB);
+  - the deployed preview URL works on an iPhone (open, see above).
 
 ## M3 · Input steps and live drawing (Sonnet, medium effort; Opus review)
 

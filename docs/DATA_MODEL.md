@@ -8,6 +8,7 @@ Changes made while implementing (M1):
 - `Constraints.speakersFixed` alongside `listenerFixed`.
 - `SpeakerPlacement.certainty` (optional, default "estimated").
 - `Project.speaker` holds the profile itself (no model database in v1).
+- `Project.name` is empty for an untitled project; the UI shows a localised label (M2).
 - `Directivity` keeps only `omniBelowHz` and `qMid` in v1; measured polar data is deferred.
 - `SurfacePatch` (u, v) are room coordinates along the boundary's axes: front/back walls (x, z); left/right walls (y, z); floor/ceiling (x, y).
 - `Analysis` is a union: `status: 'needs-room-size'` (only confidence) or `status: 'ok'` (everything). `topActions` are `Action`s: fix a red flag, move to a candidate, or change a speaker setting.

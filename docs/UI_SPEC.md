@@ -83,6 +83,13 @@ The drawing takes the top 45% (sticky). The panel scrolls below.
 
 The drawing takes the top ~40% of the viewport. The **bottom sheet** holds the stepper and the form: it can be dragged between peek (stepper plus a one-line summary), half and full. The confidence meter is compact in the top bar. No horizontal page scroll, ever.
 
+> **Implementation notes (M2).**
+> - The stepper shows every step name from 640 px up (wrapping to a second row if needed); on phones only the active step shows its name, the others are numbers with tooltips and screen-reader names.
+> - On phones the units, language and theme toggles live in the ☰ menu, to keep the top bar to two rows.
+> - On phones the sheet is part of the flex layout, so the drawing always fits the space above it (peek / half / full).
+> - Untitled projects have an empty name and show "Untitled room" in the current language.
+> - Numbers and units are separated by a non-breaking space, and the input parser accepts it back.
+
 ## 4. Global elements
 
 - **Top bar:**
