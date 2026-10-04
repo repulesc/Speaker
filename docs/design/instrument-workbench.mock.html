@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Workbench, Instrument look</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0b0f14; color: #e8eef6; font-family: 'Sora', sans-serif; font-size: 14px; overflow: hidden">
+
+  <!-- Top bar -->
+  <div style="height: 56px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid #1e2a3b; background: #0e141c">
+    <div style="display: flex; align-items: center; gap: 28px">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <div style="width: 26px; height: 26px; border-radius: 7px; background: #182231; border: 1px solid #2c3d57; display: flex; align-items: center; justify-content: center">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#6ea8ff" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1"></rect><circle cx="8" cy="10" r="1.6" fill="#6ea8ff"></circle></svg>
+        </div>
+        <div style="font-weight: 600; font-size: 15px; letter-spacing: 0.2px">Speaker Placement</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 4px; padding: 3px; border-radius: 10px; background: #121923; border: 1px solid #1e2a3b">
+        <div style="padding: 6px 14px; border-radius: 8px; background: #20304a; color: #e8eef6; font-size: 13px">Current</div>
+        <div style="padding: 6px 14px; border-radius: 8px; color: #8fa1b8; font-size: 13px">Bed moved</div>
+        <div style="padding: 6px 12px; border-radius: 8px; color: #8fa1b8; font-size: 13px">+ New setup</div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px; color: #8fa1b8; font-size: 13px">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <div style="display: flex; gap: 3px"><span style="width: 7px; height: 16px; border-radius: 2px; background: #6ea8ff"></span><span style="width: 7px; height: 16px; border-radius: 2px; background: #6ea8ff"></span><span style="width: 7px; height: 16px; border-radius: 2px; background: #2c3d57"></span><span style="width: 7px; height: 16px; border-radius: 2px; background: #2c3d57"></span><span style="width: 7px; height: 16px; border-radius: 2px; background: #2c3d57"></span></div>
+        <span>First impression</span>
+      </div>
+      <div style="font-family: 'JetBrains Mono', monospace; padding: 5px 10px; border: 1px solid #1e2a3b; border-radius: 8px">m · EN</div>
+      <div style="width: 34px; height: 34px; border: 1px solid #1e2a3b; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #e8eef6; font-size: 16px">≡</div>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+
+    <!-- Dock: sections, not steps -->
+    <div style="width: 92px; flex: none; border-right: 1px solid #1e2a3b; background: #0e141c; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 0">
+      <div style="width: 72px; padding: 10px 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #8fa1b8; font-size: 11px">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="16" height="16" rx="1"></rect></svg>Room
+      </div>
+      <div style="width: 72px; padding: 10px 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #8fa1b8; font-size: 11px">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l8-4 8 4-8 4z"></path><path d="M3 12l8 4 8-4"></path><path d="M3 16l8 4 8-4"></path></svg>Surfaces
+      </div>
+      <div style="width: 72px; padding: 10px 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #8fa1b8; font-size: 11px">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="9" width="16" height="8" rx="2"></rect><path d="M5 9V6h12v3"></path></svg>Furniture
+      </div>
+      <div style="width: 72px; padding: 10px 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; background: #1b2a42; color: #e8eef6; font-size: 11px">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="3" width="12" height="16" rx="2"></rect><circle cx="11" cy="13" r="3"></circle><circle cx="11" cy="7" r="1"></circle></svg>Speakers
+      </div>
+      <div style="width: 72px; padding: 10px 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #8fa1b8; font-size: 11px">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><circle cx="11" cy="11" r="4"></circle><circle cx="11" cy="11" r="1" fill="currentColor"></circle></svg>Goals
+      </div>
+      <div style="flex: 1"></div>
+      <div style="width: 72px; padding: 10px 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #8fa1b8; font-size: 11px; border: 1px dashed #2c3d57">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="16" height="16" rx="1"></rect><path d="M3 14h16"></path></svg>Side view
+      </div>
+    </div>
+
+    <!-- Centre: map -->
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+
+      <!-- Layers -->
+      <div style="height: 56px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 20px">
+        <div style="color: #8fa1b8; font-size: 12px; margin-right: 6px; letter-spacing: 0.6px">MAP</div>
+        <div style="padding: 7px 14px; border-radius: 999px; background: #6ea8ff; color: #0b0f14; font-weight: 600; font-size: 13px">Overall</div>
+        <div style="padding: 7px 14px; border-radius: 999px; border: 1px solid #243247; color: #c3cfde; font-size: 13px">Bass evenness</div>
+        <div style="padding: 7px 14px; border-radius: 999px; border: 1px solid #243247; color: #c3cfde; font-size: 13px">Bass holes</div>
+        <div style="padding: 7px 14px; border-radius: 999px; border: 1px solid #243247; color: #c3cfde; font-size: 13px">Wall interference</div>
+        <div style="padding: 7px 14px; border-radius: 999px; border: 1px solid #243247; color: #c3cfde; font-size: 13px">Reflections</div>
+        <div style="padding: 7px 14px; border-radius: 999px; border: 1px solid #243247; color: #c3cfde; font-size: 13px">Stereo</div>
+        <div style="padding: 7px 14px; border-radius: 999px; border: 1px solid #243247; color: #c3cfde; font-size: 13px">My goals</div>
+        <div style="flex: 1"></div>
+        <div style="display: flex; align-items: center; gap: 8px; color: #8fa1b8; font-size: 12px">Poorer
+          <div style="width: 120px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #440154, #31688e, #21908c, #5dc863, #fde725)"></div>Better</div>
+      </div>
+
+      <!-- Plan -->
+      <div style="flex: 1; min-height: 0; position: relative">
+        <svg width="972" height="600" viewBox="0 0 972 600" style="position: absolute; left: 0; top: 0">
+          <defs>
+            <clipPath id="room"><rect x="284" y="44" width="403" height="493"></rect></clipPath>
+            <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"></feGaussianBlur></filter>
+          </defs>
+          <rect x="284" y="44" width="403" height="493" fill="#31688e"></rect>
+          <g clip-path="url(#room)">
+            <g filter="url(#soft)">
+              <rect x="244" y="268" width="483" height="56" fill="#440154"></rect>
+              <rect x="244" y="440" width="483" height="120" fill="#440154" opacity="0.9"></rect>
+              <ellipse cx="486" cy="234" rx="150" ry="52" fill="#5dc863"></ellipse>
+              <ellipse cx="486" cy="392" rx="120" ry="40" fill="#21908c"></ellipse>
+              <ellipse cx="486" cy="234" rx="70" ry="22" fill="#fde725"></ellipse>
+              <ellipse cx="486" cy="392" rx="46" ry="16" fill="#5dc863"></ellipse>
+            </g>
+          </g>
+          <rect x="284" y="44" width="403" height="493" fill="none" stroke="#6b84a8" stroke-width="1.5"></rect>
+          <line x1="284" y1="44" x2="687" y2="44" stroke="#e8eef6" stroke-width="4"></line>
+          <text x="485" y="32" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#8fa1b8">FRONT WALL</text>
+
+          <!-- sight lines -->
+          <polyline points="396,132 486,324 575,132" fill="none" stroke="#e8eef6" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"></polyline>
+
+          <!-- dimensions: selected left speaker -->
+          <g font-family="JetBrains Mono, monospace" font-size="11" stroke="#6ea8ff" fill="#6ea8ff">
+            <line x1="366" y1="44" x2="366" y2="112" stroke-width="1"></line>
+            <line x1="361" y1="44" x2="371" y2="44" stroke-width="1"></line>
+            <line x1="361" y1="112" x2="371" y2="112" stroke-width="1"></line>
+            <rect x="318" y="68" width="42" height="20" rx="6" fill="#0b0f14" stroke="#6ea8ff"></rect>
+            <text x="339" y="82" text-anchor="middle" stroke="none">62 cm</text>
+            <line x1="284" y1="148" x2="385" y2="148" stroke-width="1"></line>
+            <line x1="284" y1="143" x2="284" y2="153" stroke-width="1"></line>
+            <line x1="385" y1="143" x2="385" y2="153" stroke-width="1"></line>
+            <rect x="313" y="156" width="46" height="20" rx="6" fill="#0b0f14" stroke="#6ea8ff"></rect>
+            <text x="336" y="170" text-anchor="middle" stroke="none">1.00 m</text>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="11" fill="#8fa1b8" stroke="#6b84a8">
+            <line x1="396" y1="100" x2="575" y2="100" stroke-width="1"></line>
+            <text x="485" y="94" text-anchor="middle" stroke="none">1.60 m</text>
+            <line x1="712" y1="44" x2="712" y2="324" stroke-width="1"></line>
+            <line x1="707" y1="44" x2="717" y2="44" stroke-width="1"></line>
+            <line x1="707" y1="324" x2="717" y2="324" stroke-width="1"></line>
+            <text x="722" y="188" stroke="none">2.50 m</text>
+            <line x1="284" y1="562" x2="687" y2="562" stroke-width="1"></line>
+            <text x="485" y="580" text-anchor="middle" stroke="none">3.60 m</text>
+          </g>
+
+          <!-- speakers -->
+          <g>
+            <rect x="385" y="112" width="22" height="20" rx="2" fill="#0b0f14" stroke="#6ea8ff" stroke-width="2.5"></rect>
+            <circle cx="396" cy="132" r="2.5" fill="#6ea8ff"></circle>
+            <rect x="564" y="112" width="22" height="20" rx="2" fill="#0b0f14" stroke="#e8eef6" stroke-width="2"></rect>
+            <circle cx="575" cy="132" r="2.5" fill="#e8eef6"></circle>
+          </g>
+          <!-- current seat -->
+          <circle cx="486" cy="324" r="11" fill="#0b0f14" stroke="#e8eef6" stroke-width="2"></circle>
+          <circle cx="486" cy="324" r="3" fill="#e8eef6"></circle>
+          <!-- best spots -->
+          <g font-family="Sora, sans-serif" font-size="12" font-weight="600" text-anchor="middle">
+            <circle cx="486" cy="234" r="12" fill="#fde725" stroke="#0b0f14" stroke-width="2"></circle>
+            <text x="486" y="238" fill="#0b0f14">A</text>
+            <circle cx="486" cy="392" r="12" fill="#5dc863" stroke="#0b0f14" stroke-width="2"></circle>
+            <text x="486" y="396" fill="#0b0f14">B</text>
+          </g>
+        </svg>
+
+        <!-- probe -->
+        <div style="position: absolute; left: 520px; top: 268px; width: 262px; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; background: rgba(18, 25, 35, 0.94); border: 1px solid #2c3d57; box-shadow: 0 10px 30px rgba(0,0,0,0.5)">
+          <div style="font-size: 12px; color: #8fa1b8; margin-bottom: 4px">Seat here · 2.50 m from the front wall</div>
+          <div style="font-size: 13px; line-height: 1.45">The lowest bass note (≈ 39 Hz) nearly vanishes: you are close to the middle of the room's length.</div>
+        </div>
+        <div style="position: absolute; left: 24px; top: 14px; font-size: 12px; color: #8fa1b8; line-height: 1.5; width: 220px">Drag anything. The map redraws as you move.<br>Click a number to type an exact value.</div>
+      </div>
+
+      <!-- Bass chart -->
+      <div style="height: 176px; flex: none; margin: 0 20px 18px; padding: 12px 16px; box-sizing: border-box; border-radius: 14px; background: #121923; border: 1px solid #1e2a3b; position: relative">
+        <div style="display: flex; justify-content: space-between; align-items: baseline">
+          <div style="font-size: 13px; font-weight: 600">Bass at your seat <span style="font-weight: 400; color: #8fa1b8">· predicted shape, not loudness</span></div>
+          <div style="font-size: 12px; color: #8fa1b8; display: flex; gap: 14px"><span><span style="display: inline-block; width: 14px; height: 3px; background: #e8eef6; vertical-align: middle; margin-right: 6px"></span>now</span><span><span style="display: inline-block; width: 14px; height: 3px; background: #fde725; vertical-align: middle; margin-right: 6px"></span>spot A</span></div>
+        </div>
+        <svg width="900" height="116" viewBox="0 0 900 116" style="position: absolute; left: 16px; top: 44px">
+          <g stroke="#1e2a3b" stroke-width="1"><line x1="40" y1="20" x2="880" y2="20"></line><line x1="40" y1="58" x2="880" y2="58"></line><line x1="40" y1="96" x2="880" y2="96"></line></g>
+          <g stroke="#2c3d57" stroke-width="1" stroke-dasharray="2 3"><line x1="156" y1="8" x2="156" y2="96"></line><line x1="248" y1="8" x2="248" y2="96"></line><line x1="376" y1="8" x2="376" y2="96"></line><line x1="463" y1="8" x2="463" y2="96"></line></g>
+          <path d="M40 52 C90 50 130 56 156 92 C175 108 195 70 248 50 C300 36 340 40 376 46 C410 52 440 36 463 50 C520 80 560 56 640 54 C690 54 700 80 720 84 C750 84 800 56 880 52" fill="none" stroke="#e8eef6" stroke-width="2"></path>
+          <path d="M40 54 C100 52 160 48 248 48 C320 48 360 52 463 50 C560 48 620 54 700 52 C770 50 820 52 880 52" fill="none" stroke="#fde725" stroke-width="2"></path>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="#8fa1b8"><text x="148" y="110">39</text><text x="240" y="110">48</text><text x="368" y="110">64</text><text x="455" y="110">78</text><text x="700" y="110">120 Hz</text><text x="2" y="24">+6</text><text x="2" y="62">0</text><text x="2" y="100">−6 dB</text></g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div style="width: 380px; flex: none; border-left: 1px solid #1e2a3b; background: #0e141c; display: flex; flex-direction: column; padding: 16px; box-sizing: border-box; gap: 14px; overflow: hidden">
+      <div style="display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: #121923; border: 1px solid #1e2a3b">
+        <div style="flex: 1; text-align: center; padding: 7px 0; border-radius: 8px; background: #20304a; font-size: 13px">Why</div>
+        <div style="flex: 1; text-align: center; padding: 7px 0; border-radius: 8px; color: #8fa1b8; font-size: 13px">Treat</div>
+        <div style="flex: 1; text-align: center; padding: 7px 0; border-radius: 8px; color: #8fa1b8; font-size: 13px">Listen</div>
+      </div>
+
+      <div style="border: 1px solid #243247; border-radius: 14px; background: #121923; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; justify-content: space-between; align-items: center"><div style="font-weight: 600">Left speaker</div><div style="font-size: 12px; color: #8fa1b8">mirrored with right ⇄</div></div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+          <div><div style="font-size: 11px; color: #8fa1b8; margin-bottom: 4px">Rear panel to front wall</div><div style="padding: 8px 10px; border-radius: 8px; background: #0b0f14; border: 1px solid #6ea8ff; font-family: 'JetBrains Mono', monospace; font-size: 13px">62 cm</div></div>
+          <div><div style="font-size: 11px; color: #8fa1b8; margin-bottom: 4px">To left wall</div><div style="padding: 8px 10px; border-radius: 8px; background: #0b0f14; border: 1px solid #243247; font-family: 'JetBrains Mono', monospace; font-size: 13px">1.00 m</div></div>
+          <div><div style="font-size: 11px; color: #8fa1b8; margin-bottom: 4px">Height of the base</div><div style="padding: 8px 10px; border-radius: 8px; background: #0b0f14; border: 1px solid #243247; font-family: 'JetBrains Mono', monospace; font-size: 13px">89 cm</div></div>
+          <div><div style="font-size: 11px; color: #8fa1b8; margin-bottom: 4px">Toe-in</div><div style="padding: 8px 10px; border-radius: 8px; background: #0b0f14; border: 1px solid #243247; font-family: 'JetBrains Mono', monospace; font-size: 13px">0°</div></div>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; color: #8fa1b8; letter-spacing: 0.6px">WHY IT SCORES "FAIR"</div>
+
+      <div style="border: 1px solid #243247; border-radius: 14px; background: #121923; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; justify-content: space-between; font-size: 12px"><span style="color: #f2b84b">▲ Caution</span><span style="color: #8fa1b8">● Physics</span></div>
+        <div style="font-size: 14px; line-height: 1.45">Your seat sits 5% from the middle of the room's length, where the deepest bass note nearly disappears.</div>
+        <div style="font-size: 12px; color: #6ea8ff">Move the seat about 40 cm forward → map turns yellow</div>
+      </div>
+      <div style="border: 1px solid #243247; border-radius: 14px; background: #121923; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; justify-content: space-between; font-size: 12px"><span style="color: #8fa1b8">○ Info</span><span style="color: #8fa1b8">● Physics</span></div>
+        <div style="font-size: 14px; line-height: 1.45">The speakers' backs are 62 cm from the wall, so some bass cancels near 120 Hz.</div>
+      </div>
+      <div style="border: 1px solid #243247; border-radius: 14px; background: #121923; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; justify-content: space-between; font-size: 12px"><span style="color: #8fa1b8">○ Info</span><span style="color: #8fa1b8">▲ Rule of thumb</span></div>
+        <div style="font-size: 14px; line-height: 1.45">The popular "38% rule" would put your seat at 1.67 m. Your map agrees: that area is good here.</div>
+      </div>
+      <div style="flex: 1"></div>
+      <div style="font-size: 12px; color: #8fa1b8; line-height: 1.5">Confidence: first impression. Tell us your wall materials to firm this up.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
