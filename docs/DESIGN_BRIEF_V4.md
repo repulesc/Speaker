@@ -41,6 +41,11 @@ The owner wants Opus to have real freedom, without surprises.
 - **Survey look (desktop):** a calm centered card, one question at a time ("2 of 4"), then a reveal: the room and heatmap fade in at the end. Not the "room builds as you answer" variant.
 - **Typeface:** the system font, as now (San Francisco on a Mac). No web font.
 
+- **Best placement answer:** one plain sentence first (what to change relative to the current setup), the exact numbers below in small type, the map shows the result. The sentence must be unambiguous ("Move each speaker 10 cm toward the front wall and 30 cm further apart", not "30 cm apart", which could mean the final spacing) and must come from the engine's real numbers, never be rounded into something untrue.
+- **Map interaction:** hover shows a small tooltip (score and a one-line reason); click pins it. Keep the map itself clean.
+- **Motion:** subtle and quick, about 150 to 250 ms: fades and slides, speakers glide when a placement is applied, the map crossfades when it updates. Respect "reduce motion".
+- **Loading:** a small spinner next to the title (not skeletons). Keep the previous result visible meanwhile.
+
 ## The owner's feedback, in order
 
 1. **Settings icon:** replace the cog with the three-lines menu icon (friendlier, less industrial).
