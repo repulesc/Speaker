@@ -35,13 +35,13 @@ export function loadIndex(store: KeyValueStore): IndexEntry[] {
   try {
     const raw: unknown = JSON.parse(store.getItem(INDEX_KEY) ?? '[]');
     if (!Array.isArray(raw)) return [];
-    return raw
-      .filter(
-        (e): e is IndexEntry =>
-          typeof e?.id === 'string' &&
-          typeof e.name === 'string' &&
-          typeof e.updatedAt === 'string',
-      )
+    const entries = raw.filter(
+      (e): e is IndexEntry =>
+        typeof e?.id === 'string' && typeof e.name === 'string' && typeof e.updatedAt === 'string',
+    );
+    // The project list is keyed by id: keep the first entry of each.
+    return entries
+      .filter((e, i) => entries.findIndex((other) => other.id === e.id) === i)
       .slice(0, SIZE_LIMITS.projects);
   } catch {
     return [];

@@ -21,6 +21,8 @@ export function boundaryGainCategory(front: number, side: number, floor: number)
 export const P05: RuleDef = {
   id: 'P05',
   level: 'physics',
+  concern: 'bass',
+  scope: 'placement',
   sources: ['ALL74', 'TOOLE', 'EVP'],
   variants: ['low', 'moderate', 'high', 'very-high'],
   evaluate(ctx, placement) {

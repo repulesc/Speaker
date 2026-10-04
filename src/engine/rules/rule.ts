@@ -1,5 +1,5 @@
 import type { AnalysisContext } from '../context';
-import type { EvidenceLevel, Finding, Placement, Severity, Vec3 } from '../types';
+import type { Concern, EvidenceLevel, Finding, Placement, Severity, Vec3 } from '../types';
 
 /**
  * One rule from docs/RULE_CATALOGUE.md. `variants` lists every message variant the rule can
@@ -8,6 +8,10 @@ import type { EvidenceLevel, Finding, Placement, Severity, Vec3 } from '../types
 export interface RuleDef {
   id: string;
   level: EvidenceLevel;
+  /** What the finding is about; the UI groups findings by it. */
+  concern: Concern;
+  /** 'room': the same wherever things stand. 'placement': changes when the speakers or seat move. */
+  scope: 'room' | 'placement';
   sources: readonly string[];
   variants: readonly string[];
   evaluate(ctx: AnalysisContext, placement: Placement): Finding[];
@@ -20,7 +24,7 @@ interface FindingExtras {
 }
 
 export function makeFinding(
-  rule: Pick<RuleDef, 'id' | 'level' | 'sources'>,
+  rule: Pick<RuleDef, 'id' | 'level' | 'sources' | 'concern'>,
   variant: string,
   severity: Severity,
   params: Record<string, number | string> = {},
@@ -29,6 +33,7 @@ export function makeFinding(
   return {
     ruleId: rule.id,
     level: rule.level,
+    concern: rule.concern,
     severity,
     messageKey: `finding.${rule.id}.${variant}`,
     params,

@@ -1,4 +1,4 @@
-import { BUSYNESS_ABSORPTION, OBJECT_ABSORPTION } from './presets/objects';
+import { BUSYNESS_ABSORPTION_PER_M2, OBJECT_ABSORPTION } from './presets/objects';
 import { DEFAULTS } from './presets/defaults';
 import { roomModes } from './rules/P02-room-modes';
 import { speedOfSound } from './rules/P01-speed-of-sound';
@@ -94,19 +94,22 @@ export function resolveSpeaker(project: Project): ResolvedSpeaker {
   };
 }
 
-/** Furnishing absorption range: explicit objects, or the quick-mode busy-ness shortcut. */
-export function furnishingAbsorption(variant: SetupVariant): [number, number] {
-  if (variant.objects.length > 0) {
-    return variant.objects.reduce<[number, number]>(
-      (sum, o) => {
-        const [lo, hi] = o.absorptionRange ?? OBJECT_ABSORPTION[o.kind];
-        return [sum[0] + lo, sum[1] + hi];
-      },
-      [0, 0],
-    );
-  }
-  const busy = variant.busyness?.value;
-  return busy ? BUSYNESS_ABSORPTION[busy] : BUSYNESS_ABSORPTION.some;
+/**
+ * Furnishing absorption range (m² sabins, mid bands). The busy-ness estimate ("some" when not
+ * given) scales with the floor area. Placed furniture is usually only part of what is in the
+ * room, so it can raise the estimate but never lower it: adding a sofa must not make the room
+ * sound more reverberant.
+ */
+export function furnishingAbsorption(variant: SetupVariant, floorArea: number): [number, number] {
+  const [lo, hi] = BUSYNESS_ABSORPTION_PER_M2[variant.busyness?.value ?? 'some'];
+  const placed = variant.objects.reduce<[number, number]>(
+    (sum, o) => {
+      const [a, b] = o.absorptionRange ?? OBJECT_ABSORPTION[o.kind];
+      return [sum[0] + a, sum[1] + b];
+    },
+    [0, 0],
+  );
+  return [Math.max(lo * floorArea, placed[0]), Math.max(hi * floorArea, placed[1])];
 }
 
 export function activeVariant(project: Project): SetupVariant {
@@ -137,10 +140,11 @@ export function buildContext(
       : speedOfSound(temperature.value);
 
   const variant = activeVariant(project);
+  // Furniture does not change when the room-size perturbations (robustness runs) do.
   const t60 = reverberation(
     room,
     project.surfaces,
-    furnishingAbsorption(variant),
+    furnishingAbsorption(variant, width.value * length.value),
     overrides.t60Scale,
   );
   const schroeder = {

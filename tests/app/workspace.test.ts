@@ -8,7 +8,7 @@ import {
   defaultPlacement,
 } from '../../src/app/state/defaults';
 import { moveSeat } from '../../src/app/plan/placement';
-import { genericSpeaker } from '../fixtures/projects';
+import { genericSpeaker, makeProject } from '../fixtures/projects';
 
 class MemoryStore implements KeyValueStore {
   data = new Map<string, string>();
@@ -135,6 +135,23 @@ describe('Workspace', () => {
     expect(ws.project.name).toBe('Imported');
     expect(ws.project.id).not.toBe(incoming.id);
     expect(ws.index.map((e) => e.id)).toContain(original);
+  });
+
+  it('a stored project list with a repeated id shows each project once', () => {
+    const store = new MemoryStore();
+    const a = { id: 'a', name: 'A', updatedAt: '2026-01-01' };
+    const b = { id: 'b', name: 'B', updatedAt: '2026-01-02' };
+    store.setItem('spa:index', JSON.stringify([a, { ...a, name: 'A again' }, b]));
+    expect(loadIndex(store).map((e) => e.name)).toEqual(['A', 'B']);
+  });
+
+  it('never opens a stored project that fails validation (here: two setups with one id)', () => {
+    const store = new MemoryStore();
+    const bad = makeProject();
+    bad.variants.push({ ...bad.variants[0]!, name: 'Copy' });
+    store.setItem(`spa:project:${bad.id}`, JSON.stringify(bad));
+    store.setItem('spa:active', bad.id);
+    expect(new Workspace(store, options).project.id).not.toBe(bad.id);
   });
 
   it('removing the last project opens a fresh one', () => {

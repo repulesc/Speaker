@@ -215,4 +215,15 @@ describe('heuristics', () => {
     const ctx2 = buildContext(dead)!;
     expect(H06.evaluate(ctx2, currentPlacement(ctx2))[0]!.messageKey).toBe('finding.H06.lift');
   });
+
+  it('H06 never advises from defaults alone (nothing about the room described)', () => {
+    const p = makeProject();
+    p.speaker.dsp.treble = { minDb: -3, maxDb: 3, stepDb: 0.5 };
+    p.surfaces.baseCertainty = Object.fromEntries(
+      Object.keys(p.surfaces.baseCertainty).map((b) => [b, 'unknown']),
+    ) as typeof p.surfaces.baseCertainty;
+    p.variants[0]!.busyness = { value: null, certainty: 'unknown' };
+    const ctx = buildContext(p)!;
+    expect(H06.evaluate(ctx, currentPlacement(ctx))).toEqual([]);
+  });
 });

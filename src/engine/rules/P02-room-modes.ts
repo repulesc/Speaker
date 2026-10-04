@@ -36,6 +36,8 @@ export function roomModes(room: RoomGeometry, c: number, maxHz: number): Mode[] 
 export const P02: RuleDef = {
   id: 'P02',
   level: 'physics',
+  concern: 'bass',
+  scope: 'room',
   sources: ['KUT', 'EVP', 'TOOLE'],
   variants: ['lowestModes'],
   evaluate(ctx) {

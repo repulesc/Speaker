@@ -1,12 +1,12 @@
 import { acousticCentre, rearClearance, wooferCentre, type AnalysisContext } from '../context';
 import { distance, ramp } from '../math/geometry';
-import { cornerProximity } from '../rules/G06-corners';
+import { speakerCorner } from '../rules/G06-corners';
 import { stereoAngleDeg } from '../rules/G04-stereo-angle';
 import { sideDistanceDifference } from '../rules/G03-symmetry';
-import { boundaryNullHz } from '../rules/P04-boundary-interference';
+import { frontWallNullAtSeat } from '../rules/P04-boundary-interference';
 import { firstReflections, isNearSide } from '../rules/P06-reflections';
 import {
-  bassRange,
+  bassBand,
   buildBassModel,
   PER_OCTAVE,
   responseDb,
@@ -16,7 +16,7 @@ import {
   type BassModel,
 } from '../rules/P09-bass-response';
 import type { ComponentId, Placement, ScoreBreakdownItem, SpeakerPlacement, Vec3 } from '../types';
-import type { ScoringSettings } from './settings';
+import { scoringSettings, type ScoringSettings } from './settings';
 import { THRESHOLDS as T } from './thresholds';
 
 export interface ScoreResult {
@@ -30,6 +30,10 @@ export interface ScoreResult {
  */
 export class Scorer {
   readonly model: BassModel;
+  /** The goal weights, with C1 and C2 dropped when the speaker leaves no bass band to judge. */
+  readonly weights: Record<ComponentId, number>;
+  /** The same without any goals: the "overall" view, the same for everyone. */
+  readonly neutralWeights: Record<ComponentId, number>;
   private readonly range: [number, number];
   /** Index range of the model frequencies inside the scoring range. */
   private readonly kLo: number;
@@ -40,7 +44,11 @@ export class Scorer {
     readonly settings: ScoringSettings,
     truncation?: number,
   ) {
-    this.range = bassRange(ctx);
+    const band = bassBand(ctx);
+    this.range = band.range;
+    const neutral = scoringSettings({ weights: {} }).weights;
+    this.weights = band.scored ? settings.weights : withoutBass(settings.weights);
+    this.neutralWeights = band.scored ? neutral : withoutBass(neutral);
     // Extend by the smoothing half-window so smoothing near the edges sees real data.
     const margin = 2 ** (1 / 12);
     this.model = buildBassModel(ctx, this.range[0] / margin, this.range[1] * margin, truncation);
@@ -76,15 +84,16 @@ export class Scorer {
     };
   }
 
-  /** C3: front-wall interference above the scored bass band (inside it, C1 already counts it). */
-  frontWall(p: SpeakerPlacement): number {
-    const nullHz = boundaryNullHz(wooferCentre(p, this.ctx.speaker).y, this.ctx.c);
-    if (nullHz <= this.range[1]) return 1;
-    if (nullHz >= T.frontNullGoodHz) return 1;
-    const nearWithCompensation =
-      this.ctx.speaker.hasWallSetting && rearClearance(p, this.ctx.speaker) < T.nearWallClearance;
-    if (nearWithCompensation) return 1;
-    return ramp(nullHz, T.frontNullBadHz, T.frontNullGoodHz, T.frontNullBadScore, 1);
+  /**
+   * C3: the front-wall null as heard at the seat (P04). Inside the scored bass band C1 counts it,
+   * so the penalty fades in over the band's top third of an octave instead of jumping at its edge.
+   * A wall-distance DSP setting does not help here: EQ cannot fill a cancellation.
+   */
+  frontWall(p: SpeakerPlacement, seat: Vec3): number {
+    const nullHz = frontWallNullAtSeat(wooferCentre(p, this.ctx.speaker), seat, this.ctx.c);
+    const score = ramp(nullHz, T.frontNullBadHz, T.frontNullGoodHz, T.frontNullBadScore, 1);
+    const share = ramp(Math.log2(nullHz / this.range[1]), -1 / 3, 0, 0, 1);
+    return 1 - share * (1 - score);
   }
 
   /** C4: stereo angle around the goal target, times equal-distance (G05). */
@@ -137,10 +146,9 @@ export class Scorer {
     const s = this.ctx.speaker;
     const scores = (['left', 'right'] as const).map((side) => {
       const p = placement.speakers[side];
-      const w = wooferCentre(p, s);
       let corner = 1;
       if (!s.designedForCorner) {
-        const proximity = cornerProximity(w.y, Math.min(w.x, this.ctx.room.W - w.x));
+        const proximity = speakerCorner(p, this.ctx);
         const raw =
           proximity === 'corner'
             ? T.cornerScore
@@ -165,8 +173,8 @@ export class Scorer {
       C1: c1,
       C2: c2,
       C3: Math.min(
-        this.frontWall(placement.speakers.left),
-        this.frontWall(placement.speakers.right),
+        this.frontWall(placement.speakers.left, placement.listener),
+        this.frontWall(placement.speakers.right, placement.listener),
       ),
       C4: this.geometry(placement),
       C5: c5,
@@ -176,8 +184,9 @@ export class Scorer {
     };
     const breakdown = (Object.keys(values) as ComponentId[]).map((componentId) => ({
       componentId,
-      value: values[componentId],
-      weight: this.settings.weights[componentId],
+      // A degenerate input (e.g. the seat on a speaker) must never read as a good score.
+      value: Number.isFinite(values[componentId]) ? values[componentId] : 0,
+      weight: this.weights[componentId],
     }));
     const score = breakdown.reduce((sum, b) => sum + b.value * b.weight, 0);
     return { score, breakdown };
@@ -185,6 +194,13 @@ export class Scorer {
 }
 
 const ORIGIN: Vec3 = { x: 0, y: 0, z: 0 };
+
+function withoutBass(weights: Record<ComponentId, number>): Record<ComponentId, number> {
+  const w = { ...weights, C1: 0, C2: 0 };
+  const total = Object.values(w).reduce((a, b) => a + b, 0);
+  for (const id of Object.keys(w) as ComponentId[]) w[id] /= total;
+  return w;
+}
 
 function average(values: number[]): number {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 1;

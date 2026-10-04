@@ -3,8 +3,12 @@ import { boxesOverlap2D, distance, pointInBox2D } from '../math/geometry';
 import { seededRandom, symmetric } from '../math/random';
 import { DEFAULTS } from '../presets/defaults';
 import { SEAT_KINDS } from '../presets/objects';
+import { MIDPOINT_RED_FLAG, midpointOffsetFraction } from '../rules/G01-room-midpoint';
+import { BACK_WALL_RED_FLAG } from '../rules/G02-back-wall';
+import { angleRedFlag, stereoAngleDeg } from '../rules/G04-stereo-angle';
+import { speakerCorner } from '../rules/G06-corners';
 import { cabinetBox, isObstructed, objectBox } from '../rules/G10-objects';
-import type { Candidate, Grid, Placement, SpeakerPlacement, Vec3 } from '../types';
+import type { Candidate, Placement, SpeakerPlacement, Vec2, Vec3 } from '../types';
 import { Scorer } from './scorer';
 import { scoringSettings } from './settings';
 import { THRESHOLDS as T } from './thresholds';
@@ -30,7 +34,37 @@ export function isValidPlacement(ctx: AnalysisContext, placement: Placement): bo
   return isObstructed(ctx, placement.speakers, listener) === null;
 }
 
-function range(from: number, to: number, step: number): number[] {
+/**
+ * The search never proposes a spot the app would red-flag itself (docs/SCORING.md §1): the room
+ * midpoint (G01), the back wall (G02), a stereo angle outside 35–90° (G04) and a corner (G06).
+ * Only what the search moves is checked: the seat when it is free, the speakers when they are.
+ */
+export function avoidsRedFlags(
+  ctx: AnalysisContext,
+  placement: Placement,
+  moves: { seat: boolean; speakers: boolean },
+): boolean {
+  const { room, speaker } = ctx;
+  const { speakers, listener } = placement;
+  if (moves.seat) {
+    if (midpointOffsetFraction(listener.y, room.L) < MIDPOINT_RED_FLAG) return false;
+    if (room.L - listener.y < BACK_WALL_RED_FLAG) return false;
+  }
+  if (moves.speakers && !speaker.designedForCorner) {
+    for (const side of ['left', 'right'] as const) {
+      if (speakerCorner(speakers[side], ctx) === 'corner') return false;
+    }
+  }
+  const angle = stereoAngleDeg(
+    acousticCentre(speakers.left, speaker),
+    acousticCentre(speakers.right, speaker),
+    listener,
+  );
+  return !angleRedFlag(angle);
+}
+
+/** `from`, `from + step`, … up to `to` (inclusive), rounded to the millimetre. */
+export function steps(from: number, to: number, step: number): number[] {
   const values: number[] = [];
   for (let v = from; v <= to + 1e-9; v += step) values.push(Math.round(v * 1000) / 1000);
   return values;
@@ -63,9 +97,11 @@ interface SearchSpace {
   earZ: number;
   fixedSpeakers: Placement['speakers'] | null;
   fixedListener: Vec3 | null;
+  /** False only for the fallback search, when the user's constraints leave no red-flag-free spot. */
+  avoidRedFlags: boolean;
 }
 
-function searchSpace(ctx: AnalysisContext): SearchSpace {
+function searchSpace(ctx: AnalysisContext, avoidRedFlags: boolean): SearchSpace {
   const { W, L } = ctx.room;
   const { constraints } = ctx.project;
   const ears = ctx.variant.listener.ears;
@@ -82,14 +118,16 @@ function searchSpace(ctx: AnalysisContext): SearchSpace {
     W / 2 - 0.25,
     Math.min(centreX, W - centreX) - ctx.speaker.width / 2 - 0.02,
   );
+  const [from, to] = constraints.listenerYRange ?? [0.5, L - 0.3];
   return {
     centreX,
     clearance: [minClearance, Math.max(minClearance, maxClearance)],
     halfSpacing: [0.5, Math.max(0.5, maxHalf)],
-    listenerY: constraints.listenerYRange ?? [0.5, L - 0.3],
+    listenerY: [Math.min(from, to), Math.max(from, to)],
     earZ: ears.z,
     fixedSpeakers: constraints.speakersFixed ? ctx.variant.speakers : null,
     fixedListener: constraints.listenerFixed ? ears : null,
+    avoidRedFlags,
   };
 }
 
@@ -117,9 +155,11 @@ function placementFor(ctx: AnalysisContext, space: SearchSpace, p: Params): Plac
 function scoreAll(scorer: Scorer, space: SearchSpace, params: Params[]): Scored[] {
   const couplings = new Map<string, Float64Array>();
   const results: Scored[] = [];
+  const moves = { seat: !space.fixedListener, speakers: !space.fixedSpeakers };
   for (const p of params) {
     const placement = placementFor(scorer.ctx, space, p);
     if (!isValidPlacement(scorer.ctx, placement)) continue;
+    if (space.avoidRedFlags && !avoidsRedFlags(scorer.ctx, placement, moves)) continue;
     const key = space.fixedSpeakers ? 'fixed' : `${p.clearance.toFixed(3)}|${p.half.toFixed(3)}`;
     let coupling = couplings.get(key);
     if (!coupling) {
@@ -137,12 +177,17 @@ const SEEDS = 10;
 
 /**
  * Coarse search at 20 cm over the whole space, then a 5 cm refinement (±10 cm) around the ten best
- * distinct coarse results. Sorted best first.
+ * distinct coarse results. Sorted best first. Red-flag-free spots only, unless the user's
+ * constraints leave none: then the best spots that remain, whose findings say what is wrong.
  */
 export function searchPlacements(scorer: Scorer): Scored[] {
-  const space = searchSpace(scorer.ctx);
+  const found = searchWithin(scorer, searchSpace(scorer.ctx, true));
+  return found.length > 0 ? found : searchWithin(scorer, searchSpace(scorer.ctx, false));
+}
+
+function searchWithin(scorer: Scorer, space: SearchSpace): Scored[] {
   const axis = (bounds: [number, number], fixed: boolean, current: number) =>
-    fixed ? [current] : range(bounds[0], bounds[1], COARSE_STEP);
+    fixed ? [current] : steps(bounds[0], bounds[1], COARSE_STEP);
   const ears = scorer.ctx.variant.listener.ears;
   const coarseParams = axis(space.clearance, !!space.fixedSpeakers, 0).flatMap((clearance) =>
     axis(space.halfSpacing, !!space.fixedSpeakers, 0).flatMap((half) =>
@@ -207,13 +252,37 @@ function dimensionJitter(certainty: string): number {
   return certainty === 'measured' ? 0.01 : 0.05;
 }
 
-function jitter(p: Vec3, random: () => number): Vec3 {
-  return {
-    x: p.x + symmetric(random) * POSITION_JITTER,
-    y: p.y + symmetric(random) * POSITION_JITTER,
-    z: p.z,
-  };
+interface Perturbation {
+  scorer: Scorer;
+  /** Plan-view position errors for the left speaker, the right speaker and the seat. */
+  offsets: [Vec2, Vec2, Vec2];
 }
+
+/**
+ * The perturbed inputs, drawn once per seed and applied to every placement alike (common random
+ * numbers). A placement's robust score then does not depend on which other placements are scored
+ * with it or in what order, and the ranking is not decided by the luck of the draw.
+ */
+function perturbations(base: Scorer, seed: number): Perturbation[] {
+  const { project, t60 } = base.ctx;
+  const { width, length, height } = project.room;
+  const random = seededRandom(seed);
+  const offset = (): Vec2 => ({
+    x: symmetric(random) * POSITION_JITTER,
+    y: symmetric(random) * POSITION_JITTER,
+  });
+  return Array.from({ length: PERTURBATION_RUNS }, () => {
+    const ctx = buildContext(project, {
+      W: width.value! * (1 + symmetric(random) * dimensionJitter(width.certainty)),
+      L: length.value! * (1 + symmetric(random) * dimensionJitter(length.certainty)),
+      H: height.value! * (1 + symmetric(random) * dimensionJitter(height.certainty)),
+      t60Scale: (t60.low + random() * (t60.high - t60.low)) / t60.mid,
+    })!;
+    return { scorer: new Scorer(ctx, base.settings), offsets: [offset(), offset(), offset()] };
+  });
+}
+
+const shift = (p: Vec3, by: Vec2): Vec3 => ({ x: p.x + by.x, y: p.y + by.y, z: p.z });
 
 /** Scores with perturbed room size, reverberation and positions. Deterministic for a given seed. */
 export function robustScores(
@@ -221,34 +290,16 @@ export function robustScores(
   placements: Placement[],
   seed: number,
 ): { mean: number; spread: number; robust: number }[] {
-  const { project } = baseScorer.ctx;
-  const random = seededRandom(seed);
-  const t60 = baseScorer.ctx.t60;
-  const runs = Array.from({ length: PERTURBATION_RUNS }, () => {
-    const { width, length, height } = project.room;
-    const ctx = buildContext(project, {
-      W: width.value! * (1 + symmetric(random) * dimensionJitter(width.certainty)),
-      L: length.value! * (1 + symmetric(random) * dimensionJitter(length.certainty)),
-      H: height.value! * (1 + symmetric(random) * dimensionJitter(height.certainty)),
-      t60Scale: (t60.low + random() * (t60.high - t60.low)) / t60.mid,
-    })!;
-    return new Scorer(ctx, baseScorer.settings);
-  });
-  return placements.map((placement) => {
+  const runs = perturbations(baseScorer, seed);
+  return placements.map(({ speakers, listener }) => {
     const scores = runs.map(
-      (scorer) =>
+      ({ scorer, offsets: [left, right, seat] }) =>
         scorer.score({
           speakers: {
-            left: {
-              ...placement.speakers.left,
-              base: jitter(placement.speakers.left.base, random),
-            },
-            right: {
-              ...placement.speakers.right,
-              base: jitter(placement.speakers.right.base, random),
-            },
+            left: { ...speakers.left, base: shift(speakers.left.base, left) },
+            right: { ...speakers.right, base: shift(speakers.right.base, right) },
           },
-          listener: jitter(placement.listener, random),
+          listener: shift(listener, seat),
         }).score,
     );
     const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
@@ -303,58 +354,6 @@ export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate
   return pickDistinct(ranked, T.candidateSeparation, max).map((p) =>
     toCandidate(scorer, p.placement, p.robust),
   );
-}
-
-// ── Heatmaps (docs/SCORING.md §5) ─────────────────────────────────────────
-
-/** Heatmap resolution: 10 cm for typical rooms, coarser for large ones (render cost, not accuracy). */
-function heatmapStep(ctx: AnalysisContext): number {
-  const area = ctx.room.W * ctx.room.L;
-  return area <= 30 ? 0.1 : area <= 60 ? 0.15 : 0.2;
-}
-
-/** Score for the listener at every grid cell, speakers fixed. NaN where not allowed. */
-export function listenerHeatmap(
-  scorer: Scorer,
-  speakers: Placement['speakers'],
-  earZ: number,
-): Grid {
-  const { W, L } = scorer.ctx.room;
-  const step = heatmapStep(scorer.ctx);
-  const xs = range(step / 2, W - step / 2, step);
-  const ys = range(step / 2, L - step / 2, step);
-  const coupling = scorer.coupling(speakers);
-  const values = ys.flatMap((y) =>
-    xs.map((x) => {
-      const placement = { speakers, listener: { x, y, z: earZ } };
-      return isValidPlacement(scorer.ctx, placement)
-        ? scorer.score(placement, coupling).score
-        : NaN;
-    }),
-  );
-  return { x0: xs[0]!, y0: ys[0]!, step, nx: xs.length, ny: ys.length, values };
-}
-
-/**
- * Score for the left speaker at every grid cell of the left half (right speaker mirrored about
- * the listener's x), listener fixed. The UI mirrors the grid for the right half.
- */
-export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
-  const ctx = scorer.ctx;
-  const centre = listener.x;
-  const step = heatmapStep(ctx);
-  const xs = range(step / 2, centre - step / 2, step);
-  const ys = range(step / 2, ctx.room.L / 2, step);
-  const values = ys.flatMap((y) =>
-    xs.map((x) => {
-      const clearance = y - ctx.speaker.depth / 2;
-      if (clearance < 0) return NaN;
-      const speakers = speakerPair(ctx, centre, centre - x, clearance);
-      const placement = { speakers, listener };
-      return isValidPlacement(ctx, placement) ? scorer.score(placement).score : NaN;
-    }),
-  );
-  return { x0: xs[0] ?? 0, y0: ys[0] ?? 0, step, nx: xs.length, ny: ys.length, values };
 }
 
 export function makeScorer(ctx: AnalysisContext): Scorer {

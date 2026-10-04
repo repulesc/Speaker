@@ -21,6 +21,24 @@ export function coincidentAxialModes(modes: readonly Mode[], maxHz: number): [Mo
   return pairs;
 }
 
+/**
+ * Bonello's second criterion [BON81]: coincident modes do little harm in a third-octave band that
+ * holds at least five modes. So only pairs in sparser bands count; the plain 5 % test alone flags
+ * nearly every room (R0 audit: 99.7 % of 2,424 plausible rooms), which tells the user nothing.
+ */
+export function sparseCoincidences(modes: readonly Mode[], maxHz: number): [Mode, Mode][] {
+  return coincidentAxialModes(modes, maxHz).filter(([a, b]) => {
+    const [lo, hi] = thirdOctaveBand(Math.sqrt(a.f * b.f));
+    return modes.filter((m) => m.f >= lo && m.f < hi).length < 5;
+  });
+}
+
+/** Edges of the base-2 third-octave band (centres 1000·2^(n/3) Hz) that contains `f`. */
+function thirdOctaveBand(f: number): [number, number] {
+  const centre = 1000 * 2 ** (Math.round(3 * Math.log2(f / 1000)) / 3);
+  return [centre * 2 ** (-1 / 6), centre * 2 ** (1 / 6)];
+}
+
 const THIRD_OCTAVE_CENTRES = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250];
 
 /**
@@ -51,13 +69,22 @@ export function ituRatioPass(room: RoomGeometry): boolean {
 export const P11: RuleDef = {
   id: 'P11',
   level: 'physics',
+  concern: 'bass',
+  scope: 'room',
   sources: ['BON81', 'BOLT46', 'ITU1116'],
   variants: ['coincident', 'bonello', 'ituPass', 'ituFail'],
   evaluate(ctx) {
     const findings: Finding[] = [];
-    for (const [a, b] of coincidentAxialModes(ctx.modes, ctx.schroeder.value).slice(0, 3)) {
+    // One finding for the whole check (RULE_CATALOGUE P11), naming the lowest stacked pair.
+    const stacked = sparseCoincidences(ctx.modes, ctx.schroeder.value);
+    if (stacked.length > 0) {
+      const [a, b] = stacked[0]!;
       findings.push(
-        makeFinding(P11, 'coincident', 'caution', { frequencyA: a.f, frequencyB: b.f }),
+        makeFinding(P11, 'coincident', 'caution', {
+          frequencyA: a.f,
+          frequencyB: b.f,
+          pairs: stacked.length,
+        }),
       );
     }
     const band = bonelloViolation(ctx.modes, ctx.schroeder.value);

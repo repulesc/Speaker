@@ -30,8 +30,8 @@ export function scoringSettings(goals: Goals): ScoringSettings {
 
   const w: Record<ComponentId, number> = { ...DEFAULT_WEIGHTS };
   w.C4 *= 1 + 0.3 * precise;
-  // "Flat response" emphasises the bass components by de-emphasising the guidelines.
-  for (const id of ['C3', 'C4', 'C5', 'C6', 'C7'] as const) w[id] /= 1 + 0.2 * flat;
+  // "Flat response" emphasises the physics (C1–C3) by de-emphasising the guidelines.
+  for (const id of ['C4', 'C5', 'C6', 'C7'] as const) w[id] /= 1 + 0.2 * flat;
 
   const goalConflict = wide > 0 && precise > 0;
   const reflectionMode: ReflectionMode = goalConflict

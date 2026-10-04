@@ -8,7 +8,8 @@
 
   /** Words for a 0–1 score (UI calibration). Never shown as a percentage. */
   function scoreWord(score: number): 'poor' | 'fair' | 'good' | 'veryGood' {
-    if (score < 0.5) return 'poor';
+    // NaN fails every comparison below: never let a broken number read as "very good".
+    if (!Number.isFinite(score) || score < 0.5) return 'poor';
     if (score < 0.7) return 'fair';
     if (score < 0.85) return 'good';
     return 'veryGood';
@@ -26,7 +27,9 @@
   <h2>{i18n.t('steps.results')}</h2>
 
   {#if !result}
-    <p class="card" role="status">{i18n.t('results.calculating')}</p>
+    {#if !analysis.error}
+      <p class="card" role="status">{i18n.t('results.calculating')}</p>
+    {/if}
   {:else if result.status === 'needs-room-size'}
     <div class="card">
       <p>{i18n.t('results.needRoom')}</p>

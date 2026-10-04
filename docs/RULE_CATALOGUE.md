@@ -1,6 +1,6 @@
 # Rule Catalogue (v1)
 
-Status: implemented in M1 (`src/engine/rules/`, one file per rule). Implementation notes are marked **(M1)**. License: CC BY 4.0.
+Status: implemented in M1 (`src/engine/rules/`, one file per rule). Implementation notes are marked **(M1)**; changes from the R0 audit are marked **(R0)** and explained in `docs/REVIEW_FINDINGS.md`. License: CC BY 4.0.
 
 This is the single source of truth for every piece of acoustics advice the app gives. The engine implements **only** rules listed here; each rule becomes one small file in `src/engine/rules/` with the same ID.
 
@@ -89,10 +89,11 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Formula:** for a single nearby boundary at distance `d` from the speaker's acoustic centre, the first cancellation is at `f_null ≈ c / (4·d)`. Further nulls at `3·f_null`, `5·f_null`, …, but these are much shallower because the speaker becomes directional at higher frequencies.
 - **Applies to:** front wall (most important), nearest side wall, floor, ceiling.
 - **Inputs:** speaker position, acoustic centre height, room dimensions, speaker directivity (if known: frequency below which the speaker is effectively omnidirectional).
-- **Output:** `f_null` for the front wall (info). **(M1)** When two boundaries (front, nearest side, floor, ceiling, each < 1.5 m) are within 10% of each other in distance, their nulls line up and deepen: caution, with the combined frequency (🟡 threshold).
+- **Output:** `f_null` for the front wall (info). **(M1)** When two boundaries (front, nearest side, floor, ceiling, each < 1.5 m) are within 10% of each other in distance, their nulls line up and deepen, at the combined frequency (🟡 threshold). **(R0)** This is a caution only when the combined frequency lies above the scored bass band; inside it, P09 already models and scores the combined dip, so it is an explanation (info). Before R0 it was a caution in most setups.
 - **Sources:** [ALL74] (original treatment of boundary effects on power output), [TOOLE] ch. on low-frequency boundary interaction, [EVP].
 - **Limits:** `c/(4d)` is the free-field, single-boundary, listener-far-away approximation. Real notch depth depends on directivity and on the other boundaries. Below the Schroeder frequency SBIR and room modes are the same physics, so the full model (P09) takes over for scoring. P04 is used for **explanation** and above the Schroeder frequency.
 - **Test case:** `d = 0.5 m → f_null = 171.5 Hz`; `d = 1.0 m → 85.75 Hz`; `d = 0.3 m → 285.8 Hz`.
+- **At the seat (R1):** scoring (C3) and the treatment advisor use the null as heard at the seat: the reflection comes from the woofer's mirror image behind the front wall, and the first cancellation is where the extra path Δ is half a wavelength, `f = c / (2Δ)`. On the wall's normal Δ = 2d (so `c/4d`); off it, the null is higher (10–15 % at a typical stereo seat). Checked against a brute-force two-path sum (`tests/engine/validation.test.ts`).
 
 ### P05 · Boundary bass gain
 
@@ -140,6 +141,8 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Sources:** [SAB], [EYR30], [KUT], [EVP] (absorption tables).
 - **Limits:** both formulas assume a diffuse field, which small rooms do not have. Treat as a **rough character estimate** (dead / balanced / live), not a measurement. Displayed with one decimal and a range.
 - **Default when unknown:** `T60_mid = 0.4 s` with range 0.3–0.6 s. Toole reports typical domestic listening rooms cluster around this range [TOOLE] ⚠ verify exact cited range and survey.
+- **Furnishing (R0):** the busy-ness answer gives an absorption per m² of floor (bare 0–0.2, some 0.3–0.6, busy 0.5–0.9, very busy 0.7–1.2 m² sabins per m², 🟡), "some" when not answered. Placed furniture counts too: the larger of the two is used, so placing a sofa never makes the room more reverberant. Anchors: Room R with the default surfaces gives about 1.1 s bare, 0.56 s with some furniture, 0.37 s busy and 0.28 s very busy. Before R0 the amounts were fixed (bare 0–2 … very busy 10–18 m²), which made typical rooms read 0.7–1.4 s ("live"), and placed objects replaced the estimate, so placing a bed could raise T60 (0.79 → 1.07 s in Room R).
+- **Floor (R0):** the mean absorption never goes below 0.01, which keeps T60 finite for any input.
 - **Test case (Room R):** `ᾱ = 0.25 → A = 21.25 m²`. Sabine `T60 = 0.379 s`. Eyring `T60 = 0.329 s`. Since `ᾱ > 0.2`, the engine reports 0.33 s.
 
 ### P09 · Low-frequency response at the listening position (modal model)
@@ -153,7 +156,8 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Frequency range:** displayed curve from 20 Hz to `min(1.5 · f_s, 300 Hz)` (at least 120 Hz), at 1/24-octave points with 1/6-octave smoothing. Scoring uses `max(30 Hz, f6)` to `min(f_s, 200 Hz)`.
 - **Truncation (M1):** modes up to 1.5× the top frequency. The sum converges slowly; see OPEN_QUESTIONS D5.
 - **Speaker roll-off (M1):** a Butterworth high-pass with exactly −6 dB at the profile's f6, 2nd order for sealed boxes and 4th order otherwise. Shape only, an assumption.
-- **Findings (M1):** a peak or dip more than 6 dB from the median inside the scoring band → caution (🟡 threshold, same as C2).
+- **Findings (M1, R0):** a peak or dip more than 6 dB from the median inside the scoring band is reported: as information up to 10 dB, as a caution beyond (🟡 thresholds). Before R0 every 6 dB extreme was a caution, and the best spot found had one in 7 of 9 test rooms, so the caution carried no information.
+- **Narrow bands (R0):** the scored band is never empty. If the speaker's −6 dB point leaves less than half an octave of it (a small satellite), the bass is not scored (C1 and C2 get weight 0) and P09 reports `notScored` instead of a peak, dip or "smooth". Before R0 such speakers (f6 above 200 Hz, which the form accepts) produced NaN scores that the UI showed as "very good".
 - **Inputs:** room dimensions, speaker and listener positions, low-frequency T60, speaker low-frequency extension (−6 dB point) if known, used to weight the low end.
 - **Output:** predicted relative SPL curve (dB, normalised to its median), list of peaks and dips with frequencies.
 - **Sources:** [KUT] (modal Green's function), [EVP].
@@ -169,7 +173,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Formula:** `r_c ≈ 0.057 · sqrt(Q · V / T60)` (m), `Q` = directivity factor of the speaker in the relevant band.
 - **Inputs:** `V`, `T60_mid`, `Q` (default 2 for a typical small two-way monitor at mid frequencies if unknown, range 2–5).
 - **Output:** `r_c` and the ratio listening distance ÷ `r_c`.
-- **Sources:** [EVP], [KUT] ⚠ verify the 0.057 constant form in the edition cited.
+- **Sources:** [EVP], [KUT]. **(R0)** The constant is ✓ by derivation: the critical distance `r_c = sqrt(Q·A / (16π))` with Sabine's `A = 0.161·V / T60` gives `sqrt(0.161 / (16π)) = 0.0566`. Still ⚠: the equation numbers in the editions cited.
 - **Limits:** diffuse-field assumption, rough in small rooms. Used only as context for goal "precise imaging" (G08 and scoring), never as a red flag on its own.
 - **Test case:** `V = 50`, `T60 = 0.4`, `Q = 2 → r_c = 0.90 m`. With `Q = 4 → 1.27 m`.
 
@@ -181,6 +185,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
   2. **Bonello criterion:** count of modes per 1/3-octave band should not decrease with frequency, and bands with fewer than 5 modes should not contain coincident modes [BON81].
   3. **ITU-R BS.1116 ratio criterion:** `1.1·(W/H) ≤ L/H ≤ 4.5·(W/H) − 4`, with `L/H < 3` and `W/H < 3` [ITU1116].
 - **Output:** pass / caution per check, with the coincident frequencies listed. Never changes scoring (the room is given). It informs the confidence and the "why" texts.
+- **Coincidences (R0):** one finding for the check (the lowest stacked pair, plus the number of pairs), and only for pairs in a third-octave band with fewer than five modes, Bonello's second criterion. The plain 5% test flagged 99.7% of 2,424 plausible rooms (up to three separate cautions each), which told the user nothing; with the criterion 30.7% of them get it. Room R (68.6 Hz) and the 4 m cube still do.
 - **Sources:** [BON81], [BOLT46] (historical area chart, cited for context only), [ITU1116].
 - **Limits:** these criteria were designed for empty rooms and critical listening rooms. They are contested as predictors of perceived quality [TOOLE].
 - **Test case (Room R):** `W/H = 1.6`, `L/H = 2.0`. ITU: `1.76 ≤ 2.0 ≤ 3.2` → pass. Coincidence: 68.60 Hz (length 2nd and height 1st) → caution.
@@ -232,7 +237,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 ### G06 · Avoid corners (unless the speaker is designed for it)
 
 - **In plain words:** In a corner the speaker excites every bass resonance at full strength and gets a big, uneven bass boost.
-- **Logic:** derived from P03 and P05. Caution when a speaker's acoustic centre is within 0.5 m of two walls. Red flag within 0.25 m of two walls. The exception is a speaker profile flagged `designedForCorner` (rare).
+- **Logic:** derived from P03 and P05. Caution when a speaker's acoustic centre is within 0.5 m of two walls. Red flag within 0.25 m of two walls. The exception is a speaker profile flagged `designedForCorner` (rare). **(R1)** Distances are measured from the cabinet (rear panel to the front wall, side panel to the side wall), where a rear port also sits; from the woofer on the front baffle, a deep cabinet pushed fully into a corner could never be red-flagged.
 - **Sources:** [ALL74], [TOOLE]. Thresholds 🟡.
 
 ### G07 · Bass port clearance (speaker-specific)
@@ -268,6 +273,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
   - an object intersecting the direct path from a speaker to the listener (top view and height check) → red flag;
   - a hard object within 0.3 m of a speaker's side or front → caution (🟡 threshold);
   - other loudspeakers nearby (switched off): caution "passive speakers can resonate along. We can't predict how much; test by ear (cover or move them)" → 🟡 / 🟣. No source claims a magnitude; the app says so.
+  - **(R0)** one finding per object, for the nearer speaker (before R0 an object near both speakers gave two).
 - **Sources:** [TOOLE] (diffraction and early reflections from nearby objects) ⚠ verify chapter.
 
 ---
@@ -320,6 +326,25 @@ These appear as optional dashed overlay lines on the plan ("popular starting poi
 - **Sources:** manufacturer EQ guidance (KEF Connect offers room-size / acoustic-character and treble settings), [TOOLE] (room acoustics and the perceived spectral balance) ⚠ verify which manufacturers document this logic.
 
 ---
+
+## Treatment advice (T) and speaker settings (D) — R1
+
+What to change in the room or on the speaker, most useful first; the first item answers "if you can only do one thing". Each piece of advice states the direction of its effect and a rough size (small / moderate / large), never a promise. Priorities are 🟡 ordering choices. Code: `src/engine/advice/`, one file per rule. Display text: `advice.<id>.<variant>` (written in R4).
+
+| ID | Advice | Level | Sources | When |
+|---|---|---|---|---|
+| T01 | Side-wall first reflections: absorb or diffuse there (imaging goal), or try it and listen (goals split or none). About 5 cm of porous absorber works across the mid and treble range (🟡, ⚠ verify in [EVP]) | 🟠 (points 🔴 P06) | [TOOLE], [DAV80] | hard, flat surface at a near-side reflection point; nothing for a "wide stage" goal |
+| T02 | A rug at the floor reflection; a panel at the ceiling reflection (ranked lower: vertical reflections matter less for imaging) | 🟠 | [TOOLE] | hard floor or ceiling at the point |
+| T03 | The front-wall dip: move the speakers first; a panel needs to be about a quarter wavelength deep to remove it (porous absorbers work where the air moves, which peaks λ/4 from a wall), so a 10–20 cm panel only makes it a little shallower | 🔴 | [KUT], [EVP], [ALL74] | null at the seat between 80 and 300 Hz; "panel" only when the speakers are fixed |
+| T04 | Bass traps in the corners (pressure maxima of every mode, P03); honest that small corner pieces do little below 100 Hz | 🟠 | [KUT], [EVP], [TOOLE] | P09 peak caution or P11 stacked modes |
+| T05 | Too live: about 5 m² of extra soft absorption (a large rug, heavy curtains), with the predicted T60; too dead: take some away | 🔴 model (P08), target band 🟡 | [SAB], [EYR30], [EVP] | P08 live or dead |
+| T06 | Head near the back wall: move forward first; if the seat is fixed, a thick absorber (≥ 10 cm) behind the head | 🟠 | [TOOLE] | G02 caution or red flag |
+| D01 | Match the wall-distance setting: the distance, and whether it counts as close (< 0.3 m, 🟡). Option names come from the speaker's manual (⚠) | 🟠 | manufacturer | the profile has a wall setting |
+| D02 | One step of bass cut for high boundary gain, then listen | 🟡 | [ALL74], manufacturer | P05 high or very high, and a bass control |
+| D03 | One step of the treble control in H06's direction, then listen | 🟡 | manufacturer, [TOOLE] | H06 lift or cut, and a treble control |
+| D04 | The base height that puts the tweeter at ear height, or tilt the speaker (heights are not searched in v1) | 🟠 | [TOOLE], [ITU1116] ⚠ | G08 caution or red flag |
+| D05 | Move a rear port out to the minimum; the manual says whether port plugs exist (⚠) | 🟠 | manufacturer, [TOOLE] | G07 too close |
+| D06 | Desk mode when the speakers stand on a desk or table, otherwise stand mode | 🟠 | manufacturer | the profile lists those modes |
 
 ## 🟣 Subjective rules (symptom → hypotheses → experiment)
 
@@ -378,6 +403,8 @@ Objects (absorption area, m² sabins, per object, mid bands):
 | Wooden table / cabinet | ≈ 0 absorption; counts as reflector / scatterer | n/a |
 
 Object values are ranges. The engine uses the midpoint and propagates the range into T60 uncertainty.
+
+**(R0) Known issue, not yet changed:** the row "Plaster on lath / brick, plastered" carries the values usually tabulated for rough plaster *on lath*, a light construction whose panel absorption gives the 0.14 at 125 Hz. Plaster on solid masonry is usually tabulated near 0.01–0.02 at 125 Hz (from memory, ⚠ check against the table). It is the default wall and ceiling material, so it sets much of the predicted low-frequency damping. Proposal in `docs/REVIEW_FINDINGS.md` (M3).
 
 ---
 

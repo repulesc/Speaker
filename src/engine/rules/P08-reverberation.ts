@@ -57,8 +57,13 @@ export function surfaceAbsorptionArea(room: RoomGeometry, surfaces: Surfaces): B
   return area as BandValues;
 }
 
+/** No real room absorbs less than this on average (bare concrete ≈ 0.01–0.02); keeps T60 finite. */
+const MIN_MEAN_ALPHA = 0.01;
+
 function t60Bands(room: RoomGeometry, surfaceArea: BandValues, furnishing: number) {
-  const totals = surfaceArea.map((a, i) => a + furnishing * OBJECT_BAND_FACTOR[i]!);
+  const totals = surfaceArea.map((a, i) =>
+    Math.max(a + furnishing * OBJECT_BAND_FACTOR[i]!, MIN_MEAN_ALPHA * room.S),
+  );
   const midAlpha = (totals[2]! + totals[3]!) / 2 / room.S;
   const method: ReverbResult['method'] = midAlpha > 0.2 ? 'eyring' : 'sabine';
   const bands = totals.map((a) =>
@@ -110,6 +115,8 @@ export function roomCharacter(t60Mid: number): RoomCharacter {
 export const P08: RuleDef = {
   id: 'P08',
   level: 'physics',
+  concern: 'room',
+  scope: 'room',
   sources: ['SAB', 'EYR30', 'KUT', 'EVP'],
   variants: ['dead', 'balanced', 'live'],
   evaluate(ctx) {

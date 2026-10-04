@@ -113,6 +113,8 @@ export function isNearSide(r: Reflection): boolean {
 export const P06: RuleDef = {
   id: 'P06',
   level: 'physics',
+  concern: 'reflections',
+  scope: 'placement',
   sources: ['KUT', 'EVP', 'TOOLE'],
   variants: ['sideWall', 'floor', 'ceiling', 'scattering'],
   evaluate(ctx, placement) {

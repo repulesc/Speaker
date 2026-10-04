@@ -85,7 +85,7 @@
     <legend>{i18n.t('furnishing.busy.legend')}</legend>
     <p class="help">
       {variant.objects.length > 0
-        ? i18n.t('furnishing.busy.ignored')
+        ? i18n.t('furnishing.busy.combined')
         : i18n.t('furnishing.busy.help')}
     </p>
     <div class="seg" role="radiogroup" aria-label={i18n.t('furnishing.busy.legend')}>

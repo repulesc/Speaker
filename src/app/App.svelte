@@ -113,67 +113,92 @@
 
 <svelte:window onkeydown={onKeydown} onhashchange={openFromHash} />
 
-<div class="app">
-  <a class="skip visually-hidden" href="#panel">{i18n.t('app.skipToContent')}</a>
-  <TopBar
-    onshare={() => shareDialog?.show()}
-    onexport={exportFile}
-    onimport={() => fileInput?.click()}
-    onabout={() => aboutDialog?.show()}
-  />
-  <Notice />
+<!-- A rendering error must never leave a blank page (R0 audit): offer a way out instead. -->
+<svelte:boundary onerror={(error) => console.error(error)}>
+  <div class="app">
+    <a class="skip visually-hidden" href="#panel">{i18n.t('app.skipToContent')}</a>
+    <TopBar
+      onshare={() => shareDialog?.show()}
+      onexport={exportFile}
+      onimport={() => fileInput?.click()}
+      onabout={() => aboutDialog?.show()}
+    />
+    <Notice />
 
-  <main class="workspace" data-sheet={sheet}>
-    <section class="drawing">
-      <Drawing />
-    </section>
+    <main class="workspace" data-sheet={sheet}>
+      <section class="drawing">
+        <Drawing />
+      </section>
 
-    <section class="panel" id="panel" tabindex="-1">
-      <button
-        type="button"
-        class="handle"
-        aria-label={sheet === 'full' ? i18n.t('sheet.collapse') : i18n.t('sheet.expand')}
-        onclick={cycleSheet}
-      >
-        <span aria-hidden="true"></span>
-      </button>
+      <section class="panel" id="panel" tabindex="-1">
+        <button
+          type="button"
+          class="handle"
+          aria-label={sheet === 'full' ? i18n.t('sheet.collapse') : i18n.t('sheet.expand')}
+          onclick={cycleSheet}
+        >
+          <span aria-hidden="true"></span>
+        </button>
 
-      <div class="content">
-        <Stepper current={ui.step} onselect={(s) => (ui.step = s)} />
-        {#if !prefs.welcomed}<Welcome />{/if}
+        <div class="content">
+          <Stepper current={ui.step} onselect={(s) => (ui.step = s)} />
+          {#if !prefs.welcomed}<Welcome />{/if}
 
-        {#if ui.step === 'room'}
-          <StepRoom />
-        {:else if ui.step === 'surfaces'}
-          <StepSurfaces />
-        {:else if ui.step === 'furnishing'}
-          <StepFurnishing />
-        {:else if ui.step === 'speakers'}
-          <StepSpeakers />
-        {:else if ui.step === 'goals'}
-          <StepGoals />
-        {:else}
-          <StepResults />
-        {/if}
+          {#if ui.step === 'room'}
+            <StepRoom />
+          {:else if ui.step === 'surfaces'}
+            <StepSurfaces />
+          {:else if ui.step === 'furnishing'}
+            <StepFurnishing />
+          {:else if ui.step === 'speakers'}
+            <StepSpeakers />
+          {:else if ui.step === 'goals'}
+            <StepGoals />
+          {:else}
+            <StepResults />
+          {/if}
 
-        {#if analysis.error}
-          <div class="card error" role="alert">
-            <p>{i18n.t('analysis.error')}</p>
-          </div>
-        {/if}
+          {#if analysis.error}
+            <div class="card error" role="alert">
+              <p>{i18n.t('analysis.error')}</p>
+            </div>
+          {/if}
 
-        <StepNav current={ui.step} onselect={(s) => (ui.step = s)} />
+          <StepNav current={ui.step} onselect={(s) => (ui.step = s)} />
 
-        <footer>
-          <p class="save" role="status" data-state={workspace.saveState}>
-            {i18n.t(`project.${workspace.saveState}`)}
-          </p>
-          <p class="disclaimer">{i18n.t('app.disclaimer')}</p>
-        </footer>
+          <footer>
+            <p class="save" role="status" data-state={workspace.saveState}>
+              {i18n.t(`project.${workspace.saveState}`)}
+            </p>
+            <p class="disclaimer">{i18n.t('app.disclaimer')}</p>
+          </footer>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  {#snippet failed(error, reset)}
+    <main class="crashed" role="alert">
+      <h1>{i18n.t('crash.title')}</h1>
+      <p>{i18n.t('crash.body')}</p>
+      <details>
+        <summary>{i18n.t('crash.details')}</summary>
+        <pre>{error instanceof Error ? error.message : String(error)}</pre>
+      </details>
+      <div class="actions">
+        <button type="button" class="btn" onclick={exportFile}>{i18n.t('crash.export')}</button>
+        <button
+          type="button"
+          class="btn primary"
+          onclick={() => {
+            workspace.newProject();
+            reset();
+          }}>{i18n.t('crash.newProject')}</button
+        >
       </div>
-    </section>
-  </main>
-</div>
+    </main>
+  {/snippet}
+</svelte:boundary>
 
 <input
   bind:this={fileInput}
@@ -192,6 +217,22 @@
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
+  }
+  .crashed {
+    display: grid;
+    gap: 16px;
+    max-width: 36rem;
+    margin: 0 auto;
+    padding: 48px 16px;
+  }
+  .crashed pre {
+    white-space: pre-wrap;
+    font-size: 13px;
+  }
+  .crashed .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
   }
   .skip:focus {
     position: fixed;

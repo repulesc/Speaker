@@ -5,6 +5,7 @@ import { modeFrequency, roomModes } from '../../src/engine/rules/P02-room-modes'
 import { boundaryNullHz } from '../../src/engine/rules/P04-boundary-interference';
 import { reflectionPoint } from '../../src/engine/rules/P06-reflections';
 import { schroederFrequency } from '../../src/engine/rules/P07-schroeder';
+import { reverberation } from '../../src/engine/rules/P08-reverberation';
 import {
   buildBassModel,
   responseDb,
@@ -47,10 +48,12 @@ describe('engine vs independent reference', () => {
     expect(schroederFrequency(s.t60, s.V)).toBeCloseTo(s.f, 6);
   });
 
-  it('Sabine reverberation per band (Room R, default surfaces, "some" furnishing)', () => {
-    const ctx = buildContext(makeProject())!;
-    expect(ctx.t60.method).toBe('sabine');
-    ctx.t60.bands.forEach((t, i) => expect(t).toBeCloseTo(reference.sabine[i]!, 6));
+  it('Sabine reverberation per band (Room R, default surfaces, 5 m² of furnishing)', () => {
+    // The furnishing is given directly (3–7 m², nominal 5), as in the reference, so this checks
+    // the formula and the surface data, not the busy-ness calibration.
+    const t60 = reverberation(room, makeProject().surfaces, [3, 7]);
+    expect(t60.method).toBe('sabine');
+    t60.bands.forEach((t, i) => expect(t).toBeCloseTo(reference.sabine[i]!, 6));
   });
 
   it('modal bass response shape (normalised to the 30–180 Hz median)', () => {

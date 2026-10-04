@@ -1,5 +1,9 @@
 import { ASSUMPTION, makeFinding, type RuleDef } from './rule';
 
+/** Distance from the midpoint as a fraction of the room length (🟡 bands). */
+export const MIDPOINT_RED_FLAG = 0.05;
+const MIDPOINT_CAUTION = 0.1;
+
 /**
  * G01 · Don't sit at the room's midpoint along its length (🟠, null itself 🔴 via P03).
  * Sources: [TOOLE], [EVP]. Red flag within 5 % of L/2, caution within 10 % (🟡 bands).
@@ -12,6 +16,8 @@ export function midpointOffsetFraction(listenerY: number, length: number): numbe
 export const G01: RuleDef = {
   id: 'G01',
   level: 'guideline',
+  concern: 'bass',
+  scope: 'placement',
   sources: ['TOOLE', 'EVP'],
   variants: ['redFlag', 'caution', 'ok', 'widthNode'],
   evaluate(ctx, placement) {
@@ -19,9 +25,9 @@ export const G01: RuleDef = {
     const params = { offsetFraction: offset, midpoint: ctx.room.L / 2 };
     const assumptions = [ASSUMPTION.rigidRectangular];
     const lengthFinding =
-      offset < 0.05
+      offset < MIDPOINT_RED_FLAG
         ? makeFinding(G01, 'redFlag', 'red-flag', params, { assumptions })
-        : offset < 0.1
+        : offset < MIDPOINT_CAUTION
           ? makeFinding(G01, 'caution', 'caution', params, { assumptions })
           : makeFinding(G01, 'ok', 'ok', params);
     const findings = [lengthFinding];

@@ -11,6 +11,8 @@ import { makeFinding, type RuleDef } from './rule';
 export const G07: RuleDef = {
   id: 'G07',
   level: 'guideline',
+  concern: 'speaker',
+  scope: 'placement',
   sources: ['manufacturer', 'TOOLE'],
   variants: ['tooClose', 'ok', 'unknownPort', 'matchSetting'],
   evaluate(ctx, placement) {
