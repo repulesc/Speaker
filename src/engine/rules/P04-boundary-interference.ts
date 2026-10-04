@@ -1,5 +1,6 @@
 import { wooferCentre, type AnalysisContext } from '../context';
-import type { Finding, SpeakerPlacement } from '../types';
+import { distance } from '../math/geometry';
+import type { Finding, SpeakerPlacement, Vec3 } from '../types';
 import { bassBand } from './P09-bass-response';
 import { ASSUMPTION, makeFinding, type RuleDef } from './rule';
 
@@ -9,6 +10,17 @@ import { ASSUMPTION, makeFinding, type RuleDef } from './rule';
  */
 export function boundaryNullHz(distance: number, c: number): number {
   return c / (4 * distance);
+}
+
+/**
+ * The front-wall null as heard at the seat: the reflection comes from the woofer's mirror image
+ * behind the front wall, and the first cancellation is where the extra path is half a wavelength,
+ * f = c / (2·Δ). On the wall's normal Δ = 2d (so f = c/4d); off it the null sits higher.
+ */
+export function frontWallNullAtSeat(woofer: Vec3, seat: Vec3, c: number): number {
+  const image = { ...woofer, y: -woofer.y };
+  const extra = distance(image, seat) - distance(woofer, seat);
+  return extra > 1e-9 ? c / (2 * extra) : Infinity;
 }
 
 export interface BoundaryDistances {

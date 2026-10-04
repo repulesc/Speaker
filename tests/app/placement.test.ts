@@ -159,6 +159,18 @@ describe('typed-field setters', () => {
     expect(activeVariant(p).speakers.right.base.y).toBeCloseTo(0.4 + 0.125, 6);
   });
 
+  it('with the mirror lock off, clearance and stand height still apply to both speakers', () => {
+    const p = project();
+    p.constraints.keepSymmetric = false;
+    setSpeakerClearance(p, 0.3);
+    setStandHeight(p, 0.8);
+    const { left, right } = activeVariant(p).speakers;
+    for (const s of [left, right]) {
+      expect(s.base.y).toBeCloseTo(0.3 + 0.125, 6);
+      expect(s.base.z).toBe(0.8);
+    }
+  });
+
   it('spacing keeps the pair centred', () => {
     const p = project();
     setSpeakerSpacing(p, 2.4);

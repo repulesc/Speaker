@@ -13,8 +13,6 @@ export const THRESHOLDS = {
   frontNullGoodHz: 300,
   frontNullBadHz: 250,
   frontNullBadScore: 0.3,
-  /** C3: rear clearance counted as "near the wall" for speakers with wall compensation. */
-  nearWallClearance: 0.3,
   /** C4: stereo angle. Within ±okSpan of the target scores ≥ okScore; 0 at the red-flag limits. */
   angleOkSpan: 10,
   angleOkScore: 0.8,

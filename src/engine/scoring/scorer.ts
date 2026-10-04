@@ -3,7 +3,7 @@ import { distance, ramp } from '../math/geometry';
 import { cornerProximity } from '../rules/G06-corners';
 import { stereoAngleDeg } from '../rules/G04-stereo-angle';
 import { sideDistanceDifference } from '../rules/G03-symmetry';
-import { boundaryNullHz } from '../rules/P04-boundary-interference';
+import { frontWallNullAtSeat } from '../rules/P04-boundary-interference';
 import { firstReflections, isNearSide } from '../rules/P06-reflections';
 import {
   bassBand,
@@ -80,15 +80,16 @@ export class Scorer {
     };
   }
 
-  /** C3: front-wall interference above the scored bass band (inside it, C1 already counts it). */
-  frontWall(p: SpeakerPlacement): number {
-    const nullHz = boundaryNullHz(wooferCentre(p, this.ctx.speaker).y, this.ctx.c);
-    if (nullHz <= this.range[1]) return 1;
-    if (nullHz >= T.frontNullGoodHz) return 1;
-    const nearWithCompensation =
-      this.ctx.speaker.hasWallSetting && rearClearance(p, this.ctx.speaker) < T.nearWallClearance;
-    if (nearWithCompensation) return 1;
-    return ramp(nullHz, T.frontNullBadHz, T.frontNullGoodHz, T.frontNullBadScore, 1);
+  /**
+   * C3: the front-wall null as heard at the seat (P04). Inside the scored bass band C1 counts it,
+   * so the penalty fades in over the band's top third of an octave instead of jumping at its edge.
+   * A wall-distance DSP setting does not help here: EQ cannot fill a cancellation.
+   */
+  frontWall(p: SpeakerPlacement, seat: Vec3): number {
+    const nullHz = frontWallNullAtSeat(wooferCentre(p, this.ctx.speaker), seat, this.ctx.c);
+    const score = ramp(nullHz, T.frontNullBadHz, T.frontNullGoodHz, T.frontNullBadScore, 1);
+    const share = ramp(Math.log2(nullHz / this.range[1]), -1 / 3, 0, 0, 1);
+    return 1 - share * (1 - score);
   }
 
   /** C4: stereo angle around the goal target, times equal-distance (G05). */
@@ -169,8 +170,8 @@ export class Scorer {
       C1: c1,
       C2: c2,
       C3: Math.min(
-        this.frontWall(placement.speakers.left),
-        this.frontWall(placement.speakers.right),
+        this.frontWall(placement.speakers.left, placement.listener),
+        this.frontWall(placement.speakers.right, placement.listener),
       ),
       C4: this.geometry(placement),
       C5: c5,

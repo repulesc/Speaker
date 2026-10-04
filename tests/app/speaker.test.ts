@@ -99,6 +99,16 @@ describe('speaker profile files', () => {
     expect(parseSpeakerJson(text)).toMatchObject({ ok: false, reason });
   });
 
+  it.each([
+    ['a treble range from high to low', { treble: { minDb: 3, maxDb: -3, stepDb: 0.5 } }],
+    ['a zero step', { bass: { minDb: -6, maxDb: 6, stepDb: 0 } }],
+    ['a wall setting that is not true or false', { wallDistanceSetting: 'yes' }],
+  ])('rejects DSP controls with %s', (_, dsp) => {
+    const bad = JSON.parse(serializeSpeaker(speaker()));
+    bad.speaker.dsp = dsp;
+    expect(parseSpeakerJson(JSON.stringify(bad))).toMatchObject({ ok: false, reason: 'invalid' });
+  });
+
   it('rejects out-of-range values with the path', () => {
     const bad = JSON.parse(serializeSpeaker(speaker()));
     bad.speaker.dimensions.w = { value: 99, certainty: 'measured' };

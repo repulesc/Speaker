@@ -38,8 +38,9 @@ function inputs(project: Project): InputSpec[] {
   const surfaceFactor =
     boundaries.reduce((sum, c) => sum + (c === 'unknown' ? FACTOR.unknown : FACTOR.estimated), 0) /
     Math.max(1, boundaries.length);
+  const busyness = variant?.busyness?.certainty ?? 'unknown';
   const furnishingFactor =
-    variant && (variant.objects.length > 0 || variant.busyness?.certainty !== 'unknown')
+    variant && (variant.objects.length > 0 || busyness !== 'unknown')
       ? FACTOR.estimated
       : FACTOR.unknown;
 

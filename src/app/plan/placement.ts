@@ -162,15 +162,20 @@ export function rotateObject(project: Project, id: string): boolean {
 
 const EXACT: MoveOptions = { grid: false, keepCertainty: true };
 
+const SIDES = ['left', 'right'] as const;
+
+/** Moves both speakers, each keeping its own x (one move covers both when they are mirrored). */
+function moveBoth(project: Project, to: Target): boolean {
+  const { speakers } = activeVariant(project);
+  const sides = project.constraints.keepSymmetric ? (['left'] as const) : SIDES;
+  return sides.every((side) =>
+    moveSpeaker(project, side, { ...to, x: speakers[side].base.x }, EXACT),
+  );
+}
+
 /** Distance from the speakers' rear panel to the front wall. */
 export function setSpeakerClearance(project: Project, clearance: number): boolean {
-  const left = activeVariant(project).speakers.left.base;
-  return moveSpeaker(
-    project,
-    'left',
-    { y: Math.max(0, clearance) + cabinet(project).d / 2, x: left.x },
-    EXACT,
-  );
+  return moveBoth(project, { y: Math.max(0, clearance) + cabinet(project).d / 2 });
 }
 
 /** Distance between the two speaker centres. Keeps the pair centred where it is. */
@@ -186,7 +191,7 @@ export function setSpeakerSpacing(project: Project, spacing: number): boolean {
 }
 
 export function setStandHeight(project: Project, z: number): boolean {
-  return moveSpeaker(project, 'left', { z }, EXACT);
+  return moveBoth(project, { z });
 }
 
 export function setEarHeight(project: Project, z: number): boolean {

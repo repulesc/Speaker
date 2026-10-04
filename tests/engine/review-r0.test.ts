@@ -5,11 +5,18 @@ import { buildContext, currentPlacement, type AnalysisContext } from '../../src/
 import { RULES } from '../../src/engine/rules';
 import { G04 } from '../../src/engine/rules/G04-stereo-angle';
 import { G10 } from '../../src/engine/rules/G10-objects';
-import { P04 } from '../../src/engine/rules/P04-boundary-interference';
+import { frontWallNullAtSeat, P04 } from '../../src/engine/rules/P04-boundary-interference';
 import { roomCharacter } from '../../src/engine/rules/P08-reverberation';
 import { bassBand } from '../../src/engine/rules/P09-bass-response';
 import { P11 } from '../../src/engine/rules/P11-room-proportions';
-import { makeScorer, robustScores, searchPlacements } from '../../src/engine/scoring/search';
+import { confidence } from '../../src/engine/confidence';
+import {
+  makeScorer,
+  robustScores,
+  searchPlacements,
+  speakerPair,
+} from '../../src/engine/scoring/search';
+import { scoringSettings } from '../../src/engine/scoring/settings';
 import type {
   AnalysisOk,
   Busyness,
@@ -307,5 +314,64 @@ describe('H4 · a robust score does not depend on what else is being ranked', ()
       expect(reversed[i]!.robust).toBe(r.robust);
       expect(alone[i]!.robust).toBe(r.robust);
     });
+  });
+});
+
+describe('M1 · the front-wall null as heard at the seat, handed over without a cliff', () => {
+  it('on the wall’s normal it is c/4d; off it, higher', () => {
+    const woofer = { x: 1, y: 0.5, z: 0.8 };
+    expect(frontWallNullAtSeat(woofer, { x: 1, y: 3, z: 0.8 }, 343)).toBeCloseTo(171.5, 6);
+    expect(frontWallNullAtSeat(woofer, { x: 1.65, y: 1.65, z: 1.1 }, 343)).toBeGreaterThan(180);
+  });
+
+  it('C3 changes smoothly as the speakers move (before: a 0.70 jump within 2 cm)', () => {
+    const ctx = buildContext(makeProject())!;
+    const scorer = makeScorer(ctx);
+    const seat = { x: 2, y: 1.7, z: 1.1 };
+    let previous: number | null = null;
+    for (let c = 0.05; c <= 0.6; c += 0.01) {
+      const speakers = speakerPair(ctx, 2, 0.65, c);
+      const c3 = scorer
+        .score({ speakers, listener: seat })
+        .breakdown.find((b) => b.componentId === 'C3')!.value;
+      if (previous !== null) expect(Math.abs(c3 - previous)).toBeLessThan(0.15);
+      previous = c3;
+    }
+  });
+});
+
+describe('M2 · a wall-distance DSP setting does not excuse a front-wall null', () => {
+  it('same C3 with and without the setting', () => {
+    const c3 = (wallSetting: boolean) => {
+      const p = makeProject({ clearance: 0.15 });
+      if (wallSetting) p.speaker.dsp.wallDistanceSetting = true;
+      const ctx = buildContext(p)!;
+      return makeScorer(ctx)
+        .score(currentPlacement(ctx))
+        .breakdown.find((b) => b.componentId === 'C3')!.value;
+    };
+    expect(c3(true)).toBe(c3(false));
+    expect(c3(false)).toBeLessThan(1);
+  });
+});
+
+describe('M4 · "flat response" keeps the physics together', () => {
+  it('C3 keeps its share relative to C1', () => {
+    const flat = scoringSettings({ weights: { 'flat-response': 2 } }).weights;
+    const none = scoringSettings({ weights: {} }).weights;
+    expect(flat.C3 / flat.C1).toBeCloseTo(none.C3 / none.C1, 9);
+    expect(flat.C4 / flat.C1).toBeLessThan(none.C4 / none.C1);
+  });
+});
+
+describe('L3 · a project without a busy-ness answer counts its furniture as unknown', () => {
+  it('same confidence as an explicit "don’t know"', () => {
+    const missing = makeProject();
+    delete missing.variants[0]!.busyness;
+    const unknownAnswer = makeProject();
+    unknownAnswer.variants[0]!.busyness = { value: null, certainty: 'unknown' };
+    expect(confidence(missing, buildContext(missing)).overall).toBe(
+      confidence(unknownAnswer, buildContext(unknownAnswer)).overall,
+    );
   });
 });

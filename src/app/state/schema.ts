@@ -83,6 +83,14 @@ const patch = obj({
   label: optional(str(SIZE_LIMITS.name)),
 });
 
+/** A tone control's range, e.g. −3…+3 dB in 0.5 dB steps. */
+const trim: Check = (v, p) => {
+  const error = obj({ minDb: num(-24, 0), maxDb: num(0, 24), stepDb: num(0.01, 12) })(v, p);
+  if (error) return error;
+  const { minDb, maxDb } = v as { minDb: number; maxDb: number };
+  return minDb < maxDb ? null : `${p}: expected a range from low to high`;
+};
+
 export const speakerSchema: Check = obj({
   id: str(SIZE_LIMITS.name),
   brand: str(SIZE_LIMITS.name),
@@ -95,7 +103,14 @@ export const speakerSchema: Check = obj({
   wooferCentreHeight: known(num(0, 3)),
   lowFrequencyMinus6dB: known(num(10, 500)),
   directivity: obj({ omniBelowHz: known(num(20, 2000)), qMid: known(num(1, 30)) }),
-  dsp: obj({}),
+  dsp: obj({
+    treble: optional(trim),
+    bass: optional(trim),
+    placementModes: optional(arr(str(SIZE_LIMITS.name), 10)),
+    wallDistanceSetting: optional(bool),
+    roomCharacterSetting: optional(bool),
+    subOut: optional(bool),
+  }),
   minWallDistance: optional(known(num(0, 3))),
   designedForCorner: optional(bool),
   manufacturerNotes: arr(
