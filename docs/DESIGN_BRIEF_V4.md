@@ -51,6 +51,11 @@ The owner wants Opus to have real freedom, without surprises.
 - **Drawing labels:** Opus decides. Propose in the options (few human labels such as "Front wall", "Left speaker", "You", versus constant technical dimensions); the owner chooses.
 - **Legend:** a thin gradient bar with two words, "Poorer" to "Better", with the room's best level named; out of the way, bottom-left of the map.
 
+- **Left panel home list:** undecided. Mock up both (rows with the value on the right, as now; and a grid of four icon cards with a one-word status) and let the owner choose by looking.
+- **Moving between sections:** drill in with Back (as now): tap a row, the section slides in, Back returns.
+- **Panel size:** the left panel can be hidden with a small toggle so the map fills the window (also good for screenshots and sharing).
+- **Fun features:** the owner picked **guided listening tests** (short "play this track, try this move" experiments so people can check the advice by ear; builds on the existing Listen tab). The owner added that the main way to stand out is an excellent design; the fun features are a bonus.
+
 ## The owner's feedback, in order
 
 1. **Settings icon:** replace the cog with the three-lines menu icon (friendlier, less industrial).
@@ -76,3 +81,27 @@ V3 first pass is merged (see the status section at the end of `docs/DESIGN_BRIEF
 - All tests keep passing; e2e selectors change only where a control moved.
 - Bundle under 150 KB gzip (now about 115 KB).
 - Every new rule or estimate needs a formula, a cited source, an evidence level and tests; mark anything unverified.
+
+## Open mandate for Opus (the owner asked for this explicitly)
+
+Beyond the list above, think out of the box about the whole site. Re-evaluate what is here, find what is missing, and propose.
+
+- **Think about real users and real situations.** Most people have a fixed seat; many have limited room to move speakers; many will open the link from a friend. What would a first-time visitor try to do, and where would they get stuck? What is missing for them: for example a "why should I trust this" moment, a comparison with how they set up today, a way to remember the result and come back, or a printable "tape-measure" card (a first version exists in the print sheet).
+- **Ideas that make the site stand out from similar tools.** Excellent design first. Then features that are fun and still honest. Subjective or psychological ideas are welcome only where they make sense, and must always be labelled as taste ("your preference"), never presented as physics. Candidates the owner has seen and not yet ruled in or out: sound-taste sliders (tight and punchy to warm and spacious), music-based tuning ("what do you mostly listen to?"), a shareable one-line "character of your room" generated from the real analysis. The owner's chosen direction is the guided listening tests.
+- **Ask before restructuring.** Propose with screenshots or a short written case first. The owner decides before anything big is built. New features need the same rigour as rules: honest wording, evidence level, tests.
+
+## Naming (decide with the owner; the name lives only in `src/app/config.ts`)
+
+Wanted: simple, unique, symbolic, easy to say in any language, no cringe, no kitsch; obscure is fine. Ten options, none of them checked for domains, trademarks or existing sites (do that before choosing):
+
+1. **Eigen**: German "own, proper"; the maths word behind a room's own tones (eigenmodes). Note: also the name of a well-known maths library.
+2. **Aula**: Latin and Hungarian for a hall; short, calm, means "room". Common word in German and Hungarian.
+3. **Tria**: from the triangle of the two speakers and the listener, the central shape of stereo.
+4. **Locus**: Latin "place"; in maths, the set of points that meet a condition, which is what the map shows. Very common word.
+5. **Stanza**: Italian "room", also a verse of a song. Used by some software.
+6. **Sabine**: after Wallace Sabine, founder of architectural acoustics. Reads as a person's name; I believe an audio company uses it.
+7. **Haas**: after Helmut Haas, the precedence effect behind stereo imaging. A well-known surname and brand.
+8. **Axo**: from axial room modes, the strongest bass patterns. Short and open.
+9. **Placet**: Latin "it pleases", and a nod to "placement". A real word (approval) in Hungarian.
+10. **Fermata**: the held note or pause in music: sit still and listen. A standard musical term; may feel slightly precious.
+
