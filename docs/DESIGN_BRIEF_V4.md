@@ -46,6 +46,11 @@ The owner wants Opus to have real freedom, without surprises.
 - **Motion:** subtle and quick, about 150 to 250 ms: fades and slides, speakers glide when a placement is applied, the map crossfades when it updates. Respect "reduce motion".
 - **Loading:** a small spinner next to the title (not skeletons). Keep the previous result visible meanwhile.
 
+- **Apply:** show a before/after comparison on the map for a few seconds so the change is obvious. Undo stays one step away (it already works with the Undo button and Ctrl+Z); do not remove it.
+- **Share and Export:** inside the settings menu, as the owner chose. Opus should note that this is harder to discover than a button on the map and may suggest a more visible entry point; the owner decides.
+- **Drawing labels:** Opus decides. Propose in the options (few human labels such as "Front wall", "Left speaker", "You", versus constant technical dimensions); the owner chooses.
+- **Legend:** a thin gradient bar with two words, "Poorer" to "Better", with the room's best level named; out of the way, bottom-left of the map.
+
 ## The owner's feedback, in order
 
 1. **Settings icon:** replace the cog with the three-lines menu icon (friendlier, less industrial).
