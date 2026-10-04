@@ -76,6 +76,7 @@ test('journey 6 — share: a link opens an identical project for someone else', 
   await fillRoom(page, '4', '5.2', '2.6');
   await openMenu(page);
   await page.getByRole('button', { name: 'Share link' }).click();
+  await expect(page.getByLabel('Share link')).toHaveValue(/#p=/); // the link is made a moment after the dialog opens
   const link = await page.getByLabel('Share link').inputValue();
   expect(link).toContain('#p=');
   await page.getByRole('button', { name: 'Close' }).click();

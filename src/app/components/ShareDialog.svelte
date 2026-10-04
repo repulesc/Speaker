@@ -15,8 +15,9 @@
 
   export async function show() {
     copied = 'none';
-    await refresh();
+    link = '';
     dialog?.showModal();
+    await refresh();
   }
 
   async function copy() {
