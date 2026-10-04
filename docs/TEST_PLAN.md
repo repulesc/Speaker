@@ -100,6 +100,8 @@ The snapshot holds the top 3 candidates (positions rounded to 5 cm), their score
 
 > **Status (M3).** Journeys 1–10 are implemented in `tests/e2e/` (journeys 1 and 3 with the M3 results summary and setup switching; the full comparison follows in M4). Beyond the plan: dragging and keyboard moves, every input step, the speaker file round trip, offline use, phone layout checks, and axe scans of every step in light and dark.
 >
+> **R1 validation suite** (`tests/engine/validation.test.ts`): the mode count against Kuttruff's asymptotic formula (three rooms, within 10 %), the front-wall null against a brute-force two-path sum, Eyring against Sabine, and a table of known-bad setups that must always be flagged (it found G06's corner gap). R1 features are tested in `explain.test.ts` and `advice.test.ts`, including physics checks of the room-mode explorer (nodes at L/2 and L/4).
+>
 > **Gaps found in R0** (`docs/REVIEW_FINDINGS.md`): no component tests with Testing Library (the e2e tests cover the components instead); the external cross-checks of §4 (`docs/verification/`) are not done yet; the monotonic-confidence property only varies the room dimensions.
 
 ## 7. The busy room: test profile

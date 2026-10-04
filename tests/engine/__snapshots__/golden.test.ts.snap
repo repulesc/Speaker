@@ -149,37 +149,37 @@ exports[`golden scenarios > a satellite speaker (−6 dB at 160 Hz): bass not sc
       "score": 0.98,
       "seat": [
         2,
-        3.6,
+        3.8,
       ],
       "speakersX": [
         0.35,
         3.65,
       ],
-      "speakersY": 0.65,
+      "speakersY": 0.85,
     },
     {
       "score": 0.98,
       "seat": [
         2,
-        3.85,
-      ],
-      "speakersX": [
-        0.35,
-        3.65,
-      ],
-      "speakersY": 0.9,
-    },
-    {
-      "score": 0.98,
-      "seat": [
-        2,
-        3.2,
+        3.4,
       ],
       "speakersX": [
         0.55,
         3.45,
       ],
-      "speakersY": 0.6,
+      "speakersY": 0.8,
+    },
+    {
+      "score": 0.98,
+      "seat": [
+        2,
+        3.8,
+      ],
+      "speakersX": [
+        0.55,
+        3.45,
+      ],
+      "speakersY": 1.2,
     },
   ],
   "current": 0.85,
@@ -252,7 +252,7 @@ exports[`golden scenarios > long narrow room 3 × 8 × 2.5 m: a good stereo angl
       "speakersY": 0.2,
     },
   ],
-  "current": 0.71,
+  "current": 0.68,
   "findings": [
     "caution P09.dip",
     "caution G01.caution",
@@ -367,18 +367,6 @@ exports[`golden scenarios > seat fixed against the back wall: red flag, and the 
         0.25,
         3.75,
       ],
-      "speakersY": 0.5,
-    },
-    {
-      "score": 0.68,
-      "seat": [
-        2,
-        4.8,
-      ],
-      "speakersX": [
-        0.25,
-        3.75,
-      ],
       "speakersY": 0.85,
     },
     {
@@ -392,6 +380,18 @@ exports[`golden scenarios > seat fixed against the back wall: red flag, and the 
         3.55,
       ],
       "speakersY": 0.85,
+    },
+    {
+      "score": 0.66,
+      "seat": [
+        2,
+        4.8,
+      ],
+      "speakersX": [
+        0.7,
+        3.3,
+      ],
+      "speakersY": 0.9,
     },
   ],
   "current": 0.38,
@@ -502,16 +502,16 @@ exports[`golden scenarios > tiny room 2.5 × 3 × 2.4 m: the 1 m listening dista
 {
   "candidates": [
     {
-      "score": 0.89,
+      "score": 0.87,
       "seat": [
         1.25,
-        1.75,
+        1.7,
       ],
       "speakersX": [
-        0.6,
-        1.9,
+        0.7,
+        1.8,
       ],
-      "speakersY": 0.5,
+      "speakersY": 0.55,
     },
     {
       "score": 0.86,
@@ -526,16 +526,16 @@ exports[`golden scenarios > tiny room 2.5 × 3 × 2.4 m: the 1 m listening dista
       "speakersY": 1.4,
     },
     {
-      "score": 0.82,
+      "score": 0.83,
       "seat": [
         1.25,
-        2.4,
+        1.75,
       ],
       "speakersX": [
-        0.55,
-        1.95,
+        0.5,
+        2,
       ],
-      "speakersY": 1.1,
+      "speakersY": 0.5,
     },
   ],
   "current": 0.52,

@@ -1,6 +1,6 @@
 import { acousticCentre, rearClearance, wooferCentre, type AnalysisContext } from '../context';
 import { distance, ramp } from '../math/geometry';
-import { cornerProximity } from '../rules/G06-corners';
+import { speakerCorner } from '../rules/G06-corners';
 import { stereoAngleDeg } from '../rules/G04-stereo-angle';
 import { sideDistanceDifference } from '../rules/G03-symmetry';
 import { frontWallNullAtSeat } from '../rules/P04-boundary-interference';
@@ -146,10 +146,9 @@ export class Scorer {
     const s = this.ctx.speaker;
     const scores = (['left', 'right'] as const).map((side) => {
       const p = placement.speakers[side];
-      const w = wooferCentre(p, s);
       let corner = 1;
       if (!s.designedForCorner) {
-        const proximity = cornerProximity(w.y, Math.min(w.x, this.ctx.room.W - w.x));
+        const proximity = speakerCorner(p, this.ctx);
         const raw =
           proximity === 'corner'
             ? T.cornerScore

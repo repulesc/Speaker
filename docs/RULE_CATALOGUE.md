@@ -93,6 +93,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Sources:** [ALL74] (original treatment of boundary effects on power output), [TOOLE] ch. on low-frequency boundary interaction, [EVP].
 - **Limits:** `c/(4d)` is the free-field, single-boundary, listener-far-away approximation. Real notch depth depends on directivity and on the other boundaries. Below the Schroeder frequency SBIR and room modes are the same physics, so the full model (P09) takes over for scoring. P04 is used for **explanation** and above the Schroeder frequency.
 - **Test case:** `d = 0.5 m → f_null = 171.5 Hz`; `d = 1.0 m → 85.75 Hz`; `d = 0.3 m → 285.8 Hz`.
+- **At the seat (R1):** scoring (C3) and the treatment advisor use the null as heard at the seat: the reflection comes from the woofer's mirror image behind the front wall, and the first cancellation is where the extra path Δ is half a wavelength, `f = c / (2Δ)`. On the wall's normal Δ = 2d (so `c/4d`); off it, the null is higher (10–15 % at a typical stereo seat). Checked against a brute-force two-path sum (`tests/engine/validation.test.ts`).
 
 ### P05 · Boundary bass gain
 
@@ -236,7 +237,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 ### G06 · Avoid corners (unless the speaker is designed for it)
 
 - **In plain words:** In a corner the speaker excites every bass resonance at full strength and gets a big, uneven bass boost.
-- **Logic:** derived from P03 and P05. Caution when a speaker's acoustic centre is within 0.5 m of two walls. Red flag within 0.25 m of two walls. The exception is a speaker profile flagged `designedForCorner` (rare).
+- **Logic:** derived from P03 and P05. Caution when a speaker's acoustic centre is within 0.5 m of two walls. Red flag within 0.25 m of two walls. The exception is a speaker profile flagged `designedForCorner` (rare). **(R1)** Distances are measured from the cabinet (rear panel to the front wall, side panel to the side wall), where a rear port also sits; from the woofer on the front baffle, a deep cabinet pushed fully into a corner could never be red-flagged.
 - **Sources:** [ALL74], [TOOLE]. Thresholds 🟡.
 
 ### G07 · Bass port clearance (speaker-specific)
@@ -325,6 +326,25 @@ These appear as optional dashed overlay lines on the plan ("popular starting poi
 - **Sources:** manufacturer EQ guidance (KEF Connect offers room-size / acoustic-character and treble settings), [TOOLE] (room acoustics and the perceived spectral balance) ⚠ verify which manufacturers document this logic.
 
 ---
+
+## Treatment advice (T) and speaker settings (D) — R1
+
+What to change in the room or on the speaker, most useful first; the first item answers "if you can only do one thing". Each piece of advice states the direction of its effect and a rough size (small / moderate / large), never a promise. Priorities are 🟡 ordering choices. Code: `src/engine/advice/`, one file per rule. Display text: `advice.<id>.<variant>` (written in R4).
+
+| ID | Advice | Level | Sources | When |
+|---|---|---|---|---|
+| T01 | Side-wall first reflections: absorb or diffuse there (imaging goal), or try it and listen (goals split or none). About 5 cm of porous absorber works across the mid and treble range (🟡, ⚠ verify in [EVP]) | 🟠 (points 🔴 P06) | [TOOLE], [DAV80] | hard, flat surface at a near-side reflection point; nothing for a "wide stage" goal |
+| T02 | A rug at the floor reflection; a panel at the ceiling reflection (ranked lower: vertical reflections matter less for imaging) | 🟠 | [TOOLE] | hard floor or ceiling at the point |
+| T03 | The front-wall dip: move the speakers first; a panel needs to be about a quarter wavelength deep to remove it (porous absorbers work where the air moves, which peaks λ/4 from a wall), so a 10–20 cm panel only makes it a little shallower | 🔴 | [KUT], [EVP], [ALL74] | null at the seat between 80 and 300 Hz; "panel" only when the speakers are fixed |
+| T04 | Bass traps in the corners (pressure maxima of every mode, P03); honest that small corner pieces do little below 100 Hz | 🟠 | [KUT], [EVP], [TOOLE] | P09 peak caution or P11 stacked modes |
+| T05 | Too live: about 5 m² of extra soft absorption (a large rug, heavy curtains), with the predicted T60; too dead: take some away | 🔴 model (P08), target band 🟡 | [SAB], [EYR30], [EVP] | P08 live or dead |
+| T06 | Head near the back wall: move forward first; if the seat is fixed, a thick absorber (≥ 10 cm) behind the head | 🟠 | [TOOLE] | G02 caution or red flag |
+| D01 | Match the wall-distance setting: the distance, and whether it counts as close (< 0.3 m, 🟡). Option names come from the speaker's manual (⚠) | 🟠 | manufacturer | the profile has a wall setting |
+| D02 | One step of bass cut for high boundary gain, then listen | 🟡 | [ALL74], manufacturer | P05 high or very high, and a bass control |
+| D03 | One step of the treble control in H06's direction, then listen | 🟡 | manufacturer, [TOOLE] | H06 lift or cut, and a treble control |
+| D04 | The base height that puts the tweeter at ear height, or tilt the speaker (heights are not searched in v1) | 🟠 | [TOOLE], [ITU1116] ⚠ | G08 caution or red flag |
+| D05 | Move a rear port out to the minimum; the manual says whether port plugs exist (⚠) | 🟠 | manufacturer, [TOOLE] | G07 too close |
+| D06 | Desk mode when the speakers stand on a desk or table, otherwise stand mode | 🟠 | manufacturer | the profile lists those modes |
 
 ## 🟣 Subjective rules (symptom → hypotheses → experiment)
 

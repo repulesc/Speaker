@@ -248,14 +248,7 @@ export type EvidenceLevel = 'physics' | 'guideline' | 'heuristic' | 'subjective'
 
 /** What a finding or piece of advice is about. The UI groups by it. */
 export type Concern =
-  | 'bass'
-  | 'frontWall'
-  | 'reflections'
-  | 'stereo'
-  | 'room'
-  | 'speaker'
-  | 'objects'
-  | 'rulesOfThumb';
+  'bass' | 'frontWall' | 'reflections' | 'stereo' | 'room' | 'speaker' | 'objects' | 'rulesOfThumb';
 export type Severity = 'ok' | 'info' | 'caution' | 'red-flag';
 
 export interface Finding {
@@ -316,14 +309,7 @@ export interface Grid {
 
 /** One heatmap per concern (docs/REVAMP_PLAN.md, "Layers"). */
 export type LayerId =
-  | 'overall'
-  | 'goals'
-  | 'bass'
-  | 'nulls'
-  | 'frontWall'
-  | 'stereo'
-  | 'symmetry'
-  | 'backWall';
+  'overall' | 'goals' | 'bass' | 'nulls' | 'frontWall' | 'stereo' | 'symmetry' | 'backWall';
 
 /** Seat heatmaps: the speakers stay where they are and the seat moves over the grid. */
 export interface SeatLayers {

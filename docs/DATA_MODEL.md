@@ -10,6 +10,7 @@ Changes made while implementing (M1):
 - `Project.speaker` holds the profile itself (no model database in v1).
 - `Project.name` is empty for an untitled project; the UI shows a localised label (M2). The same holds for `SetupVariant.name` ("Current").
 - **Speaker files (M3):** `{ "kind": "speaker-profile", "schemaVersion": 1, "speaker": SpeakerProfile }`, saved as `<brand model>.speaker-profile.json`. A loaded profile always gets a fresh `id`. Validated with the same schema as the project's speaker.
+- **Engine output (R1):** every `Finding` carries its `concern` (bass, frontWall, reflections, stereo, room, speaker, objects, rulesOfThumb) for grouping; candidates carry `fragility`; `AnalysisOk` adds `layers`, `advice` and `folk` (types in `src/engine/types.ts`). On demand, through the worker: `explainPoint` (the probe) and `modeField` (one bass note over the floor).
 - **Placement certainty (M3):** `SpeakerPlacement.certainty` / `Listener.certainty` of `'unknown'` means "default position, not placed by the user": such items follow the room size. Dragging sets `'estimated'`; typed values keep `'measured'`.
 - `Directivity` keeps only `omniBelowHz` and `qMid` in v1; measured polar data is deferred.
 - `SurfacePatch` (u, v) are room coordinates along the boundary's axes: front/back walls (x, z); left/right walls (y, z); floor/ceiling (x, y).
@@ -311,6 +312,9 @@ export interface Analysis {
   findings: Finding[];                // sorted: red-flag, caution, info; then by level
   topActions: Finding[];              // "do this first", max 3
   candidates: Candidate[];            // top distinct candidates (≤ 5)
+  layers: SeatLayers;                 // (R1) one seat map per concern + red-flag mask
+  advice: { treatment: Advice[]; settings: Advice[] }; // (R1) T and D rules, most useful first
+  folk: FolkComparison[];             // (R1) 38 % and two-thirds seat lines vs the seat map
   heatmap: { listener: Grid; speakers: Grid };
   confidence: ConfidenceReport;
 }

@@ -50,7 +50,7 @@ Every component returns a value in `[0, 1]` (1 = best). The total is a weighted 
 |---|---|---|---|---|
 | C1 | Bass smoothness at the seat | 🔴 | 0.35 | P09 response, 1/6-oct smoothed, from `max(30 Hz, speaker f−6dB)` to `min(f_s, 200 Hz)` **(M1: capped at 200 Hz, see OPEN_QUESTIONS D)**. `σ` = standard deviation (dB) around the median. `C1 = clamp(1 − (σ − 2)/8, 0, 1)` (σ ≤ 2 dB → 1; σ ≥ 10 dB → 0). |
 | C2 | Deep nulls at the seat | 🔴 | 0.10 | Largest dip below median within the C1 range: `C2 = clamp(1 − (dip − 6)/12, 0, 1)`. Separate from C1 because one deep null is audible even when σ looks fine. **(R0)** When the speaker's −6 dB point leaves less than half an octave of the band (a satellite), C1 and C2 get weight 0 and the rest is renormalised. |
-| C3 | Front-wall interference above the scored bass band | 🔴 | 0.10 | From P04 / H04 for `f_null` above C1's upper limit: 1 if `f_null ≥ 300 Hz`, or if the speaker has a wall-compensation DSP and its rear panel is within 0.3 m of the wall; 0.3 up to 250 Hz, rising linearly to 1 at 300 Hz. Inside C1's band, C1 already includes it. |
+| C3 | Front-wall interference above the scored bass band | 🔴 | 0.10 | **(R1)** The null as heard at the seat (P04, `f = c/2Δ`): 0.3 up to 250 Hz, rising linearly to 1 at 300 Hz. Inside C1's band C1 includes it, so the penalty fades in over the band's top third of an octave (no cliff at the edge). A wall-compensation DSP no longer exempts the speaker: EQ cannot fill a cancellation. |
 | C4 | Stereo geometry | 🟠 | 0.15 | G04 angle (target per goals, OK band → ≥ 0.8, falls to 0 at the red-flag limits) × G05 (1 when symmetric by construction). |
 | C5 | Symmetry of surroundings | 🟠 | 0.10 | G03: surface class match at mirrored side-reflection points (P06) and side-wall distance difference. |
 | C6 | Seat boundary proximity | 🟠 | 0.10 | G02 back-wall distance: 0 at ≤ 0.3 m, 1 at ≥ 1.0 m, linear between. |
@@ -70,7 +70,7 @@ Notes:
 |---|---|
 | `wide-stage` | G04 target angle 62°; C8 prefers keeping side reflections (if smooth off-axis speaker) |
 | `precise-imaging` | G04 target 58°; C4 weight × 1.3; C8 activates (prefers treated side reflections) |
-| `flat-response` | Guideline weights (C3–C7) ÷ 1.2, then renormalised, which raises the share of C1 and C2 |
+| `flat-response` | Guideline weights (C4–C7) ÷ 1.2, then renormalised, which raises the share of the physics, C1–C3 **(R1:** C3 is physics and was divided too before**)** |
 | `deep-bass` | C7 corner penalty × 0.7 (more boundary gain accepted). **(M1)** The C1 band is *not* changed, so goals never change a component's value. |
 | `low-volume-listening` | No positional change; enables a hint about loudness perception (info only) |
 
@@ -96,6 +96,10 @@ Inputs are rarely exact. For a diverse pool of the best 30 search results (at le
 
 - **Top candidates:** up to 5, greedily picked by robust score with a minimum separation of 0.2 m (any speaker or the listener) so they are genuinely different options. Labelled A, B, C…
 - **Zones:** for the **heatmap of the seat**, speakers are fixed at the current or selected candidate and the listener is moved over the grid. For the **heatmap of the speakers**, the seat is fixed and the speaker pair is moved. Cells within 0.05 of the best robust score form the "good zone" outline. The colour scale is the score itself (sequential, colour-blind safe).
+- **(R1) Layers** (`scoring/heatmaps.ts`): the seat map comes in one layer per concern, from one scoring pass: overall (no goals), my goals, bass evenness (C1), bass holes (C2), wall interference (C3), stereo (C4), symmetry (C5), back wall (C6), each with its evidence level. A mask marks cells the app would red-flag itself (G01, G02, G04), to be drawn hatched. The analysis maps keep the speakers (seat map) or the seat (speaker map) where they are now, so the map, the probe and the rules of thumb describe the same situation.
+- **(R1) Probe** (`explainPoint`): score, breakdown, position-dependent findings and the bass curve at any spot; it agrees with the map cell.
+- **(R1) Fragility:** for the current setup and every candidate, the worst score drop for the seat 5 cm forward or back, the pair 5 cm nearer, further, wider or narrower, and each room dimension off by 1 % (measured) or 5 % (estimated). Steady below 0.04, sensitive below 0.10, else fragile (🟡). Sideways seat moves are left out: the narrow sweet spot is the same everywhere.
+- **(R1) Rules of thumb:** the 38 % and two-thirds seat lines read off the seat map, against the best seat in the same column: as good (within 0.03), close (within 0.10) or worse (🟡). They stay unscored.
 - **Current setup:** always scored too, so the user sees "your current setup: 0.62, best found: 0.81".
 - **Top actions ("Do this first", max 3):** a rule-based picker over findings: red flags first, then the single move from current setup to the nearest good-zone cell with the largest score gain ("move your seat 25 cm forward"), then speaker DSP settings (G07, H06). Each action states its expected effect in plain words, never a promise.
 - **Score presentation:** never shown as a bare "grade". Shown as a bar with words (poor / fair / good / very good) and a "why" breakdown by component.

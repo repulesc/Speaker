@@ -1,4 +1,4 @@
-import { acousticCentre, buildContext, wooferCentre, type AnalysisContext } from '../context';
+import { acousticCentre, buildContext, type AnalysisContext } from '../context';
 import { boxesOverlap2D, distance, pointInBox2D } from '../math/geometry';
 import { seededRandom, symmetric } from '../math/random';
 import { DEFAULTS } from '../presets/defaults';
@@ -6,7 +6,7 @@ import { SEAT_KINDS } from '../presets/objects';
 import { MIDPOINT_RED_FLAG, midpointOffsetFraction } from '../rules/G01-room-midpoint';
 import { BACK_WALL_RED_FLAG } from '../rules/G02-back-wall';
 import { angleRedFlag, stereoAngleDeg } from '../rules/G04-stereo-angle';
-import { cornerProximity } from '../rules/G06-corners';
+import { speakerCorner } from '../rules/G06-corners';
 import { cabinetBox, isObstructed, objectBox } from '../rules/G10-objects';
 import type { Candidate, Placement, SpeakerPlacement, Vec2, Vec3 } from '../types';
 import { Scorer } from './scorer';
@@ -52,8 +52,7 @@ export function avoidsRedFlags(
   }
   if (moves.speakers && !speaker.designedForCorner) {
     for (const side of ['left', 'right'] as const) {
-      const w = wooferCentre(speakers[side], speaker);
-      if (cornerProximity(w.y, Math.min(w.x, room.W - w.x)) === 'corner') return false;
+      if (speakerCorner(speakers[side], ctx) === 'corner') return false;
     }
   }
   const angle = stereoAngleDeg(

@@ -1,6 +1,6 @@
 # Review Findings (Phase R0 audit)
 
-Status: R0 complete. Every critical and high finding is fixed and has regression tests; medium and low findings are proposals for R1 and later.
+Status: R0 complete. Every critical and high finding is fixed and has regression tests. **R1 update:** M1, M2, M4, M6, M7, M8, M9, M11, L3 and L10 are fixed too, and M5 is decided (marked below); the rest remain proposals.
 
 **Scope:** the whole mechanics as of commit `f9b2bb7`:
 
@@ -213,7 +213,7 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 
 ## Medium (proposals)
 
-**M1 · The C1/C3 hand-over has a cliff.**
+**M1 · The C1/C3 hand-over has a cliff.** **Fixed in R1**: C3 uses the null at the seat and fades in over a third of an octave.
 - **Evidence:**
   - The front-wall dip counts in C3 only above the scored band. Inside it, C1 "already includes it", but the modal model shows the steady-state front-wall dip as only a few dB.
   - In Room R, moving the speakers 2 cm (rear clearance 0.17 → 0.19 m, null 204 → 195 Hz) lifts C3 from 0.30 to 1.00 and the total from 0.777 to 0.850, while C1 stays at 0.79 and C2 moves by 0.01.
@@ -221,7 +221,7 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
   - It did not move the optimum in the nine rooms.
 - **Proposal:** compute the null from the actual front-wall reflection path (P06's delay, `f = 1/(2Δt)`), and taper the hand-over over a third of an octave.
 
-**M2 · C3 gives speakers with a wall-distance DSP setting a free pass.**
+**M2 · C3 gives speakers with a wall-distance DSP setting a free pass.** **Fixed in R1.**
 - **Evidence:** C3 is 1 whenever the rear panel is within 0.3 m and the speaker has a wall setting. For cabinets 0.18–0.3 m deep, that covers every front-wall null between the top of the bass band (145–200 Hz) and 300 Hz. EQ cannot fill a cancellation; a wall setting corrects the bass *gain*.
 - **Proposal:** remove the exception and keep G07's reminder. One line plus a test. It changes rankings for the owner's speaker type.
 
@@ -229,29 +229,29 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 - **Evidence:** "plaster-brick" holds the classic values for rough plaster *on lath* (0.14 at 125 Hz, panel absorption). Plaster on masonry is about 0.01–0.02 at 125 Hz (from memory, ⚠ check against the table). It is the default for the walls and the ceiling, so it sets much of the predicted low-frequency damping.
 - **Proposal:** split it into "plaster on masonry" and "plaster on lath or board", check both rows against the table, then re-check the H3 anchors.
 
-**M4 · "Flat response" de-emphasises C3, which is physics.**
+**M4 · "Flat response" de-emphasises C3, which is physics.** **Fixed in R1.**
 - **Evidence:** SCORING §3 divides "guideline weights (C3–C7)" by 1.2. C3 is labelled 🔴, and the front-wall dip is exactly what a flat-response goal cares about.
 - **Proposal:** divide only C4–C7.
 
-**M5 · The best spot can sit in G01's caution band** (5–10% from the midpoint).
+**M5 · The best spot can sit in G01's caution band** (5–10% from the midpoint). **Decided in R1:** the model wins; the G01 caution text (R4) will say the full model accounts for the missing mode at that seat.
 - **Evidence:** after C1, this happens in 3 of 9 rooms (6 × 8, the cube, the small room). The model prefers those spots; the guideline's own words say "move by at least 10%".
 - **Decision for R1:**
   - *Recommended:* let the model win, and have the G01 caution text say that the full model accounts for the missing mode at this seat.
   - *Alternative:* extend the search guard to 10%.
 
-**M6 · Heatmaps do not mark red-flag zones.**
+**M6 · Heatmaps do not mark red-flag zones.** **Fixed in R1**: the seat layers carry a red-flag mask.
 - **Evidence:** the seat heatmap applies only physical validity, so the midpoint band can show as the brightest cells while the pins avoid it.
 - **Proposal:** R1's layers hatch the G01 and G02 bands and the corners.
 
-**M7 · G08 can red-flag every candidate.**
+**M7 · G08 can red-flag every candidate.** **Fixed in R1** as advice D04 (the base height for ear-level tweeters); heights are still not searched.
 - **Evidence:** heights are not searched, so low speakers carry the same G08 red flag at every candidate.
 - **Proposal:** a "raise or tilt the speakers" action; consider searching heights in R1.
 
-**M8 · Typed clearance and stand height move only the left speaker when the mirror lock is off.**
+**M8 · Typed clearance and stand height move only the left speaker when the mirror lock is off.** **Fixed in R1.**
 - **Evidence:** `setSpeakerClearance` and `setStandHeight` in `src/app/plan/placement.ts` move one speaker, but the fields read as both ("Back of the speakers to the front wall").
 - **Proposal:** apply both values to both speakers.
 
-**M9 · The DSP block is not validated.**
+**M9 · The DSP block is not validated.** **Fixed in R1.**
 - **Evidence:** `dsp: obj({})` accepts anything. It is only read as booleans today, but R1's settings advice will read the ranges.
 - **Proposal:** validate the treble and bass ranges (min ≤ max, step > 0), the booleans, and the placement-mode strings.
 
@@ -259,7 +259,7 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 - **Evidence:** on a desktop, 12 × 12 × 4 m takes 1.3 s, 15 × 20 × 4 m 2.1 s and 20 × 30 × 6 m 7.9 s; a phone is roughly 3–5 times slower. The budget is 1.5 s on a phone. The engine runs in a worker, so the UI stays responsive.
 - **Proposal:** scale the coarse step with the room size, cap the mode count, or say "large room, this takes a while".
 
-**M11 · H06 advises on assumed rooms, and the model's T60 rises towards treble.**
+**M11 · H06 advises on assumed rooms, and the model's T60 rises towards treble.** **First half fixed in R1** (H06 needs surfaces or furnishing described); the band factors still need a source.
 - **Evidence:** H06 suggests treble trims from defaults alone. The model's T60 rises with frequency because the furniture factors stay flat above 500 Hz, while soft furnishings usually absorb more there (⚠ source needed).
 - **Proposal:** require some furnishing or surface input before H06 fires; revisit the band factors with a source.
 
@@ -278,14 +278,14 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 
 1. P05 and H04 look at the left speaker only.
 2. Confidence uses only the left speaker's placement certainty.
-3. A project without a `busyness` field counts its furnishing as "estimated" in confidence; it should be "unknown".
+3. A project without a `busyness` field counts its furnishing as "estimated" in confidence; it should be "unknown". **Fixed in R1.**
 4. P08 counts overlapping patches twice, while P06 uses the last patch.
 5. SCORING says C1's σ is taken "around the median", but the code uses the mean. The scorer takes the upper median for C2, while P09 takes the true median.
 6. The coarse-to-fine search missed the exhaustive 5 cm optimum by 0.002–0.012 in 3 of 9 rooms; it matched elsewhere. That is less than the robust spread.
 7. Perturbed placements in the robustness runs are not re-checked against the hard constraints.
 8. The undo history keeps up to 100 full JSON snapshots: up to about 100 MB with a 1 MB project.
 9. Positions outside the room are accepted from files. The engine copes; the drawing may not.
-10. G06 measures from the front baffle: a deep cabinet pushed into a corner gets a caution, not a red flag.
+10. G06 measures from the front baffle: a deep cabinet pushed into a corner gets a caution, not a red flag. **Fixed in R1** (measured from the cabinet; found again by the new validation suite).
 11. The monotonic-confidence property varies only the room dimensions, and the weights property checks only C1.
 12. There are no Testing Library component tests, though TEST_PLAN lists them; the e2e tests cover the components.
 13. The Pages deploy has no `concurrency` group, so two quick pushes to `main` could deploy out of order.
@@ -370,6 +370,6 @@ This is the engine side of the owner's "Cautions: 7, and I can't tell what they 
 
 1. **Review the Hungarian text added in R0:** `crash.title`, `crash.body`, `crash.details`, `crash.export`, `crash.newProject`, and `furnishing.busy.combined` (the latter replaces `furnishing.busy.ignored`).
 2. **Check the sources** in the table above when convenient, starting with [BON81]'s second criterion and the typical domestic T60.
-3. **Decide M5:** in rooms where the model prefers a seat 5–10% from the midpoint, should the model win, with an explanation (recommended), or the 10% rule?
+3. ~~Decide M5~~ — decided in R1 by default (the model wins, with an explanation); say so if you prefer the 10% rule.
 4. **Accept or adjust the new busy-ness calibration (H3).** It is anchored to 0.3–0.6 s for typical rooms and stays labelled a rule of thumb.
-5. **Approve M1–M4 for R1.** They are small engine changes with clear physics, but they change rankings.
+5. ~~Approve M1–M4~~ — M1, M2 and M4 went into R1; M3 still waits for the absorption table.
