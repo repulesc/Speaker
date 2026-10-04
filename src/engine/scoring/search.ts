@@ -34,6 +34,37 @@ export function isValidPlacement(ctx: AnalysisContext, placement: Placement): bo
   return isObstructed(ctx, placement.speakers, listener) === null;
 }
 
+/** The distance the user asked for: room listening (1.5 m or more) unless they chose "close". */
+export function preferredDistance(ctx: AnalysisContext): number {
+  return ctx.project.constraints.listeningDistance === 'near'
+    ? T.minListeningDistance
+    : T.roomListeningDistance;
+}
+
+/** Both speakers at least the preferred listening distance away. */
+export function farEnough(ctx: AnalysisContext, placement: Placement): boolean {
+  const min = preferredDistance(ctx) - 1e-9;
+  return (['left', 'right'] as const).every(
+    (side) =>
+      distance(acousticCentre(placement.speakers[side], ctx.speaker), placement.listener) >= min,
+  );
+}
+
+/**
+ * Whether a seat can be scored at all: inside the room, in front of both speakers and not on top
+ * of one. Furniture and a blocked line of sight do not count here: the seat map shows a score
+ * there too, hatched as "advised against" (owner feedback: the map had holes behind furniture).
+ */
+export function seatScorable(ctx: AnalysisContext, placement: Placement): boolean {
+  const { W, L } = ctx.room;
+  const { listener } = placement;
+  if (listener.x <= 0 || listener.x >= W || listener.y <= 0 || listener.y >= L) return false;
+  return (['left', 'right'] as const).every((side) => {
+    const ac = acousticCentre(placement.speakers[side], ctx.speaker);
+    return listener.y - ac.y >= T.minListenerAhead && distance(ac, listener) >= T.minScoredDistance;
+  });
+}
+
 /**
  * The search never proposes a spot the app would red-flag itself (docs/SCORING.md §1): the room
  * midpoint (G01), the back wall (G02), a stereo angle outside 35–90° (G04) and a corner (G06).
@@ -99,9 +130,15 @@ interface SearchSpace {
   fixedListener: Vec3 | null;
   /** False only for the fallback search, when the user's constraints leave no red-flag-free spot. */
   avoidRedFlags: boolean;
+  /** Keep the preferred listening distance; dropped when the room is too small for it. */
+  keepDistance: boolean;
 }
 
-function searchSpace(ctx: AnalysisContext, avoidRedFlags: boolean): SearchSpace {
+function searchSpace(
+  ctx: AnalysisContext,
+  avoidRedFlags: boolean,
+  keepDistance = avoidRedFlags,
+): SearchSpace {
   const { W, L } = ctx.room;
   const { constraints } = ctx.project;
   const ears = ctx.variant.listener.ears;
@@ -128,6 +165,7 @@ function searchSpace(ctx: AnalysisContext, avoidRedFlags: boolean): SearchSpace 
     fixedSpeakers: constraints.speakersFixed ? ctx.variant.speakers : null,
     fixedListener: constraints.listenerFixed ? ears : null,
     avoidRedFlags,
+    keepDistance,
   };
 }
 
@@ -160,6 +198,7 @@ function scoreAll(scorer: Scorer, space: SearchSpace, params: Params[]): Scored[
     const placement = placementFor(scorer.ctx, space, p);
     if (!isValidPlacement(scorer.ctx, placement)) continue;
     if (space.avoidRedFlags && !avoidsRedFlags(scorer.ctx, placement, moves)) continue;
+    if (space.keepDistance && !farEnough(scorer.ctx, placement)) continue;
     const key = space.fixedSpeakers ? 'fixed' : `${p.clearance.toFixed(3)}|${p.half.toFixed(3)}`;
     let coupling = couplings.get(key);
     if (!coupling) {
@@ -184,11 +223,25 @@ export function searchPlacements(scorer: Scorer): Scored[] {
   return searchWithCompromise(scorer).found;
 }
 
-/** As `searchPlacements`, and whether the red-flag guard had to be dropped to find anything. */
-function searchWithCompromise(scorer: Scorer): { found: Scored[]; compromise: boolean } {
-  const found = searchWithin(scorer, searchSpace(scorer.ctx, true));
-  if (found.length > 0) return { found, compromise: false };
-  return { found: searchWithin(scorer, searchSpace(scorer.ctx, false)), compromise: true };
+/**
+ * As `searchPlacements`, and what had to give to find anything: first the preferred listening
+ * distance (a small room), then the red-flag guard (the user's limits leave no clean spot).
+ */
+function searchWithCompromise(scorer: Scorer): {
+  found: Scored[];
+  compromise: boolean;
+  closer: boolean;
+} {
+  const tries: [boolean, boolean][] = [
+    [true, true],
+    [true, false],
+    [false, false],
+  ];
+  for (const [avoid, keep] of tries) {
+    const found = searchWithin(scorer, searchSpace(scorer.ctx, avoid, keep));
+    if (found.length > 0) return { found, compromise: !avoid, closer: !keep };
+  }
+  return { found: [], compromise: true, closer: true };
 }
 
 function searchWithin(scorer: Scorer, space: SearchSpace): Scored[] {
@@ -351,7 +404,7 @@ export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate
   // Nothing may move: there is nothing to suggest (R5: the current setup was offered as "best").
   const { constraints } = scorer.ctx.project;
   if (constraints.speakersFixed && constraints.listenerFixed) return [];
-  const { found, compromise } = searchWithCompromise(scorer);
+  const { found, compromise, closer } = searchWithCompromise(scorer);
   const pool = pickDistinct(found, 0.1, 30);
   const robust = robustScores(
     scorer,
@@ -364,6 +417,7 @@ export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate
   return pickDistinct(ranked, T.candidateSeparation, max).map((p) => ({
     ...toCandidate(scorer, p.placement, p.robust),
     ...(compromise ? { compromise: true } : {}),
+    ...(closer ? { closer: true } : {}),
   }));
 }
 

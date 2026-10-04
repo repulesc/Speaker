@@ -69,7 +69,7 @@ describe('golden scenarios', () => {
     expect(keys.some((k) => k === 'finding.G04.ok' || k === 'finding.G04.info')).toBe(true);
   });
 
-  it('tiny room 2.5 × 3 × 2.4 m: the 1 m listening distance is kept', () => {
+  it('tiny room 2.5 × 3 × 2.4 m: 1.5 m away where the room allows, otherwise marked closer', () => {
     const p = makeProject({
       W: 2.5,
       L: 3,
@@ -84,7 +84,8 @@ describe('golden scenarios', () => {
     const speaker = buildContext(p)!.speaker;
     for (const c of a.candidates) {
       for (const side of ['left', 'right'] as const) {
-        expect(distance(acousticCentre(c.speakers[side], speaker), c.listener)).toBeGreaterThan(1);
+        const d = distance(acousticCentre(c.speakers[side], speaker), c.listener);
+        expect(d).toBeGreaterThanOrEqual(c.closer ? 0.6 - 1e-9 : 1.5 - 1e-9);
       }
     }
   });

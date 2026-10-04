@@ -203,6 +203,8 @@ export interface Constraints {
   listenerFixed: boolean;
   speakersFixed: boolean;
   keepSymmetric: boolean;
+  /** "room": sit at least 1.5 m away (default); "near": a desk or near-field setup. */
+  listeningDistance?: 'room' | 'near';
 }
 
 export type GoalId =
@@ -313,6 +315,8 @@ export interface Candidate extends Placement {
   fragility?: Fragility;
   /** No spot within the user's limits avoids every red flag; this is the least bad (R5). */
   compromise?: boolean;
+  /** The room is too small for the preferred listening distance; this spot is closer. */
+  closer?: boolean;
 }
 
 export interface Grid {

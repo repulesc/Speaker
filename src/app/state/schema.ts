@@ -169,6 +169,7 @@ export const projectSchema: Check = obj({
     listenerFixed: bool,
     speakersFixed: bool,
     keepSymmetric: bool,
+    listeningDistance: optional(oneOf(['room', 'near'])),
   }),
   goals: obj({ weights: record(oneOf([0, 1, 2]), GOALS) }),
   variants: distinctIds(arr(variant, SIZE_LIMITS.variants, 1)),

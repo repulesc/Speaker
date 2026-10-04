@@ -4,18 +4,6 @@ exports[`golden scenarios > 4 m cube: stacked modes are a caution; confidence is
 {
   "candidates": [
     {
-      "score": 0.88,
-      "seat": [
-        2,
-        1.75,
-      ],
-      "speakersX": [
-        1.35,
-        2.65,
-      ],
-      "speakersY": 0.6,
-    },
-    {
       "score": 0.83,
       "seat": [
         2,
@@ -38,6 +26,18 @@ exports[`golden scenarios > 4 m cube: stacked modes are a caution; confidence is
         3.1,
       ],
       "speakersY": 0.5,
+    },
+    {
+      "score": 0.78,
+      "seat": [
+        2,
+        2.8,
+      ],
+      "speakersX": [
+        1.25,
+        2.75,
+      ],
+      "speakersY": 1.4,
     },
   ],
   "current": 0.58,
@@ -75,18 +75,6 @@ exports[`golden scenarios > Room R, default speaker: avoids the midpoint, shows 
 {
   "candidates": [
     {
-      "score": 0.86,
-      "seat": [
-        2,
-        1.65,
-      ],
-      "speakersX": [
-        1.4,
-        2.6,
-      ],
-      "speakersY": 0.5,
-    },
-    {
       "score": 0.83,
       "seat": [
         2,
@@ -102,13 +90,25 @@ exports[`golden scenarios > Room R, default speaker: avoids the midpoint, shows 
       "score": 0.82,
       "seat": [
         2,
-        1.9,
+        2,
       ],
       "speakersX": [
-        1.3,
-        2.7,
+        1.2,
+        2.8,
       ],
       "speakersY": 0.5,
+    },
+    {
+      "score": 0.81,
+      "seat": [
+        2,
+        2,
+      ],
+      "speakersX": [
+        0.8,
+        3.2,
+      ],
+      "speakersY": 0.2,
     },
   ],
   "current": 0.55,
@@ -228,18 +228,6 @@ exports[`golden scenarios > long narrow room 3 × 8 × 2.5 m: a good stereo angl
       "speakersY": 0.55,
     },
     {
-      "score": 0.88,
-      "seat": [
-        1.5,
-        1.5,
-      ],
-      "speakersX": [
-        0.8,
-        2.2,
-      ],
-      "speakersY": 0.2,
-    },
-    {
       "score": 0.87,
       "seat": [
         1.5,
@@ -250,6 +238,18 @@ exports[`golden scenarios > long narrow room 3 × 8 × 2.5 m: a good stereo angl
         2.3,
       ],
       "speakersY": 0.5,
+    },
+    {
+      "score": 0.87,
+      "seat": [
+        1.5,
+        1.6,
+      ],
+      "speakersX": [
+        0.75,
+        2.25,
+      ],
+      "speakersY": 0.2,
     },
   ],
   "current": 0.64,
@@ -287,18 +287,6 @@ exports[`golden scenarios > rear port with a manufacturer minimum: caution now, 
 {
   "candidates": [
     {
-      "score": 0.86,
-      "seat": [
-        2,
-        1.65,
-      ],
-      "speakersX": [
-        1.35,
-        2.65,
-      ],
-      "speakersY": 0.5,
-    },
-    {
       "score": 0.83,
       "seat": [
         2,
@@ -314,11 +302,23 @@ exports[`golden scenarios > rear port with a manufacturer minimum: caution now, 
       "score": 0.82,
       "seat": [
         2,
-        1.9,
+        2,
       ],
       "speakersX": [
-        1.3,
-        2.7,
+        1.2,
+        2.8,
+      ],
+      "speakersY": 0.5,
+    },
+    {
+      "score": 0.79,
+      "seat": [
+        2,
+        2.8,
+      ],
+      "speakersX": [
+        0.75,
+        3.25,
       ],
       "speakersY": 0.55,
     },
@@ -433,37 +433,37 @@ exports[`golden scenarios > the busy room: wall-setting reminder, passive speake
       "score": 0.82,
       "seat": [
         1.8,
-        1.4,
+        1.6,
       ],
       "speakersX": [
-        1.15,
-        2.45,
+        1.05,
+        2.55,
       ],
       "speakersY": 0.2,
     },
     {
-      "score": 0.82,
+      "score": 0.8,
       "seat": [
         1.8,
-        1.7,
+        3.15,
       ],
       "speakersX": [
-        1.1,
-        2.5,
+        0.75,
+        2.85,
       ],
-      "speakersY": 0.4,
+      "speakersY": 0.75,
     },
     {
-      "score": 0.81,
+      "score": 0.8,
       "seat": [
         1.8,
-        1.9,
+        1.8,
       ],
       "speakersX": [
-        1.15,
-        2.45,
+        0.75,
+        2.85,
       ],
-      "speakersY": 0.7,
+      "speakersY": 0.15,
     },
   ],
   "current": 0.6,
@@ -499,44 +499,44 @@ exports[`golden scenarios > the busy room: wall-setting reminder, passive speake
 }
 `;
 
-exports[`golden scenarios > tiny room 2.5 × 3 × 2.4 m: the 1 m listening distance is kept 1`] = `
+exports[`golden scenarios > tiny room 2.5 × 3 × 2.4 m: 1.5 m away where the room allows, otherwise marked closer 1`] = `
 {
   "candidates": [
     {
-      "score": 0.84,
+      "score": 0.72,
+      "seat": [
+        1.25,
+        2.5,
+      ],
+      "speakersX": [
+        0.5,
+        2,
+      ],
+      "speakersY": 1.1,
+    },
+    {
+      "score": 0.69,
       "seat": [
         1.25,
         1.7,
       ],
       "speakersX": [
-        0.65,
-        1.85,
+        0.5,
+        2,
       ],
-      "speakersY": 0.55,
+      "speakersY": 0.2,
     },
     {
-      "score": 0.8,
+      "score": 0.69,
       "seat": [
         1.25,
-        2.35,
-      ],
-      "speakersX": [
-        0.65,
         1.85,
       ],
-      "speakersY": 1.4,
-    },
-    {
-      "score": 0.79,
-      "seat": [
-        1.25,
-        2.4,
-      ],
       "speakersX": [
-        0.55,
-        1.95,
+        0.5,
+        2,
       ],
-      "speakersY": 1.15,
+      "speakersY": 0.45,
     },
   ],
   "current": 0.43,
