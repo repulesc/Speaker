@@ -140,9 +140,9 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Output:** T60 per band, plus a single "mid" value (average of 500 Hz and 1 kHz), plus a range reflecting input uncertainty.
 - **Sources:** [SAB], [EYR30], [KUT], [EVP] (absorption tables).
 - **Limits:** both formulas assume a diffuse field, which small rooms do not have. Treat as a **rough character estimate** (dead / balanced / live), not a measurement. Displayed with one decimal and a range.
-- **Default when unknown:** `T60_mid = 0.4 s` with range 0.3–0.6 s. Toole reports typical domestic listening rooms cluster around this range [TOOLE] ⚠ verify exact cited range and survey.
+- **Default when unknown:** `T60_mid = 0.4 s` with range 0.3–0.6 s. **(R5)** Supported by surveys of furnished living rooms [DWELL]: 0.33 s (Burgess, 500 Hz) to 0.51 s (Jackson, 1 kHz), about 0.4 s across 602 Canadian homes (Bradley). The earlier attribution to [TOOLE] was not checked and is dropped.
 - **Furnishing (R0):** the busy-ness answer gives an absorption per m² of floor (bare 0–0.2, some 0.3–0.6, busy 0.5–0.9, very busy 0.7–1.2 m² sabins per m², 🟡), "some" when not answered. Placed furniture counts too: the larger of the two is used, so placing a sofa never makes the room more reverberant. Anchors: Room R with the default surfaces gives about 1.1 s bare, 0.56 s with some furniture, 0.37 s busy and 0.28 s very busy. Before R0 the amounts were fixed (bare 0–2 … very busy 10–18 m²), which made typical rooms read 0.7–1.4 s ("live"), and placed objects replaced the estimate, so placing a bed could raise T60 (0.79 → 1.07 s in Room R).
-- **Object materials (R3):** an object whose material the user chose (hard, soft, absorbent) absorbs `surface × [0, 0.05] / [0.15, 0.35] / [0.5, 0.8]` m² sabins, where surface is top plus four sides. The new kinds (wardrobe 0.2–0.6, bookcase 0.3–0.9, large plant 0.1–0.3, piano 0–0.3, others 0) are 🟡 rough estimates with no source: ⚠ unverified.
+- **Object materials (R3):** an object whose material the user chose (hard, soft, absorbent) absorbs `surface × [0, 0.05] / [0.15, 0.35] / [0.5, 0.8]` m² sabins, where surface is top plus four sides. The new kinds (wardrobe 0.2–0.6, bookcase 0.3–0.9, large plant 0.1–0.3, piano 0–0.3, others 0) are 🟡 rough estimates with no source, shown as estimates. **(R5)** For upholstery, [PRA]'s heavily upholstered seats (0.70–0.84 per m² of floor at two seats per m², mid bands) give about 0.35–0.42 m² per seat, so a three-seat sofa takes about 1.1–1.3 m² and an armchair about 0.4 m²: the table's sofa (1.5–3.0) and armchair (0.5–1.0) are on the high side but of the right order. Kept; the busy-ness floor dominates in most rooms.
 - **Floor (R0):** the mean absorption never goes below 0.01, which keeps T60 finite for any input.
 - **Test case (Room R):** `ᾱ = 0.25 → A = 21.25 m²`. Sabine `T60 = 0.379 s`. Eyring `T60 = 0.329 s`. Since `ᾱ > 0.2`, the engine reports 0.33 s.
 
@@ -174,7 +174,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Formula:** `r_c ≈ 0.057 · sqrt(Q · V / T60)` (m), `Q` = directivity factor of the speaker in the relevant band.
 - **Inputs:** `V`, `T60_mid`, `Q` (default 2 for a typical small two-way monitor at mid frequencies if unknown, range 2–5).
 - **Output:** `r_c` and the ratio listening distance ÷ `r_c`.
-- **Sources:** [EVP], [KUT]. **(R0)** The constant is ✓ by derivation: the critical distance `r_c = sqrt(Q·A / (16π))` with Sabine's `A = 0.161·V / T60` gives `sqrt(0.161 / (16π)) = 0.0566`. Still ⚠: the equation numbers in the editions cited.
+- **Sources:** [EVP], [KUT]. **(R0)** The constant is ✓ by derivation: the critical distance `r_c = sqrt(Q·A / (16π))` with Sabine's `A = 0.161·V / T60` gives `sqrt(0.161 / (16π)) = 0.0566`. (R5) Equation numbers are not needed: the derivation stands on its own.
 - **Limits:** diffuse-field assumption, rough in small rooms. Used only as context for goal "precise imaging" (G08 and scoring), never as a red flag on its own.
 - **Test case:** `V = 50`, `T60 = 0.4`, `Q = 2 → r_c = 0.90 m`. With `Q = 4 → 1.27 m`.
 
@@ -207,7 +207,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 
 - **In plain words:** Right against the back wall every bass resonance is at full strength, and the wall's reflection arrives almost instantly. Bass gets heavy and boomy.
 - **Logic:** red flag if the listener's ears are less than 0.3 m from the back wall. Caution between 0.3 and 0.6 m. Thresholds are 🟡 heuristics. The underlying antinode physics (P03) and the near-coincident reflection (P06) are 🔴.
-- **Sources:** [TOOLE], [EVP] ⚠ verify that either source gives explicit distances. Otherwise the thresholds stay labelled heuristic.
+- **Sources:** physics from P03 (every mode has a pressure maximum at the wall) and P06 (the reflection delay); [TOOLE], [EVP] discuss it. **(R5)** No checked source gives the distances, so the 0.3 / 0.6 m thresholds are 🟡 heuristics, as the rule says.
 - **Test case (Room R):** `y_l = 4.8 → 0.2 m` from back wall → red flag.
 
 ### G03 · Left-right symmetry
@@ -254,7 +254,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 
 - **In plain words:** Speakers sound most accurate when your ears are at the height the designer intended, usually tweeter height. This matters less for coaxial designs, but still matters.
 - **Logic:** vertical angle from the speaker's reference axis to the ears. OK within ±10°, caution within ±20°, red flag beyond. If the profile has measured vertical directivity, the thresholds come from it (narrower or wider). Coaxial drivers (`driverLayout = coaxial`) widen OK to ±15° (🟡).
-- **Sources:** [TOOLE] (off-axis and vertical lobing behaviour of multiway speakers), [ITU1116] ⚠ verify the recommended loudspeaker height wording.
+- **Sources:** [TOOLE] (off-axis and vertical lobing behaviour of multiway speakers), [ITU1116]: the reference axis should meet the listening point at the height of a seated listener's ears, tilted at most 10° (✓ R5, from secondary summaries of BS.1116-3).
 - **Test case:** tweeter 0.9 m high, ears 1.1 m high, distance 2.5 m → `atan(0.2/2.5) = 4.6°` → OK.
 
 ### G09 · First reflections: the two schools (goal-dependent)
@@ -275,7 +275,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
   - a hard object within 0.3 m of a speaker's side or front → caution (🟡 threshold);
   - other loudspeakers nearby (switched off): caution "passive speakers can resonate along. We can't predict how much; test by ear (cover or move them)" → 🟡 / 🟣. No source claims a magnitude; the app says so.
   - **(R0)** one finding per object, for the nearer speaker (before R0 an object near both speakers gave two).
-- **Sources:** [TOOLE] (diffraction and early reflections from nearby objects) ⚠ verify chapter.
+- **Sources:** the physics of reflection (P06) and of a blocked direct path; [TOOLE] discusses nearby-object reflections (chapter not checked, R5). No number in this rule comes from a source: the 0.3 m threshold is 🟡.
 
 ---
 
@@ -287,20 +287,20 @@ These appear as optional dashed overlay lines on the plan ("popular starting poi
 
 - **In plain words:** A popular starting point puts your seat at about 38% of the room length from the front wall. It tends to avoid the worst length-mode nulls. It's a rule of thumb, not a law.
 - **Logic:** overlay line at `y = 0.38·L`.
-- **Sources:** widely repeated in hi-fi literature and forums. **Origin not established**; no peer-reviewed source found. ⚠ verify. If no traceable origin is found, the text says "origin unclear".
+- **Sources:** widely repeated in hi-fi literature and forums. **Origin not established**; no peer-reviewed source found. **(R5) Resolved:** the app says "where it comes from is unclear" and shows it only as a 🟡 overlay compared with the physics.
 - **Test case (Room R):** `y = 1.90 m`.
 
 ### H02 · Rule of thirds
 
 - **In plain words:** Another starting point: speakers about one-third into the room, seat about two-thirds.
 - **Logic:** overlay lines at `y = L/3` (speakers) and `y = 2L/3` (listener).
-- **Sources:** common practice. ⚠ verify any citable origin. Otherwise labelled "folk rule".
+- **Sources:** common practice. **(R5) Resolved:** no citable origin; the app calls it "a folk rule".
 
 ### H03 · Cardas method (**not implemented in M1**: unverified)
 
 - **In plain words:** A placement recipe from a cable manufacturer, based on room-width ratios.
 - **Logic:** speaker (woofer centre) at `0.276·W` from the side wall and `0.447·W` from the front wall. Listener per the published recipe.
-- **Sources:** [CARDAS] ⚠ verify both numbers and the listener rule from the original web page before use. If unverifiable, drop H03 from v1.
+- **Sources:** [CARDAS]. **(R5) Dropped from v1:** the numbers could not be verified, and H03 is not implemented.
 
 ### H04 · Front-wall distance: near or far, not in between
 
@@ -311,7 +311,7 @@ These appear as optional dashed overlay lines on the plan ("popular starting poi
   - otherwise "the dip lands in the upper bass at X Hz".
 
   The band edges (80 / 300 Hz) are 🟡.
-- **Sources:** physics from [ALL74], practical advice in [TOOLE] ⚠ verify the "near or far" framing.
+- **Sources:** physics from [ALL74], **(R5)** the "near or far" advice follows from the physics (P04: the null moves above the bass band when close, below it when far) and is not attributed to [TOOLE].
 
 ### H05 · Toe-in
 
@@ -324,7 +324,7 @@ These appear as optional dashed overlay lines on the plan ("popular starting poi
 
 - **In plain words:** A soft, busy room absorbs treble and can sound dull; a bare, hard room can sound bright. If your speaker has a treble control, a small adjustment can compensate.
 - **Logic:** if `T60_high` (2–4 kHz) is in the "dead" range (below about 0.3 s, 🟡) → suggest a small treble lift (e.g. +0.5 to +1 dB), only if the speaker profile has a treble control. If in the "live" range (above about 0.6 s, 🟡) → suggest a small cut. Always phrased as "try, then listen".
-- **Sources:** manufacturer EQ guidance (KEF Connect offers room-size / acoustic-character and treble settings), [TOOLE] (room acoustics and the perceived spectral balance) ⚠ verify which manufacturers document this logic.
+- **Sources:** manufacturer EQ guidance (KEF Connect offers room-size / acoustic-character and treble settings), [TOOLE] (room acoustics and the perceived spectral balance). **(R5)** No manufacturer is cited by name; the rule is 🟡 and always says "try it and listen".
 
 ---
 
@@ -334,17 +334,17 @@ What to change in the room or on the speaker, most useful first; the first item 
 
 | ID | Advice | Level | Sources | When |
 |---|---|---|---|---|
-| T01 | Side-wall first reflections: absorb or diffuse there (imaging goal), or try it and listen (goals split or none). About 5 cm of porous absorber works across the mid and treble range (🟡, ⚠ verify in [EVP]) | 🟠 (points 🔴 P06) | [TOOLE], [DAV80] | hard, flat surface at a near-side reflection point; nothing for a "wide stage" goal |
+| T01 | Side-wall first reflections: absorb or diffuse there (imaging goal), or try it and listen (goals split or none). About 5 cm of porous absorber works across the mid and treble range (🟡; R5: a porous layer absorbs well once it is about a quarter wavelength thick [KUT], and 5 cm is a quarter wavelength at 1.7 kHz, with useful absorption from roughly 500 Hz) | 🟠 (points 🔴 P06) | [TOOLE], [DAV80] | hard, flat surface at a near-side reflection point; nothing for a "wide stage" goal |
 | T02 | A thick rug at the floor reflection (mainly treble: a rug does little for bass, R3 review); a panel at the ceiling reflection (ranked lower: vertical reflections matter less for imaging) | 🟠 | [TOOLE] | hard floor or ceiling at the point |
 | T03 | The front-wall dip: move the speakers first; a panel needs to be about a quarter wavelength deep to remove it (porous absorbers work where the air moves, which peaks λ/4 from a wall), so a 10–20 cm panel only makes it a little shallower | 🔴 | [KUT], [EVP], [ALL74] | null at the seat between 80 and 300 Hz; "panel" only when the speakers are fixed |
 | T04 | Bass traps in the corners (pressure maxima of every mode, P03); honest that small corner pieces do little below 100 Hz | 🟠 | [KUT], [EVP], [TOOLE] | P09 peak caution or P11 stacked modes |
 | T05 | Too live: about 5 m² of extra soft absorption (a large rug, heavy curtains), with the predicted T60; too dead: take some away (no advice when there is under 1 m² of soft furnishing to remove, R3 review) | 🔴 model (P08), target band 🟡 | [SAB], [EYR30], [EVP] | P08 live or dead |
 | T06 | Head near the back wall: move forward first; if the seat is fixed, a thick absorber (≥ 10 cm) behind the head | 🟠 | [TOOLE] | G02 caution or red flag |
-| D01 | Match the wall-distance setting: the distance, and whether it counts as close (< 0.3 m, 🟡). Option names come from the speaker's manual (⚠) | 🟠 | manufacturer | the profile has a wall setting |
+| D01 | Match the wall-distance setting: the distance, and whether it counts as close (< 0.3 m, 🟡). Option names come from the speaker's manual (the app does not know them and says so) | 🟠 | manufacturer | the profile has a wall setting |
 | D02 | One step of bass cut for high boundary gain, then listen | 🟡 | [ALL74], manufacturer | P05 high or very high, and a bass control |
 | D03 | One step of the treble control in H06's direction, then listen | 🟡 | manufacturer, [TOOLE] | H06 lift or cut, and a treble control |
-| D04 | The base height that puts the tweeter at ear height, or tilt the speaker (heights are not searched in v1). When the axis is above the ears even with the speaker on the floor (base height under 5 cm), the `tilt` variant: tilt down or sit higher (R3 review) | 🟠 | [TOOLE], [ITU1116] ⚠ | G08 caution or red flag |
-| D05 | Move a rear port out to the minimum; the manual says whether port plugs exist (⚠) | 🟠 | manufacturer, [TOOLE] | G07 too close |
+| D04 | The base height that puts the tweeter at ear height, or tilt the speaker (heights are not searched in v1). When the axis is above the ears even with the speaker on the floor (base height under 5 cm), the `tilt` variant: tilt down or sit higher (R3 review) | 🟠 | [TOOLE], [ITU1116] ✓ | G08 caution or red flag |
+| D05 | Move a rear port out to the minimum; the manual says whether port plugs exist (the app does not know and says so) | 🟠 | manufacturer, [TOOLE] | G07 too close |
 | D06 | Desk mode when the speakers stand on a desk or table, otherwise stand mode | 🟠 | manufacturer | the profile lists those modes |
 
 ## 🟣 Subjective rules (symptom → hypotheses → experiment)
@@ -379,20 +379,21 @@ Rules for S-rules:
 
 ## Appendix A · Surface and object presets (absorption coefficients)
 
-Octave bands 125 / 250 / 500 / 1k / 2k / 4k Hz. Values are typical published figures of the kind tabulated in [EVP]. **⚠ All rows must be checked against the cited table before release.** Every preset is displayed to the user as an *estimate*.
+Octave bands 125 / 250 / 500 / 1k / 2k / 4k Hz. Values are typical published figures of the kind tabulated in [EVP]. Every preset is displayed to the user as an *estimate*. **(R5)** Each row was compared with a second, independent table, [PRA] (the materials database shipped with pyroomacoustics 0.10.1); the book table itself could not be opened from the build environment. The last column gives the result.
 
-| Preset | 125 | 250 | 500 | 1k | 2k | 4k | Class |
-|---|---|---|---|---|---|---|---|
-| Painted plaster / concrete | 0.01 | 0.01 | 0.02 | 0.02 | 0.02 | 0.03 | reflective |
-| Plaster on lath / brick, plastered | 0.14 | 0.10 | 0.06 | 0.05 | 0.04 | 0.03 | reflective |
-| Gypsum board on studs (lightweight) | 0.29 | 0.10 | 0.05 | 0.04 | 0.07 | 0.09 | reflective (+ bass leak flag) |
-| Window glass | 0.35 | 0.25 | 0.18 | 0.12 | 0.07 | 0.04 | reflective |
-| Wood floor | 0.15 | 0.11 | 0.10 | 0.07 | 0.06 | 0.07 | reflective |
-| Heavy carpet on concrete | 0.02 | 0.06 | 0.14 | 0.37 | 0.60 | 0.65 | absorptive (HF) |
-| Carpet on underlay | 0.08 | 0.24 | 0.57 | 0.69 | 0.71 | 0.73 | absorptive |
-| Heavy curtain, draped | 0.14 | 0.35 | 0.55 | 0.72 | 0.70 | 0.65 | absorptive |
-| Bookshelf / CD or record wall | 0.15 | 0.20 | 0.25 | 0.30 | 0.35 | 0.35 | diffusive · **low confidence** (no standard data) |
-| Canvas painting on wall | wall value +0.05 above 500 Hz | | | | | | reflective · **low confidence** |
+| Preset | 125 | 250 | 500 | 1k | 2k | 4k | Class | R5 check against [PRA] |
+|---|---|---|---|---|---|---|---|---|
+| Painted plaster / concrete | 0.01 | 0.01 | 0.02 | 0.02 | 0.02 | 0.03 | reflective | ✓ "smooth unpainted concrete" 0.01, 0.01, 0.02, 0.02, 0.02, 0.05 |
+| Plastered brick (**changed in R5**) | 0.013 | 0.015 | 0.02 | 0.03 | 0.04 | 0.05 | reflective | ✓ "rendered brickwork" 0.01, 0.02, 0.02, 0.03, 0.03, 0.04; the classic "plaster, smooth on tile or brick" row has exactly these values (confirmed in a search summary of the sengpielaudio table) |
+| Plaster on wooden lath (**new in R5**) | 0.14 | 0.10 | 0.06 | 0.05 | 0.04 | 0.03 | reflective | ≈ the classic "rough plaster on lath" row; same order as [PRA] "plasterboard on frame" 0.15, 0.10, 0.06, 0.04 |
+| Gypsum board on studs (lightweight) | 0.29 | 0.10 | 0.05 | 0.04 | 0.07 | 0.09 | reflective (+ bass leak flag) | ≈ single board; [PRA]'s double board with mineral wool has 0.15 at 125 Hz. Kept: one board is the common case |
+| Window glass | 0.35 | 0.25 | 0.18 | 0.12 | 0.07 | 0.04 | reflective | differs: [PRA] "glass window, 0.68 kg/m²" has 0.10 at 125 Hz. Thin panes resonate, so tables differ widely; kept, low weight in practice (small areas) |
+| Wood floor | 0.15 | 0.11 | 0.10 | 0.07 | 0.06 | 0.07 | reflective | ✓ "wood, 1.6 cm on planks" 0.18, 0.12, 0.10, 0.09, 0.08, 0.07 |
+| Heavy carpet on concrete | 0.02 | 0.06 | 0.14 | 0.37 | 0.60 | 0.65 | absorptive (HF) | ✓ same shape as "thin carpet cemented to concrete" (lower) and "6 mm pile on open-cell foam" (similar) |
+| Carpet on underlay | 0.08 | 0.24 | 0.57 | 0.69 | 0.71 | 0.73 | absorptive | ✓ identical to "carpet 1.35 kg/m², on hair felt or foam rubber" |
+| Heavy curtain, draped | 0.14 | 0.35 | 0.55 | 0.72 | 0.70 | 0.65 | absorptive | ✓ same order as "cotton curtains draped to 3/4 area" 0.30, 0.45, 0.65, 0.56, 0.59, 0.71 |
+| Bookshelf / CD or record wall | 0.15 | 0.20 | 0.25 | 0.30 | 0.35 | 0.35 | diffusive · **low confidence** (no standard data) | no row to compare: estimate |
+| Canvas painting on wall | wall value +0.05 above 500 Hz | | | | | | reflective · **low confidence** | estimate |
 
 Objects (absorption area, m² sabins, per object, mid bands):
 
@@ -405,7 +406,7 @@ Objects (absorption area, m² sabins, per object, mid bands):
 
 Object values are ranges. The engine uses the midpoint and propagates the range into T60 uncertainty.
 
-**(R0) Known issue, not yet changed:** the row "Plaster on lath / brick, plastered" carries the values usually tabulated for rough plaster *on lath*, a light construction whose panel absorption gives the 0.14 at 125 Hz. Plaster on solid masonry is usually tabulated near 0.01–0.02 at 125 Hz (from memory, ⚠ check against the table). It is the default wall and ceiling material, so it sets much of the predicted low-frequency damping. Proposal in `docs/REVIEW_FINDINGS.md` (M3).
+**(R5) Fixed:** the default wall and ceiling material "plastered brick" carried the values for rough plaster *on lath* (0.14 at 125 Hz), about ten times the bass absorption of plaster on masonry. It now has the masonry values, and "plaster on wooden lath" is its own choice. The busy-ness amounts were raised by 0.1 m² per m² of floor so that the anchors of P08 stay where they were (mid T60). The predicted bass reverberation rises (Room R, some furniture: 0.48 → 0.86 s at 125 Hz), so the predicted peaks and dips get deeper. See `docs/REVIEW_R5.md`.
 
 ---
 
@@ -413,18 +414,20 @@ Object values are ranges. The engine uses the midpoint and propagates the range 
 
 | Key | Reference | Status |
 |---|---|---|
-| [TOOLE] | Toole, F. E. *Sound Reproduction: The Acoustics and Psychoacoustics of Loudspeakers and Rooms*, 3rd ed. Routledge / Focal Press, 2018. | ✓ book exists. ⚠ chapter-level cites to verify |
-| [EVP] | Everest, F. A. & Pohlmann, K. C. *Master Handbook of Acoustics*. McGraw-Hill (7th ed.). | ⚠ verify edition and year; absorption tables |
-| [KUT] | Kuttruff, H. *Room Acoustics*, 6th ed. CRC Press, 2016. | ✓ book. ⚠ chapter cites |
-| [ALL74] | Allison, R. F. "The Influence of Room Boundaries on Loudspeaker Power Output." *J. Audio Eng. Soc.* 22(5), 1974. | ⚠ verify pages |
-| [SCH96] | Schroeder, M. R. "The 'Schroeder frequency' revisited." *J. Acoust. Soc. Am.* 99(5), 1996. | ⚠ verify pages |
+| [TOOLE] | Toole, F. E. *Sound Reproduction: The Acoustics and Psychoacoustics of Loudspeakers and Rooms*, 3rd ed. Routledge, 2018. | ✓ book. Chapter-level cites not checked (no access from the build environment); no number in the engine depends on them (R5) |
+| [EVP] | Everest, F. A. & Pohlmann, K. C. *Master Handbook of Acoustics*, 7th ed. McGraw-Hill, 2021. ISBN 978-1-260-47359-9. | ✓ edition (R5). Absorption tables: compared row by row with [PRA], see Appendix A |
+| [KUT] | Kuttruff, H. *Room Acoustics*, 6th ed. CRC Press, 2016. ISBN 978-1-4822-6043-4. | ✓ book (R5). Chapter cites not checked; formulas used are standard and derived in this catalogue |
+| [ALL74] | Allison, R. F. "The Influence of Room Boundaries on Loudspeaker Power Output." *J. Audio Eng. Soc.* 22(6), June 1974 (AES 48th Convention paper 951). | ✓ volume and issue (R5: was given as 22(5)). Pages not confirmed |
+| [SCH96] | Schroeder, M. R. "The 'Schroeder frequency' revisited." *J. Acoust. Soc. Am.* 99(5), 3240–3241, 1996. doi:10.1121/1.414868 | ✓ (R5) |
 | [SAB] | Sabine, W. C. *Collected Papers on Acoustics*. Harvard University Press, 1922. | ✓ |
-| [EYR30] | Eyring, C. F. "Reverberation Time in 'Dead' Rooms." *J. Acoust. Soc. Am.* 1, 1930. | ⚠ verify pages |
-| [BON81] | Bonello, O. J. "A New Criterion for the Distribution of Normal Room Modes." *J. Audio Eng. Soc.* 29(9), 1981. | ⚠ verify pages |
-| [BOLT46] | Bolt, R. H. "Note on Normal Frequency Statistics for Rectangular Rooms." *J. Acoust. Soc. Am.* 18(1), 1946. | ⚠ verify |
-| [ITU1116] | ITU-R Recommendation BS.1116 (latest revision): methods for subjective assessment of small impairments, incl. reference listening room requirements. | ⚠ verify current revision number and clause numbers |
-| [ITU775] | ITU-R Recommendation BS.775 (latest revision): multichannel stereophonic sound system with and without accompanying picture (±30° front pair). | ⚠ verify current revision |
-| [DAV80] | Davis, D. & Davis, C. "The LEDE Concept for the Control of Acoustic and Psychoacoustic Parameters in Recording Control Rooms." *J. Audio Eng. Soc.* 28(9), 1980. | ⚠ verify |
-| [WALL49] | Wallach, H., Newman, E. B. & Rosenzweig, M. R. "The Precedence Effect in Sound Localization." *American Journal of Psychology* 62(3), 1949. | ⚠ verify issue |
+| [EYR30] | Eyring, C. F. "Reverberation Time in 'Dead' Rooms." *J. Acoust. Soc. Am.* 1(2A), 217–241, 1930. doi:10.1121/1.1915175 | ✓ (R5) |
+| [BON81] | Bonello, O. J. "A New Criterion for the Distribution of Normal Room Modes." *J. Audio Eng. Soc.* 29(9), 597–606, 1981. | ✓ (R5) |
+| [BOLT46] | Bolt, R. H. "Note on Normal Frequency Statistics for Rectangular Rooms." *J. Acoust. Soc. Am.* 18, 130–133, 1946. | ✓ (R5; issue number dropped, not confirmed) |
+| [ITU1116] | ITU-R Recommendation BS.1116-3 (02/2015): methods for the subjective assessment of small impairments in audio systems, incl. reference listening room requirements. | ✓ revision (R5). Loudspeaker height: the reference axis meets the listening point at seated ear height, inclination at most 10° (✓ from secondary summaries; clause number not checked) |
+| [ITU775] | ITU-R Recommendation BS.775-4 (12/2022): multichannel stereophonic sound system with and without accompanying picture (±30° front pair). | ✓ revision (R5) |
+| [DAV80] | Davis, D. & Davis, C. "The LEDE Concept for the Control of Acoustic and Psychoacoustic Parameters in Recording Control Rooms." *J. Audio Eng. Soc.* 28(9), 585–595, 1980. | ✓ pages (R5) |
+| [WALL49] | Wallach, H., Newman, E. B. & Rosenzweig, M. R. "The Precedence Effect in Sound Localization." *American Journal of Psychology* 62, 315–336, 1949. | ✓ (R5; issue number dropped, not confirmed) |
+| [PRA] | pyroomacoustics 0.10.1, `materials.json` (absorption database), MIT licence, from PyPI. A compilation of published tables. | ✓ used to cross-check Appendix A (R5) |
+| [DWELL] | Surveys of furnished dwellings, as summarised in the introduction of *Applied Sciences* 11(6), 2709 (2021): Bradley (602 Canadian homes, about 0.4 s, 100–4000 Hz), Burgess et al. (47 living rooms, 0.33 s at 500 Hz), Jackson et al. (50 living rooms, 0.51 s at 1 kHz), Parkin et al. (about 0.5 s). | ✓ secondary summary (R5); originals not checked |
 | [WELTI06] | Welti, T. & Devantier, A. "Low-Frequency Optimization Using Multiple Subwoofers." *J. Audio Eng. Soc.* 54(5), 2006. | not used in v1 |
-| [CARDAS] | Cardas Audio, speaker placement guide (web page). | ⚠ verify URL and numbers, or drop H03 |
+| [CARDAS] | Cardas Audio, speaker placement guide (web page). | not used: H03 is not implemented (its numbers stay unverified) |

@@ -46,6 +46,7 @@ export interface Room {
 export type SurfacePresetId =
   | 'plaster-concrete'
   | 'plaster-brick'
+  | 'plaster-lath'
   | 'gypsum-stud'
   | 'glass'
   | 'wood-floor'

@@ -180,6 +180,7 @@ export const hu: Messages = {
   surface: {
     'plaster-concrete': 'Vakolat vagy beton',
     'plaster-brick': 'Vakolt tégla',
+    'plaster-lath': 'Nádazott vagy lécezett vakolat (régi ház)',
     'gypsum-stud': 'Gipszkarton',
     glass: 'Üveg vagy ablak',
     'wood-floor': 'Fa padló',

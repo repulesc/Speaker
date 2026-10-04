@@ -174,6 +174,7 @@ export const en = {
   surface: {
     'plaster-concrete': 'Plaster or concrete',
     'plaster-brick': 'Plastered brick',
+    'plaster-lath': 'Plaster on wooden lath (old house)',
     'gypsum-stud': 'Plasterboard',
     glass: 'Glass or window',
     'wood-floor': 'Wooden floor',

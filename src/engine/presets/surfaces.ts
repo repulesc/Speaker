@@ -19,7 +19,18 @@ export const SURFACE_PRESETS: Record<Exclude<SurfacePresetId, 'custom'>, Surface
     dataConfidence: 'medium',
     source: 'EVP',
   },
+  // R5 (REVIEW_FINDINGS M3): this row used to carry plaster-on-lath values (0.14 at 125 Hz).
+  // Plaster smooth on brick or tile, as tabulated; matches "rendered brickwork" (0.01, 0.02, 0.02,
+  // 0.03, 0.03, 0.04) in the pyroomacoustics materials database.
   'plaster-brick': {
+    absorption: [0.013, 0.015, 0.02, 0.03, 0.04, 0.05],
+    class: 'reflective',
+    dataConfidence: 'medium',
+    source: 'EVP',
+  },
+  // Rough plaster on wooden (or reed) lath, as in older houses: the thin layer flexes and takes
+  // up some bass (panel absorption).
+  'plaster-lath': {
     absorption: [0.14, 0.1, 0.06, 0.05, 0.04, 0.03],
     class: 'reflective',
     dataConfidence: 'medium',
@@ -69,7 +80,7 @@ export const SURFACE_PRESETS: Record<Exclude<SurfacePresetId, 'custom'>, Surface
   },
   // Canvas on a wall: plaster value plus a small high-frequency increase (low confidence).
   'canvas-art': {
-    absorption: [0.14, 0.1, 0.11, 0.1, 0.09, 0.08],
+    absorption: [0.013, 0.015, 0.07, 0.08, 0.09, 0.1],
     class: 'reflective',
     dataConfidence: 'low',
     source: 'estimate',
