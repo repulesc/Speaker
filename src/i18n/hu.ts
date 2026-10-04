@@ -103,20 +103,28 @@ export const hu: Messages = {
     },
   },
   input: {
-    'room.width': 'a helyiség szélessége',
-    'room.length': 'a helyiség hossza',
-    'room.height': 'a belmagasság',
-    'room.construction': 'a falak szerkezete',
-    'speakers.position': 'a hangfalak helye',
-    'listener.position': 'az ülőhely helye',
+    room: {
+      width: 'a helyiség szélessége',
+      length: 'a helyiség hossza',
+      height: 'a belmagasság',
+      construction: 'a falak szerkezete',
+    },
+    speakers: {
+      position: 'a hangfalak helye',
+    },
+    listener: {
+      position: 'az ülőhely helye',
+    },
     surfaces: 'a falfelületek',
     furnishing: 'a berendezés',
-    'speaker.lowFrequencyMinus6dB': 'a hangfal mélyleadása',
-    'speaker.directivity': 'a hangfal sugárzási képe',
-    'speaker.portLocation': 'a basszusnyílás helye',
-    'speaker.enclosure': 'a hangfal háztípusa',
-    'speaker.acousticAxisHeight': 'a magassugárzó magassága',
-    'speaker.driverLayout': 'a hangszórók elrendezése',
+    speaker: {
+      lowFrequencyMinus6dB: 'a hangfal mélyleadása',
+      directivity: 'a hangfal sugárzási képe',
+      portLocation: 'a basszusnyílás helye',
+      enclosure: 'a hangfal háztípusa',
+      acousticAxisHeight: 'a magassugárzó magassága',
+      driverLayout: 'a hangszórók elrendezése',
+    },
   },
   steps: { room: 'Helyiség' },
   field: {
@@ -276,11 +284,10 @@ export const hu: Messages = {
   },
   speakers: {
     title: 'Hangfalak',
-    intro:
-      'Írd le a hangfalaidat, és hogy hol vannak ők és az ülőhelyed. Elég a durva érték is; jelezd, ha bizonytalan vagy.',
+    intro: 'Válaszd ki a legközelebbi típust, és add meg, hol állnak. A többi nem kötelező.',
     type: {
-      legend: 'Kezdd egy típussal',
-      help: 'Válaszd a legközelebbit. Kitölti a tipikus értékeket, amelyeket lent átírhatsz.',
+      legend: 'Melyik hasonlít leginkább a hangfaladra?',
+      help: 'Ez kitölti a tipikus méreteket. A További részleteknél átírhatod őket.',
       'small-bookshelf-rear-port': {
         name: 'Kis polchangfal',
         help: 'Kétutas, a basszusnyílás hátul',
@@ -294,6 +301,10 @@ export const hu: Messages = {
       'floorstander-rear-port': { name: 'Álló hangfal, hátul nyílással', help: 'Magas, háromutas' },
     },
     describe: { title: 'A te hangfalad' },
+    more: {
+      summary: 'További részletek',
+      hint: 'Méret, basszusnyílás, ülőhely, befordítás, hangfalfájl',
+    },
     brand: 'Márka (saját emlékeztetőnek)',
     model: 'Típus (saját emlékeztetőnek)',
     size: { width: 'Szélesség', height: 'Magasság', depth: 'Mélység' },
@@ -334,7 +345,6 @@ export const hu: Messages = {
       minWallValue: 'Legkisebb távolság a faltól',
     },
     advanced: {
-      summary: 'Haladó: mélyleadás',
       f6: 'A legmélyebb hang, amit jól játszik (Hz)',
       f6Help:
         'Az a frekvencia, ahol a basszus 6 dB-lel esik, a műszaki adatokból. Hagyd üresen, ha nem tudod.',
@@ -352,8 +362,9 @@ export const hu: Messages = {
       },
     },
     placement: {
-      title: 'Hol van minden?',
-      help: 'A hangfalakat és az ülőhelyet a rajzon is húzhatod. A távolságokat az elülső faltól mérjük, ha nincs másképp megadva.',
+      title: 'Hol állnak?',
+      help: 'A rajzon is húzhatod őket.',
+      seatTitle: 'Az ülőhelyed és az irány',
       certainty: 'Mennyire vagy biztos ezekben a helyekben?',
       clearance: 'A hangfalak hátulja az elülső faltól',
       spacing: 'A hangfalak távolsága egymástól',
@@ -489,6 +500,7 @@ export const hu: Messages = {
     why: 'Miért ez az eredmény',
     treat: 'A szoba javítása',
     listen: 'Hallgatási jegyzetek',
+    bass: 'Basszus az ülőhelyeden',
     back: 'Vissza',
     notSet: 'Nincs megadva',
     none: 'Nincs',
@@ -507,7 +519,14 @@ export const hu: Messages = {
       near: 'Asztal',
     },
     speakers: 'Hangfalak',
-    speakersLine: '{front} az elülső faltól (a hangfal hátuljáig), egymástól {spacing}',
+    bass: 'Basszus azon a helyen',
+    bassWord: {
+      even: 'Egyenletes',
+      fair: 'Nagyjából egyenletes, {frequency} körül a leggyengébb',
+      uneven: 'Egyenetlen {frequency} körül',
+    },
+    optionsTitle: 'Beállítások',
+    speakersLine: '{front} az elülső faltól (a hátlaptól), egymástól {spacing}',
     seat: 'Az ülőhelyed',
     seatLine: '{front} az elülső faltól, {distance} mindkét hangfaltól',
     stay: 'Maradnak a helyükön',
@@ -549,6 +568,10 @@ export const hu: Messages = {
     },
   },
   layer: {
+    speakers: {
+      name: 'Hová kerüljenek a hangfalak',
+      what: 'Hol szólnának a legjobban a hangfalak, ha az ülőhelyed ott marad, ahol van. Minden pont azt mutatja, hová állna a hangfalpár, tükrözve az ülőhelyed körül. Minél világosabb, annál jobb.',
+    },
     overall: {
       name: 'Összesített',
       what: 'Mennyire jó itt az ülőhely, mindent egyformán számítva. Minél világosabb, annál jobb.',
@@ -986,7 +1009,7 @@ export const hu: Messages = {
     higher: 'A(z) „{name}” pontozódik magasabbra.',
     legend: '„{name}” beállítás',
     chartNote:
-      'A basszus grafikonon a másik beállítás szaggatott vonallal látszik, mindegyik a saját ülőhelyénél.',
+      'A „Basszus az ülőhelyeden” oldalon a másik beállítás a szaggatott vonal, mindegyik a saját ülőhelyénél.',
   },
   print: {
     now: 'A mostani beállításod: „{setup}”',

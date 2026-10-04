@@ -97,20 +97,28 @@ export const en = {
     },
   },
   input: {
-    'room.width': 'room width',
-    'room.length': 'room length',
-    'room.height': 'ceiling height',
-    'room.construction': 'wall construction',
-    'speakers.position': 'speaker positions',
-    'listener.position': 'seat position',
+    room: {
+      width: 'room width',
+      length: 'room length',
+      height: 'ceiling height',
+      construction: 'wall construction',
+    },
+    speakers: {
+      position: 'speaker positions',
+    },
+    listener: {
+      position: 'seat position',
+    },
     surfaces: 'wall surfaces',
     furnishing: 'furnishing',
-    'speaker.lowFrequencyMinus6dB': 'speaker bass extension',
-    'speaker.directivity': 'speaker dispersion',
-    'speaker.portLocation': 'bass port location',
-    'speaker.enclosure': 'speaker enclosure type',
-    'speaker.acousticAxisHeight': 'tweeter height',
-    'speaker.driverLayout': 'driver layout',
+    speaker: {
+      lowFrequencyMinus6dB: 'speaker bass extension',
+      directivity: 'speaker dispersion',
+      portLocation: 'bass port location',
+      enclosure: 'speaker enclosure type',
+      acousticAxisHeight: 'tweeter height',
+      driverLayout: 'driver layout',
+    },
   },
   steps: { room: 'Room' },
   field: {
@@ -265,11 +273,10 @@ export const en = {
   },
   speakers: {
     title: 'Speakers',
-    intro:
-      'Describe your speakers and where they and your seat are. Rough values are fine; say so when you are unsure.',
+    intro: 'Pick the closest type and say where they stand. Everything else is optional.',
     type: {
-      legend: 'Start from a type',
-      help: 'Pick the closest match. It fills in typical values, which you can change below.',
+      legend: 'Which speakers are closest to yours?',
+      help: 'This fills in typical sizes. You can change them under More details.',
       'small-bookshelf-rear-port': {
         name: 'Small bookshelf speaker',
         help: 'Two-way, port at the back',
@@ -289,6 +296,7 @@ export const en = {
       },
     },
     describe: { title: 'Your speaker' },
+    more: { summary: 'More details', hint: 'Size, port, seat, toe-in, speaker file' },
     brand: 'Brand (for your own reference)',
     model: 'Model (for your own reference)',
     size: { width: 'Width', height: 'Height', depth: 'Depth' },
@@ -329,7 +337,6 @@ export const en = {
       minWallValue: 'Minimum distance from the wall',
     },
     advanced: {
-      summary: 'Advanced: bass extension',
       f6: 'Lowest note it plays well (Hz)',
       f6Help:
         'The frequency where the bass has dropped by 6 dB, from the specifications. Leave empty if you don’t know.',
@@ -347,8 +354,9 @@ export const en = {
       },
     },
     placement: {
-      title: 'Where everything is',
-      help: 'You can also drag the speakers and your seat on the drawing. Distances are measured from the front wall unless stated otherwise.',
+      title: 'Where they stand',
+      help: 'You can also drag them on the drawing.',
+      seatTitle: 'Your seat and aim',
       certainty: 'How sure are you about these positions?',
       clearance: 'Back of the speakers to the front wall',
       spacing: 'Distance between the speakers',
@@ -486,6 +494,7 @@ export const en = {
     why: 'Why this result',
     treat: 'Improve the room',
     listen: 'Listening notes',
+    bass: 'Bass at your seat',
     back: 'Back',
     notSet: 'Not set',
     none: 'None',
@@ -504,7 +513,14 @@ export const en = {
       near: 'Desk',
     },
     speakers: 'Speakers',
-    speakersLine: '{front} from the front wall (to the back of the speaker), {spacing} apart',
+    bass: 'Bass at that seat',
+    bassWord: {
+      even: 'Even',
+      fair: 'Fairly even, weakest near {frequency}',
+      uneven: 'Uneven near {frequency}',
+    },
+    optionsTitle: 'Options',
+    speakersLine: '{front} from the front wall (back panel), {spacing} apart',
     seat: 'Your seat',
     seatLine: '{front} from the front wall, {distance} from each speaker',
     stay: 'Stay where they are',
@@ -546,6 +562,10 @@ export const en = {
     },
   },
   layer: {
+    speakers: {
+      name: 'Where the speakers go',
+      what: 'Where the speakers would sound best, with your seat staying where it is. Each spot is where the speaker pair would stand, mirrored about your seat. Brighter is better.',
+    },
     overall: {
       name: 'Overall',
       what: 'How good a seat is here, everything counted equally. Brighter is better.',
@@ -978,7 +998,8 @@ export const en = {
     same: 'Both setups score about the same.',
     higher: '“{name}” scores higher.',
     legend: 'Setup “{name}”',
-    chartNote: 'The bass chart shows the other setup as a dashed line, each at its own seat.',
+    chartNote:
+      'On the “Bass at your seat” page, the other setup is the dashed line, each at its own seat.',
   },
   print: {
     now: 'Your setup now: “{setup}”',

@@ -56,6 +56,14 @@ export async function goStep(page: Page, name: string) {
   await openSection(page, name === 'Furnishing' ? 'Furniture' : name);
 }
 
+/** The Speakers page keeps size, port, seat, toe-in and the speaker file under "More details". */
+export async function openSpeakerDetails(page: Page) {
+  const more = page.locator('details.more');
+  if (!(await more.evaluate((d) => (d as HTMLDetailsElement).open))) {
+    await more.locator('summary').click();
+  }
+}
+
 /** Back to the home page from a section. */
 export async function showResults(page: Page) {
   await goHome(page);

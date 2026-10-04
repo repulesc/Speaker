@@ -16,10 +16,22 @@
     /** Centre of the label on the drawing, in pixels. */
     x: number;
     y: number;
+    /** Which item the number belongs to; the plan shows speaker and seat numbers on demand. */
+    group?: 'room' | 'speaker' | 'seat';
     onchange: (metres: number) => void;
   }
 
-  let { name, value, system, kind = 'position', limits, x, y, onchange }: Props = $props();
+  let {
+    name,
+    value,
+    system,
+    kind = 'position',
+    limits,
+    x,
+    y,
+    group = 'room',
+    onchange,
+  }: Props = $props();
 
   const locale = $derived(i18n.locale);
   const format = (metres: number) => formatLength(metres, system, kind, locale);
@@ -70,7 +82,7 @@
   });
 </script>
 
-<div class="dim" style="left:{x}px; top:{y}px">
+<div class="dim" data-group={group} style="left:{x}px; top:{y}px">
   {#if editing}
     <input
       bind:this={input}

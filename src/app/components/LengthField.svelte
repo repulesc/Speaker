@@ -145,7 +145,7 @@
   }
   .help {
     color: var(--ink-muted);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   .row {
     display: flex;
@@ -159,10 +159,10 @@
   }
   .error {
     color: var(--danger);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   .note {
     color: var(--caution);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
 </style>

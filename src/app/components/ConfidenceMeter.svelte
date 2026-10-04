@@ -13,7 +13,7 @@
   );
 </script>
 
-<Dropdown label={i18n.t('confidence.hintTitle')} align="end" triggerClass="meter">
+<Dropdown label={i18n.t('confidence.hintTitle')} triggerClass="meter">
   {#snippet trigger()}
     <span class="visually-hidden">{i18n.t('confidence.label')}</span>
     <span class="segments" aria-hidden="true">
@@ -64,7 +64,7 @@
     border-color: var(--accent);
   }
   .word {
-    font-size: 15px;
+    font-size: var(--text-md);
     max-width: 11rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -81,16 +81,16 @@
     }
   }
   h2 {
-    font-size: 17px;
+    font-size: var(--text-md);
     margin-bottom: 4px;
   }
   h3 {
-    font-size: 15px;
+    font-size: var(--text-md);
     margin-bottom: 4px;
   }
   p,
   li {
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   ul {
     margin: 0;

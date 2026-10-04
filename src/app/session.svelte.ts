@@ -34,9 +34,10 @@ export type StepId =
   | 'results'
   | 'why'
   | 'treat'
-  | 'listen';
+  | 'listen'
+  | 'bass';
 /** Result pages opened from the home list. */
-export type PageId = 'why' | 'treat' | 'listen';
+export type PageId = 'why' | 'treat' | 'listen' | 'bass';
 export type SectionId = Exclude<StepId, PageId | 'results'>;
 /** The dock, top to bottom. */
 export const SECTIONS: readonly SectionId[] = [

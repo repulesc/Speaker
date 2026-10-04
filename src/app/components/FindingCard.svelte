@@ -46,7 +46,7 @@
     gap: 12px;
     margin: 0;
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--text-sm);
   }
   .red-flag .sev {
     color: var(--danger);
@@ -58,7 +58,7 @@
   }
   .text {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--text-md);
     line-height: 1.5;
   }
 </style>

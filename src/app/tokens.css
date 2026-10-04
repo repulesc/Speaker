@@ -21,6 +21,13 @@
   --caution: #a25000;
   --danger: #c4001a;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.08);
+  /* The selected segment: white on grey in light, a lighter grey on dark (as the platform). */
+  --thumb: #ffffff;
+  --thumb-ink: #1d1d1f;
+  /* The plan: speaker cabinets (front bar lighter) and the room's soft shadow. */
+  --speaker: #2c2c2e;
+  --speaker-baffle: #aeaeb2;
+  --plan-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
   /* Heat ramp, poorer → better (viridis: lightness-ordered, colour-blind safe). */
   --heat-0: #440154;
   --heat-1: #31688e;
@@ -49,6 +56,11 @@
     --caution: #ffb340;
     --danger: #ff6961;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.5);
+    --thumb: #636366;
+    --thumb-ink: #ffffff;
+    --speaker: #d1d1d6;
+    --speaker-baffle: #636366;
+    --plan-shadow: 0 2px 16px rgb(0 0 0 / 0.7);
     color-scheme: dark;
   }
 }
@@ -71,5 +83,10 @@
   --caution: #ffb340;
   --danger: #ff6961;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.5);
+  --thumb: #636366;
+  --thumb-ink: #ffffff;
+  --speaker: #d1d1d6;
+  --speaker-baffle: #636366;
+  --plan-shadow: 0 2px 16px rgb(0 0 0 / 0.7);
   color-scheme: dark;
 }

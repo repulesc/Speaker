@@ -245,13 +245,13 @@
     gap: 20px;
   }
   h3 {
-    font-size: 17px;
+    font-size: var(--text-md);
     margin-bottom: 6px;
   }
   .intro,
   .help {
     color: var(--ink-muted);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   .hint {
     margin-top: 4px;
@@ -298,14 +298,14 @@
   }
   .tile-title {
     display: block;
-    font-size: 15px;
+    font-size: var(--text-md);
     font-weight: 600;
     line-height: 1.25;
   }
   .tile-sub {
     display: block;
     color: var(--ink-muted);
-    font-size: 13px;
+    font-size: var(--text-sm);
     line-height: 1.3;
   }
   .adds {
@@ -330,7 +330,7 @@
     min-width: 0;
   }
   .field label {
-    font-size: 15px;
+    font-size: var(--text-md);
     font-weight: 600;
   }
   .input {

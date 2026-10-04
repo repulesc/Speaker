@@ -86,11 +86,11 @@
     min-width: 0;
   }
   label {
-    font-size: 15px;
+    font-size: var(--text-md);
     font-weight: 600;
   }
   .error {
     color: var(--danger);
-    font-size: 14px;
+    font-size: var(--text-md);
   }
 </style>

@@ -12,7 +12,8 @@ let step = $state<StepId>('room');
 let selection = $state<Selection>({ kind: 'none' });
 let boundary = $state<BoundaryId>('left');
 let view = $state<'top' | 'side'>('top');
-let layer = $state<LayerId>('overall');
+/** A seat layer, or 'speakers': where the speakers would score best, the seat staying put. */
+let layer = $state<LayerId | 'speakers'>('overall');
 /** The bass note shown by the room-mode explorer (Hz), or null when it is off. */
 let modeFrequency = $state<number | null>(null);
 /** The other setup drawn over the bass chart (Compare), or null. */
@@ -21,6 +22,8 @@ let compareId = $state<string | null>(null);
 let candidate = $state<number | null>(null);
 /** The side view is hidden until asked for (docs/REVAMP_PLAN.md). */
 let sideOpen = $state(false);
+/** The Speakers page's "More details" stays open once opened, for this visit. */
+let speakerDetails = $state(false);
 
 export const ui = {
   get step() {
@@ -28,9 +31,9 @@ export const ui = {
   },
   set step(value: StepId) {
     step = value;
-    // A preview belongs to the home page and a comparison to the Why page; leaving ends them.
+    // A preview belongs to the home page; leaving it ends the preview. A comparison chosen on the
+    // Why page stays on, because it is drawn on the separate Bass page.
     if (value !== 'results') candidate = null;
-    if (value !== 'why') compareId = null;
   },
   get selection() {
     return selection;
@@ -48,7 +51,7 @@ export const ui = {
   get layer() {
     return layer;
   },
-  set layer(value: LayerId) {
+  set layer(value: LayerId | 'speakers') {
     layer = value;
   },
   get modeFrequency() {
@@ -74,6 +77,12 @@ export const ui = {
   },
   set sideOpen(value: boolean) {
     sideOpen = value;
+  },
+  get speakerDetails() {
+    return speakerDetails;
+  },
+  set speakerDetails(value: boolean) {
+    speakerDetails = value;
   },
   /** Which drawing is visible when only one fits (tablet, phone). */
   get view() {

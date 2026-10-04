@@ -2,7 +2,6 @@
   import { onDestroy, onMount } from 'svelte';
   import { i18n } from '../i18n/locale.svelte';
   import AboutDialog from './components/AboutDialog.svelte';
-  import BassChart from './components/BassChart.svelte';
   import LayerBar from './components/LayerBar.svelte';
   import Notice from './components/Notice.svelte';
   import PrintSheet from './components/PrintSheet.svelte';
@@ -183,7 +182,6 @@
           </p>
         {/if}
       </div>
-      {#if viewport.wide}<BassChart />{/if}
     </main>
   </div>
 

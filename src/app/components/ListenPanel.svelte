@@ -231,18 +231,12 @@
     padding: 0;
     margin-bottom: 6px;
     font-weight: 600;
-    font-size: 14px;
-  }
-  h3 {
-    font-size: 12px;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: var(--ink-muted);
+    font-size: var(--text-md);
   }
   ol {
     margin: 0;
     padding-left: 20px;
-    font-size: 14px;
+    font-size: var(--text-md);
     line-height: 1.5;
   }
   p {
@@ -250,7 +244,7 @@
   }
   .muted {
     color: var(--ink-muted);
-    font-size: 13px;
+    font-size: var(--text-sm);
   }
   .card {
     display: grid;
@@ -259,7 +253,7 @@
     border: 1px solid var(--grid-strong);
     border-radius: var(--radius-md);
     background: var(--surface);
-    font-size: 14px;
+    font-size: var(--text-md);
     line-height: 1.5;
   }
   .meta {
@@ -267,7 +261,7 @@
     justify-content: space-between;
     gap: 12px;
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--text-sm);
   }
   .seg {
     display: flex;
@@ -323,6 +317,6 @@
     resize: vertical;
   }
   .symptom {
-    font-size: 13px;
+    font-size: var(--text-sm);
   }
 </style>

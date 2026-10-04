@@ -64,20 +64,14 @@
     display: grid;
     gap: 8px;
   }
-  h3 {
-    font-size: 12px;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-  }
   .muted {
     color: var(--ink-muted);
-    font-size: 13px;
+    font-size: var(--text-sm);
   }
   .first-label {
     margin: 0;
     color: var(--accent);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 600;
   }
   .card {
@@ -97,11 +91,11 @@
     gap: 12px;
     margin: 0;
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--text-sm);
   }
   .text {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--text-md);
     line-height: 1.5;
   }
 </style>

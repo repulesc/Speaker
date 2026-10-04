@@ -45,6 +45,9 @@
       : undefined,
   );
   const comparedCurve = $derived(compared ? (setups.views[compared.id]?.bass ?? null) : null);
+  $effect(() => {
+    if (compared) void setups.refresh($state.snapshot(workspace.project));
+  });
 
   const fMin = $derived(result?.bassResponse.f[0] ?? 20);
   const fMax = $derived(result?.bassResponse.f.at(-1) ?? 300);
@@ -94,7 +97,8 @@
 <section class="chart" aria-labelledby="chart-title">
   <header>
     <h3 id="chart-title">
-      {i18n.t('chart.title')} <span class="sub">· {i18n.t('chart.sub')}</span>
+      <span class="visually-hidden">{i18n.t('chart.title')}: </span>
+      <span class="sub">{i18n.t('chart.sub')}</span>
     </h3>
     <ul class="legend">
       <li><i class="now"></i>{i18n.t('chart.now')}</li>
@@ -151,9 +155,7 @@
 
 <style>
   .chart {
-    margin: 0 var(--gutter) 14px;
-    padding: 10px 14px 6px;
-    border: 1px solid var(--grid);
+    padding: 12px 12px 6px;
     border-radius: var(--radius-md);
     background: var(--surface);
   }
@@ -165,7 +167,7 @@
     gap: 4px 16px;
   }
   h3 {
-    font-size: 13px;
+    font-size: var(--text-sm);
   }
   .sub {
     font-weight: 400;
@@ -178,7 +180,7 @@
     padding: 0;
     list-style: none;
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--text-sm);
   }
   .legend i {
     display: inline-block;

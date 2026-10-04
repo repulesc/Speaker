@@ -271,13 +271,13 @@
     gap: 20px;
   }
   h3 {
-    font-size: 17px;
+    font-size: var(--text-md);
     margin-bottom: 6px;
   }
   .intro,
   .help {
     color: var(--ink-muted);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   fieldset {
     margin: 0;
@@ -334,7 +334,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
-    font-size: 14px;
+    font-size: var(--text-md);
   }
   .tags-label {
     color: var(--ink-muted);
@@ -355,7 +355,7 @@
     gap: 4px;
   }
   .field label {
-    font-size: 15px;
+    font-size: var(--text-md);
     font-weight: 600;
   }
   .input {

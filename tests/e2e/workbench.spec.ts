@@ -15,7 +15,7 @@ test('the map shows a heatmap, layers that say what they mean, and a legend', as
   await withResults(page);
   await expect(page.locator('canvas.heat')).toBeVisible();
   const layer = page.getByLabel('Map layer');
-  await expect(layer.locator('option')).toHaveCount(8);
+  await expect(layer.locator('option')).toHaveCount(9); // eight seat layers + the speakers
   await layer.selectOption({ label: 'Bass holes' });
   await expect(page.getByText('Whether a bass note nearly vanishes here')).toBeVisible();
   await expect(page.getByText('Physics', { exact: false }).first()).toBeVisible();
@@ -54,12 +54,9 @@ test('best placement: shown first, other options, apply, and undo brings the set
   const answer = page.getByTestId('suggestion');
   await expect(answer).toContainText(/from the front wall/);
   await expect(answer).toContainText(/apart/);
-  await page.getByRole('button', { name: /^Option B/ }).click();
-  await expect(page.getByRole('button', { name: /^Option B/ })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  await page.getByRole('button', { name: /^Option A/ }).click();
+  await page.getByRole('radio', { name: /^Option B/ }).check({ force: true });
+  await expect(page.getByRole('radio', { name: /^Option B/ })).toBeChecked();
+  await page.getByRole('radio', { name: /^Option A/ }).check({ force: true });
 
   await page.getByRole('button', { name: 'Apply', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Placement applied' })).toBeVisible();
@@ -76,6 +73,7 @@ test('best placement: shown first, other options, apply, and undo brings the set
 
 test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({ page }) => {
   await withResults(page);
+  await page.getByRole('button', { name: /^Options/ }).click();
   await page.getByRole('radio', { name: 'Speakers' }).check({ force: true });
   await expect(page.getByTestId('suggestion')).toContainText('Stay where they are');
   const project = await savedProject(page);
@@ -105,6 +103,11 @@ test('the probe: click the map to see why, then move the seat there', async ({ p
 
 test('click a number on the map to type an exact value', async ({ page }) => {
   await withResults(page);
+  // The seat's numbers show once the seat is selected (or hovered).
+  await page
+    .getByRole('button', { name: /^Seat\./ })
+    .first()
+    .focus();
   await page.getByRole('button', { name: /^Seat to front wall/ }).click();
   const input = page.getByRole('textbox', { name: /Type an exact value for Seat to front wall/ });
   await input.fill('2.6');
@@ -210,8 +213,12 @@ test('compare: a second setup appears as a dashed line and a verdict', async ({ 
   await openWhy(page);
   await page.getByLabel('Compare with').selectOption({ index: 1 });
   await expect(page.getByTestId('compare-scores')).toBeVisible();
+  // The bass chart has its own page; the comparison stays on while it is open.
+  await openSection(page, 'Bass at your seat');
   await expect(page.locator('path.line.other')).toHaveCount(1);
+  await openWhy(page);
   await page.getByLabel('Compare with').selectOption('');
+  await openSection(page, 'Bass at your seat');
   await expect(page.locator('path.line.other')).toHaveCount(0);
 });
 
@@ -223,4 +230,31 @@ test('the print sheet has the tape-measure numbers', async ({ page }) => {
   await expect(sheet).toContainText('from the front wall');
   await expect(sheet).toContainText('Left speaker');
   await expect(page.locator('.app')).toBeHidden();
+});
+
+test('the speaker layer shows where the speakers would sound best, mirrored about the seat', async ({
+  page,
+}) => {
+  await withResults(page);
+  await page.getByLabel('Map layer').selectOption({ label: 'Where the speakers go' });
+  await expect(page.getByText(/Where the speakers would sound best/)).toBeVisible();
+  const canvas = page.locator('canvas.heat');
+  await expect(canvas).toBeVisible();
+  // Mirrored: the canvas is twice as wide as the half grid, and not blank.
+  const sample = await canvas.evaluate((el: HTMLCanvasElement) => {
+    const ctx = el.getContext('2d')!;
+    const { data } = ctx.getImageData(0, 0, el.width, el.height);
+    let left = 0;
+    let right = 0;
+    for (let y = 0; y < el.height; y++) {
+      for (let x = 0; x < el.width; x++) {
+        const a = data[(y * el.width + x) * 4 + 3]!;
+        if (a && x < el.width / 2) left++;
+        if (a && x >= el.width / 2) right++;
+      }
+    }
+    return { left, right };
+  });
+  expect(sample.left).toBeGreaterThan(50);
+  expect(sample.right).toBe(sample.left);
 });
