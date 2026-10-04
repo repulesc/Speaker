@@ -26,6 +26,11 @@ The owner wants Opus to have real freedom, without surprises.
 - **Movement zone:** one number ("How far can you move them?", about 50 cm), applied around each speaker.
 - **Sharing:** "Share as image" first (room, map and recommendation as a clean picture); link preview later.
 
+- **Menu structure:** Opus decides. Propose a structure with screenshots (keep the lists, or fewer groups such as Your room / Your speakers / Results); the owner approves or rejects.
+- **Freedom:** Opus asks before restructuring. Polish within today's structure needs only a checkpoint. If Opus judges that a fuller redesign would be clearly better, it says so, shows why with screenshots, and the owner decides before any of it is built.
+- **Layout (desktop):** Opus proposes. Mock up sidebar-left with the map on the right (as now) and floating cards over a full-screen map; the owner chooses.
+- **Wording tone:** undecided. Show 2 or 3 example versions (for example the Best placement card and one survey screen in a friendly-and-short, a neutral-and-precise and a warm voice) and let the owner pick by reading.
+
 ## The owner's feedback, in order
 
 1. **Settings icon:** replace the cog with the three-lines menu icon (friendlier, less industrial).
