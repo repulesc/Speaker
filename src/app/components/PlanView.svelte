@@ -263,9 +263,11 @@
         bind:this={fieldCanvas}
         class="heat"
         aria-hidden="true"
-        style="left:{px(field.grid.x0)}px; top:{py(field.grid.y0)}px; width:{field.grid.nx *
+        style="left:{px(field.grid.x0 - field.grid.step / 2)}px; top:{py(
+          field.grid.y0 - field.grid.step / 2,
+        )}px; width:{field.grid.nx * field.grid.step * frame.scale}px; height:{field.grid.ny *
           field.grid.step *
-          frame.scale}px; height:{field.grid.ny * field.grid.step * frame.scale}px"
+          frame.scale}px"
       ></canvas>
     {:else if showHeat && layers}
       <canvas

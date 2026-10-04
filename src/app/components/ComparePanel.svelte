@@ -1,6 +1,7 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
   import { scoreWord } from '../findings/text';
+  import { SCORE_TIE } from '../listen/agreement';
   import { variantLabel, workspace } from '../session.svelte';
   import { setups } from '../state/setups.svelte';
   import { ui } from '../ui.svelte';
@@ -16,12 +17,10 @@
 
   const mine = $derived(setups.views[active.id]?.score ?? null);
   const theirs = $derived(other ? (setups.views[other.id]?.score ?? null) : null);
-  /** Scores closer than this read as "about the same" (matches the listening comparison). */
-  const TIE = 0.02;
   const verdict = $derived(
     mine === null || theirs === null || !other
       ? null
-      : Math.abs(mine - theirs) < TIE
+      : Math.abs(mine - theirs) < SCORE_TIE
         ? i18n.t('compare.same')
         : i18n.t('compare.higher', {
             name: variantLabel(mine > theirs ? active.name : other.name),

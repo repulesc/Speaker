@@ -879,6 +879,8 @@ export const en = {
     empty: 'No notes for this setup yet.',
     delete: 'Delete note',
     tryThis: 'Try this',
+    earlier:
+      'Rated before the setup last changed, so it no longer counts in the comparison with the app.',
     symptom: {
       S01: {
         name: 'Boomy, heavy bass',
@@ -906,7 +908,7 @@ export const en = {
       },
       S07: {
         name: 'Sound pulls to one side',
-        try: 'Swap the left and right cables: if the pull follows the cable, it is the speaker or amplifier; if it stays, it is the room.',
+        try: 'Check the balance control first. Then swap the left and right cables at the amplifier: if the pull moves to the other side, the cause is before the speakers (source, amplifier, cable). If it stays, swap the two speakers: if the pull moves with a speaker, it is that speaker; if it stays, it is the room.',
       },
     },
     agreement: {
@@ -938,7 +940,7 @@ export const en = {
     wall: { left: 'left', right: 'right' },
     speaker:
       '{side}: rear panel {front} from the front wall, centre {sideWall} from the {wall} wall, stand height {height}, toe-in {toeIn}°.',
-    seat: 'Seat: {front} from the front wall, {left} from the left wall, ears at {height}.',
+    seat: 'Seat: {front} from the front wall, {left} from the left wall, ears at {ears}.',
     between:
       'Speakers {between} apart, centre to centre. To your seat: {left} (left) and {right} (right), along the floor.',
     footer:
@@ -976,6 +978,8 @@ export const en = {
     tangential: 'two pairs of walls',
     oblique: 'all three wall pairs',
     jump: 'Jump to {frequency}',
+    aboveTransition:
+      'Above about {frequency} the room’s resonances overlap, so the real pattern differs more from this picture.',
     caption: 'Bass note at {frequency}: where it is loud or silent (speakers as they are).',
   },
   advice: {
@@ -986,7 +990,7 @@ export const en = {
         '{speaker}: its first reflection lands on a hard surface at the marked spot ({boundary}). Experts disagree about treating it, so try a panel or diffuser there (about {thickness} thick), listen, and keep what you like.',
     },
     T02: {
-      rug: 'A rug on the floor between the speakers and you, at the marked spot, cuts the floor reflection. It is cheap and usually helps.',
+      rug: 'A thick rug on the floor between the speakers and you, at the marked spot, softens the floor reflection, mainly in the treble (a rug does little for bass). It is cheap: try it.',
       ceilingPanel:
         'A panel on the ceiling at the marked spot would cut its reflection. This matters less than the side walls, so it comes later.',
     },
@@ -1026,6 +1030,7 @@ export const en = {
     D04: {
       height:
         'Your ears are {angle} off the speakers’ axis. Put the speakers’ bases about {baseHeight} above the floor (a stand or desk) so the tweeters are at ear height, or tilt the speakers.',
+      tilt: 'Your ears are {angle} below the speakers’ axis, even with the speakers on the floor. Tilt them slightly down towards you, or sit a little higher.',
     },
     D05: {
       moveOut:

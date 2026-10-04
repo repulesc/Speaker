@@ -184,6 +184,7 @@ export const projectSchema: Check = obj({
         listenedHours: optional(num(0, 10_000)),
         text: optional(text),
         experimentId: optional(str(SIZE_LIMITS.name)),
+        setupKey: optional(str(SIZE_LIMITS.name)),
       }),
       SIZE_LIMITS.notes,
     ),

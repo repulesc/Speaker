@@ -126,6 +126,7 @@ const ADVICE_SAMPLE: Record<string, Record<string, number | string>> = {
   'D02.cut': { gain: 'high', stepDb: -0.5 },
   'D03.*': { t60: 0.2, stepDb: 0.5 },
   'D04.height': { baseHeight: 0.9, angle: 12 },
+  'D04.tilt': { angle: 14 },
   'D05.moveOut': { clearance: 0.1, minimum: 0.2 },
 };
 

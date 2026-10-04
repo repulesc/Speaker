@@ -335,15 +335,15 @@ What to change in the room or on the speaker, most useful first; the first item 
 | ID | Advice | Level | Sources | When |
 |---|---|---|---|---|
 | T01 | Side-wall first reflections: absorb or diffuse there (imaging goal), or try it and listen (goals split or none). About 5 cm of porous absorber works across the mid and treble range (🟡, ⚠ verify in [EVP]) | 🟠 (points 🔴 P06) | [TOOLE], [DAV80] | hard, flat surface at a near-side reflection point; nothing for a "wide stage" goal |
-| T02 | A rug at the floor reflection; a panel at the ceiling reflection (ranked lower: vertical reflections matter less for imaging) | 🟠 | [TOOLE] | hard floor or ceiling at the point |
+| T02 | A thick rug at the floor reflection (mainly treble: a rug does little for bass, R3 review); a panel at the ceiling reflection (ranked lower: vertical reflections matter less for imaging) | 🟠 | [TOOLE] | hard floor or ceiling at the point |
 | T03 | The front-wall dip: move the speakers first; a panel needs to be about a quarter wavelength deep to remove it (porous absorbers work where the air moves, which peaks λ/4 from a wall), so a 10–20 cm panel only makes it a little shallower | 🔴 | [KUT], [EVP], [ALL74] | null at the seat between 80 and 300 Hz; "panel" only when the speakers are fixed |
 | T04 | Bass traps in the corners (pressure maxima of every mode, P03); honest that small corner pieces do little below 100 Hz | 🟠 | [KUT], [EVP], [TOOLE] | P09 peak caution or P11 stacked modes |
-| T05 | Too live: about 5 m² of extra soft absorption (a large rug, heavy curtains), with the predicted T60; too dead: take some away | 🔴 model (P08), target band 🟡 | [SAB], [EYR30], [EVP] | P08 live or dead |
+| T05 | Too live: about 5 m² of extra soft absorption (a large rug, heavy curtains), with the predicted T60; too dead: take some away (no advice when there is under 1 m² of soft furnishing to remove, R3 review) | 🔴 model (P08), target band 🟡 | [SAB], [EYR30], [EVP] | P08 live or dead |
 | T06 | Head near the back wall: move forward first; if the seat is fixed, a thick absorber (≥ 10 cm) behind the head | 🟠 | [TOOLE] | G02 caution or red flag |
 | D01 | Match the wall-distance setting: the distance, and whether it counts as close (< 0.3 m, 🟡). Option names come from the speaker's manual (⚠) | 🟠 | manufacturer | the profile has a wall setting |
 | D02 | One step of bass cut for high boundary gain, then listen | 🟡 | [ALL74], manufacturer | P05 high or very high, and a bass control |
 | D03 | One step of the treble control in H06's direction, then listen | 🟡 | manufacturer, [TOOLE] | H06 lift or cut, and a treble control |
-| D04 | The base height that puts the tweeter at ear height, or tilt the speaker (heights are not searched in v1) | 🟠 | [TOOLE], [ITU1116] ⚠ | G08 caution or red flag |
+| D04 | The base height that puts the tweeter at ear height, or tilt the speaker (heights are not searched in v1). When the axis is above the ears even with the speaker on the floor (base height under 5 cm), the `tilt` variant: tilt down or sit higher (R3 review) | 🟠 | [TOOLE], [ITU1116] ⚠ | G08 caution or red flag |
 | D05 | Move a rear port out to the minimum; the manual says whether port plugs exist (⚠) | 🟠 | manufacturer, [TOOLE] | G07 too close |
 | D06 | Desk mode when the speakers stand on a desk or table, otherwise stand mode | 🟠 | manufacturer | the profile lists those modes |
 
@@ -359,7 +359,7 @@ Subjective input never changes the computed positions. It produces a **ranked li
 | S04 | Narrow soundstage | Angle too narrow (G04); absorption at side reflections with goal "wide" (G09); too much toe-in (H05) | Widen speakers 10 cm each; reduce toe-in |
 | S05 | Harsh / bright treble | Hard surfaces at first reflections (P06); live room (P08); toe-in straight at ears with bright speaker (H05); treble trim | Reduce toe-in slightly; soften one reflection point; treble −0.5 dB |
 | S06 | Dull / closed-in | Very dead room (P08, H06); ears above or below axis (G08); obstruction (G10) | Check heights; treble +0.5 dB; remove obstruction |
-| S07 | Image pulls to one side | Unequal distances (G05); asymmetric reflections or objects (G03, G10) | Swap left and right cables to test the room vs the speaker |
+| S07 | Image pulls to one side | Unequal distances (G05); asymmetric reflections or objects (G03, G10) | Check the balance control. Swap the L and R cables at the amplifier: if the pull changes side, the cause is upstream (source, amplifier, cable). If not, swap the speakers: if the pull follows a speaker, it is the speaker; otherwise the room (R3 review: the old wording mixed these up) |
 
 Rules for S-rules:
 

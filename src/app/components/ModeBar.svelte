@@ -32,6 +32,10 @@
   };
   const hz = (f: number) => `${Math.round(f)} Hz`;
   const near = $derived(modeExplorer.field?.nearbyModes ?? []);
+  /** Above the transition frequency modes overlap and the simple model says less (R3 review F6). */
+  const schroeder = $derived(
+    analysis.result?.status === 'ok' ? analysis.result.schroederHz.value : Infinity,
+  );
 </script>
 
 <div class="mode">
@@ -62,6 +66,9 @@
       })}
     {:else}
       {i18n.t('mode.nearNone')}
+    {/if}
+    {#if frequency > schroeder}
+      {i18n.t('mode.aboveTransition', { frequency: hz(schroeder) })}
     {/if}
   </p>
   <div class="legend" aria-hidden="true">

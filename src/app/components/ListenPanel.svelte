@@ -2,7 +2,14 @@
   import type { ListeningNote, SymptomId } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { agreement } from '../listen/agreement';
-  import { addNote, DURATIONS, ratingsBySetup, removeNote, SYMPTOMS } from '../listen/notes';
+  import {
+    addNote,
+    DURATIONS,
+    ratingsBySetup,
+    removeNote,
+    setupKey,
+    SYMPTOMS,
+  } from '../listen/notes';
   import type { Duration } from '../listen/notes';
   import { variantLabel, workspace } from '../session.svelte';
   import { setups } from '../state/setups.svelte';
@@ -27,6 +34,7 @@
   function save() {
     const draft = {
       variantId: active.id,
+      setupKey: setupKey(active),
       rating,
       symptoms: [...symptoms],
       listenedHours: duration ? DURATIONS[duration] : undefined,
@@ -48,7 +56,7 @@
     void setups.refresh($state.snapshot(workspace.project));
   });
   const verdict = $derived.by(() => {
-    const byId = ratingsBySetup(project.notes);
+    const byId = ratingsBySetup(project.notes, project.variants);
     return agreement(
       project.variants.map((v) => ({
         id: v.id,
@@ -59,6 +67,7 @@
     );
   });
 
+  const currentKey = $derived(setupKey(active));
   const when = (iso: string) =>
     new Intl.DateTimeFormat(i18n.locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
       new Date(iso),
@@ -182,6 +191,9 @@
               · {i18n.t(`listen.duration.${durationOf(n.listenedHours)}`)}{/if}
           </span>
         </p>
+        {#if n.rating && n.setupKey !== currentKey}
+          <p class="muted">{i18n.t('listen.earlier')}</p>
+        {/if}
         {#if n.text}<p>{n.text}</p>{/if}
         {#each tries(n) as id (id)}
           <p class="symptom">

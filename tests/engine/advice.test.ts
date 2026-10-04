@@ -71,6 +71,7 @@ describe('treatment', () => {
     const liven = adviceFor(busyRoom()).treatment.find((a) => a.ruleId === 'T05')!;
     expect(liven.messageKey).toBe('advice.T05.liven');
     expect(Number(liven.params.after)).toBeGreaterThan(Number(liven.params.t60));
+    expect(Number(liven.params.absorption)).toBeGreaterThanOrEqual(1);
   });
 
   it('T06: head against the back wall comes first; an absorber only if the seat is fixed', () => {
@@ -99,6 +100,14 @@ describe('speaker settings', () => {
     const p = makeProject({ standZ: 0 });
     const height = adviceFor(p).settings.find((a) => a.ruleId === 'D04')!;
     expect(height.params.baseHeight).toBeCloseTo(1.1 - 0.2, 9);
+  });
+
+  it('D04: the axis above the ears even on the floor — tilt, never a 0 cm stand (R3 review F9)', () => {
+    const p = makeProject({ standZ: 0 });
+    p.variants[0]!.listener.ears.z = 0.5;
+    p.speaker.acousticAxisHeight = { value: 1.2, certainty: 'measured' };
+    const d04 = adviceFor(p).settings.find((a) => a.ruleId === 'D04')!;
+    expect(d04.messageKey).toBe('advice.D04.tilt');
   });
 
   it('D05: a rear port too close to the wall', () => {

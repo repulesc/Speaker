@@ -224,6 +224,8 @@ export interface ListeningNote {
   listenedHours?: number;
   text?: string;
   experimentId?: string;
+  /** Fingerprint of the setup as it stood when the note was written (positions, objects). */
+  setupKey?: string;
 }
 
 // ── Project ───────────────────────────────────────────────────────────────

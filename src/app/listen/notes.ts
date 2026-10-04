@@ -1,4 +1,4 @@
-import type { ListeningNote, Project, SymptomId } from '../../engine/types';
+import type { ListeningNote, Project, SetupVariant, SymptomId } from '../../engine/types';
 import { newId, nowIso } from '../state/ids';
 import { SIZE_LIMITS } from '../state/limits';
 
@@ -10,6 +10,7 @@ export type Duration = keyof typeof DURATIONS;
 
 export interface NoteDraft {
   variantId: string;
+  setupKey: string;
   rating?: ListeningNote['rating'];
   symptoms: SymptomId[];
   listenedHours?: number;
@@ -23,6 +24,7 @@ export function addNote(project: Project, draft: NoteDraft): void {
     id: newId(),
     createdAt: nowIso(),
     variantId: draft.variantId,
+    setupKey: draft.setupKey,
     symptoms: draft.symptoms,
     ...(draft.rating ? { rating: draft.rating } : {}),
     ...(draft.listenedHours !== undefined ? { listenedHours: draft.listenedHours } : {}),
@@ -35,11 +37,48 @@ export function removeNote(project: Project, id: string): void {
   project.notes = project.notes.filter((n) => n.id !== id);
 }
 
-/** The ratings given to each setup, by setup id. */
-export function ratingsBySetup(notes: ListeningNote[]): Map<string, number[]> {
+/**
+ * A short fingerprint of what the ears heard: speaker and seat positions, toe-in and the objects,
+ * to the centimetre. A rating only describes the setup as it stood (R3 review F2): once anything
+ * moves, older ratings no longer count towards the comparison with the app.
+ */
+export function setupKey(variant: SetupVariant): string {
+  const cm = (v: number) => Math.round(v * 100);
+  const point = (p: { x: number; y: number; z: number }) => [cm(p.x), cm(p.y), cm(p.z)];
+  const parts = [
+    ...(['left', 'right'] as const).map((side) => [
+      ...point(variant.speakers[side].base),
+      Math.round(variant.speakers[side].toeInDeg),
+    ]),
+    point(variant.listener.ears),
+    ...variant.objects.map((o) => [
+      o.kind,
+      ...point(o.position),
+      ...point(o.size),
+      o.material ?? '',
+    ]),
+    variant.busyness?.value ?? '',
+  ];
+  // FNV-1a: short, stable, and good enough to tell arrangements apart.
+  let hash = 0x811c9dc5;
+  for (const ch of JSON.stringify(parts)) {
+    hash ^= ch.charCodeAt(0);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+/** The ratings given to each setup as it stands now, by setup id. */
+export function ratingsBySetup(
+  notes: ListeningNote[],
+  variants: SetupVariant[],
+): Map<string, number[]> {
+  const current = new Map(variants.map((v) => [v.id, setupKey(v)]));
   const map = new Map<string, number[]>();
   for (const n of notes) {
-    if (n.rating) map.set(n.variantId, [...(map.get(n.variantId) ?? []), n.rating]);
+    if (n.rating && n.setupKey === current.get(n.variantId)) {
+      map.set(n.variantId, [...(map.get(n.variantId) ?? []), n.rating]);
+    }
   }
   return map;
 }

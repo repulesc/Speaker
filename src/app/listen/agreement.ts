@@ -25,9 +25,13 @@ export type Agreement =
       app: string;
     };
 
-/** A rating gap under half a point, or a score gap under 0.02, is a tie. */
+/**
+ * A rating gap under half a point is a tie. So is a score gap under 0.05: smaller than what a 5 cm
+ * placement error or a 5 % room-size error can change (the fragility bands, 0.04 to 0.1), so the
+ * model cannot tell such setups apart (🟡).
+ */
 const RATING_TIE = 0.5;
-const SCORE_TIE = 0.02;
+export const SCORE_TIE = 0.05;
 
 const mean = (values: number[]) => values.reduce((a, b) => a + b, 0) / values.length;
 

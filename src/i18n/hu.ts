@@ -886,6 +886,8 @@ export const hu: Messages = {
     empty: 'Ehhez a beállításhoz még nincs jegyzet.',
     delete: 'Jegyzet törlése',
     tryThis: 'Próbáld ki',
+    earlier:
+      'A beállítás legutóbbi változása előtt értékelted, ezért már nem számít bele az app-pal való összevetésbe.',
     symptom: {
       S01: {
         name: 'Dörmögő, nehéz basszus',
@@ -913,7 +915,7 @@ export const hu: Messages = {
       },
       S07: {
         name: 'A hang az egyik oldalra húz',
-        try: 'Cseréld meg a bal és a jobb kábelt: ha a húzás követi a kábelt, akkor a hangfal vagy az erősítő a ludas; ha marad, akkor a szoba.',
+        try: 'Először nézd meg a balansz szabályzót. Aztán cseréld meg a bal és a jobb kábelt az erősítőnél: ha a húzás átkerül a másik oldalra, a hiba a hangfalak előtt van (forrás, erősítő, kábel). Ha marad, cseréld meg a két hangfalat: ha a húzás a hangfallal megy, az a hangfal a ludas; ha marad, akkor a szoba.',
       },
     },
     agreement: {
@@ -946,7 +948,7 @@ export const hu: Messages = {
     wall: { left: 'bal', right: 'jobb' },
     speaker:
       '{side}: a hátlap {front} az elülső faltól, a közepe {sideWall} a(z) {wall} faltól, állvány magassága {height}, befordítás {toeIn}°.',
-    seat: 'Ülőhely: {front} az elülső faltól, {left} a bal faltól, a füled {height} magasan.',
+    seat: 'Ülőhely: {front} az elülső faltól, {left} a bal faltól, a füled {ears} magasan.',
     between:
       'A hangfalak {between} távolságra vannak egymástól, középponttól középpontig. Az ülőhelyedig: {left} (bal) és {right} (jobb), a padló mentén.',
     footer:
@@ -984,6 +986,8 @@ export const hu: Messages = {
     tangential: 'két falpár között',
     oblique: 'mindhárom falpár között',
     jump: 'Ugrás: {frequency}',
+    aboveTransition:
+      'Kb. {frequency} fölött a szoba rezonanciái összefolynak, ezért a valódi kép jobban eltér ettől.',
     caption:
       'Basszushang {frequency}-en: hol hangos és hol néma (a hangfalak úgy, ahogy most állnak).',
   },
@@ -995,7 +999,7 @@ export const hu: Messages = {
         '{speaker}: az első visszaverődése egy kemény felületre érkezik a jelölt ponton ({boundary}). A szakértők nem értenek egyet abban, hogy kezelni kell-e, ezért próbálj ki ott egy panelt vagy diffúzort (kb. {thickness} vastagot), hallgasd meg, és tartsd meg, ami tetszik.',
     },
     T02: {
-      rug: 'A hangfalak és közted, a jelölt ponton lévő szőnyeg csökkenti a padlóról jövő visszaverődést. Olcsó, és általában segít.',
+      rug: 'Egy vastag szőnyeg a hangfalak és közted, a jelölt ponton, tompítja a padlóról jövő visszaverődést, főleg a magasakban (a basszuson egy szőnyeg alig segít). Olcsó: próbáld ki.',
       ceilingPanel:
         'A mennyezeten a jelölt ponton lévő panel csökkentené a visszaverődését. Ez kevésbé számít, mint az oldalfalak, ezért később jön.',
     },
@@ -1035,6 +1039,7 @@ export const hu: Messages = {
     D04: {
       height:
         'A füled {angle}-kal eltér a hangfalak tengelyétől. Tedd a hangfalak alját kb. {baseHeight} magasra a padlótól (állvány vagy asztal), hogy a magassugárzók fülmagasságban legyenek, vagy döntsd meg a hangfalakat.',
+      tilt: 'A füled {angle}-kal a hangfalak tengelye alatt van, pedig a hangfalak a padlón állnak. Döntsd őket kicsit lefelé, feléd, vagy ülj egy kicsit magasabbra.',
     },
     D05: {
       moveOut:

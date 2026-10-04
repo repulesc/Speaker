@@ -2,6 +2,7 @@ import { analyze } from './analyze';
 import { explainPoint } from './explain';
 import { seatLayersFor } from './layers';
 import { modeField } from './modeField';
+import { setupScore, type SetupScore } from './setupScore';
 import type {
   Analysis,
   ModeField,
@@ -23,6 +24,7 @@ export type WorkerTask =
       speakers?: Placement['speakers'];
     }
   | { kind: 'modeField'; frequency: number }
+  | { kind: 'setupScore' }
   | { kind: 'layers'; speakers?: Placement['speakers'] };
 
 export interface AnalyzeRequest {
@@ -36,6 +38,7 @@ export type AnalyzeResponse =
   | { id: number; explanation: PointExplanation | null }
   | { id: number; modeField: ModeField | null }
   | { id: number; layers: SeatLayers | null }
+  | { id: number; setupScore: SetupScore | null }
   | { id: number; error: string };
 
 export function runTask({ id, project, task }: AnalyzeRequest): AnalyzeResponse {
@@ -44,6 +47,7 @@ export function runTask({ id, project, task }: AnalyzeRequest): AnalyzeResponse 
       return { id, explanation: explainPoint(project, task.seat, task.speakers) };
     }
     if (task?.kind === 'modeField') return { id, modeField: modeField(project, task.frequency) };
+    if (task?.kind === 'setupScore') return { id, setupScore: setupScore(project) };
     if (task?.kind === 'layers') return { id, layers: seatLayersFor(project, task.speakers) };
     return { id, analysis: analyze(project) };
   } catch (error) {
