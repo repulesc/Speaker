@@ -4,9 +4,10 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { ui } from '../ui.svelte';
   import ModeBar from './ModeBar.svelte';
+  import VariantTabs from './VariantTabs.svelte';
 
-  const layers = LAYERS;
-  const level = (id: LayerId) => layers.find((l) => l.id === id)!.level;
+  /** One quiet toolbar over the room: setups, what the map shows, bass note, side view. */
+  const level = (id: LayerId) => LAYERS.find((l) => l.id === id)!.level;
   const shape = (l: string) =>
     l === 'physics' ? '●' : l === 'guideline' ? '◆' : l === 'heuristic' ? '▲' : '◇';
   const active = $derived(ui.layer);
@@ -14,29 +15,33 @@
 </script>
 
 <div class="bar">
-  <div class="chips" role="radiogroup" aria-label={i18n.t('map.layerLabel')}>
-    {#each layers as layer (layer.id)}
-      <label class:on={active === layer.id}>
-        <input
-          type="radio"
-          name="layer"
-          value={layer.id}
-          checked={active === layer.id}
-          onchange={() => (ui.layer = layer.id)}
-        />
-        <span>{i18n.t(`layer.${layer.id}.name`)}</span>
-      </label>
-    {/each}
+  <VariantTabs />
+  <div class="tools">
+    <label class="visually-hidden" for="map-layer">{i18n.t('map.layerLabel')}</label>
+    <select
+      id="map-layer"
+      class="select"
+      value={active}
+      disabled={modeOn}
+      onchange={(e) => (ui.layer = e.currentTarget.value as LayerId)}
+    >
+      {#each LAYERS as layer (layer.id)}
+        <option value={layer.id}>{i18n.t(`layer.${layer.id}.name`)}</option>
+      {/each}
+    </select>
+    <button
+      type="button"
+      class="toggle"
+      aria-pressed={modeOn}
+      onclick={() => (ui.modeFrequency = modeOn ? null : 60)}>{i18n.t('mode.chip')}</button
+    >
+    <button
+      type="button"
+      class="toggle"
+      aria-pressed={ui.sideOpen}
+      onclick={() => (ui.sideOpen = !ui.sideOpen)}>{i18n.t('dock.side')}</button
+    >
   </div>
-  <button
-    type="button"
-    class="note"
-    class:on={modeOn}
-    aria-pressed={modeOn}
-    onclick={() => (ui.modeFrequency = modeOn ? null : 60)}
-  >
-    {i18n.t('mode.chip')}
-  </button>
 </div>
 {#if modeOn}
   <ModeBar />
@@ -52,6 +57,7 @@
       <span>{i18n.t('map.poorer')}</span>
       <span class="ramp"></span>
       <span>{i18n.t('map.better')}</span>
+      <span class="dimmed">{i18n.t('map.dimmed')}</span>
     </div>
   </div>
 {/if}
@@ -60,80 +66,67 @@
   .bar {
     display: flex;
     align-items: center;
-    padding: 10px var(--gutter) 0;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px 0;
   }
-  .chips {
+  .tools {
     display: flex;
-    flex: 1;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: thin;
-  }
-  label {
-    position: relative;
     flex: none;
-    display: inline-flex;
     align-items: center;
-    min-height: 44px;
-    padding: 0 14px;
-    border: 1px solid var(--grid-strong);
-    border-radius: 999px;
-    color: var(--ink);
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
+    gap: 6px;
   }
-  .note {
-    flex: none;
-    min-height: 44px;
-    margin: 0 0 4px 8px;
-    padding: 0 14px;
-    border: 1px solid var(--grid-strong);
-    border-radius: 999px;
-    background: transparent;
+  .select {
+    min-height: 40px;
+    max-width: 14rem;
+    padding: 0 30px 0 12px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--fill)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.5'/%3E%3C/svg%3E")
+      no-repeat right 12px center;
     color: var(--ink);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    appearance: none;
     cursor: pointer;
+  }
+  .select:disabled {
+    opacity: 0.5;
+  }
+  .toggle {
+    min-height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--fill);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 500;
     white-space: nowrap;
+    cursor: pointer;
   }
-  .note.on,
-  label.on {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-    font-weight: 600;
-  }
-  label:has(input:focus-visible) {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-  input {
-    position: absolute;
-    opacity: 0;
-    inset: 0;
-    margin: 0;
-    cursor: inherit;
+  .toggle[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--surface);
   }
   .info {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 2px var(--gutter) 0;
+    padding: 8px 16px 0;
   }
   .what {
     margin: 0;
     color: var(--ink-muted);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     line-height: 1.4;
   }
   .tag {
     margin-right: 6px;
-    padding: 1px 6px;
-    border: 1px solid var(--grid-strong);
-    border-radius: 6px;
     color: var(--ink);
   }
   .legend {
@@ -142,12 +135,15 @@
     align-items: center;
     gap: 8px;
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--text-xs);
+  }
+  .dimmed {
+    margin-left: 6px;
   }
   .ramp {
-    width: 110px;
-    height: 8px;
-    border-radius: 4px;
+    width: 96px;
+    height: 6px;
+    border-radius: 3px;
     background: linear-gradient(
       90deg,
       var(--heat-0),
@@ -157,13 +153,10 @@
       var(--heat-4)
     );
   }
-  @media (min-width: 1024px) {
-    .note,
-    label {
-      min-height: 36px;
-    }
-  }
   @media (max-width: 1023px) {
+    .bar {
+      flex-wrap: wrap;
+    }
     .legend {
       display: none;
     }
@@ -171,6 +164,9 @@
   @media (max-width: 639px) {
     .info {
       display: none;
+    }
+    .select {
+      max-width: 9rem;
     }
   }
 </style>

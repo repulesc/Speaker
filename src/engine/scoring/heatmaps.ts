@@ -9,14 +9,7 @@ import type {
   Vec3,
 } from '../types';
 import type { Scorer } from './scorer';
-import {
-  avoidsRedFlags,
-  farEnough,
-  isValidPlacement,
-  seatScorable,
-  speakerPair,
-  steps,
-} from './search';
+import { avoidsRedFlags, isValidPlacement, seatScorable, speakerPair, steps } from './search';
 
 /**
  * Heatmaps (docs/SCORING.md §5). The seat layers show one concern each, so the map can say *why* a
@@ -63,13 +56,12 @@ export function seatLayers(
     for (const x of xs) {
       const placement = { speakers, listener: { x, y, z: earZ } };
       const scorable = seatScorable(ctx, placement);
-      // Hatched: a seat the app would not suggest (blocked, inside furniture, too close for the
-      // chosen listening distance, or red-flagged), but still scored, so the map has no holes.
+      // Hatched: a seat the app advises against (blocked, inside furniture, red-flagged), still
+      // scored so the map has no holes. Distance is a preference, so it is not hatched.
       redFlag.push(
         scorable &&
           (!isValidPlacement(ctx, placement) ||
-            !avoidsRedFlags(ctx, placement, { seat: true, speakers: false }) ||
-            !farEnough(ctx, placement)),
+            !avoidsRedFlags(ctx, placement, { seat: true, speakers: false })),
       );
       const result = scorable ? scorer.score(placement, coupling) : null;
       for (const layer of LAYERS) {

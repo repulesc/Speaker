@@ -143,9 +143,13 @@ function searchSpace(
   const { constraints } = ctx.project;
   const ears = ctx.variant.listener.ears;
   const centreX = constraints.keepSymmetric ? W / 2 : ears.x;
+  // A rear port always keeps its clearance: the app must not suggest what G07 cautions against
+  // (owner testing after R5 found a rear-ported speaker suggested 5 cm from the wall).
   const minClearance = Math.max(
     0.05,
-    ctx.speaker.minRearClearanceFromManufacturer ? ctx.speaker.minRearClearance : 0,
+    ctx.speaker.minRearClearanceFromManufacturer || ctx.speaker.portLocation === 'rear'
+      ? ctx.speaker.minRearClearance
+      : 0,
   );
   const maxClearance = Math.min(
     constraints.maxSpeakerDistanceFromWall.value ?? DEFAULTS.maxSpeakerDistanceFromWall,

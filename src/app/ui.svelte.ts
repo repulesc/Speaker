@@ -28,11 +28,9 @@ export const ui = {
   },
   set step(value: StepId) {
     step = value;
-    // A preview belongs to the results view; leaving it (or editing) ends it.
-    if (value !== 'results') {
-      candidate = null;
-      compareId = null;
-    }
+    // A preview belongs to the home page and a comparison to the Why page; leaving ends them.
+    if (value !== 'results') candidate = null;
+    if (value !== 'why') compareId = null;
   },
   get selection() {
     return selection;

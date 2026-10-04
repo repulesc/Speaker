@@ -87,35 +87,38 @@
 </div>
 
 <style>
+  /* Setups as a compact segmented control at the top left of the room view. */
   .tabs {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0 var(--gutter);
-    background: var(--surface);
-    border-bottom: 1px solid var(--grid);
+    gap: 4px;
+    min-width: 0;
     overflow-x: auto;
+    scrollbar-width: none;
   }
   .list {
     display: flex;
     gap: 2px;
+    padding: 2px;
+    border-radius: 9px;
+    background: var(--fill);
   }
   .tab {
-    min-height: 44px;
-    padding: 0 14px;
+    min-height: 40px;
+    padding: 0 12px;
     border: 0;
-    border-bottom: 3px solid transparent;
+    border-radius: 7px;
     background: transparent;
-    color: var(--ink-muted);
+    color: var(--ink);
     font: inherit;
-    font-size: 15px;
+    font-size: var(--text-sm);
+    font-weight: 500;
     white-space: nowrap;
     cursor: pointer;
   }
   .tab[aria-selected='true'] {
-    border-bottom-color: var(--accent);
-    color: var(--ink);
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
     font-weight: 600;
   }
   .actions {
@@ -123,12 +126,15 @@
     align-items: center;
     flex: none;
   }
+  .actions .btn {
+    min-width: 44px;
+    padding: 0 10px;
+    font-size: var(--text-sm);
+  }
   .add {
-    font-size: 15px;
     white-space: nowrap;
   }
   .rename .input {
-    font-family: var(--font-sans);
     min-width: 10rem;
     margin: 2px 0;
   }

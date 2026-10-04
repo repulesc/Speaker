@@ -106,14 +106,15 @@
   .value,
   .edit {
     min-height: 22px;
-    padding: 1px 7px;
-    border: 1px solid var(--accent);
-    border-radius: 6px;
-    background: var(--bg);
-    color: var(--accent);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    line-height: 1.5;
+    padding: 1px 8px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface);
+    box-shadow: 0 0 0 1px var(--grid-strong);
+    color: var(--ink);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    line-height: 1.6;
     white-space: nowrap;
     cursor: text;
   }
@@ -135,10 +136,10 @@
     max-width: 240px;
     padding: 4px 8px;
     border: 1px solid var(--danger);
-    border-radius: 6px;
-    background: var(--bg);
+    border-radius: 8px;
+    background: var(--surface);
     color: var(--danger);
-    font-size: 12px;
+    font-size: var(--text-xs);
   }
   @media (pointer: coarse) {
     .value,

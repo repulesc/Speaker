@@ -87,23 +87,14 @@
   );
   const layers = $derived(preview.layers ?? result?.layers ?? null);
   const candidates = $derived(result?.candidates.slice(0, 3) ?? []);
-  /** Pins sit on the seat of each spot; spots that share a seat are nudged apart so all stay visible. */
-  const pinOffsets = $derived(
-    candidates.map(
-      (c, i) =>
-        candidates
-          .slice(0, i)
-          .filter(
-            (o) => Math.hypot(o.listener.x - c.listener.x, o.listener.y - c.listener.y) < 0.15,
-          ).length,
-    ),
-  );
   const previewed = $derived(ui.candidate === null ? null : (candidates[ui.candidate] ?? null));
+  /** The recommendation is always on the map: dashed speakers and a marked seat (owner feedback). */
+  const shownIndex = $derived(ui.candidate ?? 0);
   const LETTERS = ['A', 'B', 'C'];
-  const PIN_FILL = ['var(--heat-4)', 'var(--heat-3)', '#8fd5c9'];
 
   /** The bass-note explorer replaces the score map while it is on. */
   const field = $derived(ui.modeFrequency !== null ? modeExplorer.field : null);
+  const suggested = $derived(field ? null : (candidates[shownIndex] ?? null));
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
     if (heat && layers && !field) paintHeat(heat, layers, layers.values[ui.layer]);
@@ -122,23 +113,6 @@
     void modeExplorer.refresh(snapshot, ui.modeFrequency);
   });
 
-  /** Runs of red-flag cells per row, for the hatch. */
-  const flaggedRuns = $derived.by(() => {
-    if (!layers) return [];
-    const runs: { x: number; y: number; w: number }[] = [];
-    for (let j = 0; j < layers.ny; j++) {
-      let start = -1;
-      for (let i = 0; i <= layers.nx; i++) {
-        const on = i < layers.nx && layers.redFlag[j * layers.nx + i];
-        if (on && start < 0) start = i;
-        if (!on && start >= 0) {
-          runs.push({ x: start, y: j, w: i - start });
-          start = -1;
-        }
-      }
-    }
-    return runs;
-  });
   const showHeat = $derived(known && layers !== null);
 
   const probeAt = $derived(
@@ -302,15 +276,6 @@
         >
           <line x1="0" y1="0" x2="0" y2="6" class="hatch" />
         </pattern>
-        <pattern
-          id="hatch-flag"
-          width="7"
-          height="7"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(-45)"
-        >
-          <line x1="0" y1="0" x2="0" y2="7" class="flag-line" />
-        </pattern>
       </defs>
 
       <rect
@@ -328,18 +293,6 @@
         {/each}
         {#each gridY as g (g)}
           <line class="grid" x1={px(0)} y1={py(g)} x2={px(W)} y2={py(g)} />
-        {/each}
-      {/if}
-      {#if layers && !field}
-        {#each flaggedRuns as r (r.y * 1000 + r.x)}
-          <rect
-            class="flagged"
-            x={px(r.x * layers.step)}
-            y={py(r.y * layers.step)}
-            width={r.w * layers.step * frame.scale}
-            height={layers.step * frame.scale}
-            fill="url(#hatch-flag)"
-          />
         {/each}
       {/if}
 
@@ -604,8 +557,8 @@
           </g>
         {/if}
 
-        {#if previewed}
-          {#each [previewed.speakers.left, previewed.speakers.right] as ghost, i (i)}
+        {#if suggested}
+          {#each [suggested.speakers.left, suggested.speakers.right] as ghost, i (i)}
             <rect
               class="ghost"
               x={px(ghost.base.x) - (cab.w * frame.scale) / 2}
@@ -614,39 +567,30 @@
               height={cab.d * frame.scale}
             />
           {/each}
-        {/if}
-        {#each field ? [] : candidates as c, i (i)}
           <g
             class="pin"
-            class:chosen={ui.candidate === i}
             role="button"
             tabindex="0"
-            aria-pressed={ui.candidate === i}
             aria-label={i18n.t('map.pin', {
-              letter: LETTERS[i]!,
-              score: i18n.t(`results.score.${scoreWord(c.score)}`),
+              letter: LETTERS[shownIndex]!,
+              score: i18n.t(`results.score.${scoreWord(suggested.score)}`),
             })}
-            onclick={() => choose(i)}
+            onclick={() => choose(shownIndex)}
             onkeydown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                choose(i);
+                choose(shownIndex);
               }
             }}
           >
-            <circle
-              cx={px(c.listener.x) + pinOffsets[i]! * 22}
-              cy={py(c.listener.y)}
-              r="13"
-              fill={PIN_FILL[i]}
-            />
+            <circle cx={px(suggested.listener.x)} cy={py(suggested.listener.y)} r="13" />
             <text
-              x={px(c.listener.x) + pinOffsets[i]! * 22}
-              y={py(c.listener.y) + 4.5}
-              text-anchor="middle">{LETTERS[i]}</text
+              x={px(suggested.listener.x)}
+              y={py(suggested.listener.y) + 4.5}
+              text-anchor="middle">{LETTERS[shownIndex]}</text
             >
           </g>
-        {/each}
+        {/if}
       {/if}
     </svg>
 
@@ -718,16 +662,6 @@
       <p class="hint">
         {i18n.t('mode.caption', { frequency: `${Math.round(field.frequency)} Hz` })}
       </p>
-    {:else if showDims && layers}
-      <p class="hint">
-        {i18n.t('map.caption', {
-          where:
-            ui.candidate === null
-              ? i18n.t('map.whereNow')
-              : i18n.t('map.wherePreview', { letter: LETTERS[ui.candidate]! }),
-        })}
-        {i18n.t('map.hint')}
-      </p>
     {/if}
 
     {#if probeAt && !field}
@@ -778,7 +712,7 @@
   .heat {
     position: absolute;
     pointer-events: none;
-    opacity: 0.94;
+    opacity: 0.88;
   }
   .room {
     fill: var(--surface);
@@ -790,17 +724,9 @@
     fill: transparent;
     opacity: 1;
   }
-  .flagged {
-    pointer-events: none;
-  }
-  .flag-line {
-    stroke: #fff;
-    stroke-width: 1.5;
-    opacity: 0.55;
-  }
   .ghost {
-    fill: none;
-    stroke: var(--ink);
+    fill: color-mix(in srgb, var(--accent-fill) 18%, transparent);
+    stroke: var(--accent-fill);
     stroke-width: 2;
     stroke-dasharray: 4 3;
     pointer-events: none;
@@ -815,7 +741,6 @@
   }
   .advice-ring text {
     fill: var(--accent);
-    font-family: var(--font-mono);
     font-size: 12px;
     font-weight: 600;
   }
@@ -824,16 +749,16 @@
     outline: none;
   }
   .pin circle {
-    stroke: #0b0f14;
+    fill: var(--accent-fill);
+    stroke: #fff;
     stroke-width: 2;
   }
   .pin text {
-    fill: #0b0f14;
+    fill: #fff;
     font-weight: 600;
-    font-size: 13px;
+    font-size: var(--text-sm);
     pointer-events: none;
   }
-  .pin.chosen circle,
   .pin:focus-visible circle {
     stroke: var(--ink);
     stroke-width: 3;
@@ -863,7 +788,6 @@
   }
   .label {
     fill: var(--ink-muted);
-    font-family: var(--font-mono);
     font-size: 12px;
   }
   .dim line {
@@ -906,9 +830,11 @@
     stroke: var(--ink);
     stroke-width: 2;
   }
+  /* Furniture is see-through, so the map shows what it is like to sit there too. */
   .object .body {
+    fill: color-mix(in srgb, var(--surface) 30%, transparent);
     stroke: var(--ink-muted);
-    stroke-width: 1;
+    stroke-width: 1.5;
   }
   .hatch {
     stroke: var(--ink-muted);
@@ -919,8 +845,9 @@
     pointer-events: none;
   }
   .item-label {
-    fill: var(--ink-muted);
-    font-size: 11px;
+    fill: var(--ink);
+    font-size: var(--text-xs);
+    font-weight: 500;
     pointer-events: none;
   }
   .body.default,

@@ -23,7 +23,7 @@ function write(key: string, value: string): void {
 const THEMES = ['auto', 'light', 'dark'] as const;
 const MODES = ['quick', 'detailed'] as const;
 
-let theme = $state<ThemePref>(read('spa:theme', THEMES, 'dark'));
+let theme = $state<ThemePref>(read('spa:theme', THEMES, 'auto'));
 let mode = $state<Mode>(read('spa:mode', MODES, 'quick'));
 let welcomed = $state(read('spa:welcomed', ['yes', 'no'], 'no') === 'yes');
 

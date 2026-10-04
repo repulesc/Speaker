@@ -21,12 +21,23 @@ export function projectLabel(name: string): string {
 
 export const analysis = new AnalysisRunner();
 
-/** What the right panel shows: the findings ("results"), or one section's form (docs/REVAMP_PLAN.md). */
+/**
+ * What the sidebar shows: its home ("results": the recommendation and the list of everything),
+ * a result page, or one section's form.
+ */
 export type StepId =
-  'room' | 'surfaces' | 'furnishing' | 'speakers' | 'goals' | 'results' | 'treat' | 'listen';
-/** The panel's own views (tabs); every other step is a form opened from the dock. */
-export type TabId = 'results' | 'treat' | 'listen';
-export type SectionId = Exclude<StepId, TabId>;
+  | 'room'
+  | 'surfaces'
+  | 'furnishing'
+  | 'speakers'
+  | 'goals'
+  | 'results'
+  | 'why'
+  | 'treat'
+  | 'listen';
+/** Result pages opened from the home list. */
+export type PageId = 'why' | 'treat' | 'listen';
+export type SectionId = Exclude<StepId, PageId | 'results'>;
 /** The dock, top to bottom. */
 export const SECTIONS: readonly SectionId[] = [
   'room',
