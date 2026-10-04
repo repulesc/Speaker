@@ -9,6 +9,11 @@ export const workspace = new Workspace(browserStorage(), {
   system: defaultSystem(navigator.language),
 });
 
+/** The name to show for a setup variant: its own, or "Current" in the current language. */
+export function variantLabel(name: string): string {
+  return name.trim() || i18n.t('variant.current');
+}
+
 /** The name to show for a project: its own, or "Untitled room" in the current language. */
 export function projectLabel(name: string): string {
   return name.trim() || i18n.t('project.untitled');

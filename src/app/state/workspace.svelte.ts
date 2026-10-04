@@ -1,4 +1,4 @@
-import type { Project } from '../../engine/types';
+import type { Project, SetupVariant } from '../../engine/types';
 import { applyDefaultPlacement, createDefaultProject } from './defaults';
 import { newId, nowIso } from './ids';
 import { SIZE_LIMITS } from './limits';
@@ -18,6 +18,8 @@ export type SaveState = 'saved' | 'unsaved' | 'unavailable' | 'failed';
 
 const HISTORY_LIMIT = 100;
 const AUTOSAVE_DELAY_MS = 400;
+/** Edits with the same coalesce key within this window (e.g. arrow-key nudges) share one undo step. */
+const COALESCE_WINDOW_MS = 900;
 
 export interface WorkspaceOptions {
   system: 'metric' | 'imperial';
@@ -35,6 +37,7 @@ export class Workspace {
   #undo: string[] = [];
   #redo: string[] = [];
   #historyVersion = $state(0);
+  #lastCoalesce: { key: string; at: number } | null = null;
   #timer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
@@ -66,14 +69,29 @@ export class Workspace {
     return JSON.stringify($state.snapshot(this.project));
   }
 
-  /** Applies a change as one undoable step and schedules a save. No-op changes leave no trace. */
-  edit(change: (project: Project) => void): void {
+  /**
+   * Applies a change as one undoable step and schedules a save. No-op changes leave no trace.
+   * Edits that share a `coalesce` key in quick succession are merged into a single undo step.
+   */
+  edit(change: (project: Project) => void, options: { coalesce?: string } = {}): void {
     const before = this.#snapshot();
     change(this.project);
     applyDefaultPlacement(this.project);
     if (this.#snapshot() === before) return;
-    this.#undo.push(before);
-    if (this.#undo.length > HISTORY_LIMIT) this.#undo.shift();
+
+    const now = Date.now();
+    const key = options.coalesce;
+    const continuing =
+      key !== undefined &&
+      this.#lastCoalesce?.key === key &&
+      now - this.#lastCoalesce.at < COALESCE_WINDOW_MS &&
+      this.#undo.length > 0;
+    this.#lastCoalesce = key !== undefined ? { key, at: now } : null;
+
+    if (!continuing) {
+      this.#undo.push(before);
+      if (this.#undo.length > HISTORY_LIMIT) this.#undo.shift();
+    }
     this.#redo = [];
     this.#historyVersion++;
     this.#changed();
@@ -94,7 +112,14 @@ export class Workspace {
   }
 
   #restore(snapshot: string): void {
-    this.project = JSON.parse(snapshot) as Project;
+    const restored = JSON.parse(snapshot) as Project;
+    // Which setup is shown is navigation, not an edit: undo keeps the current tab when it still exists.
+    const keep = this.project.activeVariantId;
+    restored.activeVariantId = restored.variants.some((v) => v.id === keep)
+      ? keep
+      : restored.variants[0]!.id;
+    this.project = restored;
+    this.#lastCoalesce = null;
     this.#historyVersion++;
     this.#changed();
   }
@@ -172,5 +197,48 @@ export class Workspace {
     this.#historyVersion++;
     this.#changed();
     this.flush();
+  }
+
+  // ── Setup variants ("Current", "Bed moved", …) ──────────────────────────
+
+  /** Copies the active setup under a new name and shows the copy. */
+  addVariant(name: string): void {
+    this.edit((p) => {
+      const source = p.variants.find((v) => v.id === p.activeVariantId) ?? p.variants[0]!;
+      const copy = JSON.parse(JSON.stringify(source)) as SetupVariant;
+      copy.id = newId();
+      copy.name = name;
+      if (p.variants.length < SIZE_LIMITS.variants) {
+        p.variants.push(copy);
+        p.activeVariantId = copy.id;
+      }
+    });
+  }
+
+  /** Shows another setup. Not an undo step; it is saved with the project. */
+  switchVariant(id: string): void {
+    if (id === this.project.activeVariantId || !this.project.variants.some((v) => v.id === id))
+      return;
+    this.project.activeVariantId = id;
+    this.#lastCoalesce = null;
+    this.#changed();
+  }
+
+  renameVariant(id: string, name: string): void {
+    const trimmed = name.trim().slice(0, SIZE_LIMITS.name);
+    if (!trimmed) return;
+    this.edit((p) => {
+      const variant = p.variants.find((v) => v.id === id);
+      if (variant) variant.name = trimmed;
+    });
+  }
+
+  /** Removes a setup (the last one cannot be removed). */
+  deleteVariant(id: string): void {
+    if (this.project.variants.length <= 1) return;
+    this.edit((p) => {
+      p.variants = p.variants.filter((v) => v.id !== id);
+      if (p.activeVariantId === id) p.activeVariantId = p.variants[0]!.id;
+    });
   }
 }

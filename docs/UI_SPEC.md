@@ -90,6 +90,15 @@ The drawing takes the top ~40% of the viewport. The **bottom sheet** holds the s
 > - Untitled projects have an empty name and show "Untitled room" in the current language.
 > - Numbers and units are separated by a non-breaking space, and the input parser accepts it back.
 
+> **Implementation notes (M3).**
+> - Wide screens (≥ 1024 px) show the top view and the side view together; narrower screens show one at a time with a Top / Side switch.
+> - Everything movable (speakers, seat, objects, patches) is a focusable item: drag, or arrow keys (1 cm; Shift = 10 cm). Each gesture is one undo step. Dragging snaps to 5 cm and to the room centreline; typed values are exact.
+> - Selecting a wall in the Surfaces step highlights it in both views. Wall elevations are drawn as seen from inside the room (so the left and back walls run right-to-left); the end labels name the neighbouring walls.
+> - First-reflection rings show on the plan and on the wall elevation while the Surfaces step is open.
+> - Setup variants appear as tabs above the drawing; switching tab is not an undo step.
+> - Bare numbers typed into metric position fields: below 10 means metres, 10 or more means centimetres (see I18N_AND_UNITS).
+> - Results (M3) is a summary only; the full results page is M4.
+
 ## 4. Global elements
 
 - **Top bar:**

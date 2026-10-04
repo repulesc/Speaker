@@ -179,9 +179,9 @@ test('confidence meter explains what would improve things', async ({ page }) => 
 test('projects: new, switch, rename and delete', async ({ page }) => {
   await fillRoom(page, '4', '5', '2.5');
   await page.getByRole('button', { name: /Current project/ }).click();
-  await page.getByRole('button', { name: 'Rename' }).click();
+  await page.getByRole('button', { name: 'Rename', exact: true }).click();
   await page.getByLabel('Project name').fill('Living room');
-  await page.getByRole('button', { name: 'Rename' }).click();
+  await page.getByRole('button', { name: 'Rename', exact: true }).click();
   await expect(page.getByRole('button', { name: /Current project: Living room/ })).toBeVisible();
 
   await page.getByRole('button', { name: /Current project/ }).click();

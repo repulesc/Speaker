@@ -47,6 +47,36 @@ test('phone: every visible control is at least 44 × 44 px', async ({ page }) =>
   expect(small).toEqual([]);
 });
 
+test('phone: one drawing at a time, switchable between top and side view', async ({ page }) => {
+  const top = page.getByRole('region', { name: 'Top view of the room' });
+  const side = page.getByRole('region', { name: 'Side view of the room' });
+  await expect(top).toBeVisible();
+  await expect(side).toHaveCount(0);
+  await page.getByRole('radio', { name: 'Side view' }).check({ force: true });
+  await expect(side).toBeVisible();
+  await expect(top).toHaveCount(0);
+  await page.getByRole('radio', { name: 'Top view' }).check({ force: true });
+  await expect(top).toBeVisible();
+});
+
+test('phone: the new steps fit the screen without sideways scrolling', async ({ page }) => {
+  for (const step of ['Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results']) {
+    await page
+      .getByRole('navigation', { name: 'Steps' })
+      .getByRole('button', { name: new RegExp(`^${step}`) })
+      .click();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, step).toBeLessThanOrEqual(0);
+    const panelOverflow = await page.evaluate(() => {
+      const panel = document.getElementById('panel')!;
+      return panel.scrollWidth - panel.clientWidth;
+    });
+    expect(panelOverflow, `${step} panel`).toBeLessThanOrEqual(0);
+  }
+});
+
 test('phone: language and units live in the menu', async ({ page }) => {
   await page.getByRole('button', { name: 'Menu' }).click();
   await expect(page.getByRole('radio', { name: 'HU' })).toBeAttached();

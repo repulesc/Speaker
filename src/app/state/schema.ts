@@ -80,7 +80,7 @@ const patch = obj({
   label: optional(str(SIZE_LIMITS.name)),
 });
 
-const speaker = obj({
+export const speakerSchema: Check = obj({
   id: str(SIZE_LIMITS.name),
   brand: str(SIZE_LIMITS.name),
   model: str(SIZE_LIMITS.name),
@@ -134,7 +134,7 @@ export const projectSchema: Check = obj({
     baseCertainty: record(oneOf(CERTAINTY), BOUNDARIES),
     patches: arr(patch, SIZE_LIMITS.patches),
   }),
-  speaker,
+  speaker: speakerSchema,
   constraints: obj({
     speakerWall: oneOf(['front']),
     maxSpeakerDistanceFromWall: known(num(0, 10)),

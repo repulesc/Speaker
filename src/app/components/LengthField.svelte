@@ -26,8 +26,10 @@
     $props();
 
   const locale = $derived(i18n.locale);
-  const format = (metres: number) => formatLength(metres, system, 'room', locale);
-  const bare = $derived<BareUnit>(system === 'imperial' ? 'ft' : kind === 'room' ? 'm' : 'cm');
+  const format = (metres: number) => formatLength(metres, system, kind, locale);
+  const bare = $derived<BareUnit>(
+    system === 'imperial' ? (kind === 'room' ? 'ft' : 'in') : kind === 'room' ? 'm' : 'm-or-cm',
+  );
 
   let text = $state('');
   let error = $state<string | null>(null);

@@ -96,6 +96,8 @@ The snapshot holds the top 3 candidates (positions rounded to 5 cm), their score
 9. **Phone viewport (390 × 844):** bottom sheet works; no horizontal scroll; tap targets ≥ 44 px.
 10. **Keyboard only:** complete Quick start without a mouse.
 
+> **Status (M3).** Journeys 1–10 are implemented in `tests/e2e/` (journeys 1 and 3 with the M3 results summary and setup switching; the full comparison follows in M4). Beyond the plan: dragging and keyboard moves, every input step, the speaker file round trip, offline use, phone layout checks, and axe scans of every step in light and dark.
+
 ## 7. The busy room: test profile
 
 A synthetic but realistic profile built from the owner's description of their room. The owner's real measurements are not needed (the product is universal), so the missing values below are filled with plausible numbers, fixed in `tests/fixtures/busy-room.ts`. The KEF data below is a **test fixture only**; no model database ships in v1.

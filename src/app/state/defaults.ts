@@ -8,6 +8,7 @@ import type {
   SetupVariant,
   SpeakerProfile,
 } from '../../engine/types';
+import { DEFAULT_BASE } from '../plan/patches';
 import { newId } from './ids';
 
 const BOUNDARIES: BoundaryId[] = ['front', 'back', 'left', 'right', 'floor', 'ceiling'];
@@ -80,7 +81,7 @@ function emptyVariant(speaker: SpeakerProfile): SetupVariant {
   const placed = defaultPlacement({ W: 4, L: 5 }, speaker);
   return {
     id: newId(),
-    name: 'Current',
+    name: '',
     speakers: { left: placed.left, right: placed.right },
     listener: { ears: placed.ears, certainty: 'unknown' },
     objects: [],
@@ -113,14 +114,7 @@ export function createDefaultProject(options: {
       outOfModel: [],
     },
     surfaces: {
-      base: {
-        front: 'plaster-brick',
-        back: 'plaster-brick',
-        left: 'plaster-brick',
-        right: 'plaster-brick',
-        floor: 'wood-floor',
-        ceiling: 'plaster-brick',
-      },
+      base: { ...DEFAULT_BASE },
       baseCertainty: Object.fromEntries(BOUNDARIES.map((b) => [b, 'unknown'])) as Record<
         BoundaryId,
         Certainty

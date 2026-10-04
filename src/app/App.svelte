@@ -3,16 +3,22 @@
   import { i18n } from '../i18n/locale.svelte';
   import AboutDialog from './components/AboutDialog.svelte';
   import Notice from './components/Notice.svelte';
-  import RoomPlan from './components/RoomPlan.svelte';
+  import Drawing from './components/Drawing.svelte';
   import ShareDialog from './components/ShareDialog.svelte';
   import StepNav from './components/StepNav.svelte';
-  import StepPlaceholder from './components/StepPlaceholder.svelte';
+  import StepFurnishing from './components/StepFurnishing.svelte';
+  import StepGoals from './components/StepGoals.svelte';
+  import StepResults from './components/StepResults.svelte';
   import StepRoom from './components/StepRoom.svelte';
+  import StepSpeakers from './components/StepSpeakers.svelte';
+  import StepSurfaces from './components/StepSurfaces.svelte';
   import Stepper from './components/Stepper.svelte';
   import TopBar from './components/TopBar.svelte';
   import Welcome from './components/Welcome.svelte';
+  import { downloadText } from './download';
   import { prefs } from './prefs.svelte';
-  import { analysis, projectLabel, showNotice, workspace, type StepId } from './session.svelte';
+  import { analysis, projectLabel, showNotice, workspace } from './session.svelte';
+  import { ui } from './ui.svelte';
   import { SIZE_LIMITS } from './state/limits';
   import {
     exportFileName,
@@ -22,7 +28,6 @@
   } from './state/projectFile';
   import { decodeShare, hasShare } from './state/share';
 
-  let step = $state<StepId>('room');
   let sheet = $state<'peek' | 'half' | 'full'>('half');
   let shareDialog = $state<ReturnType<typeof ShareDialog>>();
   let aboutDialog = $state<ReturnType<typeof AboutDialog>>();
@@ -76,14 +81,7 @@
 
   function exportFile() {
     const project = $state.snapshot(workspace.project);
-    const url = URL.createObjectURL(
-      new Blob([serializeProject(project)], { type: 'application/json' }),
-    );
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = exportFileName(project, i18n.t('project.untitled'));
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadText(exportFileName(project, i18n.t('project.untitled')), serializeProject(project));
   }
 
   // ── Lifecycle and shortcuts ──────────────────────────────────────────────
@@ -126,11 +124,8 @@
   <Notice />
 
   <main class="workspace" data-sheet={sheet}>
-    <section class="drawing" aria-label={i18n.t('plan.label')}>
-      <RoomPlan project={workspace.project} />
-      {#if analysis.busy}
-        <p class="busy" role="status">{i18n.t('analysis.updating')}</p>
-      {/if}
+    <section class="drawing">
+      <Drawing />
     </section>
 
     <section class="panel" id="panel" tabindex="-1">
@@ -144,13 +139,21 @@
       </button>
 
       <div class="content">
-        <Stepper current={step} onselect={(s) => (step = s)} />
+        <Stepper current={ui.step} onselect={(s) => (ui.step = s)} />
         {#if !prefs.welcomed}<Welcome />{/if}
 
-        {#if step === 'room'}
+        {#if ui.step === 'room'}
           <StepRoom />
+        {:else if ui.step === 'surfaces'}
+          <StepSurfaces />
+        {:else if ui.step === 'furnishing'}
+          <StepFurnishing />
+        {:else if ui.step === 'speakers'}
+          <StepSpeakers />
+        {:else if ui.step === 'goals'}
+          <StepGoals />
         {:else}
-          <StepPlaceholder {step} />
+          <StepResults />
         {/if}
 
         {#if analysis.error}
@@ -159,7 +162,7 @@
           </div>
         {/if}
 
-        <StepNav current={step} onselect={(s) => (step = s)} />
+        <StepNav current={ui.step} onselect={(s) => (ui.step = s)} />
 
         <footer>
           <p class="save" role="status" data-state={workspace.saveState}>
@@ -225,16 +228,6 @@
     background-size: 24px 24px;
     background-position: -1px -1px;
     border-bottom: 1px solid var(--grid);
-  }
-  .busy {
-    position: absolute;
-    right: 12px;
-    bottom: 8px;
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    color: var(--ink-muted);
-    font-size: 13px;
   }
 
   .panel {

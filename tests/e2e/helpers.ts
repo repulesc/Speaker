@@ -20,3 +20,22 @@ export async function savedProject(page: Page) {
 export async function openMenu(page: Page) {
   await page.getByRole('button', { name: 'Menu' }).click();
 }
+
+/** Opens a step from the stepper (matches names like "Surfaces optional" in Quick mode too). */
+export async function goStep(page: Page, name: string) {
+  await page
+    .getByRole('navigation', { name: 'Steps' })
+    .getByRole('button', { name: new RegExp(`^${name}`) })
+    .click();
+}
+
+/** Metres from the front wall in a seat's accessible label, e.g. "Seat. 2.34 m from the front wall". */
+export async function seatDistance(page: Page): Promise<number> {
+  const label = await page
+    .getByRole('button', { name: /^Seat\./ })
+    .first()
+    .getAttribute('aria-label');
+  const match = /Seat\. ([\d.]+)\u00a0m from the front wall/.exec(label ?? '');
+  if (!match) throw new Error(`Unexpected seat label: ${label}`);
+  return Number(match[1]);
+}

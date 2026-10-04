@@ -6,8 +6,12 @@
 export const INCH = 0.0254;
 export const FOOT = 0.3048;
 
-/** Unit assumed for a bare number, from the field and the display system. */
-export type BareUnit = 'm' | 'cm' | 'ft';
+/**
+ * Unit assumed for a bare number, from the field and the display system.
+ * 'm-or-cm' is for metric positions, which are displayed as "62 cm" but "2.40 m": people type what
+ * they see, so a bare number below 10 is metres ("2.4") and 10 or more is centimetres ("62").
+ */
+export type BareUnit = 'm' | 'cm' | 'ft' | 'in' | 'm-or-cm';
 
 export type ParseResult =
   | { ok: true; metres: number }
@@ -26,6 +30,9 @@ const METRIC: Record<string, number> = {
   centiméter: 0.01,
   mm: 0.001,
 };
+
+const bareFactor = (unit: BareUnit, value: number): number =>
+  unit === 'm-or-cm' ? (value < 10 ? 1 : 0.01) : { m: 1, cm: 0.01, ft: FOOT, in: INCH }[unit];
 
 const FEET_WORDS = ['ft', 'feet', 'foot', "'", '′', 'láb'];
 const INCH_WORDS = ['in', 'inch', 'inches', '"', '″', 'hüvelyk'];
@@ -66,7 +73,7 @@ export function parseLength(input: string, bare: BareUnit): ParseResult {
   const value = toNumber(single[1]!);
   const unit = single[2]?.trim();
 
-  if (!unit) return positive(value * (bare === 'ft' ? FOOT : bare === 'cm' ? 0.01 : 1));
+  if (!unit) return positive(value * bareFactor(bare, value));
   if (unit in METRIC) return positive(value * METRIC[unit]!);
   if (FEET_WORDS.includes(unit)) return positive(value * FOOT);
   if (INCH_WORDS.includes(unit)) return positive(value * INCH);

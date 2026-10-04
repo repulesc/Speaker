@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { defaultSystem, formatDb, formatFrequency, formatLength } from '../../src/units/format';
-import { parseLength } from '../../src/units/parse';
+import { parseLength, type BareUnit } from '../../src/units/parse';
 
-const metres = (input: string, bare: 'm' | 'cm' | 'ft' = 'm'): number => {
+const metres = (input: string, bare: BareUnit = 'm'): number => {
   const r = parseLength(input, bare);
   if (!r.ok) throw new Error(`rejected: ${r.reason}`);
   if (r.metres === null) throw new Error('empty');
@@ -45,7 +45,18 @@ describe('parseLength', () => {
     expect(metres('2′ 0½″')).toBeCloseTo(24.5 * 0.0254, 9);
   });
 
-  it('bare numbers use the field unit', () => {
+  it('metric positions: a bare number below 10 is metres, 10 and above is centimetres', () => {
+    expect(metres('2.4', 'm-or-cm')).toBeCloseTo(2.4, 9);
+    expect(metres('2,4', 'm-or-cm')).toBeCloseTo(2.4, 9);
+    expect(metres('0.62', 'm-or-cm')).toBeCloseTo(0.62, 9);
+    expect(metres('62', 'm-or-cm')).toBeCloseTo(0.62, 9);
+    expect(metres('120', 'm-or-cm')).toBeCloseTo(1.2, 9);
+    expect(metres('2.4 m', 'm-or-cm')).toBeCloseTo(2.4, 9); // explicit units always win
+    expect(metres('62 cm', 'm-or-cm')).toBeCloseTo(0.62, 9);
+  });
+
+  it('bare numbers use the field unit (inches for imperial positions)', () => {
+    expect(metres('24', 'in')).toBeCloseTo(0.6096, 9);
     expect(metres('62', 'cm')).toBeCloseTo(0.62, 9);
     expect(metres('11.5', 'ft')).toBeCloseTo(3.5052, 9);
   });

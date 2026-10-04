@@ -74,7 +74,7 @@ Accepted forms:
 
 | Input | Result |
 |---|---|
-| `3.5`, `3,5` | bare number → the field's current display unit (m for room dimensions in metric, cm for positions in metric; feet in imperial) |
+| `3.5`, `3,5` | bare number → the field's display unit: metres for room dimensions in metric; feet for room dimensions in imperial. **Metric positions (M3):** a bare number below 10 is metres (`2.4`) and 10 or more is centimetres (`62`), because positions are displayed as "62 cm" below 1 m and "2.40 m" above. Imperial positions: inches. |
 | `3.5 m`, `3,5m`, `350 cm`, `350cm`, `3500 mm` | explicit metric |
 | `11'6"`, `11′ 6″`, `11 ft 6 in`, `11ft6in`, `11' 6`, `138"`, `138 in`, `11.5 ft` | imperial, any spacing, straight or typographic primes |
 | `11 6` | rejected: ambiguous ("Did you mean 11′ 6″?") |

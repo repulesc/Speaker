@@ -44,7 +44,23 @@ Delivered: Blueprint tokens and self-hosted IBM Plex fonts, light and dark theme
   - initial JS ≤ 150 KB gzip ✅ (49 KB);
   - the deployed preview URL works on an iPhone (open, see above).
 
-## M3 · Input steps and live drawing (Sonnet, medium effort; Opus review)
+## M3 · Input steps and live drawing (Sonnet, medium effort; Opus review): ✅ built, review and owner test open
+
+Delivered: all five input steps (Room, Surfaces, Furnishing, Speakers, Goals) plus a minimal Results summary; interactive top view and side view (drag, 5 cm snapping, centreline snap, mirror-lock, arrow-key nudging with one undo step per gesture); setup variants with tabs; the wall elevation editor with draggable patches and first-reflection rings; object palette with typed sizes and rotation; speaker types, speaker form, speaker file save and load; constraints (reach, seat modes, fixed speakers); 204 unit tests and 41 browser tests, with accessibility scans on every step in light and dark.
+
+**Deliberate scope notes**
+- *Results are minimal.* TEST_PLAN journeys 1 and 3 mention "findings" and a "comparison". In M3 the Results step shows score words, the confidence word and red-flag and caution counts; finding texts, zones, the bass chart and the variant comparison are M4 (they need the reviewed Hungarian and English copy for every finding).
+- *Variants* can be created, renamed, deleted and switched, and are independent; scoring them side by side is M4.
+
+**Open before M3 can be called closed**
+- Opus review (physics-adjacent choices below).
+- The owner enters their own room in Detailed mode without help in ≤ 10 minutes.
+
+**Opus review: look at these**
+1. Quick-mode "busy-ness" absorption ranges and the furniture defaults in `src/engine/presets/objects.ts` (all 🟡).
+2. The default placement rule (equilateral triangle, rear panel 0.5 m from the front wall) and the placement limits in `src/app/plan/placement.ts` (`MIN_HALF_GAP`, seat height 0.3–2.0 m).
+3. That patches (windows, CD walls, curtains) reach `P08` through `surfaceAbsorptionArea` (tested), and that first-reflection rings use `P06` only for the near side wall and floor/ceiling.
+4. Hungarian strings in `src/i18n/hu.ts` added in M3 (owner will review).
 
 - **Scope:**
   - Steps 1–5;
@@ -54,8 +70,8 @@ Delivered: Blueprint tokens and self-hosted IBM Plex fonts, light and dark theme
   - speaker entry form with generic type presets (no model database in v1); profile export and import;
   - variants.
 - **Acceptance:**
-  - E2E journeys 1–3 and 10 pass;
-  - a non-technical tester (owner) enters their room in Detailed mode without help in ≤ 10 minutes.
+  - E2E journeys 1–3 and 10 pass ✅;
+  - a non-technical tester (owner) enters their room in Detailed mode without help in ≤ 10 minutes (open).
 
 ## M4 · Results (Opus for the result logic, Sonnet for the UI)
 

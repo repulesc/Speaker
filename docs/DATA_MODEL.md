@@ -8,7 +8,9 @@ Changes made while implementing (M1):
 - `Constraints.speakersFixed` alongside `listenerFixed`.
 - `SpeakerPlacement.certainty` (optional, default "estimated").
 - `Project.speaker` holds the profile itself (no model database in v1).
-- `Project.name` is empty for an untitled project; the UI shows a localised label (M2).
+- `Project.name` is empty for an untitled project; the UI shows a localised label (M2). The same holds for `SetupVariant.name` ("Current").
+- **Speaker files (M3):** `{ "kind": "speaker-profile", "schemaVersion": 1, "speaker": SpeakerProfile }`, saved as `<brand model>.speaker-profile.json`. A loaded profile always gets a fresh `id`. Validated with the same schema as the project's speaker.
+- **Placement certainty (M3):** `SpeakerPlacement.certainty` / `Listener.certainty` of `'unknown'` means "default position, not placed by the user": such items follow the room size. Dragging sets `'estimated'`; typed values keep `'measured'`.
 - `Directivity` keeps only `omniBelowHz` and `qMid` in v1; measured polar data is deferred.
 - `SurfacePatch` (u, v) are room coordinates along the boundary's axes: front/back walls (x, z); left/right walls (y, z); floor/ceiling (x, y).
 - `Analysis` is a union: `status: 'needs-room-size'` (only confidence) or `status: 'ok'` (everything). `topActions` are `Action`s: fix a red flag, move to a candidate, or change a speaker setting.

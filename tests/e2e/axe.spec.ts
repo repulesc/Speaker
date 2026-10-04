@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, openMenu } from './helpers';
+import { fillRoom, goStep, openMenu } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -49,3 +49,41 @@ test('dialogs', async ({ page }) => {
   await page.getByRole('button', { name: 'Share link' }).click();
   await expectAccessible(page);
 });
+
+const STEPS = ['Room', 'Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results'];
+
+for (const scheme of ['light', 'dark'] as const) {
+  test.describe(`every step, ${scheme} theme`, () => {
+    test.use({ colorScheme: scheme });
+
+    test('with a filled room, a patch, an object and a second setup', async ({ page }) => {
+      test.setTimeout(90_000); // seven full accessibility scans
+      await page.goto('/');
+      await page.getByRole('button', { name: /Detailed setup/ }).click();
+      await fillRoom(page, '4', '5', '2.5');
+
+      // Give the later steps something to show: a patch, an object, a second setup.
+      await goStep(page, 'Surfaces');
+      await page.getByRole('radio', { name: /^Left wall/ }).check();
+      await page.getByRole('button', { name: '+ Shelf or CD wall' }).click();
+      await goStep(page, 'Furnishing');
+      await page.getByRole('button', { name: '+ Bed' }).click();
+      await page.getByRole('button', { name: '+ New setup' }).click();
+
+      for (const step of STEPS) {
+        await goStep(page, step);
+        await expectAccessible(page);
+      }
+      await goStep(page, 'Goals');
+      await page
+        .getByRole('radiogroup', { name: 'Wide soundstage' })
+        .getByRole('radio', { name: 'Important' })
+        .check();
+      await page
+        .getByRole('radiogroup', { name: 'Precise imaging' })
+        .getByRole('radio', { name: 'Important' })
+        .check();
+      await expectAccessible(page); // conflict notice visible
+    });
+  });
+}

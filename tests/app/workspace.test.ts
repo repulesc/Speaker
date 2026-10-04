@@ -7,6 +7,7 @@ import {
   createDefaultProject,
   defaultPlacement,
 } from '../../src/app/state/defaults';
+import { moveSeat } from '../../src/app/plan/placement';
 import { genericSpeaker } from '../fixtures/projects';
 
 class MemoryStore implements KeyValueStore {
@@ -183,5 +184,85 @@ describe('default placement', () => {
     const before = JSON.stringify(project);
     applyDefaultPlacement(project);
     expect(JSON.stringify(project)).toBe(before);
+  });
+});
+
+describe('Workspace: setup variants', () => {
+  const room = (ws: Workspace) =>
+    ws.edit((p) => {
+      p.room.width = { value: 4, certainty: 'measured' };
+      p.room.length = { value: 5, certainty: 'measured' };
+    });
+
+  it('a copy of the active setup becomes the active one', () => {
+    const ws = new Workspace(new MemoryStore(), options);
+    room(ws);
+    ws.addVariant('Bed moved');
+    expect(ws.project.variants).toHaveLength(2);
+    expect(ws.project.variants[1]!.name).toBe('Bed moved');
+    expect(ws.project.activeVariantId).toBe(ws.project.variants[1]!.id);
+    expect(ws.project.variants[1]!.speakers).toEqual(ws.project.variants[0]!.speakers);
+  });
+
+  it('variants are independent', () => {
+    const ws = new Workspace(new MemoryStore(), options);
+    room(ws);
+    ws.addVariant('B');
+    ws.edit((p) => void moveSeat(p, { y: 1.5 }));
+    expect(ws.project.variants[1]!.listener.ears.y).toBe(1.5);
+    expect(ws.project.variants[0]!.listener.ears.y).not.toBe(1.5);
+  });
+
+  it('switching tabs is not an undo step, and undo keeps the tab', () => {
+    const ws = new Workspace(new MemoryStore(), options);
+    room(ws);
+    ws.addVariant('B');
+    const b = ws.project.activeVariantId;
+    ws.edit((p) => void moveSeat(p, { y: 1.5 }));
+    expect(ws.project.variants[1]!.listener.ears.y).toBe(1.5);
+    ws.switchVariant(ws.project.variants[0]!.id);
+    ws.undo(); // undoes the listener edit made in B
+    expect(ws.project.variants[1]!.listener.ears.y).not.toBe(1.5);
+    expect(ws.project.activeVariantId).not.toBe(b);
+  });
+
+  it('undoing the creation of a variant falls back to an existing one', () => {
+    const ws = new Workspace(new MemoryStore(), options);
+    room(ws);
+    ws.addVariant('B');
+    ws.undo();
+    expect(ws.project.variants).toHaveLength(1);
+    expect(ws.project.activeVariantId).toBe(ws.project.variants[0]!.id);
+  });
+
+  it('rename and delete; the last variant cannot be deleted', () => {
+    const ws = new Workspace(new MemoryStore(), options);
+    room(ws);
+    ws.addVariant('B');
+    ws.renameVariant(ws.project.activeVariantId, 'Seat forward');
+    expect(ws.project.variants[1]!.name).toBe('Seat forward');
+    ws.deleteVariant(ws.project.variants[1]!.id);
+    expect(ws.project.variants).toHaveLength(1);
+    ws.deleteVariant(ws.project.variants[0]!.id);
+    expect(ws.project.variants).toHaveLength(1);
+  });
+});
+
+describe('Workspace: coalesced edits', () => {
+  it('quick edits with the same key share one undo step; other edits do not', () => {
+    const ws = new Workspace(new MemoryStore(), options);
+    const nudge = () =>
+      ws.edit((p) => void (p.constraints.maxSpeakerDistanceFromWall.value! += 0.01), {
+        coalesce: 'nudge',
+      });
+    nudge();
+    nudge();
+    nudge();
+    ws.edit((p) => void (p.name = 'x'));
+    ws.undo(); // the rename
+    expect(ws.project.name).toBe('');
+    ws.undo(); // all three nudges at once
+    expect(ws.project.constraints.maxSpeakerDistanceFromWall.value).toBeCloseTo(1.5, 9);
+    expect(ws.canUndo).toBe(false);
   });
 });

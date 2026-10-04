@@ -2,7 +2,7 @@
 
 A free, open-source web app that helps anyone place loudspeakers and choose a listening seat in a rectangular room, using established room acoustics, and that is honest about what it doesn't know.
 
-**Status:** M1 (acoustics engine) and M2 (app shell, units, languages, saving and sharing) are done. The input steps come next (M3). See [docs/ROADMAP.md](docs/ROADMAP.md). See [docs/ROADMAP.md](docs/ROADMAP.md).
+**Status:** M1 (acoustics engine), M2 (app shell, units, languages, saving and sharing) and M3 (input steps, interactive drawing, setups) are built. The full results page is next (M4). See [docs/ROADMAP.md](docs/ROADMAP.md). See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Where to read first
 
