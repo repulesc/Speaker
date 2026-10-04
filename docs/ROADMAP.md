@@ -7,7 +7,9 @@ Each milestone ends with a short review and a demo the owner can click (from M2 
 - **Deliverables:** `RULE_CATALOGUE`, `DATA_MODEL`, `SCORING`, `UI_SPEC`, `I18N_AND_UNITS`, `TEST_PLAN`, `ROADMAP`, `OPEN_QUESTIONS`.
 - **Acceptance:** the owner has read the documents and answered the open questions marked "owner". Blocking questions are resolved or explicitly deferred.
 
-## M1 · Engine core (Opus, high effort)
+## M1 · Engine core (Opus, high effort): ✅ done
+
+Delivered: scaffold and CI, units module, all v1 rules except H03, scoring, search, robustness, heatmaps, confidence, subjective mapping, actions, worker wrapper, Python reference fixtures, 125 tests. A minimal bilingual placeholder page proves the build and deploy pipeline.
 
 - **Scope:**
   - project scaffold: Vite, Svelte, TypeScript strict, Vitest, ESLint, Prettier, GitHub Actions CI;

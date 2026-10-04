@@ -1,6 +1,6 @@
 # Rule Catalogue (v1)
 
-Status: Phase 0 draft for owner review. License: CC BY 4.0.
+Status: implemented in M1 (`src/engine/rules/`, one file per rule). Implementation notes are marked **(M1)**. License: CC BY 4.0.
 
 This is the single source of truth for every piece of acoustics advice the app gives. The engine implements **only** rules listed here; each rule becomes one small file in `src/engine/rules/` with the same ID.
 
@@ -89,7 +89,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Formula:** for a single nearby boundary at distance `d` from the speaker's acoustic centre, the first cancellation is at `f_null ≈ c / (4·d)`. Further nulls at `3·f_null`, `5·f_null`, …, but these are much shallower because the speaker becomes directional at higher frequencies.
 - **Applies to:** front wall (most important), nearest side wall, floor, ceiling.
 - **Inputs:** speaker position, acoustic centre height, room dimensions, speaker directivity (if known: frequency below which the speaker is effectively omnidirectional).
-- **Output:** per boundary, `f_null` and an estimated severity (deeper when several boundaries share similar distances, which line up their nulls).
+- **Output:** `f_null` for the front wall (info). **(M1)** When two boundaries (front, nearest side, floor, ceiling, each < 1.5 m) are within 10% of each other in distance, their nulls line up and deepen: caution, with the combined frequency (🟡 threshold).
 - **Sources:** [ALL74] (original treatment of boundary effects on power output), [TOOLE] ch. on low-frequency boundary interaction, [EVP].
 - **Limits:** `c/(4d)` is the free-field, single-boundary, listener-far-away approximation. Real notch depth depends on directivity and on the other boundaries. Below the Schroeder frequency SBIR and room modes are the same physics, so the full model (P09) takes over for scoring. P04 is used for **explanation** and above the Schroeder frequency.
 - **Test case:** `d = 0.5 m → f_null = 171.5 Hz`; `d = 1.0 m → 85.75 Hz`; `d = 0.3 m → 285.8 Hz`.
@@ -150,7 +150,10 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
   - `K_n = V / (ε_x·ε_y·ε_z)`, with `ε = 1` for a zero index and `2` otherwise;
   - `δ_n ≈ 6.91 / T60` (decay constant from reverberation time at low frequency);
   - both speakers are summed coherently (bass is mostly mono in recordings).
-- **Frequency range:** 20 Hz to `min(1.5 · f_s, 300 Hz)`, 1/24-octave points, then 1/6-octave smoothing for scoring.
+- **Frequency range:** displayed curve from 20 Hz to `min(1.5 · f_s, 300 Hz)` (at least 120 Hz), at 1/24-octave points with 1/6-octave smoothing. Scoring uses `max(30 Hz, f6)` to `min(f_s, 200 Hz)`.
+- **Truncation (M1):** modes up to 1.5× the top frequency. The sum converges slowly; see OPEN_QUESTIONS D5.
+- **Speaker roll-off (M1):** a Butterworth high-pass with exactly −6 dB at the profile's f6, 2nd order for sealed boxes and 4th order otherwise. Shape only, an assumption.
+- **Findings (M1):** a peak or dip more than 6 dB from the median inside the scoring band → caution (🟡 threshold, same as C2).
 - **Inputs:** room dimensions, speaker and listener positions, low-frequency T60, speaker low-frequency extension (−6 dB point) if known, used to weight the low end.
 - **Output:** predicted relative SPL curve (dB, normalised to its median), list of peaks and dips with frequencies.
 - **Sources:** [KUT] (modal Green's function), [EVP].
@@ -214,7 +217,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 ### G04 · Stereo listening angle
 
 - **In plain words:** The classic stereo set-up forms a triangle with about 60° between the speakers as seen from your seat. Much narrower and the stage shrinks, much wider and the centre image weakens.
-- **Logic:** angle `θ` between the two speaker axes-to-listener lines. Target 60°. OK 50–70°. Caution outside 45–75°. Red flag below 35° or above 90°. The target is from the standard [ITU775]; the tolerance bands are 🟡.
+- **Logic:** angle `θ` between the two speaker axes-to-listener lines. Target 60°. OK 50–70°. Info 45–50° and 70–75°. Caution 35–45° and 75–90°. Red flag below 35° or above 90°. The target is from the standard [ITU775]; the tolerance bands are 🟡.
 - **Goal interaction:** "wide soundstage" moves the preferred point to about 60–65°, "precise imaging" to about 55–60°. Both remain within the OK band (bounded influence, see SCORING).
 - **Sources:** [ITU775], [TOOLE].
 - **Test case:** speakers at `x = 1.0` and `3.0` (`y = 1.0`), listener at `(2.0, 2.73)` → half-angle `atan(1.0/1.73) = 30.0°` → `θ = 60.0°`.
@@ -222,7 +225,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 ### G05 · Equal distances to both speakers
 
 - **In plain words:** If one speaker is closer, the sound image pulls towards it. Keep both distances equal to within a couple of centimetres.
-- **Logic:** path difference `|d_L − d_R|`: OK ≤ 0.02 m, caution ≤ 0.05 m, red flag > 0.10 m. The underlying effect, that sounds arriving first dominate localisation (precedence effect), is established [WALL49]. The centimetre thresholds are 🟡.
+- **Logic:** path difference `|d_L − d_R|`: OK ≤ 0.02 m, caution up to 0.10 m, red flag above 0.10 m. The underlying effect, that sounds arriving first dominate localisation (precedence effect), is established [WALL49]. The centimetre thresholds are 🟡.
 - **Sources:** [WALL49], [TOOLE].
 - **Test case:** `d_L = 2.40`, `d_R = 2.47` → 0.07 m → caution.
 
@@ -286,7 +289,7 @@ These appear as optional dashed overlay lines on the plan ("popular starting poi
 - **Logic:** overlay lines at `y = L/3` (speakers) and `y = 2L/3` (listener).
 - **Sources:** common practice. ⚠ verify any citable origin. Otherwise labelled "folk rule".
 
-### H03 · Cardas method
+### H03 · Cardas method (**not implemented in M1**: unverified)
 
 - **In plain words:** A placement recipe from a cable manufacturer, based on room-width ratios.
 - **Logic:** speaker (woofer centre) at `0.276·W` from the side wall and `0.447·W` from the front wall. Listener per the published recipe.

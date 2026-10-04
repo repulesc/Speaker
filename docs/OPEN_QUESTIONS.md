@@ -61,9 +61,25 @@ Status: end of Phase 0. Questions are numbered so you can answer them by number.
 | Rear port location, dimensions, driver sizes, DSP options and ranges | confirm on the KEF spec sheet or user manual (KEF website blocked from this environment; the data came from search summaries and reviews) |
 | "No toe-in needed" (owner's belief) | look for an official KEF statement. Until then H05's experiment applies |
 
-## D. Risks noted during Phase 0
+## D. Risks and model limits
 
 1. **Model vs reality in lightweight or open rooms.** Mitigated by confidence caps and clear wording. Real rooms can differ by several dB from the modal model even with perfect inputs.
 2. **Over-trust in the score.** Mitigated by words instead of percentages, spread whiskers, the disclaimer, and the listening protocol.
 3. **Speaker data quality.** Mitigated by the `verified` flag, required sources, and no web lookup in v1.
 4. **Scope creep** (desk mode, subs, measurements). Parked in ROADMAP "Later".
+5. **Modal-sum truncation (found in M1).** The point-source modal sum converges slowly: raising the truncation from 1.5× to 4× the top frequency moved raw bass curves by up to ≈ 1.5 dB, without settling monotonically. Mitigations:
+   - the scored band is capped at 200 Hz (C1/C2), with the front-wall dip above it scored by C3;
+   - 1/6-octave smoothing;
+   - robust scoring.
+
+   Rankings were checked to be stable: the best placement is the same, or tied, at 1.5× and 3.5× truncation in three test rooms. The M5 external cross-check (REW / amroc) should look at this specifically.
+6. **Calibration choices introduced in M1** (all 🟡, in `src/engine/scoring/thresholds.ts` and the presets):
+   - furniture absorbs less at low frequencies (×0.5 at 125 Hz, ×0.8 at 250 Hz);
+   - the Quick-mode busy-ness ranges (bare 0–2, some 3–7, busy 6–12, very busy 10–18 m² sabins);
+   - P05 gain categories;
+   - the P04 "aligned boundaries" rule (two boundaries within 10%);
+   - P08 dead/live bands (0.3 / 0.6 s).
+
+   All are labelled as rules of thumb and are candidates for the M5 audit.
+7. **H03 (Cardas) is not implemented**: its numbers are unverified (section C).
+

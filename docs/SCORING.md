@@ -1,12 +1,12 @@
 # Scoring, Candidate Zones and Confidence (v1)
 
-Status: Phase 0 draft. This document defines how the engine turns rules into ranked suggestions, transparently.
+Status: implemented in M1 (`src/engine/scoring/`). Changes made during implementation are marked **(M1)**. This document defines how the engine turns rules into ranked suggestions, transparently.
 
 ## Design principles
 
 1. **Each physical effect is counted once.** For example, the midpoint null is already inside the bass model (P09); G01 then reports it as a finding but does **not** add a second penalty.
 2. **Heuristics are never scored.** H01–H06 are overlays and suggestions only. The ranking comes from physics and strong guidelines.
-3. **Goals have bounded influence.** User goals can shift guideline weights by at most ±50% and can never change physics weights or hard constraints.
+3. **Goals have bounded influence.** User goals shift relative weights by at most ±50% and targets (angle, corner penalty). They never change a physics component's value or the hard constraints.
 4. **Robust over optimal.** A position that is nearly as good but much less sensitive to input errors beats a knife-edge optimum.
 5. **Everything is explainable.** Every score has a breakdown the UI can show ("why this zone").
 
@@ -27,11 +27,19 @@ v1 assumes the speakers sit along the front wall (`y` small), symmetric about th
 - speaker footprint inside the room and not overlapping objects;
 - listener not inside an object (except seat objects: bed, sofa, armchair, which are allowed);
 - direct path from either speaker to the ears obstructed (G10 red flag);
-- listener closer than 1.0 m to either speaker (near-field use is out of scope for v1, see OPEN_QUESTIONS).
+- listener closer than 1.0 m to either speaker (near-field and desk use come after v1, see ROADMAP);
+- **(M1)** listener less than 0.5 m in front of the speaker baffles (otherwise the search proposed seats *behind* the speakers).
+
+**(M1)** The pair is symmetric about the room centreline, or about the listener's x when `keepSymmetric` is off.
 
 If `listenerFixed`, only speaker variables are searched. If the user locks the speakers, only the listener is searched.
 
-**Budget:** for typical rooms there are 15–30 values per variable, so about 10⁴ configurations. Each needs a bass response (P09) at about 80 frequency points with about 150 modes. This runs in a Web Worker and must finish in under 1.5 s on a mid-range phone (Phase 1 performance test). Speed-up: mode shapes factorise per axis (`cos·cos·cos`), so per-axis cosine tables are precomputed once per room.
+**Search strategy (M1):** a coarse pass at 20 cm over the whole space, then a 5 cm refinement (±10 cm) around the ten best *distinct* coarse results. The step sizes in the table above are the refinement resolution.
+
+**Budget:** this runs in a Web Worker and must finish in under 1.5 s on a mid-range phone. Measured in M1 (Node, desktop): Room R 0.25 s, the busy room 0.17 s, a 6 × 8 × 3 m room 0.5 s. Speed-ups:
+- mode shapes factorise per axis (`cos·cos·cos`), so per-axis cosine tables replace most cosines;
+- the source coupling is shared across listener positions;
+- in symmetric setups whole mode families cancel exactly and are skipped.
 
 ## 2. Score components
 
@@ -39,9 +47,9 @@ Every component returns a value in `[0, 1]` (1 = best). The total is a weighted 
 
 | ID | Component | Level | Default weight | Computation |
 |---|---|---|---|---|
-| C1 | Bass smoothness at the seat | 🔴 | 0.35 | P09 response, 1/6-oct smoothed, from `max(30 Hz, speaker f−6dB)` to `f_s`. `σ` = standard deviation (dB) around the median. `C1 = clamp(1 − (σ − 2)/8, 0, 1)` (σ ≤ 2 dB → 1; σ ≥ 10 dB → 0). |
+| C1 | Bass smoothness at the seat | 🔴 | 0.35 | P09 response, 1/6-oct smoothed, from `max(30 Hz, speaker f−6dB)` to `min(f_s, 200 Hz)` **(M1: capped at 200 Hz, see OPEN_QUESTIONS D)**. `σ` = standard deviation (dB) around the median. `C1 = clamp(1 − (σ − 2)/8, 0, 1)` (σ ≤ 2 dB → 1; σ ≥ 10 dB → 0). |
 | C2 | Deep nulls at the seat | 🔴 | 0.10 | Largest dip below median within the C1 range: `C2 = clamp(1 − (dip − 6)/12, 0, 1)`. Separate from C1 because one deep null is audible even when σ looks fine. |
-| C3 | Front-wall interference above `f_s` | 🔴 | 0.10 | From P04 / H04 for `f_null > f_s`: 1 if `f_null > 300 Hz` or the speaker has a wall-compensation DSP and is in "near" placement; linear down to 0.3 when `f_null` sits in 120–250 Hz. Counted only above `f_s` (below, C1 includes it). |
+| C3 | Front-wall interference above the scored bass band | 🔴 | 0.10 | From P04 / H04 for `f_null` above C1's upper limit: 1 if `f_null ≥ 300 Hz`, or if the speaker has a wall-compensation DSP and its rear panel is within 0.3 m of the wall; 0.3 up to 250 Hz, rising linearly to 1 at 300 Hz. Inside C1's band, C1 already includes it. |
 | C4 | Stereo geometry | 🟠 | 0.15 | G04 angle (target per goals, OK band → ≥ 0.8, falls to 0 at the red-flag limits) × G05 (1 when symmetric by construction). |
 | C5 | Symmetry of surroundings | 🟠 | 0.10 | G03: surface class match at mirrored side-reflection points (P06) and side-wall distance difference. |
 | C6 | Seat boundary proximity | 🟠 | 0.10 | G02 back-wall distance: 0 at ≤ 0.3 m, 1 at ≥ 1.0 m, linear between. |
@@ -61,15 +69,15 @@ Notes:
 |---|---|
 | `wide-stage` | G04 target angle 62°; C8 prefers keeping side reflections (if smooth off-axis speaker) |
 | `precise-imaging` | G04 target 58°; C4 weight × 1.3; C8 activates (prefers treated side reflections) |
-| `flat-response` | C1 and C2 weights × 1.2 (renormalised) |
-| `deep-bass` | C1 low limit extended to 25 Hz; C7 corner penalty × 0.7 (more boundary gain accepted) |
+| `flat-response` | Guideline weights (C3–C7) ÷ 1.2, then renormalised, which raises the share of C1 and C2 |
+| `deep-bass` | C7 corner penalty × 0.7 (more boundary gain accepted). **(M1)** The C1 band is *not* changed, so goals never change a component's value. |
 | `low-volume-listening` | No positional change; enables a hint about loudness perception (info only) |
 
 Weight 1 (nice to have) applies half of each effect. Combined multipliers are capped at ×1.5 / ×0.5 relative to the default weight. If two goals conflict (wide-stage vs precise-imaging both important), the targets average and the app says "these goals pull in different directions; here's the compromise".
 
 ## 4. Robustness (uncertainty propagation)
 
-Inputs are rarely exact. For every candidate in the top 50 (by nominal score), the engine reruns scoring **8 times** with perturbed inputs (fixed pseudo-random seed for reproducibility):
+Inputs are rarely exact. For a diverse pool of the best 30 search results (at least 10 cm apart, **M1**), the engine reruns scoring **8 times** with perturbed inputs (fixed pseudo-random seed for reproducibility):
 
 | Input | Perturbation |
 |---|---|
@@ -112,7 +120,7 @@ Each output (bass prediction, reflections, stereo geometry, room character, spea
 | `reflections` | positions (2 each); surfaces at reflection points (3); speaker directivity (1) |
 | `geometry` | speaker positions (3); listener position (3) |
 | `roomCharacter` | surfaces (3); objects (2); room dimensions (1) |
-| `speakerAdvice` | speaker profile verified (3); port location (2); DSP controls (1) |
+| `speakerAdvice` | port location (3); enclosure type (2); acoustic-axis height (1); driver layout (1) **(M1: no model database, so no "verified" input)** |
 
 `confidence(output) = Σ(importance · factor) / Σ importance`.
 
@@ -124,13 +132,12 @@ Caps limit an output's confidence however complete the inputs are:
 |---|---|
 | `construction = lightweight` | bass ≤ 0.6 |
 | any `outOfModel` feature | bass ≤ 0.5. `non-rectangular` → all outputs ≤ 0.3 and a prominent "outside what we can model" banner |
-| speaker profile not verified | speakerAdvice ≤ 0.6 |
 | surface preset with low data confidence at a reflection point | reflections ≤ 0.7 |
 
 ### 6.4 Overall meter and the hint
 
 - `overall = weighted mean of outputs` (bass 3, geometry 2, reflections 2, roomCharacter 1, speakerAdvice 1).
-- Display: a 5-segment meter with words: "rough guess", "first impression", "solid", "detailed", "as good as it gets without measurements". Never a percentage, which would suggest false precision.
+- Display: a 5-segment meter with words: "rough guess", "first impression", "solid", "detailed", "as good as it gets without measurements" (thresholds 0.3 / 0.45 / 0.6 / 0.75, `confidenceStep()`). Never a percentage, which would suggest false precision.
 - **Next best input:** the input with the largest `importance · (1 − factor)` gain on `overall` becomes the hint: "Measure the ceiling height to firm up the bass prediction."
 
 ## 7. Test hooks

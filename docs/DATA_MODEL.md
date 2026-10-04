@@ -1,6 +1,16 @@
 # Data Model (v1)
 
-Status: Phase 0 draft. These types become `src/engine/types.ts` (engine-facing) and `src/app/state.ts` (UI-only additions). The engine imports nothing from the app.
+Status: implemented in M1. **`src/engine/types.ts` is now the source of truth**; this document explains the design. The engine imports nothing from the app.
+
+Changes made while implementing (M1):
+- `Surfaces.baseCertainty`: whether each base material was chosen by the user or is a default (drives confidence).
+- `SetupVariant.busyness`: the Quick-mode "busy-ness" shortcut, used when no objects are placed.
+- `Constraints.speakersFixed` alongside `listenerFixed`.
+- `SpeakerPlacement.certainty` (optional, default "estimated").
+- `Project.speaker` holds the profile itself (no model database in v1).
+- `Directivity` keeps only `omniBelowHz` and `qMid` in v1; measured polar data is deferred.
+- `SurfacePatch` (u, v) are room coordinates along the boundary's axes: front/back walls (x, z); left/right walls (y, z); floor/ceiling (x, y).
+- `Analysis` is a union: `status: 'needs-room-size'` (only confidence) or `status: 'ok'` (everything). `topActions` are `Action`s: fix a red flag, move to a candidate, or change a speaker setting.
 
 ## Principles
 

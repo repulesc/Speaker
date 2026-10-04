@@ -12,3 +12,7 @@ Free, open-source, local-first web app (TypeScript strict + Vite + Svelte, stati
 - No backend, no accounts, no measurement features in v1.
 - Speaker specs from memory are not trusted: verify, and mark the source.
 - Work on the branch you were assigned. Do not create pull requests unless asked.
+
+## Commands
+
+`npm test` · `npm run check` · `npm run lint` · `npm run build`. Run all four before pushing; CI runs the same.
