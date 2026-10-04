@@ -75,8 +75,8 @@ The numbered wizard and the welcome card; the confidence meter as a top-bar widg
 | R1 | Engine additions: layers, `explainPoint`, sensitivity, mode-field, treatment rules, speaker-settings rules, folk-rule comparison, finding copy keys; validation suite. **Done**, except the copy itself: the finding and advice keys and their parameters are fixed, the EN and HU text for them is R4. Also fixed the audit's M1, M2, M4, M6–M9, M11, L3, L10. | Opus, high |
 | R2 | Workbench UI in the Instrument look: dock, map with heatmap and dimension lines, probe, chart, right panel, phone layout. **Done** (see "R2 status" below). | Sonnet, medium (Opus review) |
 | R3 | Treat tab, room-mode explorer **(done, see "R3 status")**; Listen tab, compare, print sheet, larger furniture **(done, see "R3 status")** | Sonnet medium + Opus for the rules |
-| R4 | EN + HU copy for every finding and rule; Hungarian review by the owner | Sonnet draft, owner review |
-| R5 | Physics audit of the whole product, bad-advice hunt, accessibility, performance, launch | Opus, xhigh |
+| R4 | EN + HU copy for every finding and rule; Hungarian review by the owner. **Drafted**; owner review open (`npm run hu:review`, steps below) | Sonnet draft, owner review |
+| R5 | Physics audit of the whole product, bad-advice hunt, accessibility, performance, launch. **Done** (`docs/REVIEW_R5.md`); waits on the R4 Hungarian review before launch | Opus, xhigh |
 
 Each phase ends with a deployed preview the owner can click, and updated tests (unit, browser, axe, validation).
 
@@ -110,3 +110,10 @@ Not in R2 (R3): the Treat and Listen tabs, the room-mode explorer slider, compar
 Not built: guided experiments with stored experiment ids (the protocol is text only), the plan sketch of treatment spots on the print sheet.
 
 **More Hungarian text to review** (owner): `tabs.*`, `treat.*`, `mode.*`, `advice.*` (19 keys), `words.gain` / `words.zone`; and for items 4 to 6: `listen.*`, `compare.*`, `print.*`, `furnishing.material.*`, the eight new `object.*` names and `menu.print`.
+
+## R4: how to review the Hungarian (owner)
+
+1. Open `src/i18n/hu.ts` on GitHub and press the pencil icon (or send corrections in a chat with Claude, quoting the old and the new text).
+2. Change only the text between the quotes. Keep every `{name}` placeholder as it is: the app fills in a number or a word there.
+3. When a block (for example `listen: {`) reads well, add a line `  // reviewed` directly above it.
+4. `npm run hu:review` (and CI) shows how many blocks are left.
