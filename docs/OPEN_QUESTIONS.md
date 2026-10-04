@@ -1,23 +1,26 @@
 # Open Questions & Unverified Claims
 
-Status: end of Phase 0. Questions are numbered so you can answer them by number ("Q4: magázás").
+Status: end of Phase 0. Questions are numbered so you can answer them by number.
 
 ## A. Questions for the owner
 
+### Resolved
+
+| # | Decision |
+|---|---|
+| Q1 | The owner's measurements are **not needed**: the product is universal. TEST_PLAN §7 uses a synthetic "busy room" built from the owner's description. |
+| Q4 | Hungarian register: **informal (tegezés)**. Final. |
+| Q6 | **No speaker model database at launch.** Users describe their own speaker; generic type presets help. |
+| Q7 | Desk / near-field setups: **after v1**, first item in ROADMAP "Later". The owner wants them. |
+| Q8–Q12 | Recommendations accepted by default when the owner said "proceed": rules of thumb shown but not scored; default thresholds labelled "rule of thumb"; the five goals; shape-and-word evidence tags; the "busy-ness" shortcut. Can be revisited at any time. |
+
+### Still open (not blocking M1)
+
 | # | Question | Recommendation | Blocks |
 |---|---|---|---|
-| Q1 | **Your room data:** width, length, height, wall construction, positions of the speakers, seat, bed and the other speakers, stand height, ear height. A rough sketch with tape-measure numbers is perfect. | measure in cm; mark guesses as guesses | M1 golden test for your room (not M1 itself) |
 | Q2 | **Copyright holder name** for the MIT and CC BY license files (your real name, a pseudonym, or "Speaker Placement Advisor contributors"). | your choice | M6 |
-| Q3 | **App name.** Working title "Speaker Placement Advisor". Want a shorter brand name, and a Hungarian name, or keep the English name in both languages? | keep one short name usable in both languages | M2 (title, PWA manifest) |
-| Q4 | **Hungarian register:** formal "Ön" (magázás) or informal "te" (tegezés)? | magázás, phrased impersonally where natural, for older hi-fi users | M2 copy |
+| Q3 | **App name.** Working title "Speaker Placement Advisor". A shorter brand name usable in both languages? | one short name for both languages | M2 (title, PWA manifest) |
 | Q5 | **Hungarian reviewer:** will you review all Hungarian strings, or nominate someone? | you, at each milestone | M5 |
-| Q6 | **Speaker database seed:** which models besides the KEF LSX II LT? Each entry needs sources, so 5–15 popular models is realistic for v1. | a mix: popular active (KEF, Genelec, Dynaudio), popular passive bookshelf, one floor-stander | M3 |
-| Q7 | **Desk / near-field setups** (speakers on a desk, listener < 1 m away). The LSX II LT has a desk mode, so this is a real use case. It needs extra rules (desk-surface reflection, very short distances). | v1: room setups only, with a clear "desk setups coming soon" message; v1.1: desk mode | M1 scope |
-| Q8 | Are you happy that **rules of thumb (38%, thirds, Cardas) are shown but never scored?** | yes, it's the honest approach | M1 |
-| Q9 | Are the **default calibration thresholds** (e.g. "caution if seat within 10% of midpoint", "seat ≥ 1 m from the back wall is best") acceptable as v1 defaults, labelled "rule of thumb"? | yes; revisit after the M5 audit | M1 |
-| Q10 | **Goals list:** wide soundstage, precise imaging, flat response, deep bass, quiet listening. Anything to add or remove? | keep these five | M3 |
-| Q11 | **Evidence tags in the UI** use shapes and words (● Physics, ◆ Guideline, ▲ Rule of thumb, ◇ Your ears), not the red/orange/yellow/purple emoji, to avoid clashing with the warning colours. OK? | yes | M2 |
-| Q12 | **"Busy-ness" shortcut** for Quick mode (Bare / Some / Busy / Very busy) instead of placing every object. OK? | yes; Detailed mode still allows objects | M3 |
 
 ## B. Technical decisions to confirm at the start of M1
 

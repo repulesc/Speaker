@@ -9,7 +9,7 @@ Status: Phase 0 draft. Goal: the app must never give confidently wrong advice. T
 | Unit (engine) | Vitest | every push (CI) | each rule P/G/H/S, each score component, units parser and formatter |
 | Property-based | Vitest + fast-check | every push | physical invariants (§3) |
 | Reference / cross-check | Vitest against committed fixtures | every push | engine output vs an independent implementation (§4) |
-| Golden scenarios | Vitest snapshot of ranked candidates | every push | Room R, the owner's room, edge rooms (§5) |
+| Golden scenarios | Vitest snapshot of ranked candidates | every push | Room R, the busy room, edge rooms (§5) |
 | i18n completeness | TypeScript compile + Vitest | every push | key and placeholder parity EN/HU |
 | Component / UI | Vitest + Testing Library (Svelte) | every push | forms, certainty chips, unit fields |
 | End-to-end | Playwright (Chromium) | every push | key journeys (§6) |
@@ -60,7 +60,7 @@ Threshold edges get explicit tests on both sides (e.g. G01 at exactly 5% and 10%
 The model must not be checked only against itself.
 
 - **Reference implementation:** `tools/reference/` holds a short, independently written Python (NumPy) implementation of P02, P04, P06, P07, P08 and P09. It's written from the formulas in the rule catalogue, **not** translated from the TypeScript. It generates JSON fixtures that are committed. CI compares the engine output with the fixtures (tolerances: frequencies ±0.01 Hz, bass curve ±0.5 dB after normalisation). Fixtures are regenerated only deliberately, with a reason in the commit message.
-- **External tool spot-checks (manual, recorded):** for Room R and the owner's room, compare against at least one established room simulator, such as the REW room simulator or the amroc room-mode calculator:
+- **External tool spot-checks (manual, recorded):** for Room R and the busy room, compare against at least one established room simulator, such as the REW room simulator or the amroc room-mode calculator:
   - mode list;
   - shape of the predicted response, with the same positions.
 
@@ -79,7 +79,7 @@ The model must not be checked only against itself.
 | Room with "slanted ceiling" | out-of-model banner; caps applied |
 | Seat fixed against back wall | G02 red flag; the engine must still give the best speaker positions for that seat |
 | Speaker with rear port and min wall distance | G07 caution and constraint respected |
-| Owner's room (§7) | real-world sanity check |
+| Busy room (§7) | real-world sanity check, modelled on the owner's description |
 
 The snapshot holds the top 3 candidates (positions rounded to 5 cm), their scores (2 decimals) and the finding IDs. Changes require explicit review.
 
@@ -96,9 +96,9 @@ The snapshot holds the top 3 candidates (positions rounded to 5 cm), their score
 9. **Phone viewport (390 × 844):** bottom sheet works; no horizontal scroll; tap targets ≥ 44 px.
 10. **Keyboard only:** complete Quick start without a mouse.
 
-## 7. The owner's room: test profile
+## 7. The busy room: test profile
 
-One realistic profile. The product stays universal. **Missing values must be supplied by the owner before Phase 1 golden tests** (see OPEN_QUESTIONS Q1).
+A synthetic but realistic profile built from the owner's description of their room. The owner's real measurements are not needed (the product is universal), so the missing values below are filled with plausible numbers, fixed in `tests/fixtures/busy-room.ts`. The KEF data below is a **test fixture only**; no model database ships in v1.
 
 | Item | Value | Status |
 |---|---|---|

@@ -317,4 +317,4 @@ export interface ConfidenceReport {
 - **Autosave:** `localStorage` key `spa:project:<id>` (JSON). List of projects at `spa:index`. All access is wrapped in try/catch; the app must work (unsaved) without storage.
 - **Export / import:** the same `Project` JSON, file name `<name>.speaker.json`. Import validates with a hand-written schema guard (no dependency needed for this size), runs migrations, and rejects unknown `schemaVersion` greater than supported with a clear message.
 - **Share link:** `#p=<base64url(deflate-raw(JSON))>` using the browser's native `CompressionStream`. The hash fragment is never sent to the server, so it stays private. Listening notes are **excluded** from share links by default (opt-in checkbox).
-- **Speaker database:** `src/data/speakers/*.json`, one file per model, validated in CI. `verified: false` entries are shown with an "unverified data" badge.
+- **Speaker profiles:** user-entered, stored with the project and exportable as `<name>.speaker-profile.json`. Generic type presets live in `src/engine/presets/speakerTypes.ts`, and all their values are `estimated`. No model database in v1.

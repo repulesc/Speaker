@@ -136,7 +136,7 @@ Caps limit an output's confidence however complete the inputs are:
 ## 7. Test hooks
 
 - Every component is a pure function `(config, context) → number` with unit tests at its threshold edges.
-- **Golden tests:** fixed projects (Room R and the owner's room) with stored expected top candidates and scores. Any change in ranking fails CI and must be explained in the PR.
+- **Golden tests:** fixed projects (Room R and the busy room) with stored expected top candidates and scores. Any change in ranking fails CI and must be explained in the PR.
 - **Invariants:**
   - mirror-symmetric rooms give mirror-symmetric heatmaps;
   - raising a goal weight never changes a physics component value;

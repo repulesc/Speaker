@@ -132,8 +132,8 @@ Every numeric field has the **certainty selector** inline: a small three-state c
 
 ### Step 4 · Speakers
 
-- **Find your speaker:** search box over the built-in database (brand + model, fuzzy). Results show a "verified data" or "unverified data" badge.
-- **Not listed? Enter manually:** a short form with plain-language questions and pictures: size, "Where is the bass port?" (front / back / bottom / none / don't know), "Is it a coaxial driver (tweeter in the middle of the woofer)?", "Does it have tone or placement settings?". Every field allows "don't know".
+- **Start from a type:** pick a generic speaker type (small bookshelf, coaxial monitor, floor-stander, …). It prefills typical values, all marked "estimated". There is no model database in v1.
+- **Describe your speaker:** a short form with plain-language questions and pictures: size, "Where is the bass port?" (front / back / bottom / none / don't know), "Is it a coaxial driver (tweeter in the middle of the woofer)?", "Does it have tone or placement settings?". Every field allows "don't know". Brand and model are free text, for the user's own reference. Profiles can be saved, exported and imported as files.
 - **Optional web lookup (later, see OPEN_QUESTIONS):** suggests values with sources that the user must confirm. v1 ships without it.
 - **Placement:**
   - drag both speakers; mirror-lock is on by default;

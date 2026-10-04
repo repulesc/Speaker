@@ -45,8 +45,7 @@ Each milestone ends with a short review and a demo the owner can click (from M2 
   - interactive top view and side view (SVG): drag, snap, keyboard move, undo and redo;
   - wall and patch editor;
   - object palette;
-  - speaker database (seed: the KEF LSX II LT plus a handful of popular models, each with sources; `verified` set honestly);
-  - manual speaker entry;
+  - speaker entry form with generic type presets (no model database in v1); profile export and import;
   - variants.
 - **Acceptance:**
   - E2E journeys 1–3 and 10 pass;
@@ -83,9 +82,10 @@ Each milestone ends with a short review and a demo the owner can click (from M2 
 
 ## Later (not v1, in rough priority order)
 
-1. Speaker web lookup ("suggest, then verify").
-2. Subwoofer support (single sub, then multi-sub [WELTI06]).
-3. Non-rectangular rooms (L-shape via approximate methods, with clear confidence caps).
-4. Measurement import (REW export files).
-5. More languages.
-6. Donation link.
+1. **Desk / near-field setups** (owner wants this; first after v1): desk-surface reflection, short distances, desk DSP modes.
+2. Curated speaker database and web lookup ("suggest, then verify").
+3. Subwoofer support (single sub, then multi-sub [WELTI06]).
+4. Non-rectangular rooms (L-shape via approximate methods, with clear confidence caps).
+5. Measurement import (REW export files).
+6. More languages.
+7. Donation link.

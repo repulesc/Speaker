@@ -34,7 +34,7 @@ src/i18n/
 - **No suffixes on interpolated values in Hungarian.** "`{distance}`-re" breaks for different units ("cm-re", "m-re", "ft-ra"…). Rephrase so the value stands alone, e.g. "Távolság a faltól: {distance}" rather than "{distance}-re a faltól".
 - Plain language on the surface, technical terms in "Why?" panels.
 - Engine findings have three texts: `title` (≤ 60 characters), `body` (≤ 2 sentences) and `why` (the expandable part with assumptions).
-- **Hungarian register:** recommendation is **formal-polite (magázás, "Ön")**, phrased impersonally where natural ("Érdemes a hallgatási pontot előrébb hozni"), because many target users are older hi-fi enthusiasts. ⚠ Owner to confirm (OPEN_QUESTIONS Q4).
+- **Hungarian register: informal (tegezés, "te").** Owner decision, final. Keep it warm and respectful, never slangy ("Próbáld előrébb hozni a hallgatási pontot").
 - **Translation process:** Claude drafts the Hungarian; a native-speaking hi-fi listener (the owner, or someone they nominate) reviews all strings before launch. Strings carry a `// reviewed` marker in `hu.ts` blocks once checked; CI reports the unreviewed count (a warning, not a failure).
 
 ## 4. Units
@@ -125,7 +125,7 @@ Round-trip test: for a sample of values, `parse(format(x))` stays within half th
 | confidence (meter) | megbízhatóság | |
 | red flag | kerülendő | lit. "to be avoided"; alternative "figyelmeztetés" |
 | caution | figyelem | |
-| Physics / Guideline / Rule of thumb / Your ears | Fizika / Irányelv / Ökölszabály / Az Ön füle | depends on the register decision (Q4) |
-| Do this first | Ezzel kezdje | |
+| Physics / Guideline / Rule of thumb / Your ears | Fizika / Irányelv / Ökölszabály / A füled | informal register |
+| Do this first | Kezdd ezzel | |
 | variant | változat | |
 | guidance, not a guarantee | iránymutatás, nem garancia | |

@@ -43,6 +43,9 @@ It is a **scientific helper**, not an oracle. It explains, ranks options, and fl
 | Languages | **English and Hungarian** from day one (all text in translation files) |
 | Units | Metric and imperial. Internal canonical unit is metres, conversion only at UI edges |
 | License | MIT for code, CC BY for the rule catalogue and docs |
+| Hungarian register | Informal (tegezés) |
+| Speakers | User-entered profiles plus generic type presets; no model database at launch |
+| Desk / near-field setups | After v1 (first item in "Later"); wanted by the owner |
 | Room shapes (v1) | **Rectangular only.** Others get a clear "low confidence / out of scope" message. Revisit only if cheap and unambiguous |
 | Money | Free. Optional donation link (Ko-fi / GitHub Sponsors) later |
 | Priorities | 1. smooth, clean, easy-to-read code. 2. practical use. 3. aesthetics (minimal, not ugly) |
@@ -88,7 +91,7 @@ It is a **scientific helper**, not an oracle. It explains, ranks options, and fl
   - dispersion and directivity;
   - sensitivity and power;
   - DSP and EQ controls (wall, desk, treble trim and so on).
-- **Speaker data source.** Curated built-in database plus manual entry. Web lookup only as "suggest, then the user verifies", with a source shown. Dispersion data should point to measured sources where they exist. **Never trust remembered specs; verify them.**
+- **Speaker data source (decided after Phase 0).** The user describes their own speaker; there is **no built-in model database at launch**. Generic *speaker-type presets* (for example "small rear-ported bookshelf", "coaxial active monitor", "sealed floor-stander") prefill typical values marked as estimates. Profiles can be saved and shared as files. A curated database may come later. Web lookup only as "suggest, then the user verifies", with a source shown. Dispersion data should point to measured sources where they exist. **Never trust remembered specs; verify them.**
 - **Goals:** wide soundstage, precise imaging, flat response, and so on. These weight suggestions, never override physics.
 - **Subjective feedback (optional, later in the flow):** symptoms such as "lacks focus" map to hypotheses and experiments (check toe-in, first reflections, boundary distance, ear height). They never auto-change the physics result.
 
@@ -115,7 +118,9 @@ Each claim carries its evidence badge and an expandable "why, and the source". T
 - Tests include textbook cases and cross-checks against independent references (for example room-mode calculators).
 - i18n from the start: all strings keyed, with EN and HU files. Hungarian copy needs special care for natural phrasing and hi-fi terms.
 
-## 9. Test case: the owner's room (one profile, not the product)
+## 9. Test case modelled on the owner's room (one profile, not the product)
+
+The owner's actual measurements are not needed: the product is universal. TEST_PLAN uses a synthetic "busy room" scenario built from this description.
 
 Used as one realistic test profile; the app itself stays universal.
 
