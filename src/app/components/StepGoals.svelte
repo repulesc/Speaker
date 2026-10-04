@@ -61,7 +61,7 @@
   .intro,
   .help {
     color: var(--ink-muted);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   fieldset {
     margin: 0;
@@ -81,6 +81,6 @@
   }
   .notice {
     border-color: var(--caution);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
 </style>

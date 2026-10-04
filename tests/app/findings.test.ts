@@ -220,6 +220,9 @@ describe('finding texts', () => {
       for (const path of confidenceInputPaths(makeProject())) {
         const text = i18n.t(`next.${path}`);
         expect(text, `${locale} next.${path}`).not.toBe(`next.${path}`);
+        // The confidence hint names the input too (owner testing v3 found a raw key here).
+        const name = i18n.t(`input.${path}`);
+        expect(name, `${locale} input.${path}`).not.toBe(`input.${path}`);
       }
     }
     i18n.locale = 'en';

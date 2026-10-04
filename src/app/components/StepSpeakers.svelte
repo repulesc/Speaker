@@ -548,12 +548,12 @@
     gap: 24px;
   }
   h3 {
-    font-size: 17px;
+    font-size: var(--text-md);
   }
   .intro,
   .help {
     color: var(--ink-muted);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   fieldset {
     margin: 0;
@@ -602,11 +602,11 @@
   }
   .tile-title {
     font-weight: 600;
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   .tile-sub {
     color: var(--ink-muted);
-    font-size: 13px;
+    font-size: var(--text-sm);
   }
   .grid2 {
     display: grid;
@@ -620,7 +620,7 @@
   }
   .field label,
   .label {
-    font-size: 15px;
+    font-size: var(--text-md);
     font-weight: 600;
   }
   .input {

@@ -4,6 +4,7 @@
   import { activeVariant, roomSize } from '../plan/placement';
   import { analysis, projectLabel, SECTIONS, workspace, type StepId } from '../session.svelte';
   import { ui } from '../ui.svelte';
+  import BassChart from './BassChart.svelte';
   import ConfidenceMeter from './ConfidenceMeter.svelte';
   import ListenPanel from './ListenPanel.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
@@ -59,7 +60,11 @@
     listen: () => (notes ? String(notes) : ''),
   };
   const label = (id: StepId) =>
-    i18n.t(id === 'why' || id === 'treat' || id === 'listen' ? `nav.${id}` : `dock.${id}`);
+    i18n.t(
+      id === 'why' || id === 'treat' || id === 'listen' || id === 'bass'
+        ? `nav.${id}`
+        : `dock.${id}`,
+    );
 </script>
 
 {#snippet rows(ids: readonly StepId[], title: string, titleId: string)}
@@ -110,7 +115,7 @@
     {#if home}
       <SuggestionCard />
       {@render rows(SECTIONS, i18n.t('nav.room'), 'nav-room')}
-      {@render rows(['why', 'treat', 'listen'], i18n.t('nav.results'), 'nav-results')}
+      {@render rows(['why', 'treat', 'bass', 'listen'], i18n.t('nav.results'), 'nav-results')}
       <div class="foot">
         <ConfidenceMeter report={analysis.result?.confidence ?? null} />
       </div>
@@ -136,6 +141,9 @@
           <TreatPanel />
         {:else if ui.step === 'listen'}
           <ListenPanel />
+        {:else if ui.step === 'bass'}
+          <h2>{i18n.t('nav.bass')}</h2>
+          <BassChart />
         {/if}
       </div>
       {#if SECTIONS.includes(ui.step as (typeof SECTIONS)[number])}
@@ -177,7 +185,7 @@
   }
   .save {
     color: var(--ink-muted);
-    font-size: var(--text-xs);
+    font-size: var(--text-sm);
   }
   .name {
     min-width: 0;
@@ -197,7 +205,7 @@
     border-radius: 10px;
     background: none;
     color: var(--accent);
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     cursor: pointer;
   }
   .icon:disabled {
@@ -224,11 +232,11 @@
     background: none;
     color: var(--accent);
     font: inherit;
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     cursor: pointer;
   }
   .back span {
-    font-size: 26px;
+    font-size: var(--text-xl);
     line-height: 1;
   }
   .page {

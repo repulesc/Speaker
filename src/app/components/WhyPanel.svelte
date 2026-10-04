@@ -155,11 +155,11 @@
   }
   .muted {
     color: var(--ink-muted);
-    font-size: 13px;
+    font-size: var(--text-sm);
   }
   .meta {
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--text-sm);
     margin-bottom: 4px;
   }
   .disclaimer {

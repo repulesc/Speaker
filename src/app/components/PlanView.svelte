@@ -2,7 +2,7 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { scoreWord } from '../findings/text';
-  import { paintField, paintHeat, paintSpeakerMap } from '../map/heat';
+  import { paintField, paintHeat, paintSpeakerMap, renderScale } from '../map/heat';
   import { modeExplorer } from '../state/mode.svelte';
   import { fitFrame, toPx, toWorld } from '../plan/frame';
   import {
@@ -102,16 +102,20 @@
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
     if (heat && layers && !field && ui.layer !== 'speakers') {
-      paintHeat(heat, layers, layers.values[ui.layer]);
+      paintHeat(heat, layers, layers.values[ui.layer], renderScale(layers.step * frame.scale));
     }
   });
   let speakerCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
-    if (speakerCanvas && speakerGrid) paintSpeakerMap(speakerCanvas, speakerGrid);
+    if (speakerCanvas && speakerGrid) {
+      paintSpeakerMap(speakerCanvas, speakerGrid, renderScale(speakerGrid.step * frame.scale));
+    }
   });
   let fieldCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
-    if (fieldCanvas && field) paintField(fieldCanvas, field.grid);
+    if (fieldCanvas && field) {
+      paintField(fieldCanvas, field.grid, renderScale(field.grid.step * frame.scale));
+    }
   });
 
   // Keep the preview and the probe in step with the project (and with each other).

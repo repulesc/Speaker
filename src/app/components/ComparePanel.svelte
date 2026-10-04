@@ -68,18 +68,12 @@
     display: grid;
     gap: 8px;
   }
-  h3 {
-    font-size: 12px;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-  }
   p {
     margin: 0;
   }
   .muted {
     color: var(--ink-muted);
-    font-size: 13px;
+    font-size: var(--text-sm);
   }
   .card {
     display: grid;

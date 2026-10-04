@@ -135,7 +135,7 @@
   .intro,
   .help {
     color: var(--ink-muted);
-    font-size: 15px;
+    font-size: var(--text-md);
   }
   fieldset {
     margin: 0;
