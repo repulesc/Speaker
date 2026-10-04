@@ -21,6 +21,11 @@ The owner wants Opus to have real freedom, without surprises.
 - **First visit:** start the survey straight away (no example room, no intro screen). An "Example room" shortcut inside the survey is still welcome as a later idea.
 - **Zone limit:** when the movement limit stops the best spot, the card shows what the limit costs ("Within 50 cm: Good. With more room: Very good.").
 
+- **Heatmap default:** not decided; build all three options side by side first and let the owner choose by looking.
+- **Survey length:** short, 4 screens (room size, what to work out, speaker type, where things are). Surfaces, busyness and the rest are refined later in the sidebar.
+- **Movement zone:** one number ("How far can you move them?", about 50 cm), applied around each speaker.
+- **Sharing:** "Share as image" first (room, map and recommendation as a clean picture); link preview later.
+
 ## The owner's feedback, in order
 
 1. **Settings icon:** replace the cog with the three-lines menu icon (friendlier, less industrial).
