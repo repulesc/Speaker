@@ -1050,6 +1050,7 @@ export const en = {
   },
   analysis: {
     updating: 'Updating…',
+    updatingLarge: 'Updating… a room this large takes a few seconds.',
     error: 'Something went wrong calculating this. Your data is safe.',
     copyDetails: 'Copy details',
   },

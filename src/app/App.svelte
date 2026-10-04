@@ -24,6 +24,7 @@
   import { downloadText } from './download';
   import { analysis, projectLabel, showNotice, workspace } from './session.svelte';
   import { ui } from './ui.svelte';
+  import { roomSize } from './plan/placement';
   import { viewport } from './viewport.svelte';
   import { SIZE_LIMITS } from './state/limits';
   import {
@@ -130,6 +131,13 @@
   });
 
   onDestroy(() => analysis.dispose());
+
+  /** Big rooms have many more resonances to sum: say why the update takes a while (R5, M10). */
+  const LARGE_ROOM_M2 = 150;
+  const largeRoom = $derived.by(() => {
+    const size = roomSize(workspace.project);
+    return size !== null && size.W * size.L > LARGE_ROOM_M2;
+  });
 </script>
 
 <svelte:window onkeydown={onKeydown} onhashchange={openFromHash} />
@@ -163,7 +171,9 @@
             {/if}
           {/if}
           {#if analysis.busy}
-            <p class="busy" role="status">{i18n.t('analysis.updating')}</p>
+            <p class="busy" role="status">
+              {i18n.t(largeRoom ? 'analysis.updatingLarge' : 'analysis.updating')}
+            </p>
           {/if}
         </div>
         {#if viewport.wide}<BassChart />{/if}

@@ -23,8 +23,9 @@ test('journey 9 — phone: no horizontal scroll, the bottom sheet works', async 
   await expect.poll(async () => (await plan.boundingBox())!.height).toBeGreaterThan(before);
 });
 
-test('phone: every visible control is at least 44 × 44 px', async ({ page }) => {
-  const small = await page.evaluate(() => {
+/** Controls smaller than 44 × 44 px on screen right now. */
+async function smallControls(page: import('@playwright/test').Page) {
+  return page.evaluate(() => {
     const controls = document.querySelectorAll(
       'button, input:not([type=radio]):not([type=checkbox]), label:has(input[type=radio]), summary, a[href]',
     );
@@ -43,7 +44,23 @@ test('phone: every visible control is at least 44 × 44 px', async ({ page }) =>
           `${el.tagName.toLowerCase()} ${el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 20)} ${Math.round(el.getBoundingClientRect().width)}×${Math.round(el.getBoundingClientRect().height)}`,
       );
   });
-  expect(small).toEqual([]);
+}
+
+test('phone: every visible control is at least 44 × 44 px', async ({ page }) => {
+  expect(await smallControls(page)).toEqual([]);
+});
+
+test('phone: the Treat and Listen tabs and the bass-note bar keep 44 px targets (R5)', async ({
+  page,
+}) => {
+  await goStep(page, 'Results');
+  for (const tab of ['Treat', 'Listen']) {
+    await page.getByRole('tab', { name: tab }).click();
+    expect(await smallControls(page), tab).toEqual([]);
+  }
+  await page.getByRole('tab', { name: 'Why' }).click();
+  await page.getByRole('button', { name: 'Bass note' }).click();
+  expect(await smallControls(page), 'bass note').toEqual([]);
 });
 
 test('phone: one drawing at a time, switchable between top and side view', async ({ page }) => {

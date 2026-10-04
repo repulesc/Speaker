@@ -39,6 +39,19 @@ async function cacheFirst(request) {
   const cached = await cache.match(request);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response.ok) cache.put(request, response.clone());
+  if (response.ok) {
+    await cache.put(request, response.clone());
+    await trim(cache);
+  }
   return response;
+}
+
+/* Every release brings new hashed files and the old ones are never asked for again (R0 M14).
+   Keep the newest MAX_FILES; the cache lists entries oldest first. */
+const MAX_FILES = 60;
+
+async function trim(cache) {
+  const keys = await cache.keys();
+  const stale = keys.length - MAX_FILES;
+  for (let i = 0; i < stale; i++) await cache.delete(keys[i]);
 }

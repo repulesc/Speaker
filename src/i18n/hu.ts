@@ -1059,6 +1059,7 @@ export const hu: Messages = {
   },
   analysis: {
     updating: 'Frissítés…',
+    updatingLarge: 'Frissítés… egy ekkora szobánál ez néhány másodpercig tart.',
     error: 'Valami elromlott a számításnál. Az adataid biztonságban vannak.',
     copyDetails: 'Részletek másolása',
   },

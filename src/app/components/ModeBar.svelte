@@ -98,6 +98,9 @@
   .slider input {
     flex: 1;
     min-width: 120px;
+    /* A finger needs a 44 px target; the track stays thin, the hit area does not (R5). */
+    height: 44px;
+    margin: 0;
     accent-color: var(--accent);
   }
   output {
@@ -147,6 +150,9 @@
     .slider,
     button {
       min-height: 36px;
+    }
+    .slider input {
+      height: 36px;
     }
   }
 </style>
