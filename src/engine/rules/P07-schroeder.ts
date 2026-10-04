@@ -11,6 +11,8 @@ export function schroederFrequency(t60: number, volume: number): number {
 export const P07: RuleDef = {
   id: 'P07',
   level: 'physics',
+  concern: 'room',
+  scope: 'room',
   sources: ['SCH96', 'KUT', 'TOOLE'],
   variants: ['transition'],
   evaluate(ctx) {

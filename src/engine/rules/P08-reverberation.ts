@@ -115,6 +115,8 @@ export function roomCharacter(t60Mid: number): RoomCharacter {
 export const P08: RuleDef = {
   id: 'P08',
   level: 'physics',
+  concern: 'room',
+  scope: 'room',
   sources: ['SAB', 'EYR30', 'KUT', 'EVP'],
   variants: ['dead', 'balanced', 'live'],
   evaluate(ctx) {

@@ -16,6 +16,8 @@ export function frontWallZone(nullHz: number): FrontWallZone {
 export const H04: RuleDef = {
   id: 'H04',
   level: 'heuristic',
+  concern: 'frontWall',
+  scope: 'placement',
   sources: ['ALL74', 'TOOLE'],
   variants: ['near', 'middle', 'far'],
   evaluate(ctx, placement) {

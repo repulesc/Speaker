@@ -8,6 +8,8 @@ import { makeFinding, type RuleDef } from './rule';
 export const G09: RuleDef = {
   id: 'G09',
   level: 'guideline',
+  concern: 'reflections',
+  scope: 'placement',
   sources: ['TOOLE', 'DAV80'],
   variants: ['treatForImaging', 'keepForWidth', 'bothSchools'],
   evaluate(ctx, placement) {

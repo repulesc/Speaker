@@ -59,6 +59,8 @@ export function alignedBoundaries(
 export const P04: RuleDef = {
   id: 'P04',
   level: 'physics',
+  concern: 'frontWall',
+  scope: 'placement',
   sources: ['ALL74', 'TOOLE', 'EVP'],
   variants: ['frontWall', 'aligned'],
   evaluate(ctx, placement) {

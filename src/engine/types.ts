@@ -245,11 +245,23 @@ export interface Project {
 // ── Engine output ─────────────────────────────────────────────────────────
 
 export type EvidenceLevel = 'physics' | 'guideline' | 'heuristic' | 'subjective';
+
+/** What a finding or piece of advice is about. The UI groups by it. */
+export type Concern =
+  | 'bass'
+  | 'frontWall'
+  | 'reflections'
+  | 'stereo'
+  | 'room'
+  | 'speaker'
+  | 'objects'
+  | 'rulesOfThumb';
 export type Severity = 'ok' | 'info' | 'caution' | 'red-flag';
 
 export interface Finding {
   ruleId: string;
   level: EvidenceLevel;
+  concern: Concern;
   severity: Severity;
   /** i18n key: `finding.<ruleId>.<variant>`. The engine never produces display text. */
   messageKey: string;
@@ -289,6 +301,7 @@ export interface Candidate extends Placement {
   nominalScore: number;
   scoreSpread: number;
   breakdown: ScoreBreakdownItem[];
+  fragility?: Fragility;
 }
 
 export interface Grid {
@@ -299,6 +312,77 @@ export interface Grid {
   ny: number;
   /** Row-major (y outer, x inner). NaN = not allowed (constraint). */
   values: number[];
+}
+
+/** One heatmap per concern (docs/REVAMP_PLAN.md, "Layers"). */
+export type LayerId =
+  | 'overall'
+  | 'goals'
+  | 'bass'
+  | 'nulls'
+  | 'frontWall'
+  | 'stereo'
+  | 'symmetry'
+  | 'backWall';
+
+/** Seat heatmaps: the speakers stay where they are and the seat moves over the grid. */
+export interface SeatLayers {
+  x0: number;
+  y0: number;
+  step: number;
+  nx: number;
+  ny: number;
+  /** Row-major (y outer, x inner), 0–1, NaN where the seat cannot go. */
+  values: Record<LayerId, number[]>;
+  /** True where the app red-flags the seat itself (room midpoint, back wall, stereo angle). */
+  redFlag: boolean[];
+}
+
+export type FragilityLevel = 'steady' | 'sensitive' | 'fragile';
+
+/** How much the score drops for small errors: positions ±5 cm, room size ±5 %. */
+export interface Fragility {
+  positionDrop: number;
+  roomDrop: number;
+  level: FragilityLevel;
+}
+
+/** A rule of thumb's seat line, compared with what the model says for this room. */
+export interface FolkComparison {
+  ruleId: 'H01' | 'H02';
+  seatY: number;
+  /** Seat score on that line (goal weights), or NaN where the seat cannot go. */
+  score: number;
+  bestY: number;
+  bestScore: number;
+  verdict: 'asGood' | 'close' | 'worse' | 'notAllowed';
+  redFlag: boolean;
+}
+
+/** The sound pressure of one bass note over the floor (room-mode explorer). */
+export interface ModeField {
+  frequency: number;
+  /** Level relative to the loudest cell (dB, ≤ 0, floored at −40), at ear height. */
+  grid: Grid;
+  /** Room modes within ±5 % of the frequency, the ones shaping the pattern most. */
+  nearbyModes: Mode[];
+}
+
+/** Why a spot is good or poor: the probe (docs/REVAMP_PLAN.md, "Probe / why"). */
+export interface PointExplanation {
+  placement: Placement;
+  /** Passes the hard constraints (docs/SCORING.md §1). */
+  valid: boolean;
+  /** The app would red-flag this spot itself. */
+  redFlag: boolean;
+  /** Goal-weighted score and the same without goals. */
+  score: number;
+  overall: number;
+  breakdown: ScoreBreakdownItem[];
+  /** Findings that depend on where things stand, red flags first. */
+  findings: Finding[];
+  /** Smoothed bass curve at this spot, normalised to its median (as `AnalysisOk.bassResponse`). */
+  bassResponse: { f: number[]; dB: number[] };
 }
 
 export type OutputId = 'bass' | 'reflections' | 'geometry' | 'roomCharacter' | 'speakerAdvice';
@@ -337,6 +421,11 @@ export interface AnalysisOk extends AnalysisBase {
   topActions: Action[];
   current: Candidate;
   candidates: Candidate[];
+  /** Seat layers with the speakers where they are now. */
+  layers: SeatLayers;
+  /** The 38 % rule and the rule of thirds against the seat map. */
+  folk: FolkComparison[];
+  /** Seat map (goal score, speakers as now) and speaker map (seat as now). */
   heatmap: { listener: Grid; speakers: Grid };
 }
 

@@ -52,6 +52,8 @@ export function isObstructed(
 export const G10: RuleDef = {
   id: 'G10',
   level: 'guideline',
+  concern: 'objects',
+  scope: 'placement',
   sources: ['TOOLE'],
   variants: ['obstruction', 'nearbyHard', 'passiveSpeaker'],
   evaluate(ctx, placement) {

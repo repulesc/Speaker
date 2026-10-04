@@ -15,6 +15,8 @@ export function sideDistanceDifference(leftX: number, rightX: number, width: num
 export const G03: RuleDef = {
   id: 'G03',
   level: 'guideline',
+  concern: 'stereo',
+  scope: 'placement',
   sources: ['TOOLE', 'ITU1116'],
   variants: ['redFlag', 'caution', 'ok', 'surfaces'],
   evaluate(ctx, placement) {

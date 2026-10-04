@@ -9,6 +9,8 @@ import { makeFinding, type RuleDef } from './rule';
 export const G05: RuleDef = {
   id: 'G05',
   level: 'guideline',
+  concern: 'stereo',
+  scope: 'placement',
   sources: ['WALL49', 'TOOLE'],
   variants: ['redFlag', 'caution', 'ok'],
   evaluate(ctx, placement) {

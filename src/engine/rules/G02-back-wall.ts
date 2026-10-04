@@ -11,6 +11,8 @@ const BACK_WALL_CAUTION = 0.6;
 export const G02: RuleDef = {
   id: 'G02',
   level: 'guideline',
+  concern: 'bass',
+  scope: 'placement',
   sources: ['TOOLE', 'EVP'],
   variants: ['redFlag', 'caution', 'ok'],
   evaluate(ctx, placement) {

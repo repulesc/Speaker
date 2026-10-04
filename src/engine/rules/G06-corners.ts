@@ -16,6 +16,8 @@ export function cornerProximity(frontDistance: number, sideDistance: number): Co
 export const G06: RuleDef = {
   id: 'G06',
   level: 'guideline',
+  concern: 'bass',
+  scope: 'placement',
   sources: ['ALL74', 'TOOLE'],
   variants: ['redFlag', 'caution', 'ok'],
   evaluate(ctx, placement) {

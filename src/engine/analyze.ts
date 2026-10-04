@@ -3,15 +3,11 @@ import { confidence } from './confidence';
 import { buildContext, currentPlacement } from './context';
 import { RULES } from './rules';
 import { bassCurve } from './rules/P09-bass-response';
-import {
-  findCandidates,
-  listenerHeatmap,
-  makeScorer,
-  robustScores,
-  speakerHeatmap,
-  toCandidate,
-} from './scoring/search';
-import type { Analysis, EvidenceLevel, Finding, Severity } from './types';
+import { folkComparison } from './folk';
+import { fragility, resizedRooms } from './scoring/fragility';
+import { seatLayers, speakerHeatmap } from './scoring/heatmaps';
+import { findCandidates, makeScorer, robustScores, toCandidate } from './scoring/search';
+import type { Analysis, Candidate, EvidenceLevel, Finding, Severity } from './types';
 import { ENGINE_VERSION } from './version';
 
 const SEVERITY_ORDER: Record<Severity, number> = { 'red-flag': 0, caution: 1, info: 2, ok: 3 };
@@ -54,13 +50,21 @@ export function analyze(
   const findings = sortFindings(RULES.flatMap((rule) => rule.evaluate(ctx, placement)));
 
   const scorer = makeScorer(ctx);
+  const rooms = resizedRooms(scorer);
+  const withFragility = <T extends Candidate>(c: T): T => ({
+    ...c,
+    fragility: fragility(scorer, rooms, c),
+  });
   const [currentRobust] = robustScores(scorer, [placement], seed);
-  const current = toCandidate(scorer, placement, currentRobust!);
-  const candidates = findCandidates(scorer, seed);
+  const current = withFragility(toCandidate(scorer, placement, currentRobust!));
+  const candidates = findCandidates(scorer, seed).map(withFragility);
   const best = candidates[0];
 
   const curve = bassCurve(ctx, placement);
-  const heatmapPlacement = best ?? current;
+  // The maps keep the speakers (seat map) or the seat (speaker map) where they are now, so the
+  // map, the probe (explainPoint) and the rules of thumb all describe the same situation.
+  const layers = seatLayers(scorer, placement.speakers, placement.listener.z);
+  const { x0, y0, step, nx, ny } = layers;
 
   return {
     status: 'ok',
@@ -80,9 +84,11 @@ export function analyze(
     topActions: topActions(findings, current, best),
     current,
     candidates,
+    layers,
+    folk: folkComparison(layers, ctx.room.L, placement.listener.x),
     heatmap: {
-      listener: listenerHeatmap(scorer, heatmapPlacement.speakers, placement.listener.z),
-      speakers: speakerHeatmap(scorer, heatmapPlacement.listener),
+      listener: { x0, y0, step, nx, ny, values: layers.values.goals },
+      speakers: speakerHeatmap(scorer, placement.listener),
     },
     confidence: confidence(project, ctx),
   };

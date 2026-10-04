@@ -16,7 +16,7 @@ import {
   type BassModel,
 } from '../rules/P09-bass-response';
 import type { ComponentId, Placement, ScoreBreakdownItem, SpeakerPlacement, Vec3 } from '../types';
-import type { ScoringSettings } from './settings';
+import { scoringSettings, type ScoringSettings } from './settings';
 import { THRESHOLDS as T } from './thresholds';
 
 export interface ScoreResult {
@@ -32,6 +32,8 @@ export class Scorer {
   readonly model: BassModel;
   /** The goal weights, with C1 and C2 dropped when the speaker leaves no bass band to judge. */
   readonly weights: Record<ComponentId, number>;
+  /** The same without any goals: the "overall" view, the same for everyone. */
+  readonly neutralWeights: Record<ComponentId, number>;
   private readonly range: [number, number];
   /** Index range of the model frequencies inside the scoring range. */
   private readonly kLo: number;
@@ -44,7 +46,9 @@ export class Scorer {
   ) {
     const band = bassBand(ctx);
     this.range = band.range;
+    const neutral = scoringSettings({ weights: {} }).weights;
     this.weights = band.scored ? settings.weights : withoutBass(settings.weights);
+    this.neutralWeights = band.scored ? neutral : withoutBass(neutral);
     // Extend by the smoothing half-window so smoothing near the edges sees real data.
     const margin = 2 ** (1 / 12);
     this.model = buildBassModel(ctx, this.range[0] / margin, this.range[1] * margin, truncation);

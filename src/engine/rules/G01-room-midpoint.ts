@@ -16,6 +16,8 @@ export function midpointOffsetFraction(listenerY: number, length: number): numbe
 export const G01: RuleDef = {
   id: 'G01',
   level: 'guideline',
+  concern: 'bass',
+  scope: 'placement',
   sources: ['TOOLE', 'EVP'],
   variants: ['redFlag', 'caution', 'ok', 'widthNode'],
   evaluate(ctx, placement) {

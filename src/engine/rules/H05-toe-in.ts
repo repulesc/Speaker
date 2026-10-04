@@ -7,6 +7,8 @@ import { makeFinding, type RuleDef } from './rule';
 export const H05: RuleDef = {
   id: 'H05',
   level: 'heuristic',
+  concern: 'stereo',
+  scope: 'placement',
   sources: ['TOOLE'],
   variants: ['experiment'],
   evaluate(_ctx, placement) {

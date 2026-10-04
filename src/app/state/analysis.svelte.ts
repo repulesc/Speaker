@@ -1,5 +1,5 @@
 import type { Analysis, Project } from '../../engine/types';
-import type { AnalyzeRequest, AnalyzeResponse } from '../../engine/worker';
+import type { AnalyzeRequest, AnalyzeResponse } from '../../engine/tasks';
 
 const DEBOUNCE_MS = 150;
 
@@ -47,7 +47,7 @@ export class AnalysisRunner {
       if ('error' in response) {
         this.error = response.error;
         this.result = null;
-      } else {
+      } else if ('analysis' in response) {
         this.error = null;
         this.result = response.analysis;
       }

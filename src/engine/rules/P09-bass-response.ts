@@ -286,6 +286,8 @@ const CAUTION_DB = 10;
 export const P09: RuleDef = {
   id: 'P09',
   level: 'physics',
+  concern: 'bass',
+  scope: 'placement',
   sources: ['KUT', 'EVP'],
   variants: ['peak', 'dip', 'smooth', 'notScored'],
   evaluate(ctx, placement) {

@@ -8,7 +8,7 @@ import { BACK_WALL_RED_FLAG } from '../rules/G02-back-wall';
 import { angleRedFlag, stereoAngleDeg } from '../rules/G04-stereo-angle';
 import { cornerProximity } from '../rules/G06-corners';
 import { cabinetBox, isObstructed, objectBox } from '../rules/G10-objects';
-import type { Candidate, Grid, Placement, SpeakerPlacement, Vec2, Vec3 } from '../types';
+import type { Candidate, Placement, SpeakerPlacement, Vec2, Vec3 } from '../types';
 import { Scorer } from './scorer';
 import { scoringSettings } from './settings';
 import { THRESHOLDS as T } from './thresholds';
@@ -64,7 +64,8 @@ export function avoidsRedFlags(
   return !angleRedFlag(angle);
 }
 
-function range(from: number, to: number, step: number): number[] {
+/** `from`, `from + step`, … up to `to` (inclusive), rounded to the millimetre. */
+export function steps(from: number, to: number, step: number): number[] {
   const values: number[] = [];
   for (let v = from; v <= to + 1e-9; v += step) values.push(Math.round(v * 1000) / 1000);
   return values;
@@ -187,7 +188,7 @@ export function searchPlacements(scorer: Scorer): Scored[] {
 
 function searchWithin(scorer: Scorer, space: SearchSpace): Scored[] {
   const axis = (bounds: [number, number], fixed: boolean, current: number) =>
-    fixed ? [current] : range(bounds[0], bounds[1], COARSE_STEP);
+    fixed ? [current] : steps(bounds[0], bounds[1], COARSE_STEP);
   const ears = scorer.ctx.variant.listener.ears;
   const coarseParams = axis(space.clearance, !!space.fixedSpeakers, 0).flatMap((clearance) =>
     axis(space.halfSpacing, !!space.fixedSpeakers, 0).flatMap((half) =>
@@ -354,58 +355,6 @@ export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate
   return pickDistinct(ranked, T.candidateSeparation, max).map((p) =>
     toCandidate(scorer, p.placement, p.robust),
   );
-}
-
-// ── Heatmaps (docs/SCORING.md §5) ─────────────────────────────────────────
-
-/** Heatmap resolution: 10 cm for typical rooms, coarser for large ones (render cost, not accuracy). */
-function heatmapStep(ctx: AnalysisContext): number {
-  const area = ctx.room.W * ctx.room.L;
-  return area <= 30 ? 0.1 : area <= 60 ? 0.15 : 0.2;
-}
-
-/** Score for the listener at every grid cell, speakers fixed. NaN where not allowed. */
-export function listenerHeatmap(
-  scorer: Scorer,
-  speakers: Placement['speakers'],
-  earZ: number,
-): Grid {
-  const { W, L } = scorer.ctx.room;
-  const step = heatmapStep(scorer.ctx);
-  const xs = range(step / 2, W - step / 2, step);
-  const ys = range(step / 2, L - step / 2, step);
-  const coupling = scorer.coupling(speakers);
-  const values = ys.flatMap((y) =>
-    xs.map((x) => {
-      const placement = { speakers, listener: { x, y, z: earZ } };
-      return isValidPlacement(scorer.ctx, placement)
-        ? scorer.score(placement, coupling).score
-        : NaN;
-    }),
-  );
-  return { x0: xs[0]!, y0: ys[0]!, step, nx: xs.length, ny: ys.length, values };
-}
-
-/**
- * Score for the left speaker at every grid cell of the left half (right speaker mirrored about
- * the listener's x), listener fixed. The UI mirrors the grid for the right half.
- */
-export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
-  const ctx = scorer.ctx;
-  const centre = listener.x;
-  const step = heatmapStep(ctx);
-  const xs = range(step / 2, centre - step / 2, step);
-  const ys = range(step / 2, ctx.room.L / 2, step);
-  const values = ys.flatMap((y) =>
-    xs.map((x) => {
-      const clearance = y - ctx.speaker.depth / 2;
-      if (clearance < 0) return NaN;
-      const speakers = speakerPair(ctx, centre, centre - x, clearance);
-      const placement = { speakers, listener };
-      return isValidPlacement(ctx, placement) ? scorer.score(placement).score : NaN;
-    }),
-  );
-  return { x0: xs[0] ?? 0, y0: ys[0] ?? 0, step, nx: xs.length, ny: ys.length, values };
 }
 
 export function makeScorer(ctx: AnalysisContext): Scorer {

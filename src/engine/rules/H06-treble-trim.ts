@@ -9,6 +9,8 @@ import { makeFinding, type RuleDef } from './rule';
 export const H06: RuleDef = {
   id: 'H06',
   level: 'heuristic',
+  concern: 'speaker',
+  scope: 'room',
   sources: ['manufacturer', 'TOOLE'],
   variants: ['lift', 'cut'],
   evaluate(ctx) {

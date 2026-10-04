@@ -69,6 +69,8 @@ export function ituRatioPass(room: RoomGeometry): boolean {
 export const P11: RuleDef = {
   id: 'P11',
   level: 'physics',
+  concern: 'bass',
+  scope: 'room',
   sources: ['BON81', 'BOLT46', 'ITU1116'],
   variants: ['coincident', 'bonello', 'ituPass', 'ituFail'],
   evaluate(ctx) {

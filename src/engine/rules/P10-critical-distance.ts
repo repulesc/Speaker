@@ -13,6 +13,8 @@ export function criticalDistance(q: number, volume: number, t60: number): number
 export const P10: RuleDef = {
   id: 'P10',
   level: 'physics',
+  concern: 'room',
+  scope: 'placement',
   sources: ['EVP', 'KUT'],
   variants: ['ratio'],
   evaluate(ctx, placement) {

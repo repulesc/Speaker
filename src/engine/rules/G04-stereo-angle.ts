@@ -24,6 +24,8 @@ export function angleRedFlag(angle: number): boolean {
 export const G04: RuleDef = {
   id: 'G04',
   level: 'guideline',
+  concern: 'stereo',
+  scope: 'placement',
   sources: ['ITU775', 'TOOLE'],
   variants: ['redFlag', 'caution', 'info', 'ok'],
   evaluate(ctx, placement) {
