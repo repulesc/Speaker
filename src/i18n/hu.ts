@@ -571,6 +571,10 @@ export const hu: Messages = {
     preview: 'Hely {letter} látszik a térképen és a diagramon.',
     stopPreview: 'Vissza a jelenlegi elrendezéshez',
     spotsTitle: 'Legjobb helyek',
+    compromise:
+      'A megadott korlátokon belül nincs olyan hely, ami minden komoly problémát elkerül, ezért ezek a legkevésbé rosszak. A komoly gondjaik lent láthatók; ha lazítasz egy korláton (mi mozdulhat), az segíthet.',
+    allFixed:
+      'Az ülőhelyet és a hangfalakat is rögzítettnek jelölted, így nincs mit mozgatni. A lenti megállapítások és a Javítás fül így is érvényesek.',
     spotLabel: 'Hely {letter}',
     moveFirst: 'A legjobb helyre költözés segítene a legtöbbet.',
     alreadyGood: 'Az elrendezésed már közel van a legjobbhoz, amit találtunk.',
@@ -1044,6 +1048,8 @@ export const hu: Messages = {
     D05: {
       moveOut:
         'A hátsó basszusnyílás {clearance} távolságra van a faltól, de {minimum} kell neki. Húzd ki a hangfalakat. A kézikönyv megmondhatja, segítenek-e a nyílásdugók.',
+      fixed:
+        'A hátsó basszusnyílás {clearance} távolságra van a faltól, de {minimum} kell neki, és a hangfalak nem mozdíthatók. Nézd meg a kézikönyvben, van-e nyílásdugó vagy falközeli beállítás.',
     },
     D06: {
       desk: 'A hangfalad rendelkezik asztali móddal, és a hangfalak asztalon állnak: kapcsold be.',

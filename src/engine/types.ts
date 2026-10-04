@@ -310,6 +310,8 @@ export interface Candidate extends Placement {
   scoreSpread: number;
   breakdown: ScoreBreakdownItem[];
   fragility?: Fragility;
+  /** No spot within the user's limits avoids every red flag; this is the least bad (R5). */
+  compromise?: boolean;
 }
 
 export interface Grid {

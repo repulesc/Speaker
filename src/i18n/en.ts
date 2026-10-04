@@ -568,6 +568,10 @@ export const en = {
     preview: 'Showing spot {letter} on the map and in the chart.',
     stopPreview: 'Back to your setup',
     spotsTitle: 'Best spots',
+    compromise:
+      'No spot within your limits avoids every serious problem, so these are the least bad. Their red flags are listed below; loosening a limit (what can move) may help.',
+    allFixed:
+      'You marked both the seat and the speakers as fixed, so there is nothing to move. The findings below and the Treat tab still apply.',
     spotLabel: 'Spot {letter}',
     moveFirst: 'Moving to the best spot would help most.',
     alreadyGood: 'Your setup is already close to the best we found.',
@@ -1035,6 +1039,8 @@ export const en = {
     D05: {
       moveOut:
         'The rear port is {clearance} from the wall but needs {minimum}. Move the speakers out. The manual may say whether port plugs help.',
+      fixed:
+        'The rear port is {clearance} from the wall but needs {minimum}, and the speakers cannot move. Check the manual for port plugs or a setting for placement near a wall.',
     },
     D06: {
       desk: 'Your speaker has a desk mode and the speakers stand on a desk: switch it on.',

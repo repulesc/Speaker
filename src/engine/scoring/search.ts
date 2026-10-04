@@ -181,8 +181,14 @@ const SEEDS = 10;
  * constraints leave none: then the best spots that remain, whose findings say what is wrong.
  */
 export function searchPlacements(scorer: Scorer): Scored[] {
+  return searchWithCompromise(scorer).found;
+}
+
+/** As `searchPlacements`, and whether the red-flag guard had to be dropped to find anything. */
+function searchWithCompromise(scorer: Scorer): { found: Scored[]; compromise: boolean } {
   const found = searchWithin(scorer, searchSpace(scorer.ctx, true));
-  return found.length > 0 ? found : searchWithin(scorer, searchSpace(scorer.ctx, false));
+  if (found.length > 0) return { found, compromise: false };
+  return { found: searchWithin(scorer, searchSpace(scorer.ctx, false)), compromise: true };
 }
 
 function searchWithin(scorer: Scorer, space: SearchSpace): Scored[] {
@@ -342,7 +348,11 @@ function pickDistinct<T extends { placement: Placement }>(
  * robust score, then candidates are picked at least 0.2 m apart.
  */
 export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate[] {
-  const pool = pickDistinct(searchPlacements(scorer), 0.1, 30);
+  // Nothing may move: there is nothing to suggest (R5: the current setup was offered as "best").
+  const { constraints } = scorer.ctx.project;
+  if (constraints.speakersFixed && constraints.listenerFixed) return [];
+  const { found, compromise } = searchWithCompromise(scorer);
+  const pool = pickDistinct(found, 0.1, 30);
   const robust = robustScores(
     scorer,
     pool.map((t) => t.placement),
@@ -351,9 +361,10 @@ export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate
   const ranked = pool
     .map((t, i) => ({ placement: t.placement, robust: robust[i]! }))
     .sort((a, b) => b.robust.robust - a.robust.robust);
-  return pickDistinct(ranked, T.candidateSeparation, max).map((p) =>
-    toCandidate(scorer, p.placement, p.robust),
-  );
+  return pickDistinct(ranked, T.candidateSeparation, max).map((p) => ({
+    ...toCandidate(scorer, p.placement, p.robust),
+    ...(compromise ? { compromise: true } : {}),
+  }));
 }
 
 export function makeScorer(ctx: AnalysisContext): Scorer {

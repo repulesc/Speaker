@@ -26,6 +26,9 @@
 
   const ok = $derived(result?.status === 'ok' ? result : null);
   const spots = $derived(ok?.candidates.slice(0, 3) ?? []);
+  const allFixed = $derived(
+    workspace.project.constraints.speakersFixed && workspace.project.constraints.listenerFixed,
+  );
   const move = $derived(ok?.topActions.find((a) => a.kind === 'move'));
 
   const bySeverity = (sev: Severity[]) =>
@@ -115,12 +118,17 @@
         >
       {:else if spots[0]}
         <p>{i18n.t('why.alreadyGood')}</p>
+      {:else if allFixed}
+        <p>{i18n.t('why.allFixed')}</p>
       {/if}
     </section>
 
     {#if spots.length > 0}
       <section class="spots" aria-labelledby="spots-title">
         <h3 id="spots-title">{i18n.t('why.spotsTitle')}</h3>
+        {#if spots[0]?.compromise}
+          <p class="card" role="note">{i18n.t('why.compromise')}</p>
+        {/if}
         <ul>
           {#each spots as c, i (i)}
             <li>

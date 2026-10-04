@@ -10,11 +10,13 @@ export const D05: AdviceRule = {
   level: 'guideline',
   concern: 'speaker',
   sources: ['manufacturer', 'TOOLE'],
-  variants: ['moveOut'],
-  advise(_ctx, _placement, findings) {
+  variants: ['moveOut', 'fixed'],
+  advise(ctx, _placement, findings) {
     const g07 = findingFor(findings, 'G07.tooClose');
     if (!g07) return [];
     const params = { clearance: g07.params.clearance!, minimum: g07.params.minimum! };
-    return [makeAdvice(D05, 'moveOut', { priority: 0.6, effect: 'moderate', params })];
+    // The user said the speakers cannot move (R5): point to what is left instead.
+    const variant = ctx.project.constraints.speakersFixed ? 'fixed' : 'moveOut';
+    return [makeAdvice(D05, variant, { priority: 0.6, effect: 'moderate', params })];
   },
 };
