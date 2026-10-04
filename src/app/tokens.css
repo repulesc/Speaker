@@ -1,0 +1,44 @@
+/* Blueprint design tokens (docs/UI_SPEC.md §2). */
+:root {
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --ink: #142235;
+  --ink-muted: #4a5b72;
+  --line: #1f4e8c;
+  --grid: #dce5f0;
+  --accent: #2563c9;
+  --ok: #2f7d4f;
+  --caution: #a15c07;
+  --danger: #b42318;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0b1626;
+    --surface: #102033;
+    --ink: #e6eef8;
+    --ink-muted: #9fb1c8;
+    --line: #7fb2f0;
+    --grid: #1c2f47;
+    --accent: #5b9bf0;
+    --ok: #5cc48a;
+    --caution: #f0b45b;
+    --danger: #f97066;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b1626;
+  --surface: #102033;
+  --ink: #e6eef8;
+  --ink-muted: #9fb1c8;
+  --line: #7fb2f0;
+  --grid: #1c2f47;
+  --accent: #5b9bf0;
+  --ok: #5cc48a;
+  --caution: #f0b45b;
+  --danger: #f97066;
+  color-scheme: dark;
+}

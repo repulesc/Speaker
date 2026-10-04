@@ -12,3 +12,9 @@ Free, open-source, local-first web app (TypeScript strict + Vite + Svelte, stati
 - No backend, no accounts, no measurement features in v1.
 - Speaker specs from memory are not trusted: verify, and mark the source.
 - Work on the branch you were assigned. Do not create pull requests unless asked.
+
+## Commands
+
+`npm test` · `npm run check` · `npm run lint` · `npm run build` · `npm run check:size` · `npm run test:e2e` (needs a Chromium; set `PW_CHROMIUM` if it is not the Playwright default). Run them before pushing; CI runs the same.
+
+The product name lives only in `src/app/config.ts`. Untitled projects have an empty `name`; show `projectLabel(name)`.
