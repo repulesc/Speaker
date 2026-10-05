@@ -82,12 +82,6 @@ export function roomRange(values: readonly number[]): ColourRange {
   return { lo, hi };
 }
 
-/** The best score on the map (the 98th percentile, like the colour range), or null. */
-export function bestShown(values: readonly number[]): number | null {
-  const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
-  return sorted.length ? sorted[Math.round(0.98 * (sorted.length - 1))]! : null;
-}
-
 // ── Filling the gaps ─────────────────────────────────────────────────────────
 
 /**
@@ -163,6 +157,8 @@ export interface SmoothField {
   alpha: Float32Array;
   /** 0..1: how much of the pixel lies in a marked area (e.g. "advised against"). */
   marked: Float32Array;
+  /** 0..1: how much of the pixel lies where there is no spot at all (no score of its own). */
+  inert: Float32Array;
 }
 
 /**
@@ -178,16 +174,19 @@ export function smoothField(
   scale: number,
   mark?: readonly boolean[],
   cellAlpha?: ArrayLike<number>,
+  cellInert?: readonly boolean[],
 ): SmoothField {
   const width = nx * scale;
   const height = ny * scale;
   const value = new Float32Array(width * height);
   const alpha = new Float32Array(width * height);
   const marked = new Float32Array(width * height);
+  const inert = new Float32Array(width * height);
   const clampI = (i: number) => Math.min(nx - 1, Math.max(0, i));
   const clampJ = (j: number) => Math.min(ny - 1, Math.max(0, j));
   const at = (i: number, j: number) => values[clampJ(j) * nx + clampI(i)]!;
   const markAt = (i: number, j: number) => (mark?.[clampJ(j) * nx + clampI(i)] ? 1 : 0);
+  const inertAt = (i: number, j: number) => (cellInert?.[clampJ(j) * nx + clampI(i)] ? 1 : 0);
   const alphaAt = (i: number, j: number) => cellAlpha![clampJ(j) * nx + clampI(i)]!;
   for (let py = 0; py < height; py++) {
     const gy = (py + 0.5) / scale - 0.5;
@@ -214,12 +213,14 @@ export function smoothField(
       // Bilinear coverage (or given visibility) and marked share: soft edges.
       let cover = 0;
       let mk = 0;
+      let none = 0;
       for (let b = 0; b < 2; b++) {
         for (let a = 0; a < 2; a++) {
           const w = (a ? tx : 1 - tx) * (b ? ty : 1 - ty);
           if (cellAlpha) cover += w * alphaAt(i0 + a, j0 + b);
           else if (!Number.isNaN(at(i0 + a, j0 + b))) cover += w;
           mk += w * markAt(i0 + a, j0 + b);
+          none += w * inertAt(i0 + a, j0 + b);
         }
       }
       const k = py * width + px;
@@ -230,12 +231,16 @@ export function smoothField(
           ? smoothstep(0, 1, cover)
           : smoothstep(0.25, 0.75, cover);
       marked[k] = mk;
+      inert[k] = none;
     }
   }
   // Marked areas follow the cell grid in steps; blurring over about half a cell rounds them off.
   const radius = Math.max(1, Math.round(scale * 0.5));
-  for (let pass = 0; pass < 2; pass++) boxBlur(marked, width, height, radius);
-  return { width, height, value, alpha, marked };
+  for (let pass = 0; pass < 2; pass++) {
+    boxBlur(marked, width, height, radius);
+    boxBlur(inert, width, height, radius);
+  }
+  return { width, height, value, alpha, marked, inert };
 }
 
 /** In-place separable box blur (running sums), clamped at the edges. */
@@ -284,6 +289,12 @@ const HATCH_PERIOD = 8;
 const HATCH_STRENGTH = 0.14;
 /** "Advised against": a fine light outline around the area, so it reads without hatching it hard. */
 const OUTLINE_STRENGTH = 0.3;
+/**
+ * "Not a spot" (no stereo pair or no seat fits there): one calm warm grey, off the good-to-poor
+ * scale, hatched like "advised against" (owner feedback after V6, docs/ROADMAP_V7.md). Mid-light,
+ * so it reads on the light and the dark background alike.
+ */
+const NOT_A_SPOT: [number, number, number] = [176, 168, 156];
 /** 4 × 4 ordered dither: breaks up colour banding in smooth gradients. */
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((b) => b / 16 - 0.47);
 
@@ -304,7 +315,7 @@ interface PaintOptions {
 
 /** Paints a smooth field: colour by style, contours, hatched marked areas, dithered. */
 function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOptions): void {
-  const { width, height, value, alpha, marked } = field;
+  const { width, height, value, alpha, marked, inert } = field;
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
@@ -353,7 +364,13 @@ function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOpti
           b += (255 - b) * l;
         }
       }
-      const m = marked[k]!;
+      const none = inert[k]!;
+      if (none > 0) {
+        r += (NOT_A_SPOT[0] - r) * none;
+        g += (NOT_A_SPOT[1] - g) * none;
+        b += (NOT_A_SPOT[2] - b) * none;
+      }
+      const m = Math.max(marked[k]!, none);
       // Outline where the marked share crosses one half, anti-aliased like the contours.
       const mx = (markAt(x + 1, y, m) - markAt(x - 1, y, m)) / 2;
       const my = (markAt(x, y + 1, m) - markAt(x, y - 1, m)) / 2;
@@ -385,17 +402,19 @@ function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOpti
 }
 
 /**
- * The map covers the whole room (owner decision, docs/ROADMAP_V5.md): every cell is visible, and
- * cells that had no score of their own (filled from their neighbours) are hatched like every spot
- * the app advises against. Cells with no data at all stay empty.
+ * The map covers the whole room (owner decision, docs/ROADMAP_V5.md): every cell is visible.
+ * Cells with no score of their own (no seat or no stereo pair fits there) are "not a spot": one
+ * neutral tone, never a colour borrowed from their neighbours (docs/ROADMAP_V7.md). Scored spots
+ * the app advises against are hatched. Cells with no data at all stay empty.
  */
 function wholeRoom(
   dist: Float32Array,
   flagged: readonly boolean[] | undefined,
-): { alpha: Float32Array; marks: boolean[] } {
+): { alpha: Float32Array; marks: boolean[]; inert: boolean[] } {
   const alpha = dist.map((d) => (Number.isFinite(d) ? 1 : 0));
-  const marks = Array.from(dist, (d, k) => (Number.isFinite(d) && d > 0) || !!flagged?.[k]);
-  return { alpha, marks };
+  const marks = Array.from(dist, (_, k) => !!flagged?.[k]);
+  const inert = Array.from(dist, (d) => Number.isFinite(d) && d > 0);
+  return { alpha, marks, inert };
 }
 
 /** One seat layer: calm zones over its own colour range; "advised against" outlined and hatched. */
@@ -407,8 +426,8 @@ export function paintHeat(
   range: ColourRange = roomRange(values),
 ): void {
   const { filled, dist } = fillGaps(layers.nx, layers.ny, values);
-  const { alpha, marks } = wholeRoom(dist, layers.redFlag);
-  const field = smoothField(layers.nx, layers.ny, filled, scale, marks, alpha);
+  const { alpha, marks, inert } = wholeRoom(dist, layers.redFlag);
+  const field = smoothField(layers.nx, layers.ny, filled, scale, marks, alpha, inert);
   paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }
 
@@ -446,7 +465,7 @@ export function paintSpeakerMap(
     }
   }
   const { filled, dist } = fillGaps(nx * 2, ny, mirrored);
-  const { alpha, marks: shaded } = wholeRoom(dist, marks);
-  const field = smoothField(nx * 2, ny, filled, scale, shaded, alpha);
+  const { alpha, marks: shaded, inert } = wholeRoom(dist, marks);
+  const field = smoothField(nx * 2, ny, filled, scale, shaded, alpha, inert);
   paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }

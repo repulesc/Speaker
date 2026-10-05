@@ -1,7 +1,7 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
   import { scoreWord } from '../findings/text';
-  import { bestShown, VIRIDIS } from '../map/heat';
+  import { VIRIDIS } from '../map/heat';
   import { ui } from '../ui.svelte';
 
   /**
@@ -10,15 +10,17 @@
    * brightest area always glows, so the word keeps it honest (docs/DESIGN_BRIEF_V4.md).
    */
   interface Props {
-    values: readonly number[];
-    /** Name the best level (score layers); the single-concern layers only show the ramp. */
-    named: boolean;
+    /**
+     * The cautious score of the best spot shown (the engine's `best`), named as a word; null on
+     * the single-concern layers, which only show the ramp. The same score Apply gives there.
+     */
+    best: number | null;
     /** Whether hatched "advised against" areas can appear. */
     hatched: boolean;
+    /** What the neutral "not a spot" tone means on this map. */
+    none: 'notStereo' | 'notSeat';
   }
-  let { values, named, hatched }: Props = $props();
-
-  const best = $derived(named ? bestShown(values) : null);
+  let { best, hatched, none }: Props = $props();
   const ramp = `linear-gradient(90deg, ${VIRIDIS.slice(1).join(', ')})`;
 </script>
 
@@ -34,6 +36,7 @@
     </p>
   {/if}
   <div class="extra">
+    <span class="none-key" aria-hidden="true"></span>{i18n.t(`map.${none}`)}
     {#if hatched}<span class="hatch-key" aria-hidden="true"></span>{i18n.t('map.dimmed')}{/if}
     <button
       type="button"
@@ -84,7 +87,14 @@
     gap: 6px;
     white-space: nowrap;
   }
+  .none-key {
+    width: 14px;
+    height: 10px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(-45deg, #b0a89c 0 3px, #c4bdb3 3px 4.5px);
+  }
   .hatch-key {
+    margin-left: 10px;
     width: 14px;
     height: 10px;
     border-radius: 2px;

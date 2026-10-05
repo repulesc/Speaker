@@ -8,6 +8,7 @@ import { G07 } from './G07-port-clearance';
 import { G08 } from './G08-ear-height';
 import { G09 } from './G09-first-reflections';
 import { G10 } from './G10-objects';
+import { G11 } from './G11-in-front';
 import { H01 } from './H01-38-percent';
 import { H02 } from './H02-thirds';
 import { H04 } from './H04-near-or-far';
@@ -48,6 +49,7 @@ export const RULES: readonly RuleDef[] = [
   G08,
   G09,
   G10,
+  G11,
   H01,
   H02,
   H04,

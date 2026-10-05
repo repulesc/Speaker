@@ -28,7 +28,7 @@
 
   function pick(value: 'speakers' | 'seat') {
     ui.modeFrequency = null;
-    ui.layer = value === 'speakers' ? 'speakers' : 'overall';
+    ui.layer = value === 'speakers' ? 'speakers' : 'goals';
     if (goal !== 'both' && goal !== value) workspace.edit((p) => setGoal(p, value));
   }
 </script>
@@ -91,7 +91,7 @@
       {/if}
       {i18n.t(`layer.${active}.what`)}
       {#if reason}
-        <button type="button" class="back" onclick={() => (ui.layer = 'overall')}
+        <button type="button" class="back" onclick={() => (ui.layer = 'goals')}
           >{i18n.t('map.backToMain')}</button
         >
       {/if}

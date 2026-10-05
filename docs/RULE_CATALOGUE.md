@@ -278,6 +278,13 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
   - **(R0)** one finding per object, for the nearer speaker (before R0 an object near both speakers gave two).
 - **Sources:** the physics of reflection (P06) and of a blocked direct path; [TOOLE] discusses nearby-object reflections (chapter not checked, R5). No number in this rule comes from a source: the 0.3 m threshold is 🟡.
 
+### G11 · The speakers must be in front of you (V7)
+
+- **In plain words:** Stereo works when both speakers are in front of you, facing you. Beside or behind you, it is not a stereo setup, however good the bass is there.
+- **Logic:** red flag when the seat is less than 0.5 m (`minListenerAhead`, 🟡 threshold, the same one the search and the maps use) in front of either speaker's acoustic centre. The score of such a setup is also capped at 0.45 (`notStereoScoreCap`), below the "Poor" line, so no word on screen calls it good (owner decision, docs/ROADMAP_V7.md). Before V7 this check only guided the search: a pair 1 m behind the seat scored 0.62, above a normal setup.
+- **Sources:** [ITU775] (the stereo pair at ±30° in front of the listener), [TOOLE]. The 0.5 m margin and the cap are design choices, not from a source.
+- **Test case:** `tests/engine/trust.test.ts`: speakers 1 m behind the seat → Poor with this red flag; beside the seat → Poor; a normal setup → untouched.
+
 ---
 
 ## 🟡 Heuristics (shown as reference guides, never scored)

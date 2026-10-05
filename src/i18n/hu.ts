@@ -688,7 +688,8 @@ export const hu: Messages = {
     before: 'Előtte',
     showPanel: 'Oldalsáv megjelenítése',
     notListening: 'Nem hallgatási hely',
-    noSpeakers: 'Ide nem kerülhetnek a hangfalak',
+    notStereo: 'Nem sztereó hely',
+    notSeat: 'Itt nem lehet ülni',
     label: 'Térkép',
     hint: 'Húzz bármit. A térkép mozgatás közben újrarajzolódik. Kattints egy számra, és pontos értéket írhatsz be.',
     layerLabel: 'Térképréteg',
@@ -725,7 +726,7 @@ export const hu: Messages = {
     },
     goals: {
       name: 'A céljaid',
-      what: 'Ugyanez, a kiválasztott céljaid szerint súlyozva.',
+      what: 'Mennyire jó itt az ülőhely, a hangfalakkal ott, ahol most vannak. Minél világosabb, annál jobb.',
     },
     bass: {
       name: 'Basszus egyenletessége',
@@ -852,9 +853,9 @@ export const hu: Messages = {
     moveHere: 'Ülőhelyem ide',
     speakersTitle: 'Hangfalak itt',
     speakersHere: 'Hangfalak itt: {word}',
-    speakersNot: 'Ide nem kerülhetnek a hangfalak.',
-    speakersFlagged:
-      'Nem ajánlott: nem jó sztereó elrendezés, vagy bútoron van. Ahol az ülőhely nincs a hangfalak előtt, a pontszám csak a basszusra vonatkozik.',
+    speakersNot:
+      'Nem sztereó hely: itt a hangfalak túl közel lennének hozzád, melletted vagy mögötted, vagy nem férnének el.',
+    speakersFlagged: 'Nem ajánlott: itt bútor van útban.',
     moveSpeakers: 'Hangfalak ide',
     close: 'Bezárás',
     notAllowed: 'Ide nem kerülhet ülőhely: túl közel van egy hangfalhoz, vagy valami útban van.',
@@ -1050,6 +1051,10 @@ export const hu: Messages = {
         'Egy kemény tárgy ({object}) {distance} távolságra van {speakerFrom}, és visszaverődésekkel elmossa a hangot.',
       passiveSpeaker:
         'Egy másik hangfal ({object}) {distance} távolságra van {speakerFrom}. Együtt rezeghet: próbáld meg letakarni vagy arrébb tenni, és hallgasd meg.',
+    },
+    G11: {
+      notInFront:
+        'A hangfalak melletted vagy mögötted vannak, így ez nem sztereó elrendezés. Tedd őket magad elé, feléd fordítva.',
     },
     H01: {
       overlay:

@@ -676,7 +676,8 @@ export const en = {
     before: 'Before',
     showPanel: 'Show the side panel',
     notListening: 'Not a listening position',
-    noSpeakers: 'The speakers can’t go here',
+    notStereo: 'Not a stereo spot',
+    notSeat: 'No seat here',
     label: 'Map',
     hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
     layerLabel: 'Map layer',
@@ -713,7 +714,7 @@ export const en = {
     },
     goals: {
       name: 'My goals',
-      what: 'The same, weighted by the goals you chose.',
+      what: 'How good a seat is here, with your speakers where they are. Brighter is better.',
     },
     bass: {
       name: 'Bass evenness',
@@ -839,9 +840,9 @@ export const en = {
     moveHere: 'Move my seat here',
     speakersTitle: 'Speakers here',
     speakersHere: 'Speakers here: {word}',
-    speakersNot: 'The speakers cannot stand here.',
-    speakersFlagged:
-      'Advised against: not a good stereo setup, or on furniture. The score is the bass only where the seat is not in front of the speakers.',
+    speakersNot:
+      'Not a stereo spot: here the speakers would be too close to you, beside or behind you, or would not fit.',
+    speakersFlagged: 'Advised against: furniture is in the way here.',
     moveSpeakers: 'Move the speakers here',
     close: 'Close',
     notAllowed: 'The seat cannot go here: too close to a speaker, or something is in the way.',
@@ -1034,6 +1035,10 @@ export const en = {
         'A hard object ({object}) is {distance} from {speakerFrom} and adds reflections that blur the sound.',
       passiveSpeaker:
         'Another speaker ({object}) is {distance} from {speakerFrom}. It can resonate along: try covering or moving it, and listen.',
+    },
+    G11: {
+      notInFront:
+        'The speakers are beside or behind you, so this is not a stereo setup. Put them in front of you, facing you.',
     },
     H01: {
       overlay:

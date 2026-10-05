@@ -8,7 +8,13 @@ import { folkComparison } from './folk';
 import { fragility, resizedRooms } from './scoring/fragility';
 import { seatLayers, speakerHeatmap } from './scoring/heatmaps';
 import { areaPoints } from './scoring/area';
-import { findCandidates, makeScorer, robustScores, toCandidate } from './scoring/search';
+import {
+  ANALYSIS_SEED,
+  findCandidates,
+  makeScorer,
+  robustScores,
+  toCandidate,
+} from './scoring/search';
 import type { Analysis, Candidate, EvidenceLevel, Finding, Severity } from './types';
 import { ENGINE_VERSION } from './version';
 
@@ -38,7 +44,7 @@ export function analyze(
   project: Parameters<typeof buildContext>[0],
   options: AnalyzeOptions = {},
 ): Analysis {
-  const seed = options.seed ?? 1;
+  const seed = options.seed ?? ANALYSIS_SEED;
   const ctx = buildContext(project);
   if (!ctx) {
     return {

@@ -2,6 +2,7 @@ import { acousticCentre, rearClearance, wooferCentre, type AnalysisContext } fro
 import { distance, ramp } from '../math/geometry';
 import { speakerCorner } from '../rules/G06-corners';
 import { stereoAngleDeg } from '../rules/G04-stereo-angle';
+import { speakersInFront } from '../rules/G11-in-front';
 import { sideDistanceDifference } from '../rules/G03-symmetry';
 import { frontWallNullAtSeat } from '../rules/P04-boundary-interference';
 import { firstReflections, isNearSide } from '../rules/P06-reflections';
@@ -188,7 +189,12 @@ export class Scorer {
       value: Number.isFinite(values[componentId]) ? values[componentId] : 0,
       weight: this.weights[componentId],
     }));
-    const score = breakdown.reduce((sum, b) => sum + b.value * b.weight, 0);
+    const weighted = breakdown.reduce((sum, b) => sum + b.value * b.weight, 0);
+    // Speakers beside or behind the listener are not a stereo setup, however good the bass is
+    // there (G11): never more than Poor. Before V7 such a setup could outscore a normal one.
+    const score = speakersInFront(this.ctx, placement)
+      ? weighted
+      : Math.min(weighted, T.notStereoScoreCap);
     return { score, breakdown };
   }
 }

@@ -134,17 +134,8 @@
   const range = $derived(
     ui.heatScale === 'absolute' || !shownValues ? ABSOLUTE : roomRange(shownValues),
   );
-  /** The current setup's score word, shown on the map where it stands. */
-  const seatNow = $derived.by(() => {
-    if (!layers || !seat || ui.layer === 'speakers') return result?.current.score ?? 0;
-    const i = Math.min(layers.nx - 1, Math.max(0, Math.floor(seat.ears.x / layers.step)));
-    const j = Math.min(layers.ny - 1, Math.max(0, Math.floor(seat.ears.y / layers.step)));
-    const v = layers.values[ui.layer as LayerId][j * layers.nx + i];
-    return v !== undefined && Number.isFinite(v) ? v : (result?.current.score ?? 0);
-  });
-  const nowWord = $derived(
-    result && variant && seat ? scoreWord(speakerGrid ? result.current.score : seatNow) : null,
-  );
+  /** The current setup's score word, shown on the map where it stands: the same as "Now". */
+  const nowWord = $derived(result && variant && seat ? scoreWord(result.current.score) : null);
   /** Only a placement that really helps is tagged "Best" (else the brief and the map disagree). */
   const worthMoving = $derived(result?.topActions.some((a) => a.kind === 'move') ?? false);
   const nowAt = $derived.by(() => {
@@ -184,7 +175,7 @@
     const snapshot = $state.snapshot(workspace.project);
     const speakers = previewed ? $state.snapshot(previewed.speakers) : null;
     void preview.refresh(snapshot, speakers);
-    probe.refresh(snapshot, speakers ?? undefined);
+    probe.refresh(snapshot, speakers ?? undefined, speakerGrid !== null);
     void modeExplorer.refresh(snapshot, ui.modeFrequency);
   });
 
@@ -226,21 +217,14 @@
     ui.candidate = next;
   }
 
-  /** The speaker map's value under the pointer (the grid covers the left half; mirrored). */
+  /**
+   * The speaker map under the pointer, from the engine: the cautious score of the pair standing
+   * there, the word Apply would give (docs/ROADMAP_V7.md), or "not a stereo spot".
+   */
   const speakerProbe = $derived.by(() => {
-    const at = probe.point;
-    if (!at || !speakerGrid || !seat) return null;
-    const { x0, y0, step, nx, ny, values } = speakerGrid;
-    const centre = project.constraints.keepSymmetric ? W / 2 : seat.ears.x;
-    const x = at.x <= centre ? at.x : 2 * centre - at.x;
-    const i = Math.round((x - x0) / step);
-    const j = Math.round((at.y - y0) / step);
-    if (i < 0 || j < 0 || i >= nx || j >= ny) return { value: null, flagged: false };
-    const v = values[j * nx + i]!;
-    return {
-      value: Number.isFinite(v) ? v : null,
-      flagged: speakerGrid.redFlag?.[j * nx + i] ?? false,
-    };
+    const spot = probe.spot;
+    if (!probe.point || !speakerGrid || !spot) return null;
+    return { value: spot.stereo ? spot.robust : null, flagged: spot.flagged };
   });
 
   function moveSpeakersToProbe() {
@@ -873,8 +857,12 @@
 
     {#if shownValues && known && !field}
       <MapLegend
-        values={shownValues}
-        named={ui.layer === 'overall' || ui.layer === 'goals' || ui.layer === 'speakers'}
+        best={speakerGrid
+          ? (speakerGrid.best ?? null)
+          : ui.layer === 'goals'
+            ? (layers?.best ?? null)
+            : null}
+        none={speakerGrid ? 'notStereo' : 'notSeat'}
         hatched
       />
     {/if}

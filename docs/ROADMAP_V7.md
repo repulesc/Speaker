@@ -12,12 +12,12 @@ the cards and visual polish second.
 | 1 | Speakers placed **behind the seat** are called "good". | Checked with a test: a setup with the speakers 1 m behind the listener scores **0.62, higher than the normal setup (0.55)**, with no red flag. The "listener must be in front of the speakers" rule (`isValidPlacement`, `engine/scoring/search.ts`) is only used when searching and mapping, never when scoring the current setup. The stereo-angle part is low (0.27) but the other components are generous. | engine bug, serious |
 | 2 | Hover says "Speakers here: Good"; after Apply the same spot says "Now: Fair". | Three different numbers share one word scale: the speaker map shows the **nominal** score of one pair at the spot, "Now" and the suggestion A show the **robust** score (mean minus half the spread over 8 perturbed runs) and, with a sofa or bed, the area-weighted score. | consistency bug |
 | 3 | The map is "scored everywhere", also in places no stereo pair can stand. | By earlier owner decision (a full-room map) every spot is coloured; spots that are not stereo setups show only the bass part, hatched. That is honest on paper but reads as "this is good here". | design problem |
-| 4 | A sofa as listening position hatches the sofa **and everything behind and beside it**. | `isObstructed` (`engine/rules/G10-objects.ts`) is a 2-D test: any object between speaker and seat blocks. A 0.85 m sofa is treated as a wall for sound travelling to ears at about 1.1 m, so every seat behind or beside it is "obstructed" and hatched. | engine bug |
-| 5 | After filling in the speaker data and pressing Done, the speaker row was not ticked. | The progress marker (`app/state/progress.ts`) counts a section by its certainty flags, which typed values do not always change. Not reproduced yet. | needs a repro |
+| 4 | A sofa as listening position hatches the sofa **and everything behind and beside it**. | Checked in Phase 1: `isObstructed` already tests height (a 0.85 m sofa does not block a seat behind it, a wardrobe does). The hatching was the not-a-stereo spots of item 3. | not a bug; fixed with item 3 |
+| 5 | After filling in the speaker data and pressing Done, the speaker row was not ticked. | Reproduced: the marker (`app/state/progress.ts`) only counted placing the speakers. Now the speaker data counts too: half a tick for one, a full tick for both. | fixed |
 
 ## The roadmap
 
-### Phase 1: make the numbers trustworthy (engine; Opus)
+### Phase 1: make the numbers trustworthy (engine; Opus) — DONE (docs/SCORING.md, "V7")
 
 1. **Gate the setup.** A setup with the speakers not clearly in front of the listener is not a
    stereo setup: the score is capped at "Poor" and a red-flag finding says so in words ("The

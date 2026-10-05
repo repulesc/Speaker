@@ -66,6 +66,15 @@ describe('smooth field', () => {
     expect(f.marked[4 * 32 + 20]).toBeGreaterThan(0.5);
     expect(f.marked[4 * 32 + 30]).toBeLessThan(0.5);
   });
+
+  it('carries "not a spot" apart from the scores, so it is drawn in its own tone', () => {
+    const values = [0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8];
+    const none = [true, true, false, false, true, true, false, false];
+    const f = smoothField(4, 2, values, 8, undefined, new Float32Array(8).fill(1), none);
+    expect(f.inert[4 * 32 + 2]).toBeGreaterThan(0.9);
+    expect(f.inert[4 * 32 + 29]).toBeLessThan(0.1);
+    expect(f.marked.every((m) => m === 0)).toBe(true);
+  });
 });
 
 describe('colour range and gaps', () => {

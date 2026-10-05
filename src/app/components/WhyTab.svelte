@@ -17,7 +17,7 @@
 
   function show(id: LayerId) {
     ui.modeFrequency = null;
-    ui.layer = showing === id ? 'overall' : id;
+    ui.layer = showing === id ? 'goals' : id;
   }
 </script>
 

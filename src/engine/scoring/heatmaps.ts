@@ -9,8 +9,15 @@ import type {
   Vec3,
 } from '../types';
 import type { Scorer } from './scorer';
-import { cabinetBox } from '../rules/G10-objects';
-import { avoidsRedFlags, isValidPlacement, seatScorable, speakerPair, steps } from './search';
+import {
+  ANALYSIS_SEED,
+  avoidsRedFlags,
+  isValidPlacement,
+  robustScores,
+  seatScorable,
+  speakerPair,
+  steps,
+} from './search';
 
 /**
  * Heatmaps (docs/SCORING.md §5). The seat layers show one concern each, so the map can say *why* a
@@ -53,9 +60,11 @@ export function seatLayers(
     number[]
   >;
   const redFlag: boolean[] = [];
+  const placements: Placement[] = [];
   for (const y of ys) {
     for (const x of xs) {
       const placement = { speakers, listener: { x, y, z: earZ } };
+      placements.push(placement);
       const scorable = seatScorable(ctx, placement);
       // Hatched: a seat the app advises against (blocked, inside furniture, red-flagged), still
       // scored so the map has no holes. Distance is a preference, so it is not hatched.
@@ -70,23 +79,25 @@ export function seatLayers(
       }
     }
   }
-  return { x0: xs[0]!, y0: ys[0]!, step, nx: xs.length, ny: ys.length, values, redFlag };
+  const best = bestRobust(scorer, values.goals, placements);
+  return { x0: xs[0]!, y0: ys[0]!, step, nx: xs.length, ny: ys.length, values, redFlag, best };
 }
 
-/** Whether both cabinets lie inside the room. */
-function insideRoom(ctx: AnalysisContext, speakers: Placement['speakers']): boolean {
-  return (['left', 'right'] as const).every((side) => {
-    const box = cabinetBox(speakers[side], ctx);
-    return box.min.x >= 0 && box.max.x <= ctx.room.W && box.min.y >= 0 && box.max.y <= ctx.room.L;
-  });
-}
-
-/** The bass part of the score (C1 and C2 with their goal weights, 🔴 physics), or null. */
-function physicsOnly(scorer: Scorer, placement: Placement): number | null {
-  const { C1, C2 } = scorer.weights;
-  if (C1 + C2 <= 0 || !insideRoom(scorer.ctx, placement.speakers)) return null;
-  const { c1, c2 } = scorer.bass(scorer.coupling(placement.speakers), placement.listener);
-  return (C1 * c1 + C2 * c2) / (C1 + C2);
+/**
+ * The cautious score of the best spot on a map: the cell at the 98th percentile (the one the
+ * legend names, so one odd cell does not speak for the map), scored like the analysis scores a
+ * setup. Undefined when nothing on the map is scored.
+ */
+function bestRobust(
+  scorer: Scorer,
+  values: readonly number[],
+  placements: readonly Placement[],
+): number | undefined {
+  const scored = values.flatMap((v, k) => (Number.isFinite(v) ? [k] : []));
+  if (scored.length === 0) return undefined;
+  scored.sort((a, b) => values[a]! - values[b]!);
+  const k = scored[Math.round(0.98 * (scored.length - 1))]!;
+  return robustScores(scorer, [placements[k]!], ANALYSIS_SEED)[0]!.robust;
 }
 
 function layerValue(id: LayerId, result: ReturnType<Scorer['score']>, scorer: Scorer): number {
@@ -114,7 +125,12 @@ export function listenerHeatmap(
 
 /**
  * Score for the left speaker at every grid cell of the left half (right speaker mirrored about
- * the listener's x), listener fixed. The UI mirrors the grid for the right half.
+ * the room's middle or the seat), listener fixed. The UI mirrors the grid for the right half.
+ *
+ * Every spot is either a real candidate (scored, hatched if furniture is in the way) or "not a
+ * stereo spot" (`inert`, no score): beside, behind or too close to the seat, or not fitting in the
+ * room. Before V7 those spots showed the bass part of the score, which read as "good here" (owner
+ * feedback, docs/ROADMAP_V7.md); now the map draws them in one neutral tone.
  */
 export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
   const ctx = scorer.ctx;
@@ -123,35 +139,38 @@ export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
   const centre = ctx.project.constraints.keepSymmetric ? ctx.room.W / 2 : listener.x;
   const step = heatmapStep(ctx);
   const xs = steps(step / 2, centre - step / 2, step);
-  // The whole length of the room: spots the speakers cannot take (behind or beside the seat, in
-  // furniture) have no score and fade out, so the map ends where the speakers' options end.
   const ys = steps(step / 2, ctx.room.L - step / 2, step);
-  // Furniture does not hide the map (owner: the heatmap is visible everywhere): a spot where a
-  // speaker would stand on furniture is scored and hatched as "advised against", like the seat map.
+  // Furniture does not hide the map: a spot where a speaker would stand on furniture is scored
+  // and hatched as "advised against", like the seat map.
   const bare = { ...ctx, objects: [] };
   const redFlag: boolean[] = [];
+  const inert: boolean[] = [];
+  const placements: Placement[] = [];
   const values = ys.flatMap((y) =>
     xs.map((x) => {
       const clearance = y - ctx.speaker.depth / 2;
-      const speakers = speakerPair(ctx, centre, centre - x, clearance);
-      const placement = { speakers, listener };
+      const placement = { speakers: speakerPair(ctx, centre, centre - x, clearance), listener };
+      placements.push(placement);
       const apart = clearance >= 0 && centre - x >= ctx.speaker.width / 2; // cabinets do not overlap
-      if (!apart) {
+      if (!apart || !isValidPlacement(bare, placement)) {
         redFlag.push(false);
+        inert.push(true);
         return NaN;
       }
-      if (isValidPlacement(bare, placement)) {
-        redFlag.push(!isValidPlacement(ctx, placement));
-        return scorer.score(placement).score;
-      }
-      // Not a stereo setup (the speakers would stand beside or behind the seat, or too close to
-      // it). The map still shows what the room itself does there (owner: see the whole room):
-      // only the bass, which the room decides wherever the speakers stand. Hatched like every
-      // spot the app advises against; the stereo rules do not apply and are left out.
-      const physics = physicsOnly(scorer, placement);
-      redFlag.push(physics !== null);
-      return physics ?? NaN;
+      redFlag.push(!isValidPlacement(ctx, placement));
+      inert.push(false);
+      return scorer.score(placement).score;
     }),
   );
-  return { x0: xs[0] ?? 0, y0: ys[0] ?? 0, step, nx: xs.length, ny: ys.length, values, redFlag };
+  return {
+    x0: xs[0] ?? 0,
+    y0: ys[0] ?? 0,
+    step,
+    nx: xs.length,
+    ny: ys.length,
+    values,
+    redFlag,
+    inert,
+    best: bestRobust(scorer, values, placements),
+  };
 }

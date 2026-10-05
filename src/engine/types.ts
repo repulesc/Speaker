@@ -352,6 +352,13 @@ export interface Grid {
   values: number[];
   /** Scored, but the app advises against it (e.g. a speaker on furniture): drawn hatched. */
   redFlag?: boolean[];
+  /** Not a candidate at all (e.g. speakers beside or behind the seat): no score, a neutral tone. */
+  inert?: boolean[];
+  /**
+   * The cautious (robust) score of the best spot shown, the one the legend names, so the legend's
+   * word is the word Apply would give there (docs/ROADMAP_V7.md, "one score, one meaning").
+   */
+  best?: number;
 }
 
 /** One heatmap per concern (docs/REVAMP_PLAN.md, "Layers"). */
@@ -369,6 +376,8 @@ export interface SeatLayers {
   values: Record<LayerId, number[]>;
   /** True where the app red-flags the seat itself (room midpoint, back wall, stereo angle). */
   redFlag: boolean[];
+  /** The cautious score of the best seat on the goals layer, as for `Grid.best`. */
+  best?: number;
 }
 
 export type FragilityLevel = 'steady' | 'sensitive' | 'fragile';
@@ -408,9 +417,14 @@ export interface PointExplanation {
   valid: boolean;
   /** The app would red-flag this spot itself. */
   redFlag: boolean;
-  /** Goal-weighted score and the same without goals. */
+  /** Goal-weighted score (nominal) and the same without goals. */
   score: number;
   overall: number;
+  /**
+   * The cautious score (robust, with the listening area if any): the number every word on screen
+   * uses, the same as "Now" and the suggestions (owner decision, docs/ROADMAP_V7.md).
+   */
+  robust: number;
   breakdown: ScoreBreakdownItem[];
   /** Findings that depend on where things stand, red flags first. */
   findings: Finding[];
