@@ -1,4 +1,4 @@
-import type { BoundaryId, LayerId } from '../engine/types';
+import type { BoundaryId, LayerId, Placement, Vec3 } from '../engine/types';
 import type { StepId } from './session.svelte';
 
 /** What the user is currently looking at or has selected. Not saved with the project. */
@@ -22,6 +22,18 @@ let compareId = $state<string | null>(null);
 let candidate = $state<number | null>(null);
 /** The side view is hidden until asked for (docs/REVAMP_PLAN.md). */
 let sideOpen = $state(false);
+/** Colours stretched over this room's own range (default) or the same scale for every room. */
+let heatScale = $state<'room' | 'absolute'>('room');
+/** For a moment after "Apply": the speakers and seat glide, and the old spots are outlined. */
+let glide = $state(false);
+let before = $state<{ speakers: Placement['speakers']; listener: Vec3 } | null>(null);
+let beforeTimer: ReturnType<typeof setTimeout> | undefined;
+/** The side panel is hidden on a wide screen, so the room fills the window. */
+let panelHidden = $state(false);
+/** The first-run survey is open (a new project without a room). */
+let survey = $state(false);
+/** The room fades in once, right after the survey (the "reveal"). */
+let reveal = $state(false);
 /** The Speakers page's "More details" stays open once opened, for this visit. */
 let speakerDetails = $state(false);
 
@@ -77,6 +89,44 @@ export const ui = {
   },
   set sideOpen(value: boolean) {
     sideOpen = value;
+  },
+  get glide() {
+    return glide;
+  },
+  get before() {
+    return before;
+  },
+  /** Marks a placement change: glide to the new spots and show the old ones for a moment. */
+  showChange(old: { speakers: Placement['speakers']; listener: Vec3 }) {
+    clearTimeout(beforeTimer);
+    before = old;
+    glide = true;
+    setTimeout(() => (glide = false), 700);
+    beforeTimer = setTimeout(() => (before = null), 3600);
+  },
+  get panelHidden() {
+    return panelHidden;
+  },
+  set panelHidden(value: boolean) {
+    panelHidden = value;
+  },
+  get survey() {
+    return survey;
+  },
+  set survey(value: boolean) {
+    survey = value;
+  },
+  get reveal() {
+    return reveal;
+  },
+  set reveal(value: boolean) {
+    reveal = value;
+  },
+  get heatScale() {
+    return heatScale;
+  },
+  set heatScale(value: 'room' | 'absolute') {
+    heatScale = value;
   },
   get speakerDetails() {
     return speakerDetails;

@@ -11,6 +11,9 @@ import type {
 import { DEFAULT_BASE } from '../plan/patches';
 import { newId } from './ids';
 
+/** How far suggested speaker moves may go, by default (metres around each speaker). */
+export const DEFAULT_SPEAKER_ZONE = 0.5;
+
 const BOUNDARIES: BoundaryId[] = ['front', 'back', 'left', 'right', 'floor', 'ceiling'];
 
 const estimated = <T>(value: T): Known<T> => ({ value, certainty: 'estimated' });
@@ -125,9 +128,13 @@ export function createDefaultProject(options: {
     constraints: {
       speakerWall: 'front',
       maxSpeakerDistanceFromWall: estimated(DEFAULTS.maxSpeakerDistanceFromWall),
-      listenerFixed: false,
+      // Speakers only by default: most people have a fixed seat (owner, docs/DESIGN_BRIEF_V4.md).
+      listenerFixed: true,
       speakersFixed: false,
       keepSymmetric: true,
+      // Suggestions stay within 50 cm of where the speakers stand (once placed): most people
+      // cannot move them far (owner decision, docs/DESIGN_BRIEF_V4.md).
+      speakerZone: DEFAULT_SPEAKER_ZONE,
     },
     goals: { weights: {} },
     variants: [variant],

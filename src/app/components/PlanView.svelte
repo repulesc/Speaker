@@ -1,8 +1,16 @@
 <script lang="ts">
+  import type { LayerId } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { scoreWord } from '../findings/text';
-  import { paintField, paintHeat, paintSpeakerMap, renderScale } from '../map/heat';
+  import {
+    ABSOLUTE,
+    paintField,
+    paintHeat,
+    paintSpeakerMap,
+    renderScale,
+    roomRange,
+  } from '../map/heat';
   import { modeExplorer } from '../state/mode.svelte';
   import { fitFrame, toPx, toWorld } from '../plan/frame';
   import {
@@ -21,6 +29,7 @@
   import { viewport } from '../viewport.svelte';
   import { ROOM_LIMITS } from '../state/limits';
   import DimLabel from './DimLabel.svelte';
+  import MapLegend from './MapLegend.svelte';
   import ProbeCard from './ProbeCard.svelte';
 
   const project = $derived(workspace.project);
@@ -32,7 +41,7 @@
   const MARGINS = $derived(
     viewport.compact
       ? { left: 16, right: 16, top: 28, bottom: 12 }
-      : { left: 76, right: 84, top: 44, bottom: 56 },
+      : { left: 76, right: 84, top: 44, bottom: 104 }, // bottom: room size and the legend
   );
   const locale = $derived(i18n.locale);
   const system = $derived(project.units);
@@ -95,20 +104,39 @@
   /** The bass-note explorer replaces the score map while it is on. */
   const field = $derived(ui.modeFrequency !== null ? modeExplorer.field : null);
   const suggested = $derived(field ? null : (candidates[shownIndex] ?? null));
+  /**
+   * Where the option's letter sits: on the suggested seat, or, when the seat stays put (speakers
+   * only), between the suggested speakers, so it never hides the seat.
+   */
+  const pinAt = $derived.by(() => {
+    if (!suggested) return null;
+    if (!project.constraints.listenerFixed) return suggested.listener;
+    const { left, right } = suggested.speakers;
+    return { x: (left.base.x + right.base.x) / 2, y: left.base.y };
+  });
   /** The speaker-placement layer replaces the seat map: the seat stays, the speakers move. */
   const speakerGrid = $derived(
     !field && ui.layer === 'speakers' && result ? result.heatmap.speakers : null,
   );
+  /** The values on the map now (seat layer or speaker map), for the colours and the legend. */
+  const shownValues = $derived(
+    speakerGrid ? speakerGrid.values : layers && !field ? layers.values[ui.layer as LayerId] : null,
+  );
+  const range = $derived(
+    ui.heatScale === 'absolute' || !shownValues ? ABSOLUTE : roomRange(shownValues),
+  );
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
     if (heat && layers && !field && ui.layer !== 'speakers') {
-      paintHeat(heat, layers, layers.values[ui.layer], renderScale(layers.step * frame.scale));
+      const scale = renderScale(layers.step * frame.scale);
+      paintHeat(heat, layers, layers.values[ui.layer], scale, range);
     }
   });
   let speakerCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
     if (speakerCanvas && speakerGrid) {
-      paintSpeakerMap(speakerCanvas, speakerGrid, renderScale(speakerGrid.step * frame.scale));
+      const scale = renderScale(speakerGrid.step * frame.scale);
+      paintSpeakerMap(speakerCanvas, speakerGrid, scale, range);
     }
   });
   let fieldCanvas = $state<HTMLCanvasElement>();
@@ -128,6 +156,14 @@
   });
 
   const showHeat = $derived(known && layers !== null);
+  /** The speaker zone, drawn around speakers the user has placed, when they may move. */
+  const zoneRadius = $derived.by(() => {
+    const zone = project.constraints.speakerZone;
+    const placed = speakers.some((sp) => !sp.isDefault);
+    return zone !== undefined && placed && !project.constraints.speakersFixed && !field
+      ? zone
+      : null;
+  });
 
   const probeAt = $derived(
     probe.point && probe.explanation
@@ -155,6 +191,31 @@
     const next = ui.candidate === i ? null : i;
     ui.step = 'results'; // leaving another section clears the preview, so set it after
     ui.candidate = next;
+  }
+
+  /** The speaker map's value under the pointer (the grid covers the left half; mirrored). */
+  const speakerProbe = $derived.by(() => {
+    const at = probe.point;
+    if (!at || !speakerGrid || !seat) return null;
+    const { x0, y0, step, nx, ny, values } = speakerGrid;
+    const centre = project.constraints.keepSymmetric ? W / 2 : seat.ears.x;
+    const x = at.x <= centre ? at.x : 2 * centre - at.x;
+    const i = Math.round((x - x0) / step);
+    const j = Math.round((at.y - y0) / step);
+    if (i < 0 || j < 0 || i >= nx || j >= ny) return { value: null };
+    const v = values[j * nx + i]!;
+    return { value: Number.isFinite(v) ? v : null };
+  });
+
+  function moveSpeakersToProbe() {
+    const at = probe.point;
+    if (!at || !seat) return;
+    const side =
+      at.x <= (project.constraints.keepSymmetric ? W / 2 : seat.ears.x) ? 'left' : 'right';
+    const now = $state.snapshot(variant!);
+    ui.showChange({ speakers: now.speakers, listener: now.listener.ears });
+    workspace.edit((p) => void moveSpeaker(p, side, at, { grid: false }));
+    probe.clear();
   }
 
   function moveSeatToProbe() {
@@ -459,6 +520,16 @@
           </g>
         {/each}
 
+        {#if showHeat && !speakerGrid && !field && speakers.length === 2}
+          <!-- In front of the speakers' line no seat is scored: the map fades out there. -->
+          {@const noteY = Math.max(speakers[0]!.p.base.y, speakers[1]!.p.base.y) + cab.d / 2 + 0.28}
+          {#if noteY < L - 0.3}
+            <text class="zone-note" x={px(W / 2)} y={py(noteY)} text-anchor="middle"
+              >{i18n.t('map.notListening')}</text
+            >
+          {/if}
+        {/if}
+
         {#if seat && speakers.length === 2}
           {@const [a, b] = speakers}
           <polyline
@@ -480,6 +551,22 @@
           <circle class="ring" cx={px(f.location!.x)} cy={py(f.location!.y)} r="9" />
         {/each}
 
+        {#if zoneRadius !== null}
+          <!-- Where suggestions may move each speaker (the user's zone, docs/DESIGN_BRIEF_V4.md). -->
+          <clipPath id="plan-room-clip">
+            <rect x={px(0)} y={py(0)} width={W * frame.scale} height={L * frame.scale} />
+          </clipPath>
+          {#each speakers as s (s.side)}
+            <circle
+              class="zone"
+              clip-path="url(#plan-room-clip)"
+              cx={px(s.p.base.x)}
+              cy={py(s.p.base.y)}
+              r={zoneRadius * frame.scale}
+            />
+          {/each}
+        {/if}
+
         {#each speakers as s (s.side)}
           {@const isSelected = selected.kind === 'speaker' && selected.side === s.side}
           {@const angle = (s.side === 'left' ? -1 : 1) * s.p.toeInDeg}
@@ -490,21 +577,19 @@
           <g
             class="item speaker"
             class:selected={isSelected}
-            class:locked={project.constraints.speakersFixed}
+            class:glide={ui.glide}
+            style="transform: translate({cx}px, {cy}px)"
             role="button"
             tabindex="0"
-            aria-disabled={project.constraints.speakersFixed || undefined}
             aria-label={speakerLabel(s.side)}
             onfocus={() => ui.select({ kind: 'speaker', side: s.side })}
             onpointerdown={(e) => {
               ui.select({ kind: 'speaker', side: s.side });
-              if (project.constraints.speakersFixed) return;
               drag(e, { x: s.p.base.x, y: s.p.base.y }, `speaker-${s.side}`, (x, y) =>
                 moveSpeaker(workspace.project, s.side, { x, y }),
               );
             }}
             onkeydown={(e) =>
-              !project.constraints.speakersFixed &&
               onKey(e, `speaker-${s.side}`, (dx, dy) =>
                 moveSpeaker(
                   workspace.project,
@@ -515,25 +600,18 @@
               )}
           >
             <!-- Top-down cabinet; the light bar is the front (baffle), the dashed line its aim. -->
-            <g transform="rotate({angle} {cx} {cy})">
-              <line class="axis" x1={cx} y1={cy + d / 2} x2={cx} y2={cy + d / 2 + 26} />
+            <g transform="rotate({angle})">
+              <line class="axis" x1="0" y1={d / 2} x2="0" y2={d / 2 + 26} />
               <rect
                 class="body cabinet"
                 class:default={s.isDefault}
-                x={cx - w / 2}
-                y={cy - d / 2}
+                x={-w / 2}
+                y={-d / 2}
                 width={w}
                 height={d}
                 rx="3"
               />
-              <rect
-                class="baffle"
-                x={cx - w / 2 + 2.5}
-                y={cy + d / 2 - 4}
-                width={w - 5}
-                height="2"
-                rx="1"
-              />
+              <rect class="baffle" x={-w / 2 + 2.5} y={d / 2 - 4} width={w - 5} height="2" rx="1" />
             </g>
           </g>
         {/each}
@@ -545,21 +623,19 @@
           <g
             class="item seat-item"
             class:selected={isSelected}
-            class:locked={project.constraints.listenerFixed}
+            class:glide={ui.glide}
+            style="transform: translate({sx}px, {sy}px)"
             role="button"
             tabindex="0"
-            aria-disabled={project.constraints.listenerFixed || undefined}
             aria-label={seatLabel}
             onfocus={() => ui.select({ kind: 'seat' })}
             onpointerdown={(e) => {
               ui.select({ kind: 'seat' });
-              if (project.constraints.listenerFixed) return;
               drag(e, { x: seat.ears.x, y: seat.ears.y }, 'seat', (x, y) =>
                 moveSeat(workspace.project, { x, y }),
               );
             }}
             onkeydown={(e) =>
-              !project.constraints.listenerFixed &&
               onKey(e, 'seat', (dx, dy) =>
                 moveSeat(
                   workspace.project,
@@ -571,12 +647,33 @@
             <circle
               class="seat"
               class:default={seat.certainty === 'unknown'}
-              cx={sx}
-              cy={sy}
+              cx="0"
+              cy="0"
               r="11"
             />
             <!-- The listener faces the front wall (the speakers). -->
-            <path class="facing" d="M {sx - 4.5} {sy + 2} L {sx} {sy - 3} L {sx + 4.5} {sy + 2}" />
+            <path class="facing" d="M -4.5 2 L 0 -3 L 4.5 2" />
+          </g>
+        {/if}
+
+        {#if ui.before && !field}
+          <!-- Just applied: where things were, for a moment (owner decision: before/after). -->
+          <g class="before" aria-hidden="true">
+            {#each [ui.before.speakers.left, ui.before.speakers.right] as b, i (i)}
+              <rect
+                x={px(b.base.x) - (cab.w * frame.scale) / 2}
+                y={py(b.base.y) - (cab.d * frame.scale) / 2}
+                width={cab.w * frame.scale}
+                height={cab.d * frame.scale}
+                rx="3"
+              />
+            {/each}
+            <circle cx={px(ui.before.listener.x)} cy={py(ui.before.listener.y)} r="11" />
+            <text
+              x={px((ui.before.speakers.left.base.x + ui.before.speakers.right.base.x) / 2)}
+              y={py(ui.before.speakers.left.base.y) + 4}
+              text-anchor="middle">{i18n.t('map.before')}</text
+            >
           </g>
         {/if}
 
@@ -611,11 +708,9 @@
               }
             }}
           >
-            <circle cx={px(suggested.listener.x)} cy={py(suggested.listener.y)} r="13" />
-            <text
-              x={px(suggested.listener.x)}
-              y={py(suggested.listener.y) + 4.5}
-              text-anchor="middle">{LETTERS[shownIndex]}</text
+            <circle cx={px(pinAt!.x)} cy={py(pinAt!.y)} r="13" />
+            <text x={px(pinAt!.x)} y={py(pinAt!.y) + 4.5} text-anchor="middle"
+              >{LETTERS[shownIndex]}</text
             >
           </g>
         {/if}
@@ -692,13 +787,54 @@
       />
     {/if}
 
+    {#if shownValues && known && !field}
+      <MapLegend
+        values={shownValues}
+        named={ui.layer === 'overall' || ui.layer === 'goals' || ui.layer === 'speakers'}
+        hatched={!speakerGrid}
+      />
+    {/if}
+
     {#if field}
       <p class="hint">
         {i18n.t('mode.caption', { frequency: `${Math.round(field.frequency)} Hz` })}
       </p>
     {/if}
 
-    {#if probeAt && !field}
+    {#if probe.point && speakerGrid && speakerProbe}
+      <!-- On the speaker map, pointing says how good the speakers would be there. -->
+      {@const at = { x: px(probe.point.x), y: py(probe.point.y) }}
+      <div
+        class="spot"
+        role="region"
+        aria-label={i18n.t('probe.speakersTitle')}
+        aria-live={probe.pinned ? 'polite' : 'off'}
+        style="left:{Math.max(8, Math.min(width - 228, at.x + 18))}px; top:{Math.max(
+          8,
+          Math.min(height - 120, at.y + 18),
+        )}px"
+      >
+        <p class="spot-score">
+          {speakerProbe.value === null
+            ? i18n.t('probe.speakersNot')
+            : i18n.t('probe.speakersHere', {
+                word: i18n.t(`results.score.${scoreWord(speakerProbe.value)}`),
+              })}
+        </p>
+        {#if probe.pinned}
+          <div class="spot-actions">
+            {#if speakerProbe.value !== null}
+              <button type="button" class="btn small primary" onclick={moveSpeakersToProbe}
+                >{i18n.t('probe.moveSpeakers')}</button
+              >
+            {/if}
+            <button type="button" class="btn small" onclick={() => probe.clear()}
+              >{i18n.t('probe.close')}</button
+            >
+          </div>
+        {/if}
+      </div>
+    {:else if probeAt && !field && !speakerGrid}
       <ProbeCard
         explanation={probeAt.explanation}
         {system}
@@ -746,7 +882,6 @@
   .heat {
     position: absolute;
     pointer-events: none;
-    opacity: 0.88;
   }
   /* Heat sits under the drawing: same rounded corners and soft shadow as the empty room. */
   .heat {
@@ -834,6 +969,13 @@
     fill: var(--ink-muted);
     font-size: var(--text-xs);
   }
+  .zone-note {
+    fill: var(--ink-muted);
+    font-size: var(--text-xs);
+    letter-spacing: 0.02em;
+    opacity: 0.8;
+    pointer-events: none;
+  }
   .dim line {
     stroke: var(--accent);
     stroke-width: 1;
@@ -874,6 +1016,83 @@
       transition: none !important;
     }
   }
+  /* Applying a placement: the speakers and the seat glide, the old spots fade away. */
+  .glide {
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .before {
+    animation: before 3.5s ease forwards;
+    pointer-events: none;
+  }
+  .before rect,
+  .before circle {
+    fill: none;
+    stroke: var(--ink-muted);
+    stroke-width: 1.25;
+    stroke-dasharray: 3 3;
+  }
+  .before text {
+    fill: var(--ink-muted);
+    font-size: var(--text-xs);
+  }
+  @keyframes before {
+    0%,
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glide {
+      transition: none;
+    }
+  }
+  .spot {
+    position: absolute;
+    z-index: 3;
+    display: grid;
+    gap: 8px;
+    width: 220px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow);
+    font-size: var(--text-sm);
+    pointer-events: none;
+  }
+  .spot:has(.spot-actions) {
+    pointer-events: auto;
+  }
+  .spot-score {
+    margin: 0;
+    font-weight: 600;
+  }
+  .spot-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .spot .small {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: var(--text-sm);
+  }
+  @media (pointer: coarse) {
+    .spot .small {
+      min-height: 44px;
+    }
+  }
+  .zone {
+    fill: color-mix(in srgb, var(--accent-fill) 7%, transparent);
+    stroke: var(--accent-fill);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+    opacity: 0.8;
+    pointer-events: none;
+  }
   .triangle {
     fill: none;
     stroke: var(--ink-muted);
@@ -894,9 +1113,6 @@
     cursor: grab;
     touch-action: none;
     outline: none;
-  }
-  .item.locked {
-    cursor: default;
   }
   .item:active {
     cursor: grabbing;

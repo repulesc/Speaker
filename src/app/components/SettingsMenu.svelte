@@ -9,12 +9,13 @@
   /** One place for everything that is not the room itself: language, units, look, projects, files. */
   interface Props {
     onshare: () => void;
+    onimage: () => void;
     onexport: () => void;
     onimport: () => void;
     onprint: () => void;
     onabout: () => void;
   }
-  let { onshare, onexport, onimport, onprint, onabout }: Props = $props();
+  let { onshare, onimage, onexport, onimport, onprint, onabout }: Props = $props();
 
   const themes: ThemePref[] = ['auto', 'light', 'dark'];
   const project = $derived(workspace.project);
@@ -52,13 +53,13 @@
 
 <Dropdown label={i18n.t('settings.label')} triggerClass="gear">
   {#snippet trigger()}
+    <!-- Three lines: friendlier than a cog (owner feedback, docs/DESIGN_BRIEF_V4.md). -->
     <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none">
       <path
-        d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"
+        d="M4 7h16M4 12h16M4 17h16"
         stroke="currentColor"
-        stroke-width="1.6"
+        stroke-width="1.8"
         stroke-linecap="round"
-        stroke-linejoin="round"
       />
     </svg>
     <span class="visually-hidden">{i18n.t('settings.label')}</span>
@@ -164,7 +165,7 @@
       </ul>
 
       <ul class="list">
-        {#each [['menu.share', onshare], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.about', onabout]] as const as [key, action] (key)}
+        {#each [['menu.share', onshare], ['menu.image', onimage], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.about', onabout]] as const as [key, action] (key)}
           <li>
             <button
               type="button"

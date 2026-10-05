@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { fillRoom, goHome, openSection } from './helpers';
+import { fillRoom, goHome, openApp, openSection } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
 test('the page title, manifest and icons all come from the one app-name setting', async ({
   page,
 }) => {
-  await page.goto('/');
+  await openApp(page);
   const title = await page.title();
   expect(title.length).toBeGreaterThan(0);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
@@ -23,7 +23,7 @@ test('after the first visit the app opens offline, with the saved project', asyn
   page,
   context,
 }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5.2', '2.6');
   await page.getByText('Saved on this device').waitFor();
 

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, goHome, openSection, openSpeakerDetails } from './helpers';
+import { fillRoom, goHome, openApp, openSection, openSpeakerDetails } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -31,7 +31,7 @@ async function panelSizes(page: Page): Promise<Record<string, string>> {
 }
 
 test('the sidebar keeps to one type scale on every page', async ({ page }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   const pages: Array<() => Promise<void>> = [
     () => goHome(page),

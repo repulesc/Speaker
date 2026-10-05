@@ -8,6 +8,7 @@
   import ConfidenceMeter from './ConfidenceMeter.svelte';
   import ListenPanel from './ListenPanel.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
+  import { SPEAKER_TYPES } from '../../engine/presets/speakerTypes';
   import StepFurnishing from './StepFurnishing.svelte';
   import StepGoals from './StepGoals.svelte';
   import StepRoom from './StepRoom.svelte';
@@ -24,12 +25,24 @@
    */
   interface Props {
     onshare: () => void;
+    onimage: () => void;
     onexport: () => void;
     onimport: () => void;
     onprint: () => void;
     onabout: () => void;
   }
   let props: Props = $props();
+
+  const HOME_CARDS =
+    typeof location !== 'undefined' && new URLSearchParams(location.search).get('home') === 'cards';
+  /** Simple line glyphs for the cards (24 × 24). */
+  const ICONS: Partial<Record<StepId, string>> = {
+    room: 'M4 5h16v14H4z',
+    surfaces: 'M4 6h16M4 12h16M4 18h16',
+    furnishing: 'M4 13v5M20 13v5M4 14h16M6 14v-3a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3',
+    speakers: 'M7 3h10v18H7zM12 8.5a1.2 1.2 0 1 0 0 .01M12 15a3 3 0 1 0 0 .01',
+    goals: 'M12 3a9 9 0 1 0 0 18 9 9 0 1 0 0-18M12 8a4 4 0 1 0 0 8 4 4 0 1 0 0-8',
+  };
 
   const project = $derived(workspace.project);
   const variant = $derived(activeVariant(project));
@@ -50,8 +63,28 @@
   );
   const notes = $derived(project.notes.filter((n) => n.variantId === variant.id).length);
 
+  /** The speaker type the speaker still matches, by its typical size (as on the Speakers page). */
+  const speakerType = $derived(
+    SPEAKER_TYPES.find(
+      (t) =>
+        Math.abs((project.speaker.dimensions.w.value ?? -1) - t.w) < 1e-6 &&
+        Math.abs((project.speaker.dimensions.d.value ?? -1) - t.d) < 1e-6 &&
+        project.speaker.driverLayout.value === t.driverLayout,
+    ) ?? null,
+  );
+  const wallsValue = $derived.by(() => {
+    const walls = ['front', 'back', 'left', 'right'] as const;
+    const first = project.surfaces.base.front;
+    const known = walls.every((b) => project.surfaces.baseCertainty[b] !== 'unknown');
+    return known && walls.every((b) => project.surfaces.base[b] === first)
+      ? i18n.t(`surface.${first}`)
+      : '';
+  });
+
   const values: Partial<Record<StepId, () => string>> = {
     room: () => roomValue,
+    surfaces: () => wallsValue,
+    speakers: () => (speakerType ? i18n.t(`speakers.type.${speakerType.id}.short`) : ''),
     furnishing: () =>
       variant.objects.length ? String(variant.objects.length) : i18n.t('nav.none'),
     goals: () => (goalCount ? String(goalCount) : i18n.t('nav.none')),
@@ -66,6 +99,27 @@
         : `dock.${id}`,
     );
 </script>
+
+<!-- The "Your room" group as four-up cards: one of two looks for the owner to choose from
+     (`?home=cards`, docs/DESIGN_BRIEF_V4.md); rows are the default. -->
+{#snippet cards(ids: readonly StepId[], title: string, titleId: string)}
+  <section aria-labelledby={titleId}>
+    <h3 class="group-title" id={titleId}>{title}</h3>
+    <ul class="cards">
+      {#each ids as id (id)}
+        <li>
+          <button type="button" class="card" onclick={() => (ui.step = id)}>
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+              <path d={ICONS[id] ?? ''} />
+            </svg>
+            <span class="card-title">{label(id)}</span>
+            <span class="value">{values[id]?.() || i18n.t('nav.notSet')}</span>
+          </button>
+        </li>
+      {/each}
+    </ul>
+  </section>
+{/snippet}
 
 {#snippet rows(ids: readonly StepId[], title: string, titleId: string)}
   <section aria-labelledby={titleId}>
@@ -114,7 +168,11 @@
   <div class="body">
     {#if home}
       <SuggestionCard />
-      {@render rows(SECTIONS, i18n.t('nav.room'), 'nav-room')}
+      {#if HOME_CARDS}
+        {@render cards(SECTIONS, i18n.t('nav.room'), 'nav-room')}
+      {:else}
+        {@render rows(SECTIONS, i18n.t('nav.room'), 'nav-room')}
+      {/if}
       {@render rows(['why', 'treat', 'bass', 'listen'], i18n.t('nav.results'), 'nav-results')}
       <div class="foot">
         <ConfidenceMeter report={analysis.result?.confidence ?? null} />
@@ -166,6 +224,45 @@
     min-height: 100%;
     background: var(--bg);
   }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .card {
+    display: grid;
+    gap: 2px;
+    justify-items: start;
+    width: 100%;
+    min-height: 96px;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .card svg {
+    margin-bottom: 6px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .card-title {
+    font-size: var(--text-md);
+    font-weight: 600;
+  }
+  .card .value {
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+  }
   .head {
     position: sticky;
     top: var(--sheet-handle, 0px);
@@ -175,7 +272,7 @@
     gap: 8px;
     min-height: 56px;
     padding: 6px 10px;
-    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
     backdrop-filter: saturate(180%) blur(16px);
     border-bottom: 1px solid var(--grid);
   }

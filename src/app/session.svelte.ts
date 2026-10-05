@@ -50,16 +50,28 @@ export const SECTIONS: readonly SectionId[] = [
 
 /** Transient message under the top bar (import results, errors). */
 export const notice = $state<
-  { kind: 'success' | 'error'; text: string } | { kind: 'none'; text: '' }
+  | { kind: 'success' | 'error'; text: string; undo: boolean }
+  | { kind: 'none'; text: ''; undo: false }
 >({
   kind: 'none',
   text: '',
+  undo: false,
 });
 
-export function showNotice(kind: 'success' | 'error', text: string): void {
-  Object.assign(notice, { kind, text });
+let noticeTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Shows a short message over the room; a success fades away by itself, an error stays. */
+export function showNotice(
+  kind: 'success' | 'error',
+  text: string,
+  options: { undo?: boolean } = {},
+): void {
+  Object.assign(notice, { kind, text, undo: options.undo ?? false });
+  clearTimeout(noticeTimer);
+  if (kind === 'success') noticeTimer = setTimeout(clearNotice, 6000);
 }
 
 export function clearNotice(): void {
-  Object.assign(notice, { kind: 'none', text: '' });
+  clearTimeout(noticeTimer);
+  Object.assign(notice, { kind: 'none', text: '', undo: false });
 }

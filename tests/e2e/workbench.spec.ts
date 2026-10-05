@@ -1,11 +1,20 @@
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, goHome, goStep, openMenu, openSection, openWhy, savedProject } from './helpers';
+import {
+  fillRoom,
+  goHome,
+  goStep,
+  openApp,
+  openMenu,
+  openSection,
+  openWhy,
+  savedProject,
+} from './helpers';
 
 test.use({ locale: 'en-GB' });
 
 /** A room with the default speakers, open on the home page with the best placement. */
 async function withResults(page: Page) {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
   await expect(page.getByTestId('suggestion')).toBeVisible();
@@ -20,6 +29,8 @@ test('the map shows a heatmap, layers that say what they mean, and a legend', as
   await expect(page.getByText('Whether a bass note nearly vanishes here')).toBeVisible();
   await expect(page.getByText('Physics', { exact: false }).first()).toBeVisible();
   await expect(page.getByText('Poorer')).toBeVisible();
+  await layer.selectOption({ label: 'Overall' });
+  await expect(page.getByTestId('best-here')).toHaveText(/^Best here: (Poor|Fair|Good|Very good)$/);
 });
 
 test('the side view stays hidden until asked for', async ({ page }) => {
@@ -50,8 +61,19 @@ test('best placement: shown first, other options, apply, and undo brings the set
   page,
 }) => {
   await withResults(page);
+  // Both move (the default is speakers only, with the seat fixed).
+  await page.getByRole('button', { name: /^Options/ }).click();
+  await page.getByRole('radio', { name: 'Both' }).check({ force: true });
   const before = (await savedProject(page)).variants[0].listener.ears.y;
   const answer = page.getByTestId('suggestion');
+  // Wait for the new answer: the suggested seat is no longer the current one.
+  await expect
+    .poll(async () => {
+      const text = await answer.innerText();
+      const m = /([\d.]+)\u00a0m from the front wall, [\d.]+\u00a0m from each/.exec(text);
+      return m ? Math.abs(Number(m[1]) - before) : 0;
+    })
+    .toBeGreaterThan(0.05);
   await expect(answer).toContainText(/from the front wall/);
   await expect(answer).toContainText(/apart/);
   await page.getByRole('radio', { name: /^Option B/ }).check({ force: true });
@@ -75,7 +97,7 @@ test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({
   await withResults(page);
   await page.getByRole('button', { name: /^Options/ }).click();
   await page.getByRole('radio', { name: 'Speakers' }).check({ force: true });
-  await expect(page.getByTestId('suggestion')).toContainText('Stay where they are');
+  await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
   const project = await savedProject(page);
   expect(project.constraints.listenerFixed).toBe(true);
   await page.getByRole('radio', { name: 'Desk' }).check({ force: true });
@@ -86,6 +108,7 @@ test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({
 
 test('the probe: click the map to see why, then move the seat there', async ({ page }) => {
   await withResults(page);
+  await page.getByLabel('Map layer').selectOption({ label: 'Overall' }); // the seat map
   const plan = page.getByRole('group', { name: 'Top view of the room' });
   const box = (await plan.boundingBox())!;
   const before = (await savedProject(page)).variants[0].listener.ears;
@@ -99,6 +122,22 @@ test('the probe: click the map to see why, then move the seat there', async ({ p
   const after = (await savedProject(page)).variants[0].listener;
   expect(after.ears.y).not.toBeCloseTo(before.y, 1);
   expect(after.certainty).toBe('estimated');
+});
+
+test('on the speaker map, a click offers to move the speakers there', async ({ page }) => {
+  await withResults(page);
+  await expect(page.getByLabel('Map layer')).toHaveValue('speakers'); // speakers only: the default
+  const plan = page.getByRole('group', { name: 'Top view of the room' });
+  const box = (await plan.boundingBox())!;
+  const before = (await savedProject(page)).variants[0].speakers.left.base;
+  // Upper left of the room, where the left speaker could stand.
+  await page.mouse.click(box.x + box.width * 0.33, box.y + box.height * 0.3);
+  const card = page.getByRole('region', { name: 'Speakers here' });
+  await expect(card).toContainText(/Speakers here: (Poor|Fair|Good|Very good)/);
+  await card.getByRole('button', { name: 'Move the speakers here' }).click();
+  await expect(card).toHaveCount(0);
+  const after = (await savedProject(page)).variants[0].speakers.left.base;
+  expect(Math.hypot(after.x - before.x, after.y - before.y)).toBeGreaterThan(0.05);
 });
 
 test('click a number on the map to type an exact value', async ({ page }) => {
@@ -154,7 +193,7 @@ test('the Treat tab lists advice in order, with no raw keys', async ({ page }) =
 test('the bass-note explorer shows a pressure pattern and the resonances near the note', async ({
   page,
 }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
   await expect(page.getByTestId('suggestion')).toBeVisible();
@@ -257,4 +296,17 @@ test('the speaker layer shows where the speakers would sound best, mirrored abou
   });
   expect(sample.left).toBeGreaterThan(50);
   expect(sample.right).toBe(sample.left);
+});
+
+test('share as image: the menu saves a picture of the room and the answer', async ({ page }) => {
+  await withResults(page);
+  await openMenu(page);
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Share as image' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe('Untitled room.png');
+  const path = await download.path();
+  const { size } = await import('node:fs').then((fs) => fs.statSync(path));
+  expect(size).toBeGreaterThan(20_000); // a real picture, not an empty canvas
 });

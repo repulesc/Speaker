@@ -177,21 +177,17 @@
           <g
             class="item"
             class:selected={isSelected}
-            class:locked={project.constraints.speakersFixed}
             role="button"
             tabindex="0"
-            aria-disabled={project.constraints.speakersFixed || undefined}
             aria-label={speakerLabel(side)}
             onfocus={() => ui.select({ kind: 'speaker', side })}
             onpointerdown={(e) => {
               ui.select({ kind: 'speaker', side });
-              if (project.constraints.speakersFixed) return;
               drag(e, { x: s.base.y, y: s.base.z }, `side-speaker-${side}`, (y, z) =>
                 moveSpeaker(workspace.project, side, { y, z }),
               );
             }}
             onkeydown={(e) =>
-              !project.constraints.speakersFixed &&
               onKey(e, `side-speaker-${side}`, (dy, dz) =>
                 moveSpeaker(
                   workspace.project,
@@ -222,10 +218,8 @@
           <g
             class="item"
             class:selected={selected.kind === 'seat'}
-            class:locked={project.constraints.listenerFixed}
             role="button"
             tabindex="0"
-            aria-disabled={project.constraints.listenerFixed || undefined}
             aria-label={i18n.t('plan.item.seatSide', {
               front: fmtPos(seat.ears.y),
               height: fmtPos(seat.ears.z),
@@ -234,13 +228,11 @@
             onfocus={() => ui.select({ kind: 'seat' })}
             onpointerdown={(e) => {
               ui.select({ kind: 'seat' });
-              if (project.constraints.listenerFixed) return;
               drag(e, { x: seat.ears.y, y: seat.ears.z }, 'side-seat', (y, z) =>
                 moveSeat(workspace.project, { y, z }),
               );
             }}
             onkeydown={(e) =>
-              !project.constraints.listenerFixed &&
               onKey(e, 'side-seat', (dy, dz) =>
                 moveSeat(
                   workspace.project,
@@ -336,9 +328,6 @@
     cursor: grab;
     touch-action: none;
     outline: none;
-  }
-  .item.locked {
-    cursor: default;
   }
   .body {
     fill: var(--surface);

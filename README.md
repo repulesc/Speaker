@@ -1,4 +1,6 @@
-# Speaker Placement Advisor
+# Nodo
+
+_Speaker placement advisor: where your speakers and your seat sound best in your room._
 
 A free, open-source web app that helps anyone place loudspeakers and choose a listening seat in a rectangular room, using established room acoustics, and that is honest about what it doesn't know.
 

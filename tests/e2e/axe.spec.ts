@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, goStep, openMenu, openSection, openWhy } from './helpers';
+import { fillRoom, goStep, openApp, openMenu, openSection, openWhy } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -22,13 +22,13 @@ for (const scheme of ['light', 'dark'] as const) {
       await page.addInitScript((theme) => localStorage.setItem('spa:theme', theme), scheme);
     });
 
-    test('empty workbench', async ({ page }) => {
+    test('empty workbench (the first-run survey)', async ({ page }) => {
       await page.goto('/');
       await expectAccessible(page);
     });
 
     test('filled room, menu and meter open', async ({ page }) => {
-      await page.goto('/');
+      await openApp(page);
       await fillRoom(page, '4', '5.2', '2.6');
       await page.getByLabel('Width', { exact: true }).fill('banana');
       await page.getByLabel('Width', { exact: true }).blur();
@@ -40,7 +40,7 @@ for (const scheme of ['light', 'dark'] as const) {
 }
 
 test('Hungarian', async ({ page }) => {
-  await page.goto('/');
+  await openApp(page);
   await openMenu(page);
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
   await page.keyboard.press('Escape');
@@ -48,7 +48,7 @@ test('Hungarian', async ({ page }) => {
 });
 
 test('dialogs', async ({ page }) => {
-  await page.goto('/');
+  await openApp(page);
   await openMenu(page);
   await page.getByRole('button', { name: 'Share link' }).click();
   await expectAccessible(page);
@@ -65,12 +65,13 @@ for (const scheme of ['light', 'dark'] as const) {
 
     test('with a filled room, a patch, an object and a second setup', async ({ page }) => {
       test.setTimeout(90_000); // seven full accessibility scans
-      await page.goto('/');
+      await openApp(page);
       await fillRoom(page, '4', '5', '2.5');
 
       // Give the later steps something to show: a patch, an object, a second setup.
       await goStep(page, 'Surfaces');
-      await page.getByRole('radio', { name: /^Left wall/ }).check();
+      await page.getByText('Add something on a wall').click();
+      await page.getByRole('radio', { name: /^Left wall/ }).check({ force: true });
       await page.getByRole('button', { name: '+ Shelf or CD wall' }).click();
       await goStep(page, 'Furnishing');
       await page.getByRole('button', { name: '+ Bed' }).click();
@@ -95,7 +96,7 @@ for (const scheme of ['light', 'dark'] as const) {
 }
 
 test('home, Why, Treat, Listen and the bass-note explorer', async ({ page }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
   await expectAccessible(page); // home: the best placement and the list

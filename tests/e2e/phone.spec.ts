@@ -1,11 +1,11 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { fillRoom, goStep, openSection } from './helpers';
+import { fillRoom, goStep, openApp, openSection } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5.2', '2.6');
 });
 

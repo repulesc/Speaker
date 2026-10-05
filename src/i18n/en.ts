@@ -43,6 +43,7 @@ export const en = {
     failed: 'Could not save: storage may be full. Use Export to keep your work.',
   },
   menu: {
+    image: 'Share as image',
     label: 'Menu',
     undo: 'Undo',
     redo: 'Redo',
@@ -75,6 +76,12 @@ export const en = {
     },
     dismiss: 'Dismiss',
   },
+  image: {
+    subtitle: 'Room {width} × {length}',
+    needRoom: 'Enter the room size first, then there is something to share.',
+    failed: 'The picture could not be made in this browser.',
+  },
+  notice: { undo: 'Undo' },
   confidence: {
     label: 'How sure are we?',
     step: {
@@ -201,11 +208,17 @@ export const en = {
   surfaces: {
     title: 'Surfaces',
     intro:
-      'What the walls, floor and ceiling are made of changes how the room sounds. Guesses are fine; this step is optional.',
+      'What the room is made of changes how it sounds. Guesses are fine; this step is optional.',
     pick: 'Which surface?',
     base: 'What is the {name} made of?',
     dontKnow: 'I don’t know',
     dontKnowHelp: 'We’ll assume {material}.',
+    dontKnowShort: 'I don’t know ({material})',
+    row: { walls: 'Walls', floor: 'Floor', ceiling: 'Ceiling' },
+    mixed: 'Different on each wall',
+    eachWall: 'Each wall separately',
+    addThings: 'Add something on a wall',
+    addThingsHint: 'Windows, shelves, curtains, paintings',
     needRoom: 'Enter the room size first, then you can describe the surfaces.',
     elevation: 'View of the {name} from inside the room',
     patchLabel: '{name}, {left} along, {top} up. {hint}',
@@ -279,19 +292,27 @@ export const en = {
       help: 'This fills in typical sizes. You can change them under More details.',
       'small-bookshelf-rear-port': {
         name: 'Small bookshelf speaker',
+        short: 'Bookshelf',
         help: 'Two-way, port at the back',
       },
       'coaxial-active-monitor': {
         name: 'Coaxial active monitor',
+        short: 'Coaxial monitor',
         help: 'Tweeter in the middle of the woofer',
       },
-      'sealed-bookshelf': { name: 'Sealed bookshelf speaker', help: 'No port' },
+      'sealed-bookshelf': {
+        name: 'Sealed bookshelf speaker',
+        short: 'Sealed bookshelf',
+        help: 'No port',
+      },
       'floorstander-front-port': {
         name: 'Floor-standing, port at the front',
+        short: 'Floor-standing',
         help: 'Tall, three-way',
       },
       'floorstander-rear-port': {
         name: 'Floor-standing, port at the back',
+        short: 'Floor-standing',
         help: 'Tall, three-way',
       },
     },
@@ -382,6 +403,11 @@ export const en = {
         to: 'Furthest from the front wall',
       },
       fixed: 'My speakers can’t move (only suggest a better seat)',
+      zone: {
+        legend: 'How far can the speakers move from where they are now?',
+        help: 'Suggestions keep each speaker within this distance.',
+        any: 'Anywhere',
+      },
     },
   },
   goals: {
@@ -499,6 +525,33 @@ export const en = {
     notSet: 'Not set',
     none: 'None',
   },
+  survey: {
+    step: '{n} of {total}',
+    skip: 'Skip',
+    back: 'Back',
+    next: 'Next',
+    done: 'Show me',
+    room: {
+      title: 'How big is your room?',
+      help: 'Rough numbers are fine. Leave the ceiling empty and we assume a typical {height}.',
+    },
+    goal: {
+      title: 'What do you want to work out?',
+      help: 'You can change this any time.',
+      speakers: { name: 'Where to put my speakers', help: 'My seat stays where it is.' },
+      seat: { name: 'Where to sit', help: 'My speakers stay where they are.' },
+      both: { name: 'Both', help: 'I can move the speakers and my seat.' },
+    },
+    speaker: {
+      title: 'Which speakers are closest to yours?',
+      help: 'Pick the nearest match. It fills in typical sizes.',
+    },
+    where: {
+      title: 'Where are things now?',
+      help: 'Rough is fine. You can drag everything on the map later.',
+      both: 'Nothing to measure: we look for the best spot for both.',
+    },
+  },
   suggest: {
     title: 'Best placement',
     move: {
@@ -524,15 +577,29 @@ export const en = {
     seat: 'Your seat',
     seatLine: '{front} from the front wall, {distance} from each speaker',
     stay: 'Stay where they are',
+    seatStays: 'Stays where it is',
+    mood: 'Your setup now: {word}',
+    say: {
+      speakers: 'Move the speakers {parts}.',
+      away: '{d} further from the front wall',
+      toward: '{d} closer to the front wall',
+      apart: '{d} further apart',
+      together: '{d} closer together',
+      and: ' and ',
+      seatBack: 'Move your seat {d} back.',
+      seatForward: 'Move your seat {d} forward.',
+      keep: 'Keep everything where it is.',
+    },
     verdict: 'Your setup now: {now}. With this placement: {best}.',
     apply: 'Apply',
-    applied: 'Placement applied. Undo brings your setup back.',
+    applied: 'Placement applied.',
     already: 'Your setup is already about as good as it gets in this room.',
     others: 'Other good options',
     option: 'Option {letter}: {score}',
     closer:
       'The room is too small to sit 1.5 m from the speakers, so this is the best closer spot.',
     nothing: 'No placement fits your limits. Let more things move.',
+    zoneCost: 'Within {zone}: {inside}. With more room: {outside}.',
   },
   panel: {
     label: 'Settings and results',
@@ -540,7 +607,13 @@ export const en = {
     done: 'Done',
   },
   map: {
-    dimmed: 'Dimmed: advised against',
+    dimmed: 'Advised against',
+    bestHere: 'Best here: {word}',
+    absolute: 'Absolute scale',
+    hidePanel: 'Hide the side panel',
+    before: 'Before',
+    showPanel: 'Show the side panel',
+    notListening: 'Not a listening position',
     label: 'Map',
     hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
     layerLabel: 'Map layer',
@@ -696,6 +769,10 @@ export const en = {
   probe: {
     title: 'Seat here · {front} from the front wall',
     moveHere: 'Move my seat here',
+    speakersTitle: 'Speakers here',
+    speakersHere: 'Speakers here: {word}',
+    speakersNot: 'The speakers cannot stand here.',
+    moveSpeakers: 'Move the speakers here',
     close: 'Close',
     notAllowed: 'The seat cannot go here: too close to a speaker, or something is in the way.',
     flagged: 'The guidelines advise against sitting here.',

@@ -49,6 +49,11 @@ export const THRESHOLDS = {
   minListenerAhead: 0.5,
   candidateSeparation: 0.2,
   goodZoneMargin: 0.05,
+  /**
+   * The speaker zone's cost is mentioned when the best without it scores at least this much more
+   * (score points, 0..1). Same size as the listen-log tie (SCORE_TIE): smaller is noise.
+   */
+  zoneCostWorthMentioning: 0.05,
 } as const;
 
 export const DEFAULT_WEIGHTS = {

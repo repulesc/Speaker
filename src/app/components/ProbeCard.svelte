@@ -18,7 +18,8 @@
 
   let { explanation, system, pinned, x, y, bounds, onmove, onclose }: Props = $props();
 
-  const WIDTH = 260;
+  /** Hovering shows a small tooltip; a click pins the full card (owner decision). */
+  const WIDTH = $derived(pinned ? 260 : 210);
   const left = $derived(Math.max(8, Math.min(bounds.width - WIDTH - 8, x + 18)));
   const top = $derived(Math.max(8, Math.min(bounds.height - 230, y + 18)));
 

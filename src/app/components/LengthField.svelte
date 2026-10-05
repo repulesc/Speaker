@@ -19,11 +19,24 @@
     usual?: { min: number; max: number };
     /** What is shown when the value is unknown (e.g. a default that will be assumed). */
     unknownNote?: string;
+    /** Show the "how sure are you" chips (hidden in the first-run survey, to keep it short). */
+    chips?: boolean;
     onchange: (next: Known<number>) => void;
   }
 
-  let { id, label, help, kind, value, system, limits, usual, unknownNote, onchange }: Props =
-    $props();
+  let {
+    id,
+    label,
+    help,
+    kind,
+    value,
+    system,
+    limits,
+    usual,
+    unknownNote,
+    chips = true,
+    onchange,
+  }: Props = $props();
 
   const locale = $derived(i18n.locale);
   const format = (metres: number) => formatLength(metres, system, kind, locale);
@@ -124,7 +137,9 @@
       onblur={commit}
       onkeydown={(e) => e.key === 'Enter' && commit()}
     />
-    <CertaintyChips name="{id}-certainty" value={shownCertainty} onchange={setCertainty} />
+    {#if chips}
+      <CertaintyChips name="{id}-certainty" value={shownCertainty} onchange={setCertainty} />
+    {/if}
   </div>
   {#if error}<p class="error" id="{id}-error" role="alert">{error}</p>{/if}
   {#if unusual && usual}

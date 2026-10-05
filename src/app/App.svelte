@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy, onMount, untrack } from 'svelte';
   import { i18n } from '../i18n/locale.svelte';
   import AboutDialog from './components/AboutDialog.svelte';
   import LayerBar from './components/LayerBar.svelte';
@@ -9,6 +9,8 @@
   import ShareDialog from './components/ShareDialog.svelte';
   import SideView from './components/SideView.svelte';
   import Sidebar from './components/Sidebar.svelte';
+  import Survey from './components/Survey.svelte';
+  import { goalOf } from './state/goal';
   import { APP_NAME } from './config';
   import { downloadText } from './download';
   import { analysis, projectLabel, showNotice, workspace } from './session.svelte';
@@ -23,6 +25,8 @@
     type ReadResult,
   } from './state/projectFile';
   import { decodeShare, hasShare } from './state/share';
+  import { makeShareImage, shareOrSave } from './shareImage';
+  import { formatLength } from '../units/format';
 
   let sheet = $state<'peek' | 'half' | 'full'>('half');
   let shareDialog = $state<ReturnType<typeof ShareDialog>>();
@@ -34,11 +38,33 @@
     analysis.run($state.snapshot(workspace.project));
   });
 
-  /** A project that already has a room opens on the results; a new one on the room form. */
+  /** A project that already has a room opens on the results; a new one on the survey. */
   function openFirstSection() {
     const { width, length } = workspace.project.room;
-    ui.step = width.value !== null && length.value !== null ? 'results' : 'room';
+    const known = width.value !== null && length.value !== null;
+    // Behind the survey the home page waits (the room form would repeat the survey's fields).
+    ui.step = 'results';
+    ui.survey = !known;
   }
+
+  // A new or other project (menu, import) opens the same way.
+  let shownProject = workspace.project.id;
+  $effect(() => {
+    const id = workspace.project.id;
+    if (id === shownProject) return;
+    shownProject = id;
+    untrack(openFirstSection);
+  });
+
+  // The map shows what the goal asks: where the speakers go (seat fixed) or where to sit.
+  let shownGoal = goalOf(workspace.project);
+  ui.layer = shownGoal === 'speakers' ? 'speakers' : 'overall';
+  $effect(() => {
+    const goal = goalOf(workspace.project);
+    if (goal === shownGoal) return;
+    shownGoal = goal;
+    ui.layer = goal === 'speakers' ? 'speakers' : 'overall';
+  });
 
   // A new section starts at the top of the panel, not wherever the last one was scrolled to.
   let panel = $state<HTMLElement>();
@@ -90,6 +116,24 @@
     handleImport(parseProjectJson(await file.text()));
   }
 
+  /** A clean picture of the room, its map and the answer, to post or send. */
+  async function shareImage() {
+    const plan = document.querySelector<HTMLElement>('section.plan');
+    const size = roomSize(workspace.project);
+    if (!plan || !size) return showNotice('error', i18n.t('image.needRoom'));
+    const say = document.querySelector('[data-testid="say"]')?.textContent?.trim();
+    const verdict = document.querySelector('[data-share="verdict"]')?.textContent?.trim();
+    const fmt = (m: number) => formatLength(m, workspace.project.units, 'room', i18n.locale);
+    const blob = await makeShareImage(plan, {
+      title: projectLabel(workspace.project.name),
+      subtitle: i18n.t('image.subtitle', { width: fmt(size.W), length: fmt(size.L) }),
+      lines: [say, verdict].filter((t): t is string => Boolean(t)),
+      footer: `${APP_NAME} · ${location.host}${location.pathname}`,
+    });
+    if (!blob) return showNotice('error', i18n.t('image.failed'));
+    await shareOrSave(blob, `${projectLabel(workspace.project.name)}.png`);
+  }
+
   function exportFile() {
     const project = $state.snapshot(workspace.project);
     downloadText(exportFileName(project, i18n.t('project.untitled')), serializeProject(project));
@@ -133,7 +177,13 @@
 
 <!-- A rendering error must never leave a blank page (R0 audit): offer a way out instead. -->
 <svelte:boundary onerror={(error) => console.error(error)}>
-  <div class="app" data-sheet={sheet}>
+  <div
+    class="app"
+    data-sheet={sheet}
+    inert={ui.survey}
+    class:reveal={ui.reveal}
+    class:panel-hidden={ui.panelHidden && viewport.wide}
+  >
     <a class="skip visually-hidden" href="#panel">{i18n.t('app.skipToContent')}</a>
     <h1 class="visually-hidden">{APP_NAME}</h1>
 
@@ -157,6 +207,7 @@
       {/if}
       <Sidebar
         onshare={() => shareDialog?.show()}
+        onimage={shareImage}
         onexport={exportFile}
         onimport={() => fileInput?.click()}
         onprint={() => window.print()}
@@ -176,7 +227,7 @@
             <section class="side" aria-label={i18n.t('plan.sideLabel')}><SideView /></section>
           {/if}
         {/if}
-        {#if analysis.busy}
+        {#if analysis.busy && largeRoom}
           <p class="busy" role="status">
             {i18n.t(largeRoom ? 'analysis.updatingLarge' : 'analysis.updating')}
           </p>
@@ -217,6 +268,7 @@
   aria-hidden="true"
   onchange={onFile}
 />
+{#if ui.survey}<Survey />{/if}
 <ShareDialog bind:this={shareDialog} />
 <AboutDialog bind:this={aboutDialog} />
 <PrintSheet />
@@ -227,6 +279,26 @@
     flex-direction: column-reverse;
     height: 100dvh;
     overflow: hidden;
+  }
+  /* After the survey: the room and the answer fade in once. */
+  .app.reveal .canvas,
+  .app.reveal .panel {
+    animation: reveal 0.7s ease both;
+  }
+  .app.reveal .panel {
+    animation-delay: 0.15s;
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: scale(0.985);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .app.reveal .canvas,
+    .app.reveal .panel {
+      animation: none;
+    }
   }
   .crashed {
     display: grid;
@@ -355,6 +427,10 @@
     }
     .canvas {
       flex: 1 1 0;
+    }
+    /* The panel can be hidden for a full-width room (owner decision, docs/DESIGN_BRIEF_V4.md). */
+    .app.panel-hidden .panel {
+      display: none;
     }
   }
 </style>

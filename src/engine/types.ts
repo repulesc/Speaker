@@ -205,6 +205,12 @@ export interface Constraints {
   keepSymmetric: boolean;
   /** "room": sit at least 1.5 m away (default); "near": a desk or near-field setup. */
   listeningDistance?: 'room' | 'near';
+  /**
+   * How far each speaker may move from where it stands now, in metres (a circle around each).
+   * Absent: anywhere within the other limits (owner feedback: suggestions in the middle of the
+   * room are unrealistic, docs/DESIGN_BRIEF_V4.md).
+   */
+  speakerZone?: number;
 }
 
 export type GoalId =
@@ -317,6 +323,11 @@ export interface Candidate extends Placement {
   compromise?: boolean;
   /** The room is too small for the preferred listening distance; this spot is closer. */
   closer?: boolean;
+  /**
+   * The speaker zone holds the result back: the best score inside it and without it (nominal
+   * scores of the best search results, so the two are compared like with like).
+   */
+  zoneCost?: { inside: number; outside: number };
 }
 
 export interface Grid {

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import {
   fillRoom,
   goStep,
+  openApp,
   openSpeakerDetails,
   openWhy,
   savedProject,
@@ -12,7 +13,7 @@ import {
 test.use({ locale: 'en-GB' });
 
 test('journey 1 — first answer: room, speaker, then results within 3 seconds', async ({ page }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
@@ -29,7 +30,7 @@ test('journey 1 — first answer: room, speaker, then results within 3 seconds',
 test('journey 2 — edit without restart: change the ceiling, results follow, nothing is lost', async ({
   page,
 }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
@@ -52,7 +53,7 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
 
 test.describe('with a room', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await openApp(page);
     await fillRoom(page, '4', '5', '2.5');
   });
 
@@ -148,8 +149,11 @@ test.describe('with a room', () => {
     page,
   }) => {
     await goStep(page, 'Surfaces');
-    await page.getByRole('radio', { name: /^Left wall/ }).check();
-    await page.getByRole('radio', { name: /Bookshelf or CD wall/ }).check();
+    // One choice for all four walls, most common finishes first.
+    await page.getByLabel('Walls', { exact: true }).selectOption({ label: 'Plasterboard' });
+    // Shelves, windows and curtains go on a wall as "something on it".
+    await page.getByText('Add something on a wall').click();
+    await page.getByRole('radio', { name: /^Left wall/ }).check({ force: true });
     await page.getByRole('button', { name: '+ Shelf or CD wall' }).click();
     await page.getByLabel('Width', { exact: true }).fill('1.5');
     await page.getByLabel('Width', { exact: true }).blur();
@@ -165,8 +169,11 @@ test.describe('with a room', () => {
     await page.mouse.up();
 
     const project = await savedProject(page);
-    expect(project.surfaces.base.left).toBe('shelf-diffusive');
-    expect(project.surfaces.baseCertainty.left).toBe('estimated');
+    for (const wall of ['front', 'back', 'left', 'right']) {
+      expect(project.surfaces.base[wall]).toBe('gypsum-stud');
+      expect(project.surfaces.baseCertainty[wall]).toBe('estimated');
+    }
+    expect(project.surfaces.patches[0].boundary).toBe('left');
     expect(project.surfaces.patches).toHaveLength(1);
     expect(project.surfaces.patches[0].width).toBeCloseTo(1.5, 6);
     expect(project.surfaces.patches[0].u).not.toBeCloseTo(u0, 2);
@@ -174,9 +181,10 @@ test.describe('with a room', () => {
 
   test('surfaces: "I don\'t know" goes back to the typical default', async ({ page }) => {
     await goStep(page, 'Surfaces');
-    await page.getByRole('radio', { name: /^Floor/ }).check();
-    await page.getByRole('radio', { name: /Thick carpet/ }).check();
-    await page.getByRole('radio', { name: /I don’t know/ }).check();
+    const floor = page.getByLabel('Floor', { exact: true });
+    await floor.selectOption({ label: 'Thick carpet' });
+    expect((await savedProject(page)).surfaces.base.floor).toBe('carpet-heavy');
+    await floor.selectOption('unknown');
     const project = await savedProject(page);
     expect(project.surfaces.base.floor).toBe('wood-floor');
     expect(project.surfaces.baseCertainty.floor).toBe('unknown');
@@ -196,16 +204,32 @@ test.describe('with a room', () => {
     expect(project.variants[0].speakers.right.toeInDeg).toBe(12);
   });
 
-  test('speakers: constraints make things fixed', async ({ page }) => {
+  test('speakers: "fixed" limits the suggestions, not your own moves', async ({ page }) => {
     await goStep(page, 'Speakers');
     await page.getByRole('radio', { name: 'No, it is fixed' }).check();
     await page.getByLabel('My speakers can’t move (only suggest a better seat)').check();
+    const project = await savedProject(page);
+    expect(project.constraints.listenerFixed).toBe(true);
+    expect(project.constraints.speakersFixed).toBe(true);
+    // You can still put the seat where it really is.
     const seat = page.getByRole('button', { name: /^Seat\./ }).first();
-    await expect(seat).toHaveAttribute('aria-disabled', 'true');
     const before = await seatDistance(page);
     await seat.focus();
     await page.keyboard.press('Shift+ArrowDown');
-    expect(await seatDistance(page)).toBe(before);
+    expect(await seatDistance(page)).toBeCloseTo(before + 0.1, 2);
+    // With nothing allowed to move, the home page says so instead of suggesting anything.
+    await goStep(page, 'Results');
+    await expect(page.getByText(/both the seat and the speakers as fixed/)).toBeVisible();
+  });
+
+  test('speakers: how far they may move (the zone) is one choice', async ({ page }) => {
+    await goStep(page, 'Speakers');
+    const zone = page.getByRole('radiogroup', { name: /How far can the speakers move/ });
+    await expect(zone.getByRole('radio', { name: '50 cm' })).toBeChecked(); // the default
+    await zone.getByRole('radio', { name: '25 cm' }).check({ force: true });
+    expect((await savedProject(page)).constraints.speakerZone).toBe(0.25);
+    await zone.getByRole('radio', { name: 'Anywhere' }).check({ force: true });
+    expect((await savedProject(page)).constraints.speakerZone).toBeUndefined();
   });
 
   test('speaker file: save, change, load', async ({ page }) => {
