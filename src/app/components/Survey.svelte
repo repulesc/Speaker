@@ -26,6 +26,7 @@
    * keeps the answers so far.
    */
   const TOTAL = 4;
+  const STEPS = [1, 2, 3, 4];
   let screen = $state(1);
   let card = $state<HTMLElement>();
 
@@ -79,13 +80,12 @@
   }
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div class="backdrop" onkeydown={onKeydown} role="presentation">
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="survey-title" bind:this={card}>
     <div class="top">
       <span class="count">{i18n.t('survey.step', { n: screen, total: TOTAL })}</span>
       <div class="dots" aria-hidden="true">
-        {#each { length: TOTAL } as _, i (i)}<span class:on={i < screen}></span>{/each}
+        {#each STEPS as n (n)}<span class:on={n <= screen}></span>{/each}
       </div>
       <button type="button" class="link" onclick={finish}>{i18n.t('survey.skip')}</button>
     </div>
