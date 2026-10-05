@@ -2,12 +2,20 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { activeVariant, roomSize } from '../plan/placement';
-  import { analysis, projectLabel, SECTIONS, workspace, type StepId } from '../session.svelte';
+  import {
+    analysis,
+    projectLabel,
+    SECTIONS,
+    workspace,
+    type SectionId,
+    type StepId,
+  } from '../session.svelte';
   import { ui } from '../ui.svelte';
   import BassChart from './BassChart.svelte';
   import ConfidenceMeter from './ConfidenceMeter.svelte';
   import ListenPanel from './ListenPanel.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
+  import { countDone, setupProgress } from '../state/progress';
   import { SPEAKER_TYPES } from '../../engine/presets/speakerTypes';
   import StepFurnishing from './StepFurnishing.svelte';
   import StepGoals from './StepGoals.svelte';
@@ -45,6 +53,7 @@
   };
 
   const project = $derived(workspace.project);
+  const progress = $derived(setupProgress(project));
   const variant = $derived(activeVariant(project));
   const room = $derived(roomSize(project));
   const ok = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
@@ -122,15 +131,45 @@
 {/snippet}
 
 {#snippet rows(ids: readonly StepId[], title: string, titleId: string)}
+  {@const tracked = ids === SECTIONS}
   <section aria-labelledby={titleId}>
-    <h3 class="group-title" id={titleId}>{title}</h3>
+    <h3 class="group-title" id={titleId}>
+      {title}
+      {#if tracked}
+        <span class="progress" data-testid="progress">
+          <span class="bar" aria-hidden="true"
+            ><span style="width:{(countDone(progress) / SECTIONS.length) * 100}%"></span></span
+          >
+          {i18n.t('nav.progress', { n: countDone(progress), total: SECTIONS.length })}
+        </span>
+      {/if}
+    </h3>
     <ul class="list">
       {#each ids as id (id)}
         <li>
           <button type="button" class="row" onclick={() => (ui.step = id)}>
+            {#if tracked}
+              {@const status = progress[id as SectionId]}
+              <svg
+                class="mark status-{status}"
+                viewBox="0 0 16 16"
+                width="16"
+                height="16"
+                aria-hidden="true"
+              >
+                <circle cx="8" cy="8" r="6.5" />
+                {#if status === 'done'}<path d="M5 8.4l2 2 4-4.4" />{/if}
+                {#if status === 'partial'}<path class="half" d="M8 1.5a6.5 6.5 0 0 1 0 13z" />{/if}
+              </svg>
+            {/if}
             <span>{label(id)}</span>
             <span class="value">{values[id]?.() ?? ''}</span>
             <span class="chevron" aria-hidden="true">›</span>
+            {#if tracked}
+              <span class="visually-hidden"
+                >{i18n.t(`nav.status.${progress[id as SectionId]}`)}</span
+              >
+            {/if}
           </button>
         </li>
       {/each}
@@ -223,6 +262,56 @@
     flex-direction: column;
     min-height: 100%;
     background: var(--bg);
+  }
+  .progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    float: right;
+    font-weight: 400;
+  }
+  .bar {
+    width: 44px;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--grid-strong);
+  }
+  .bar span {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background: var(--ok);
+    transition: width 0.3s ease;
+  }
+  .mark {
+    flex: none;
+    margin-right: 10px;
+    fill: none;
+    stroke: var(--ink-muted);
+    stroke-width: 1.4;
+  }
+  .mark.status-done circle {
+    fill: var(--ok);
+    stroke: var(--ok);
+  }
+  .mark.status-done path {
+    stroke: #fff;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .mark .half {
+    fill: var(--ok);
+    stroke: none;
+  }
+  .mark.status-partial circle {
+    stroke: var(--ok);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar span {
+      transition: none;
+    }
   }
   .cards {
     display: grid;

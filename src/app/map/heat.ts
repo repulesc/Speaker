@@ -279,6 +279,8 @@ const CONTOUR_HALF_WIDTH = 0.9;
 /** Zones style: number of bands and the width of the soft blend between two bands. */
 const ZONES = 4;
 const ZONE_EDGE = 0.18;
+/** Gaps up to this wide (metres) inside the field are filled, not faded. */
+const GAP_FILLED_M = 0.22;
 /** The fade where the map runs out of scored seats, in metres. */
 const FADE_M = 0.45;
 /** "Advised against": light diagonal hatch (period in CSS pixels, strength 0..1). */
@@ -389,7 +391,10 @@ function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOpti
 /** Visibility per cell after fillGaps: scored cells full, the rest fading out over FADE_M. */
 function fadeAlpha(dist: Float32Array, step: number): Float32Array {
   const fade = Math.max(1, FADE_M / step);
-  return dist.map((d) => (d === 0 ? 1 : Math.max(0, 1 - d / fade) ** 1.5));
+  // A narrow gap inside the field (two cabinets cannot overlap along the centre line) is filled
+  // from its neighbours at full strength; only a real edge fades.
+  const grace = GAP_FILLED_M / step;
+  return dist.map((d) => (d <= grace ? 1 : Math.max(0, 1 - (d - grace) / fade) ** 1.5));
 }
 
 /** One seat layer: calm zones over its own colour range; "advised against" outlined and hatched. */
@@ -433,9 +438,16 @@ export function paintSpeakerMap(
 ): void {
   const { nx, ny, values } = grid;
   const mirrored: number[] = [];
+  const marks: boolean[] = [];
   for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) mirrored.push(values[j * nx + i]!);
-    for (let i = nx - 1; i >= 0; i--) mirrored.push(values[j * nx + i]!);
+    for (let i = 0; i < nx; i++) {
+      mirrored.push(values[j * nx + i]!);
+      marks.push(grid.redFlag?.[j * nx + i] ?? false);
+    }
+    for (let i = nx - 1; i >= 0; i--) {
+      mirrored.push(values[j * nx + i]!);
+      marks.push(grid.redFlag?.[j * nx + i] ?? false);
+    }
   }
   const { filled, dist } = fillGaps(nx * 2, ny, mirrored);
   // The grid stops halfway down the room (speakers never go further): fade out there too.
@@ -445,6 +457,6 @@ export function paintSpeakerMap(
     const edge = Math.min(1, (ny - 0.5 - j) / fadeRows);
     for (let i = 0; i < nx * 2; i++) visible[j * nx * 2 + i]! *= smoothstep(0, 1, edge);
   }
-  const field = smoothField(nx * 2, ny, filled, scale, undefined, visible);
+  const field = smoothField(nx * 2, ny, filled, scale, marks, visible);
   paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }

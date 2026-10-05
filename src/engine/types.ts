@@ -338,6 +338,8 @@ export interface Grid {
   ny: number;
   /** Row-major (y outer, x inner). NaN = not allowed (constraint). */
   values: number[];
+  /** Scored, but the app advises against it (e.g. a speaker on furniture): drawn hatched. */
+  redFlag?: boolean[];
 }
 
 /** One heatmap per concern (docs/REVAMP_PLAN.md, "Layers"). */

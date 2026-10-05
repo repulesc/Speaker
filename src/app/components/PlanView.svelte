@@ -202,9 +202,12 @@
     const x = at.x <= centre ? at.x : 2 * centre - at.x;
     const i = Math.round((x - x0) / step);
     const j = Math.round((at.y - y0) / step);
-    if (i < 0 || j < 0 || i >= nx || j >= ny) return { value: null };
+    if (i < 0 || j < 0 || i >= nx || j >= ny) return { value: null, flagged: false };
     const v = values[j * nx + i]!;
-    return { value: Number.isFinite(v) ? v : null };
+    return {
+      value: Number.isFinite(v) ? v : null,
+      flagged: speakerGrid.redFlag?.[j * nx + i] ?? false,
+    };
   });
 
   function moveSpeakersToProbe() {
@@ -329,10 +332,9 @@
         bind:this={speakerCanvas}
         class="heat"
         aria-hidden="true"
-        style="left:{px(0)}px; top:{py(0)}px; width:{speakerGrid.nx *
-          2 *
-          speakerGrid.step *
-          frame.scale}px; height:{speakerGrid.ny *
+        style="left:{px(0)}px; top:{py(0)}px; width:{project.constraints.keepSymmetric
+          ? W * frame.scale
+          : speakerGrid.nx * 2 * speakerGrid.step * frame.scale}px; height:{speakerGrid.ny *
           speakerGrid.step *
           frame.scale}px; clip-path: inset(0 {Math.max(
           0,
@@ -796,7 +798,7 @@
       <MapLegend
         values={shownValues}
         named={ui.layer === 'overall' || ui.layer === 'goals' || ui.layer === 'speakers'}
-        hatched={!speakerGrid}
+        hatched
       />
     {/if}
 
@@ -826,6 +828,7 @@
                 word: i18n.t(`results.score.${scoreWord(speakerProbe.value)}`),
               })}
         </p>
+        {#if speakerProbe.flagged}<p class="spot-flag">{i18n.t('probe.speakersFlagged')}</p>{/if}
         {#if probe.pinned}
           <div class="spot-actions">
             {#if speakerProbe.value !== null}
@@ -1070,6 +1073,10 @@
   }
   .spot:has(.spot-actions) {
     pointer-events: auto;
+  }
+  .spot-flag {
+    margin: 0;
+    color: var(--caution);
   }
   .spot-score {
     margin: 0;
