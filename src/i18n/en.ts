@@ -706,23 +706,23 @@ export const en = {
   layer: {
     speakers: {
       name: 'Where the speakers go',
-      what: 'Where the speakers would sound best, with your seat staying where it is. Each spot is where the speaker pair would stand, mirrored about your seat. Brighter is better.',
+      what: 'Where the speakers would sound best, with your seat staying where it is. Each spot is where the speaker pair would stand, mirrored about your seat. The stronger the colour, the better.',
     },
     overall: {
       name: 'Overall',
-      what: 'How good a seat is here, everything counted equally. Brighter is better.',
+      what: 'How good a seat is here, everything counted equally. The stronger the colour, the better.',
     },
     goals: {
       name: 'My goals',
-      what: 'How good a seat is here, with your speakers where they are. Brighter is better.',
+      what: 'How good a seat is here, with your speakers where they are. The stronger the colour, the better.',
     },
     bass: {
       name: 'Bass evenness',
-      what: 'How even the bass is at this seat. Dark means boomy or thin bass.',
+      what: 'How even the bass is at this seat. Pale means boomy or thin bass.',
     },
     nulls: {
       name: 'Bass holes',
-      what: 'Whether a bass note nearly vanishes here. Dark means a deep hole.',
+      what: 'Whether a bass note nearly vanishes here. Pale means a deep hole.',
     },
     frontWall: {
       name: 'Wall interference',
@@ -738,7 +738,7 @@ export const en = {
     },
     backWall: {
       name: 'Back wall',
-      what: 'Dark means too close to the back wall.',
+      what: 'Pale means too close to the back wall.',
     },
   },
   evidence: {
@@ -1185,7 +1185,7 @@ export const en = {
   mode: {
     chip: 'Bass note',
     name: 'Bass note',
-    what: 'Where one bass note is loud or silent in your room, with the speakers as they are. Bright is loud, dark is quiet.',
+    what: 'Where one bass note is loud or silent in your room, with the speakers as they are. Strong colour is loud, pale is quiet.',
     frequency: 'Frequency',
     poorer: 'Quiet',
     better: 'Loud',
@@ -1368,7 +1368,7 @@ export const en = {
   whyTab: {
     onMap: 'See it on the map',
     onMapHelp:
-      'Each reason has its own map: brighter is better, darker is where that reason hurts.',
+      'Each reason has its own map: the stronger the colour, the better; pale is where that reason hurts.',
     closer: 'Look closer',
   },
   about: {

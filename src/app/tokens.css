@@ -28,12 +28,14 @@
   --speaker: #2c2c2e;
   --speaker-baffle: #aeaeb2;
   --plan-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
-  /* Heat ramp, poorer → better (viridis: lightness-ordered, colour-blind safe). */
-  --heat-0: #440154;
-  --heat-1: #31688e;
-  --heat-2: #21908c;
-  --heat-3: #5dc863;
-  --heat-4: #fde725;
+  /* Heat ramp, poorer → better: sand to deep green, lightness-ordered (RAMPS in map/heat.ts). */
+  --heat-0: #f0e4c6;
+  --heat-1: #dcdcb0;
+  --heat-2: #a9c89a;
+  --heat-3: #64a37f;
+  --heat-4: #22735a;
+  --heat-none: #f4f2ee;
+  --heat-none-line: #d9d4ca;
   color-scheme: light;
 }
 
@@ -61,6 +63,13 @@
     --speaker: #d1d1d6;
     --speaker-baffle: #636366;
     --plan-shadow: 0 2px 16px rgb(0 0 0 / 0.7);
+    --heat-0: #3b352a;
+    --heat-1: #4c5841;
+    --heat-2: #5f8763;
+    --heat-3: #82bb8a;
+    --heat-4: #bdeabf;
+    --heat-none: #26241f;
+    --heat-none-line: #3d3a33;
     color-scheme: dark;
   }
 }
@@ -88,5 +97,12 @@
   --speaker: #d1d1d6;
   --speaker-baffle: #636366;
   --plan-shadow: 0 2px 16px rgb(0 0 0 / 0.7);
+  --heat-0: #3b352a;
+  --heat-1: #4c5841;
+  --heat-2: #5f8763;
+  --heat-3: #82bb8a;
+  --heat-4: #bdeabf;
+  --heat-none: #26241f;
+  --heat-none-line: #3d3a33;
   color-scheme: dark;
 }

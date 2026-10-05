@@ -1,7 +1,6 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
   import { scoreWord } from '../findings/text';
-  import { VIRIDIS } from '../map/heat';
   import { ui } from '../ui.svelte';
 
   /**
@@ -21,13 +20,12 @@
     none: 'notStereo' | 'notSeat';
   }
   let { best, hatched, none }: Props = $props();
-  const ramp = `linear-gradient(90deg, ${VIRIDIS.slice(1).join(', ')})`;
 </script>
 
 <div class="legend">
   <div class="scale" aria-hidden="true">
     <span>{i18n.t('map.poorer')}</span>
-    <span class="ramp" style="background:{ramp}"></span>
+    <span class="ramp"></span>
     <span>{i18n.t('map.better')}</span>
   </div>
   {#if best !== null}
@@ -71,6 +69,14 @@
     gap: 8px;
   }
   .ramp {
+    background: linear-gradient(
+      90deg,
+      var(--heat-0),
+      var(--heat-1),
+      var(--heat-2),
+      var(--heat-3),
+      var(--heat-4)
+    );
     width: 112px;
     height: 6px;
     border-radius: 3px;
@@ -91,7 +97,12 @@
     width: 14px;
     height: 10px;
     border-radius: 2px;
-    background: repeating-linear-gradient(-45deg, #b0a89c 0 3px, #c4bdb3 3px 4.5px);
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--heat-none) 0 3px,
+      var(--heat-none-line) 3px 4.5px
+    );
+    box-shadow: inset 0 0 0 1px var(--heat-none-line);
   }
   .hatch-key {
     margin-left: 10px;
@@ -101,7 +112,7 @@
     background: repeating-linear-gradient(
       -45deg,
       var(--heat-2) 0 3px,
-      color-mix(in srgb, var(--heat-2) 55%, white) 3px 4.5px
+      color-mix(in srgb, var(--heat-2) 55%, var(--surface)) 3px 4.5px
     );
   }
   .link {

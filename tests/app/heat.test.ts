@@ -1,9 +1,13 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   ABSOLUTE,
   fillGaps,
   heatColor,
   MIN_SPAN,
+  NOT_A_SPOT,
+  RAMPS,
   roomRange,
   smoothField,
 } from '../../src/app/map/heat';
@@ -11,21 +15,40 @@ import {
 const luma = ([r, g, b]: number[]) => 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
 
 describe('heat ramp', () => {
-  it('runs from a lifted viridis violet (not near-black) to yellow', () => {
-    const poor = heatColor(0.3);
-    expect(luma(poor)).toBeGreaterThan(luma([0x44, 0x01, 0x54]) + 15);
-    expect(heatColor(1).map(Math.round)).toEqual([0xfd, 0xe7, 0x25]);
+  const hex = (c: number[]) =>
+    '#' + c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+
+  it('runs from soft sand (poor) to deep green (best), and to a light green on dark', () => {
+    expect(hex(heatColor(0.3))).toBe(RAMPS.light[0]);
+    expect(hex(heatColor(1))).toBe(RAMPS.light[4]);
+    expect(hex(heatColor(1, 'dark'))).toBe(RAMPS.dark[4]);
   });
 
-  it('is clamped outside the range, and brighter means better (colour-blind safe)', () => {
+  it('is clamped outside the range, and lightness alone gives the order (colour-blind safe)', () => {
     expect(heatColor(-1)).toEqual(heatColor(0.3));
     expect(heatColor(2)).toEqual(heatColor(1));
-    let previous = -1;
-    for (let score = 0.3; score <= 1.0001; score += 0.05) {
-      const l = luma(heatColor(score));
-      expect(l).toBeGreaterThanOrEqual(previous);
-      previous = l;
+    for (const theme of ['light', 'dark'] as const) {
+      // Light: better is deeper (darker); dark: better is brighter. Poor recedes into the page.
+      const sign = theme === 'light' ? -1 : 1;
+      let previous = -Infinity;
+      for (let score = 0.3; score <= 1.0001; score += 0.05) {
+        const l = sign * luma(heatColor(score, theme));
+        expect(l).toBeGreaterThan(previous);
+        previous = l;
+      }
+      const span = Math.abs(luma(heatColor(1, theme)) - luma(heatColor(0.3, theme)));
+      expect(span).toBeGreaterThan(100);
     }
+  });
+
+  it('matches the --heat tokens the legend and the other charts use', () => {
+    const css = readFileSync(resolve(__dirname, '../../src/app/tokens.css'), 'utf8');
+    const light = css.slice(0, css.indexOf('@media'));
+    const dark = css.slice(css.indexOf(":root[data-theme='dark']"));
+    RAMPS.light.forEach((c, i) => expect(light).toContain(`--heat-${i}: ${c};`));
+    RAMPS.dark.forEach((c, i) => expect(dark).toContain(`--heat-${i}: ${c};`));
+    expect(light).toContain(`--heat-none: ${NOT_A_SPOT.light.fill};`);
+    expect(dark).toContain(`--heat-none: ${NOT_A_SPOT.dark.fill};`);
   });
 });
 

@@ -27,6 +27,12 @@ let theme = $state<ThemePref>(read('spa:theme', THEMES, 'auto'));
 let mode = $state<Mode>(read('spa:mode', MODES, 'quick'));
 let welcomed = $state(read('spa:welcomed', ['yes', 'no'], 'no') === 'yes');
 
+/** The system's light or dark setting, followed live (the map's colours are painted, not styled). */
+const media =
+  typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : undefined;
+let systemDark = $state(media?.matches ?? false);
+media?.addEventListener('change', (event) => (systemDark = event.matches));
+
 function applyTheme(value: ThemePref): void {
   if (value === 'auto') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = value;
@@ -40,6 +46,10 @@ export const prefs = {
     theme = value;
     write('spa:theme', value);
     applyTheme(value);
+  },
+  /** Whether the page is dark now (the user's choice, else the system's). */
+  get dark() {
+    return theme === 'dark' || (theme === 'auto' && systemDark);
   },
   get mode() {
     return mode;

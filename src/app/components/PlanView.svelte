@@ -25,6 +25,7 @@
   import { analysis, workspace } from '../session.svelte';
   import { preview } from '../state/preview.svelte';
   import { probe } from '../state/probe.svelte';
+  import { prefs } from '../prefs.svelte';
   import { ui } from '../ui.svelte';
   import { arrowDelta, startDrag } from '../plan/interaction';
   import { viewport } from '../viewport.svelte';
@@ -149,24 +150,26 @@
     return seat ? { x: px(seat.ears.x), y: py(seat.ears.y) + 28 } : { x: 0, y: 0 };
   });
 
+  /** The heat colours follow the page's light or dark look. */
+  const theme = $derived(prefs.dark ? 'dark' : 'light');
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
     if (heat && layers && !field && ui.layer !== 'speakers') {
       const scale = renderScale(layers.step * frame.scale);
-      paintHeat(heat, layers, layers.values[ui.layer], scale, range);
+      paintHeat(heat, layers, layers.values[ui.layer], scale, range, theme);
     }
   });
   let speakerCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
     if (speakerCanvas && speakerGrid) {
       const scale = renderScale(speakerGrid.step * frame.scale);
-      paintSpeakerMap(speakerCanvas, speakerGrid, scale, range);
+      paintSpeakerMap(speakerCanvas, speakerGrid, scale, range, theme);
     }
   });
   let fieldCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
     if (fieldCanvas && field) {
-      paintField(fieldCanvas, field.grid, renderScale(field.grid.step * frame.scale));
+      paintField(fieldCanvas, field.grid, renderScale(field.grid.step * frame.scale), theme);
     }
   });
 

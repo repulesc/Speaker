@@ -718,23 +718,23 @@ export const hu: Messages = {
   layer: {
     speakers: {
       name: 'Hová kerüljenek a hangfalak',
-      what: 'Hol szólnának a legjobban a hangfalak, ha az ülőhelyed ott marad, ahol van. Minden pont azt mutatja, hová állna a hangfalpár, tükrözve az ülőhelyed körül. Minél világosabb, annál jobb.',
+      what: 'Hol szólnának a legjobban a hangfalak, ha az ülőhelyed ott marad, ahol van. Minden pont azt mutatja, hová állna a hangfalpár, tükrözve az ülőhelyed körül. Minél erősebb a szín, annál jobb.',
     },
     overall: {
       name: 'Összesített',
-      what: 'Mennyire jó itt az ülőhely, mindent egyformán számítva. Minél világosabb, annál jobb.',
+      what: 'Mennyire jó itt az ülőhely, mindent egyformán számítva. Minél erősebb a szín, annál jobb.',
     },
     goals: {
       name: 'A céljaid',
-      what: 'Mennyire jó itt az ülőhely, a hangfalakkal ott, ahol most vannak. Minél világosabb, annál jobb.',
+      what: 'Mennyire jó itt az ülőhely, a hangfalakkal ott, ahol most vannak. Minél erősebb a szín, annál jobb.',
     },
     bass: {
       name: 'Basszus egyenletessége',
-      what: 'Mennyire egyenletes a basszus ezen az ülőhelyen. A sötét dörmögő vagy vékony basszust jelent.',
+      what: 'Mennyire egyenletes a basszus ezen az ülőhelyen. A halvány dörmögő vagy vékony basszust jelent.',
     },
     nulls: {
       name: 'Basszuslyukak',
-      what: 'Eltűnik-e itt egy basszushang. A sötét mély lyukat jelent.',
+      what: 'Eltűnik-e itt egy basszushang. A halvány mély lyukat jelent.',
     },
     frontWall: {
       name: 'Falról jövő interferencia',
@@ -750,7 +750,7 @@ export const hu: Messages = {
     },
     backWall: {
       name: 'Hátsó fal',
-      what: 'A sötét azt jelenti, hogy túl közel vagy a hátsó falhoz.',
+      what: 'A halvány azt jelenti, hogy túl közel vagy a hátsó falhoz.',
     },
   },
   evidence: {
@@ -1201,7 +1201,7 @@ export const hu: Messages = {
   mode: {
     chip: 'Basszushang',
     name: 'Basszushang',
-    what: 'Hol hangos és hol néma egy basszushang a helyiségedben, a hangfalakkal úgy, ahogy most állnak. A világos hangos, a sötét halk.',
+    what: 'Hol hangos és hol néma egy basszushang a helyiségedben, a hangfalakkal úgy, ahogy most állnak. Az erős szín hangos, a halvány halk.',
     frequency: 'Frekvencia',
     poorer: 'Halk',
     better: 'Hangos',
@@ -1384,7 +1384,7 @@ export const hu: Messages = {
   whyTab: {
     onMap: 'Nézd meg a térképen',
     onMapHelp:
-      'Minden oknak saját térképe van: a világosabb jobb, a sötétebb ott, ahol az az ok ront.',
+      'Minden oknak saját térképe van: minél erősebb a szín, annál jobb; a halvány ott van, ahol az az ok ront.',
     closer: 'Közelebbről',
   },
   about: {
