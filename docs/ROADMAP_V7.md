@@ -71,7 +71,7 @@ A guard: combinations that cannot exist (a "small floorstander" with 2 cm depth)
 
 **As built:** `engine/presets/speakerKinds.ts` holds one table: five kinds (bookshelf or stand, floorstander, studio monitor, small desktop, on or in the wall) × three sizes, each with a typical box and bass point, the kind's usual drivers, port and place, and its typical directivity. All 🟡 typical values, not from a source and never a brand. "Not sure" everywhere is the medium bookshelf speaker the app always used. Tweeter and woofer heights follow from the box height and the drivers. "They stand on" sets the base height of both speakers in every setup: the floor, a 0.75 m desk top, or a stand that puts the tweeter at seated ear height (1.1 m). "Made for" changes nothing in the physics; for studio monitors it offers "I listen at a desk". Every kind and size has a test that the tweeter sits inside the cabinet and bigger boxes go at least as low. The old picture cards are gone; the survey asks Kind, Size and Port.
 
-### Phase 3: one visual system (Sonnet; Opus reviews the result once)
+### Phase 3: one visual system — DONE
 
 1. **Cards.** Result, Why and Tips all use one card component: same padding, radius, one title style,
    one body style, one caption style. Result becomes a short stack: verdict card, placement card
@@ -87,6 +87,16 @@ A guard: combinations that cannot exist (a "small floorstander" with 2 cm depth)
    (axe plus a screenshot per control) in dark mode.
 5. **Seat map near the speakers.** Seats beside or in front of the speaker line are not valid seats: show
    them as one calm "not a seat" area instead of stripes of wrong colours.
+
+**As built (Phase 3):**
+- Warm page and soft cards: one `.card` (radius 16, one shadow, one padding, a title and an action row) for the Result, Why and Tips tabs and the Your room button; dark tokens to match.
+- Heat colours: sand (poor) to deep green (best), lightness-ordered for colour-blind readers, with a dark version; "not a spot" areas show the floor with a fine hatch (`map/heat.ts`, tokens tested).
+- Map: speakers dark graphite with a white ring; every label ("Now", "Best") one soft chip.
+- Result tab: verdict, Live with it (after Apply), placement, and one idea with "More in Tips" (decision: no duplicate tips, the Tips tab holds the list).
+- "Show the numbers" (menu): scores beside words, the bass frequency, tips with their numbers.
+- "What we found": the room's character (P08 bands) and its deepest resonance as a musical note.
+- Live with it: three optional faces (this position, the one before, your speakers), kept as listening notes; a gentle comparison with the app's scores, never a verdict.
+- Contextual tips C01 desk, C02 speakers that do not reach the deepest resonance, C03 bed (decision: the situations that most change what someone does; docs/RULE_CATALOGUE.md).
 
 ### Phase 4: check (Opus, once)
 

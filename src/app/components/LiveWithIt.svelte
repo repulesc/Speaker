@@ -29,7 +29,7 @@
   <p class="intro">{i18n.t('live.intro')}</p>
   {#each ABOUT as about (about)}
     {@const chosen = faceOf(project, about)}
-    <div class="row">
+    <div class="face-row">
       <span class="question" id="live-{about}">{i18n.t(`live.${about}`)}</span>
       <div class="faces" role="group" aria-labelledby="live-{about}">
         {#each FACES as face (face)}
@@ -62,7 +62,7 @@
     font-size: var(--text-sm);
     line-height: 1.45;
   }
-  .row {
+  .face-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
