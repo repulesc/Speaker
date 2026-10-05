@@ -20,6 +20,8 @@ test('the map shows a heatmap, layers that say what they mean, and a legend', as
   await expect(page.getByText('Whether a bass note nearly vanishes here')).toBeVisible();
   await expect(page.getByText('Physics', { exact: false }).first()).toBeVisible();
   await expect(page.getByText('Poorer')).toBeVisible();
+  await layer.selectOption({ label: 'Overall' });
+  await expect(page.getByTestId('best-here')).toHaveText(/^Best here: (Poor|Fair|Good|Very good)$/);
 });
 
 test('the side view stays hidden until asked for', async ({ page }) => {
@@ -172,6 +174,8 @@ test('the bass-note explorer shows a pressure pattern and the resonances near th
   await expect(page.getByText(/Room resonances near this note/)).toBeVisible();
   await chip.click();
   await expect(page.getByText('Poorer')).toBeVisible();
+  await layer.selectOption({ label: 'Overall' });
+  await expect(page.getByTestId('best-here')).toHaveText(/^Best here: (Poor|Fair|Good|Very good)$/);
 });
 
 test('furniture: a bigger palette and a material for any object', async ({ page }) => {

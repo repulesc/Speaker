@@ -173,6 +173,16 @@
     </p>
     {#if shown.closer}<p class="note">{i18n.t('suggest.closer')}</p>{/if}
     {#if shown.compromise}<p class="note">{i18n.t('why.compromise')}</p>{/if}
+    {#if shown.zoneCost && workspace.project.constraints.speakerZone !== undefined && scoreWord(shown.zoneCost.inside) !== scoreWord(shown.zoneCost.outside)}
+      <!-- What the user's speaker zone costs (owner decision, docs/DESIGN_BRIEF_V4.md). -->
+      <p class="note" data-testid="zone-cost">
+        {i18n.t('suggest.zoneCost', {
+          zone: fmt(workspace.project.constraints.speakerZone),
+          inside: i18n.t(`results.score.${scoreWord(shown.zoneCost.inside)}`),
+          outside: i18n.t(`results.score.${scoreWord(shown.zoneCost.outside)}`),
+        })}
+      </p>
+    {/if}
     {#if !move && ui.candidate === null}<p class="caption">{i18n.t('suggest.already')}</p>{/if}
 
     <div class="actions">

@@ -118,3 +118,14 @@ Wanted: simple, unique, symbolic, easy to say in any language, no cringe, no kit
 9. **Placet**: Latin "it pleases", and a nod to "placement". A real word (approval) in Hungarian.
 10. **Fermata**: the held note or pause in music: sit still and listen. A standard musical term; may feel slightly precious.
 
+
+## Status (stage 1, first pass)
+
+Done on the branch, all checks green (340 unit, 61 browser tests):
+
+- **Heatmap renderer** (`src/app/map/heat.ts`): colours stretched over the room's own range (2nd to 98th percentile, never narrower than 0.2 score points so near-equal seats stay soft), eleven-stop viridis, no dimming, no transparency, ordered dithering against banding, a 45 cm soft fade where seats stop being scored (labelled "Not a listening position" on the plan), "advised against" as a fine outline and light hatch instead of a dark smudge. Legend bottom-left of the map: ramp, "Best here: {word}" for the score layers, and an "Absolute scale" switch.
+- **Three looks to choose from:** `gradient` (default), `zones`, `glow`. Switch with `?heat=zones` or `?heat=glow` in the address until the owner picks one; then the other two are removed.
+- **Settings icon:** three lines instead of the cog.
+- **Speaker zone:** "How far can the speakers move from where they are now?" 25 cm / 50 cm (default for new projects) / 1 m / Anywhere. The search keeps each speaker within that circle; the zone only applies once the user has placed the speakers (placeholders are not a place anyone is tied to). The Best placement card says what the zone costs when the score word differs ("Within 50 cm: Fair. With more room: Good."). The zone is drawn as a dashed circle around each speaker, clipped to the room. Tests: `tests/engine/zone.test.ts`, e2e for the choice.
+
+Next: the owner picks a heatmap look; then the goal-first survey (stage 2).

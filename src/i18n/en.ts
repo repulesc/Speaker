@@ -382,6 +382,11 @@ export const en = {
         to: 'Furthest from the front wall',
       },
       fixed: 'My speakers can’t move (only suggest a better seat)',
+      zone: {
+        legend: 'How far can the speakers move from where they are now?',
+        help: 'Suggestions keep each speaker within this distance.',
+        any: 'Anywhere',
+      },
     },
   },
   goals: {
@@ -533,6 +538,7 @@ export const en = {
     closer:
       'The room is too small to sit 1.5 m from the speakers, so this is the best closer spot.',
     nothing: 'No placement fits your limits. Let more things move.',
+    zoneCost: 'Within {zone}: {inside}. With more room: {outside}.',
   },
   panel: {
     label: 'Settings and results',
@@ -540,7 +546,10 @@ export const en = {
     done: 'Done',
   },
   map: {
-    dimmed: 'Dimmed: advised against',
+    dimmed: 'Advised against',
+    bestHere: 'Best here: {word}',
+    absolute: 'Absolute scale',
+    notListening: 'Not a listening position',
     label: 'Map',
     hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
     layerLabel: 'Map layer',

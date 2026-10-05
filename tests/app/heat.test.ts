@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { heatColor, smoothField } from '../../src/app/map/heat';
+import {
+  ABSOLUTE,
+  fillGaps,
+  heatColor,
+  MIN_SPAN,
+  roomRange,
+  smoothField,
+} from '../../src/app/map/heat';
 
 const luma = ([r, g, b]: number[]) => 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
 
@@ -58,5 +65,27 @@ describe('smooth field', () => {
     expect(edge).toBeLessThan(1);
     expect(f.marked[4 * 32 + 20]).toBeGreaterThan(0.5);
     expect(f.marked[4 * 32 + 30]).toBeLessThan(0.5);
+  });
+});
+
+describe('colour range and gaps', () => {
+  it('stretches colours over the room’s own range, but never over a tiny one', () => {
+    const wide = Array.from({ length: 101 }, (_, i) => 0.4 + 0.004 * i); // 0.40 … 0.80
+    const r = roomRange(wide);
+    expect(r.lo).toBeCloseTo(0.408, 2);
+    expect(r.hi).toBeCloseTo(0.792, 2);
+    const flat = [0.61, 0.62, 0.6, 0.63, NaN];
+    const f = roomRange(flat);
+    expect(f.hi - f.lo).toBeCloseTo(MIN_SPAN, 6); // near-equal seats stay soft colours
+    expect(roomRange([NaN])).toEqual(ABSOLUTE);
+  });
+
+  it('fills cells without data from the nearest scored cell, with their distance', () => {
+    const { filled, dist } = fillGaps(3, 3, [NaN, NaN, NaN, NaN, NaN, NaN, 0.2, 0.5, 0.9]);
+    expect(dist[7]).toBe(0);
+    expect(dist[4]).toBe(1);
+    expect(dist[0]).toBe(2);
+    expect(filled[4]).toBeCloseTo(0.5, 6);
+    expect(filled[2]).toBeCloseTo(0.9, 6);
   });
 });

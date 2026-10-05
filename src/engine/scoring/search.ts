@@ -132,12 +132,15 @@ interface SearchSpace {
   avoidRedFlags: boolean;
   /** Keep the preferred listening distance; dropped when the room is too small for it. */
   keepDistance: boolean;
+  /** Each speaker stays within this distance of where it stands now (the user's zone). */
+  zone: { radius: number; left: Vec3; right: Vec3 } | null;
 }
 
 function searchSpace(
   ctx: AnalysisContext,
   avoidRedFlags: boolean,
   keepDistance = avoidRedFlags,
+  useZone = true,
 ): SearchSpace {
   const { W, L } = ctx.room;
   const { constraints } = ctx.project;
@@ -160,17 +163,55 @@ function searchSpace(
     Math.min(centreX, W - centreX) - ctx.speaker.width / 2 - 0.02,
   );
   const [from, to] = constraints.listenerYRange ?? [0.5, L - 0.3];
+  let clearance: [number, number] = [minClearance, Math.max(minClearance, maxClearance)];
+  let halfSpacing: [number, number] = [0.5, Math.max(0.5, maxHalf)];
+  const now = ctx.variant.speakers;
+  const radius = constraints.speakerZone;
+  // Only around positions the user gave: placeholder speakers (certainty 'unknown') are not a place
+  // anyone is tied to.
+  const placed = now.left.certainty !== 'unknown' || now.right.certainty !== 'unknown';
+  const zone =
+    useZone && radius !== undefined && placed && !constraints.speakersFixed
+      ? { radius, left: now.left.base, right: now.right.base }
+      : null;
+  if (zone) {
+    // Narrow the grid to the zone; the exact circle is checked per placement (withinZone).
+    const depth = ctx.speaker.depth / 2;
+    const rears = [now.left.base.y - depth, now.right.base.y - depth];
+    const half = (now.right.base.x - now.left.base.x) / 2;
+    clearance = [
+      Math.max(clearance[0], Math.min(...rears) - zone.radius),
+      Math.min(clearance[1], Math.max(...rears) + zone.radius),
+    ];
+    halfSpacing = [
+      Math.max(halfSpacing[0], half - zone.radius),
+      Math.min(halfSpacing[1], half + zone.radius),
+    ];
+  }
   return {
     centreX,
-    clearance: [minClearance, Math.max(minClearance, maxClearance)],
-    halfSpacing: [0.5, Math.max(0.5, maxHalf)],
+    clearance,
+    halfSpacing,
     listenerY: [Math.min(from, to), Math.max(from, to)],
     earZ: ears.z,
     fixedSpeakers: constraints.speakersFixed ? ctx.variant.speakers : null,
     fixedListener: constraints.listenerFixed ? ears : null,
     avoidRedFlags,
     keepDistance,
+    zone,
   };
+}
+
+/** Both speakers within the user's zone (a circle around where each stands now). */
+function withinZone(space: SearchSpace, placement: Placement): boolean {
+  const { zone } = space;
+  if (!zone) return true;
+  const { left, right } = placement.speakers;
+  const off = (a: Vec3, b: Vec3) => Math.hypot(a.x - b.x, a.y - b.y);
+  return (
+    off(left.base, zone.left) <= zone.radius + 1e-6 &&
+    off(right.base, zone.right) <= zone.radius + 1e-6
+  );
 }
 
 /** Search variables of one symmetric placement. */
@@ -201,6 +242,7 @@ function scoreAll(scorer: Scorer, space: SearchSpace, params: Params[]): Scored[
   for (const p of params) {
     const placement = placementFor(scorer.ctx, space, p);
     if (!isValidPlacement(scorer.ctx, placement)) continue;
+    if (!withinZone(space, placement)) continue;
     if (space.avoidRedFlags && !avoidsRedFlags(scorer.ctx, placement, moves)) continue;
     if (space.keepDistance && !farEnough(scorer.ctx, placement)) continue;
     const key = space.fixedSpeakers ? 'fixed' : `${p.clearance.toFixed(3)}|${p.half.toFixed(3)}`;
@@ -231,7 +273,10 @@ export function searchPlacements(scorer: Scorer): Scored[] {
  * As `searchPlacements`, and what had to give to find anything: first the preferred listening
  * distance (a small room), then the red-flag guard (the user's limits leave no clean spot).
  */
-function searchWithCompromise(scorer: Scorer): {
+function searchWithCompromise(
+  scorer: Scorer,
+  useZone = true,
+): {
   found: Scored[];
   compromise: boolean;
   closer: boolean;
@@ -242,7 +287,7 @@ function searchWithCompromise(scorer: Scorer): {
     [false, false],
   ];
   for (const [avoid, keep] of tries) {
-    const found = searchWithin(scorer, searchSpace(scorer.ctx, avoid, keep));
+    const found = searchWithin(scorer, searchSpace(scorer.ctx, avoid, keep, useZone));
     if (found.length > 0) return { found, compromise: !avoid, closer: !keep };
   }
   return { found: [], compromise: true, closer: true };
@@ -418,11 +463,29 @@ export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate
   const ranked = pool
     .map((t, i) => ({ placement: t.placement, robust: robust[i]! }))
     .sort((a, b) => b.robust.robust - a.robust.robust);
+  const zoneCost = speakerZoneCost(scorer, found[0]?.score ?? null);
   return pickDistinct(ranked, T.candidateSeparation, max).map((p) => ({
     ...toCandidate(scorer, p.placement, p.robust),
     ...(compromise ? { compromise: true } : {}),
     ...(closer ? { closer: true } : {}),
+    ...(zoneCost ? { zoneCost } : {}),
   }));
+}
+
+/**
+ * What the user's speaker zone costs: the best found inside it against the best without it, when
+ * the difference is worth mentioning (owner decision: "Within 50 cm: Good. With more room: Very
+ * good."). Null when there is no zone or it costs (almost) nothing.
+ */
+function speakerZoneCost(
+  scorer: Scorer,
+  inside: number | null,
+): { inside: number; outside: number } | null {
+  if (inside === null || !searchSpace(scorer.ctx, true).zone) return null;
+  const outside = searchWithCompromise(scorer, false).found[0]?.score ?? null;
+  return outside !== null && outside - inside >= T.zoneCostWorthMentioning
+    ? { inside, outside }
+    : null;
 }
 
 export function makeScorer(ctx: AnalysisContext): Scorer {

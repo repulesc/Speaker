@@ -55,12 +55,6 @@
       {/if}
       {i18n.t(`layer.${active}.what`)}
     </p>
-    <div class="legend" aria-hidden="true">
-      <span>{i18n.t('map.poorer')}</span>
-      <span class="ramp"></span>
-      <span>{i18n.t('map.better')}</span>
-      {#if active !== 'speakers'}<span class="dimmed">{i18n.t('map.dimmed')}</span>{/if}
-    </div>
   </div>
 {/if}
 
@@ -131,30 +125,6 @@
     margin-right: 6px;
     color: var(--ink);
   }
-  .legend {
-    display: flex;
-    flex: none;
-    align-items: center;
-    gap: 8px;
-    color: var(--ink-muted);
-    font-size: var(--text-xs);
-  }
-  .dimmed {
-    margin-left: 6px;
-  }
-  .ramp {
-    width: 96px;
-    height: 6px;
-    border-radius: 3px;
-    background: linear-gradient(
-      90deg,
-      var(--heat-0),
-      var(--heat-1),
-      var(--heat-2),
-      var(--heat-3),
-      var(--heat-4)
-    );
-  }
   @media (pointer: coarse), (max-width: 1023px) {
     .select,
     .toggle {
@@ -164,9 +134,6 @@
   @media (max-width: 1023px) {
     .bar {
       flex-wrap: wrap;
-    }
-    .legend {
-      display: none;
     }
   }
   @media (max-width: 639px) {

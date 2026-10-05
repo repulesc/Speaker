@@ -9,6 +9,7 @@
     SpeakerProfile,
   } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
+  import { formatLength } from '../../units/format';
   import { downloadText } from '../download';
   import {
     activeVariant,
@@ -64,6 +65,9 @@
     'unknown',
   ];
   const modes: SeatMode[] = ['free', 'range', 'fixed'];
+  /** Speaker zone choices in metres; null = anywhere (docs/DESIGN_BRIEF_V4.md: one number). */
+  const ZONES = [0.25, 0.5, 1, null] as const;
+  const fmtShort = (m: number) => formatLength(m, system, 'position', i18n.locale);
 
   let fileInput = $state<HTMLInputElement>();
 
@@ -301,6 +305,34 @@
           </div>
         {/if}
       </fieldset>
+
+      {#if !constraints.speakersFixed}
+        <fieldset>
+          <legend>{i18n.t('speakers.limits.zone.legend')}</legend>
+          <p class="help">{i18n.t('speakers.limits.zone.help')}</p>
+          <div
+            class="seg zone"
+            role="radiogroup"
+            aria-label={i18n.t('speakers.limits.zone.legend')}
+          >
+            {#each ZONES as zone (zone ?? 'any')}
+              <label>
+                <input
+                  type="radio"
+                  name="speaker-zone"
+                  checked={constraints.speakerZone === (zone ?? undefined)}
+                  onchange={() =>
+                    workspace.edit((p) => {
+                      if (zone === null) delete p.constraints.speakerZone;
+                      else p.constraints.speakerZone = zone;
+                    })}
+                />
+                {zone === null ? i18n.t('speakers.limits.zone.any') : fmtShort(zone)}
+              </label>
+            {/each}
+          </div>
+        </fieldset>
+      {/if}
 
       <label class="choice">
         <input

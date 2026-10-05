@@ -390,6 +390,11 @@ export const hu: Messages = {
         to: 'Legtávolabb az elülső faltól',
       },
       fixed: 'A hangfalaim nem mozdíthatók (csak jobb ülőhelyet javasolj)',
+      zone: {
+        legend: 'Milyen messzire mozdíthatod a hangfalakat a mostani helyükről?',
+        help: 'A javaslatok minden hangfalat ennyin belül tartanak.',
+        any: 'Bárhová',
+      },
     },
   },
   goals: {
@@ -539,6 +544,7 @@ export const hu: Messages = {
     closer:
       'A szoba túl kicsi ahhoz, hogy 1,5 m-re ülj a hangfalaktól, ezért ez a legjobb közelebbi hely.',
     nothing: 'Egyetlen elhelyezés sem fér bele a korlátaidba. Engedj több mindent mozdulni.',
+    zoneCost: 'Ha legfeljebb {zone}-t mozdulnak: {inside}. Több hellyel: {outside}.',
   },
   panel: {
     label: 'Beállítások és eredmények',
@@ -546,7 +552,10 @@ export const hu: Messages = {
     done: 'Kész',
   },
   map: {
-    dimmed: 'Halványítva: nem ajánlott',
+    dimmed: 'Nem ajánlott',
+    bestHere: 'A legjobb itt: {word}',
+    absolute: 'Abszolút skála',
+    notListening: 'Nem hallgatási hely',
     label: 'Térkép',
     hint: 'Húzz bármit. A térkép mozgatás közben újrarajzolódik. Kattints egy számra, és pontos értéket írhatsz be.',
     layerLabel: 'Térképréteg',

@@ -1,29 +1,143 @@
 import type { Grid, SeatLayers } from '../../engine/types';
 
-/** Heat ramp, poorer → better: viridis (lightness-ordered, colour-blind safe). Same as the tokens. */
-const STOPS = ['#440154', '#31688e', '#21908c', '#5dc863', '#fde725'].map((hex) => [
+/**
+ * Heat ramp, poorer → better: viridis (lightness-ordered, colour-blind safe), sampled at eleven
+ * points so the blend between stops stays rich instead of muddy. The legend uses the same stops.
+ */
+export const VIRIDIS = [
+  '#440154',
+  '#482475',
+  '#414487',
+  '#355f8d',
+  '#2a788e',
+  '#21918c',
+  '#22a884',
+  '#44bf70',
+  '#7ad151',
+  '#bddf26',
+  '#fde725',
+];
+const STOPS = VIRIDIS.map((hex) => [
   parseInt(hex.slice(1, 3), 16),
   parseInt(hex.slice(3, 5), 16),
   parseInt(hex.slice(5, 7), 16),
 ]);
 
-/** Scores below this are rare; the ramp starts here so real differences show (brighter = better). */
+/** Scores below this are rare; the absolute scale starts here (brighter = better). */
 const RAMP_FLOOR = 0.3;
 /**
- * Where on the viridis ramp "poor" starts (0 = the darkest purple). Lifted so that poor seats read
- * as a calm blue-violet rather than near-black in dark mode (docs/DESIGN_BRIEF_V3.md, item 3).
+ * Where on the viridis ramp "poor" starts (0 = the darkest purple). Lifted a little so the worst
+ * seats read as deep violet rather than near-black in dark mode.
  */
-const RAMP_START = 0.12;
+const RAMP_START = 0.06;
 
-/** Colour for a score from 0 (poor) to 1 (very good). */
-export function heatColor(score: number): [number, number, number] {
-  const t = Math.min(1, Math.max(0, (score - RAMP_FLOOR) / (1 - RAMP_FLOOR)));
-  const x = (RAMP_START + (1 - RAMP_START) * t) * (STOPS.length - 1);
+/** Colour at a position on the ramp, 0 (poorest shown) to 1 (best shown). */
+export function rampColor(t: number): [number, number, number] {
+  const u = Math.min(1, Math.max(0, t));
+  const x = (RAMP_START + (1 - RAMP_START) * u) * (STOPS.length - 1);
   const i = Math.min(STOPS.length - 2, Math.floor(x));
   const f = x - i;
   const a = STOPS[i]!;
   const b = STOPS[i + 1]!;
   return [a[0]! + (b[0]! - a[0]!) * f, a[1]! + (b[1]! - a[1]!) * f, a[2]! + (b[2]! - a[2]!) * f];
+}
+
+/** Colour for a score from 0 (poor) to 1 (very good), on the absolute scale. */
+export function heatColor(score: number): [number, number, number] {
+  return rampColor((score - RAMP_FLOOR) / (1 - RAMP_FLOOR));
+}
+
+// ── Colour range ─────────────────────────────────────────────────────────────
+
+/**
+ * The smallest score spread the colours are stretched over. A room where every seat is within a
+ * few points of the others must not look dramatic: tiny differences stay soft colours.
+ */
+export const MIN_SPAN = 0.2;
+
+export interface ColourRange {
+  lo: number;
+  hi: number;
+}
+
+/** The absolute scale: the same colour means the same score in every room. */
+export const ABSOLUTE: ColourRange = { lo: RAMP_FLOOR, hi: 1 };
+
+/**
+ * This room's own range, from its worst to its best seats (2nd to 98th percentile, so one odd cell
+ * does not set the scale), never narrower than MIN_SPAN. Brighter is still always better; the
+ * legend names how good the best area really is (owner decision, docs/DESIGN_BRIEF_V4.md).
+ */
+export function roomRange(values: readonly number[]): ColourRange {
+  const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
+  if (sorted.length === 0) return ABSOLUTE;
+  const at = (p: number) => sorted[Math.round(p * (sorted.length - 1))]!;
+  let lo = at(0.02);
+  let hi = at(0.98);
+  if (hi - lo < MIN_SPAN) {
+    const mid = (lo + hi) / 2;
+    lo = mid - MIN_SPAN / 2;
+    hi = mid + MIN_SPAN / 2;
+  }
+  return { lo, hi };
+}
+
+/** The best score on the map (the 98th percentile, like the colour range), or null. */
+export function bestShown(values: readonly number[]): number | null {
+  const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
+  return sorted.length ? sorted[Math.round(0.98 * (sorted.length - 1))]! : null;
+}
+
+// ── Filling the gaps ─────────────────────────────────────────────────────────
+
+/**
+ * Cells without a score (in front of the speakers' line, on top of a speaker) take the value of the
+ * nearest scored cell, and their distance to it, so the map can fade out softly over a short
+ * distance instead of stopping at a hard line. The faded part is drawing, not data: it is
+ * transparent beyond the fade and labelled "not a listening position" on the plan.
+ */
+export function fillGaps(
+  nx: number,
+  ny: number,
+  values: readonly number[],
+): { filled: Float32Array; dist: Float32Array } {
+  const n = nx * ny;
+  const filled = new Float32Array(n);
+  const dist = new Float32Array(n);
+  for (let k = 0; k < n; k++) {
+    const v = values[k]!;
+    filled[k] = Number.isFinite(v) ? v : NaN;
+    dist[k] = Number.isFinite(v) ? 0 : Infinity;
+  }
+  // Two-pass chamfer distance transform, carrying the nearest value along.
+  const relax = (k: number, i: number, j: number, cost: number) => {
+    if (i < 0 || j < 0 || i >= nx || j >= ny) return;
+    const m = j * nx + i;
+    if (dist[m]! + cost < dist[k]!) {
+      dist[k] = dist[m]! + cost;
+      filled[k] = filled[m]!;
+    }
+  };
+  const D = Math.SQRT2;
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      const k = j * nx + i;
+      relax(k, i - 1, j, 1);
+      relax(k, i - 1, j - 1, D);
+      relax(k, i, j - 1, 1);
+      relax(k, i + 1, j - 1, D);
+    }
+  }
+  for (let j = ny - 1; j >= 0; j--) {
+    for (let i = nx - 1; i >= 0; i--) {
+      const k = j * nx + i;
+      relax(k, i + 1, j, 1);
+      relax(k, i + 1, j + 1, D);
+      relax(k, i, j + 1, 1);
+      relax(k, i - 1, j + 1, D);
+    }
+  }
+  return { filled, dist };
 }
 
 // ── Smooth rendering ─────────────────────────────────────────────────────────
@@ -45,7 +159,7 @@ export interface SmoothField {
   height: number;
   /** Interpolated value per output pixel (NaN outside the data). */
   value: Float32Array;
-  /** 0..1: how much of the pixel lies inside the data (soft edges instead of hard cuts). */
+  /** 0..1: how visible the pixel is (soft edges instead of hard cuts). */
   alpha: Float32Array;
   /** 0..1: how much of the pixel lies in a marked area (e.g. "advised against"). */
   marked: Float32Array;
@@ -53,32 +167,28 @@ export interface SmoothField {
 
 /**
  * Upsamples a cell grid by `scale` with bicubic (Catmull-Rom) interpolation, so the map shows
- * smooth zones instead of blocks. Cells without data (NaN) are left out of the interpolation, and
- * the edge of the data fades over about one cell. Same data as before: only the drawing changes
- * (docs/DESIGN_BRIEF_V3.md, item 3).
+ * smooth zones instead of blocks. Without `cellAlpha`, cells without data (NaN) are left out and
+ * the edge fades over about one cell; with it, each cell's visibility is given (used after
+ * fillGaps) and blended smoothly. Same data as before: only the drawing changes.
  */
 export function smoothField(
   nx: number,
   ny: number,
-  values: readonly number[],
+  values: ArrayLike<number>,
   scale: number,
   mark?: readonly boolean[],
+  cellAlpha?: ArrayLike<number>,
 ): SmoothField {
   const width = nx * scale;
   const height = ny * scale;
   const value = new Float32Array(width * height);
   const alpha = new Float32Array(width * height);
   const marked = new Float32Array(width * height);
-  const at = (i: number, j: number) => {
-    const ci = Math.min(nx - 1, Math.max(0, i));
-    const cj = Math.min(ny - 1, Math.max(0, j));
-    return values[cj * nx + ci]!;
-  };
-  const markAt = (i: number, j: number) => {
-    const ci = Math.min(nx - 1, Math.max(0, i));
-    const cj = Math.min(ny - 1, Math.max(0, j));
-    return mark?.[cj * nx + ci] ? 1 : 0;
-  };
+  const clampI = (i: number) => Math.min(nx - 1, Math.max(0, i));
+  const clampJ = (j: number) => Math.min(ny - 1, Math.max(0, j));
+  const at = (i: number, j: number) => values[clampJ(j) * nx + clampI(i)]!;
+  const markAt = (i: number, j: number) => (mark?.[clampJ(j) * nx + clampI(i)] ? 1 : 0);
+  const alphaAt = (i: number, j: number) => cellAlpha![clampJ(j) * nx + clampI(i)]!;
   for (let py = 0; py < height; py++) {
     const gy = (py + 0.5) / scale - 0.5;
     const j0 = Math.floor(gy);
@@ -101,29 +211,28 @@ export function smoothField(
           weight += w;
         }
       }
-      // Bilinear coverage of valid cells and of marked cells: soft edges.
+      // Bilinear coverage (or given visibility) and marked share: soft edges.
       let cover = 0;
       let mk = 0;
       for (let b = 0; b < 2; b++) {
         for (let a = 0; a < 2; a++) {
           const w = (a ? tx : 1 - tx) * (b ? ty : 1 - ty);
-          if (!Number.isNaN(at(i0 + a, j0 + b))) cover += w;
+          if (cellAlpha) cover += w * alphaAt(i0 + a, j0 + b);
+          else if (!Number.isNaN(at(i0 + a, j0 + b))) cover += w;
           mk += w * markAt(i0 + a, j0 + b);
         }
       }
       const k = py * width + px;
-      if (weight > 0.25) {
-        value[k] = sum / weight;
-      } else {
-        // Too few valid neighbours for a cubic: take the nearest valid cell, if any.
-        const near = at(Math.round(gx), Math.round(gy));
-        value[k] = near;
-      }
-      alpha[k] = Number.isNaN(value[k]!) ? 0 : smoothstep(0.25, 0.75, cover);
+      value[k] = weight > 0.25 ? sum / weight : at(Math.round(gx), Math.round(gy));
+      alpha[k] = Number.isNaN(value[k]!)
+        ? 0
+        : cellAlpha
+          ? smoothstep(0, 1, cover)
+          : smoothstep(0.25, 0.75, cover);
       marked[k] = mk;
     }
   }
-  // Marked areas follow the cell grid in steps; blurring over about half a cell rounds the steps off.
+  // Marked areas follow the cell grid in steps; blurring over about half a cell rounds them off.
   const radius = Math.max(1, Math.round(scale * 0.5));
   for (let pass = 0; pass < 2; pass++) boxBlur(marked, width, height, radius);
   return { width, height, value, alpha, marked };
@@ -152,88 +261,169 @@ function smoothstep(a: number, b: number, x: number): number {
   return t * t * (3 - 2 * t);
 }
 
-/** Score levels where a faint contour line is drawn (the ramp's visible steps). */
-const CONTOURS = [0.55, 0.7, 0.85];
+// ── Painting ─────────────────────────────────────────────────────────────────
+
+/**
+ * How the map is drawn. Three looks for the owner to choose from (docs/DESIGN_BRIEF_V4.md):
+ * - gradient: a continuous colour field with faint contour lines;
+ * - zones: four calm bands (poor, fair, good, best) with soft edges;
+ * - glow: a quiet room where only the better areas glow.
+ */
+export type HeatStyle = 'gradient' | 'zones' | 'glow';
+export const HEAT_STYLES: readonly HeatStyle[] = ['gradient', 'zones', 'glow'];
+
+/** Ramp positions (0..1) where a faint contour line is drawn in the gradient style. */
+const CONTOURS = [0.25, 0.5, 0.75];
 /** How much a contour pixel is lightened towards white: faint, so the zones stay calm. */
-const CONTOUR_LIGHTEN = 0.3;
+const CONTOUR_LIGHTEN = 0.22;
 /** Half the contour line width, in canvas pixels. */
-const CONTOUR_HALF_WIDTH = 1;
-/** Brightness of an area the app advises against: dimmed, not hidden (owner feedback after R5). */
-const DIMMED = 0.5;
+const CONTOUR_HALF_WIDTH = 0.9;
+/** Zones style: number of bands and the width of the soft blend between two bands. */
+const ZONES = 4;
+const ZONE_EDGE = 0.18;
+/** Glow style: visibility of the poorest areas (the best glow at full strength). */
+const GLOW_FLOOR = 0.1;
+/** The fade where the map runs out of scored seats, in metres. */
+const FADE_M = 0.45;
+/** "Advised against": light diagonal hatch (period in CSS pixels, strength 0..1). */
+const HATCH_PERIOD = 8;
+const HATCH_STRENGTH = 0.14;
+/** "Advised against": a fine light outline around the area, so it reads without hatching it hard. */
+const OUTLINE_STRENGTH = 0.3;
+/** 4 × 4 ordered dither: breaks up colour banding in smooth gradients. */
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((b) => b / 16 - 0.47);
 
 /** Output pixels per grid cell: about one canvas pixel per screen pixel, within limits. */
 export function renderScale(cellCssPx: number): number {
-  const dpr = typeof devicePixelRatio === 'number' ? devicePixelRatio : 1;
-  return Math.max(2, Math.min(16, Math.round(cellCssPx * dpr)));
+  return Math.max(2, Math.min(24, Math.round(cellCssPx * dpr())));
 }
 
-/** Paints a smooth field with a colour function, contours and the marked (dimmed) areas. */
-function paint(
-  canvas: HTMLCanvasElement,
-  field: SmoothField,
-  colour: (v: number) => [number, number, number],
-  contours: readonly number[],
-): void {
+function dpr(): number {
+  return typeof devicePixelRatio === 'number' ? devicePixelRatio : 1;
+}
+
+interface PaintOptions {
+  style: HeatStyle;
+  /** Maps a value to a ramp position 0..1. */
+  toRamp: (v: number) => number;
+}
+
+/** Paints a smooth field: colour by style, contours, hatched marked areas, dithered. */
+function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOptions): void {
   const { width, height, value, alpha, marked } = field;
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const image = ctx.createImageData(width, height);
-  const valueAt = (x: number, y: number, fallback: number) => {
+  const { style, toRamp } = options;
+  const period = HATCH_PERIOD * dpr();
+  const markAt = (x: number, y: number, fallback: number) =>
+    x < 0 || y < 0 || x >= width || y >= height ? fallback : marked[y * width + x]!;
+  const rampAt = (x: number, y: number, fallback: number) => {
     if (x < 0 || y < 0 || x >= width || y >= height) return fallback;
     const v = value[y * width + x]!;
-    return Number.isNaN(v) ? fallback : v;
+    return Number.isNaN(v) ? fallback : toRamp(v);
   };
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const k = y * width + x;
-      const a = alpha[k]!;
+      let a = alpha[k]!;
       if (a <= 0) continue;
-      const v = value[k]!;
-      let [r, g, b] = colour(v);
-      const dim = 1 - (1 - DIMMED) * marked[k]!;
-      r *= dim;
-      g *= dim;
-      b *= dim;
-      // Contours, anti-aliased: distance to the level in pixels, from the local slope.
-      if (contours.length) {
-        const gx = (valueAt(x + 1, y, v) - valueAt(x - 1, y, v)) / 2;
-        const gy = (valueAt(x, y + 1, v) - valueAt(x, y - 1, v)) / 2;
-        const slope = Math.hypot(gx, gy);
-        let line = 0;
-        if (slope > 1e-6) {
-          for (const c of contours) {
-            line = Math.max(line, 1 - Math.abs(v - c) / slope / CONTOUR_HALF_WIDTH);
-          }
-        }
-        const t = CONTOUR_LIGHTEN * Math.max(0, line);
-        r += (255 - r) * t;
-        g += (255 - g) * t;
-        b += (255 - b) * t;
+      const t = toRamp(value[k]!);
+      let shown = t;
+      if (style === 'zones') {
+        // Quantise into bands, blending softly across each band edge.
+        const pos = Math.min(1, Math.max(0, t)) * ZONES;
+        const band = Math.min(ZONES - 1, Math.floor(pos));
+        const frac = pos - band;
+        const up = band < ZONES - 1 ? smoothstep(1 - ZONE_EDGE, 1, frac) : 0;
+        const down = band > 0 ? 1 - smoothstep(0, ZONE_EDGE, frac) : 0;
+        const level = band + up * 0.5 - down * 0.5;
+        shown = (level + 0.5) / ZONES;
       }
-      image.data.set([r, g, b, Math.round(a * 255)], k * 4);
+      let [r, g, b] = rampColor(shown);
+      if (style === 'glow') a *= GLOW_FLOOR + (1 - GLOW_FLOOR) * smoothstep(0.35, 1, t);
+      if (style === 'gradient') {
+        // Contours, anti-aliased: distance to the level in pixels, from the local slope.
+        const gx = (rampAt(x + 1, y, t) - rampAt(x - 1, y, t)) / 2;
+        const gy = (rampAt(x, y + 1, t) - rampAt(x, y - 1, t)) / 2;
+        const slope = Math.hypot(gx, gy);
+        if (slope > 1e-6) {
+          let line = 0;
+          for (const c of CONTOURS) {
+            line = Math.max(line, 1 - Math.abs(t - c) / slope / CONTOUR_HALF_WIDTH);
+          }
+          const l = CONTOUR_LIGHTEN * Math.max(0, line);
+          r += (255 - r) * l;
+          g += (255 - g) * l;
+          b += (255 - b) * l;
+        }
+      }
+      const m = marked[k]!;
+      // Outline where the marked share crosses one half, anti-aliased like the contours.
+      const mx = (markAt(x + 1, y, m) - markAt(x - 1, y, m)) / 2;
+      const my = (markAt(x, y + 1, m) - markAt(x, y - 1, m)) / 2;
+      const mSlope = Math.hypot(mx, my);
+      if (mSlope > 1e-4) {
+        const edge = Math.max(0, 1 - Math.abs(m - 0.5) / mSlope / (0.75 * dpr()));
+        const o = OUTLINE_STRENGTH * edge;
+        r += (255 - r) * o;
+        g += (255 - g) * o;
+        b += (255 - b) * o;
+      }
+      if (m > 0.02) {
+        // A fine diagonal hatch, anti-aliased, instead of darkening (owner: "a smudge").
+        const d = (((x + y) % period) + period) % period;
+        const stripe = 1 - smoothstep(0.5 * dpr(), 1.3 * dpr(), Math.min(d, period - d));
+        const h = HATCH_STRENGTH * m * stripe;
+        r += (255 - r) * h;
+        g += (255 - g) * h;
+        b += (255 - b) * h;
+      }
+      const dither = BAYER[(x & 3) + (y & 3) * 4]!;
+      image.data[k * 4] = r + dither;
+      image.data[k * 4 + 1] = g + dither;
+      image.data[k * 4 + 2] = b + dither;
+      image.data[k * 4 + 3] = Math.round(a * 255);
     }
   }
   ctx.putImageData(image, 0, 0);
 }
 
-/** One seat layer, smooth, with contours; areas the app advises against are dimmed. */
+/** Visibility per cell after fillGaps: scored cells full, the rest fading out over FADE_M. */
+function fadeAlpha(dist: Float32Array, step: number): Float32Array {
+  const fade = Math.max(1, FADE_M / step);
+  return dist.map((d) => (d === 0 ? 1 : Math.max(0, 1 - d / fade) ** 1.5));
+}
+
+/** One seat layer: smooth, in the chosen style, its own colour range; "advised against" hatched. */
 export function paintHeat(
   canvas: HTMLCanvasElement,
   layers: SeatLayers,
   values: readonly number[],
   scale = 8,
+  style: HeatStyle = 'gradient',
+  range: ColourRange = roomRange(values),
 ): void {
-  const field = smoothField(layers.nx, layers.ny, values, scale, layers.redFlag);
-  paint(canvas, field, heatColor, CONTOURS);
+  const { filled, dist } = fillGaps(layers.nx, layers.ny, values);
+  const field = smoothField(
+    layers.nx,
+    layers.ny,
+    filled,
+    scale,
+    layers.redFlag,
+    fadeAlpha(dist, layers.step),
+  );
+  paint(canvas, field, { style, toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }
 
 /** Pressure pattern of one bass note: loud is bright, −40 dB or quieter is the darkest. */
 export function paintField(canvas: HTMLCanvasElement, grid: Grid, scale = 8): void {
-  const field = smoothField(grid.nx, grid.ny, grid.values, scale);
-  // Map −40…0 dB onto the same ramp as the scores, so "brighter" always reads the same way.
-  paint(canvas, field, (db) => heatColor(RAMP_FLOOR + (1 - RAMP_FLOOR) * ((db + 40) / 40)), []);
+  const { filled, dist } = fillGaps(grid.nx, grid.ny, grid.values);
+  const field = smoothField(grid.nx, grid.ny, filled, scale, undefined, fadeAlpha(dist, grid.step));
+  // A physical level, not a score: always the absolute −40…0 dB scale.
+  paint(canvas, field, { style: 'gradient', toRamp: (db) => (db + 40) / 40 });
 }
 
 /**
@@ -241,12 +431,20 @@ export function paintField(canvas: HTMLCanvasElement, grid: Grid, scale = 8): vo
  * half (the left speaker's position); the right speaker mirrors it about the seat, so the field is
  * mirrored to twice the width before drawing.
  */
-export function paintSpeakerMap(canvas: HTMLCanvasElement, grid: Grid, scale = 8): void {
+export function paintSpeakerMap(
+  canvas: HTMLCanvasElement,
+  grid: Grid,
+  scale = 8,
+  style: HeatStyle = 'gradient',
+  range: ColourRange = roomRange(grid.values),
+): void {
   const { nx, ny, values } = grid;
   const mirrored: number[] = [];
   for (let j = 0; j < ny; j++) {
     for (let i = 0; i < nx; i++) mirrored.push(values[j * nx + i]!);
     for (let i = nx - 1; i >= 0; i--) mirrored.push(values[j * nx + i]!);
   }
-  paint(canvas, smoothField(nx * 2, ny, mirrored, scale), heatColor, CONTOURS);
+  const { filled, dist } = fillGaps(nx * 2, ny, mirrored);
+  const field = smoothField(nx * 2, ny, filled, scale, undefined, fadeAlpha(dist, grid.step));
+  paint(canvas, field, { style, toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }

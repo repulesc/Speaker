@@ -208,6 +208,16 @@ test.describe('with a room', () => {
     expect(await seatDistance(page)).toBe(before);
   });
 
+  test('speakers: how far they may move (the zone) is one choice', async ({ page }) => {
+    await goStep(page, 'Speakers');
+    const zone = page.getByRole('radiogroup', { name: /How far can the speakers move/ });
+    await expect(zone.getByRole('radio', { name: '50 cm' })).toBeChecked(); // the default
+    await zone.getByRole('radio', { name: '25 cm' }).check({ force: true });
+    expect((await savedProject(page)).constraints.speakerZone).toBe(0.25);
+    await zone.getByRole('radio', { name: 'Anywhere' }).check({ force: true });
+    expect((await savedProject(page)).constraints.speakerZone).toBeUndefined();
+  });
+
   test('speaker file: save, change, load', async ({ page }) => {
     await goStep(page, 'Speakers');
     await openSpeakerDetails(page);

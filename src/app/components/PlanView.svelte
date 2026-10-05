@@ -1,8 +1,16 @@
 <script lang="ts">
+  import type { LayerId } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { scoreWord } from '../findings/text';
-  import { paintField, paintHeat, paintSpeakerMap, renderScale } from '../map/heat';
+  import {
+    ABSOLUTE,
+    paintField,
+    paintHeat,
+    paintSpeakerMap,
+    renderScale,
+    roomRange,
+  } from '../map/heat';
   import { modeExplorer } from '../state/mode.svelte';
   import { fitFrame, toPx, toWorld } from '../plan/frame';
   import {
@@ -21,6 +29,7 @@
   import { viewport } from '../viewport.svelte';
   import { ROOM_LIMITS } from '../state/limits';
   import DimLabel from './DimLabel.svelte';
+  import MapLegend from './MapLegend.svelte';
   import ProbeCard from './ProbeCard.svelte';
 
   const project = $derived(workspace.project);
@@ -32,7 +41,7 @@
   const MARGINS = $derived(
     viewport.compact
       ? { left: 16, right: 16, top: 28, bottom: 12 }
-      : { left: 76, right: 84, top: 44, bottom: 56 },
+      : { left: 76, right: 84, top: 44, bottom: 104 }, // bottom: room size and the legend
   );
   const locale = $derived(i18n.locale);
   const system = $derived(project.units);
@@ -99,16 +108,25 @@
   const speakerGrid = $derived(
     !field && ui.layer === 'speakers' && result ? result.heatmap.speakers : null,
   );
+  /** The values on the map now (seat layer or speaker map), for the colours and the legend. */
+  const shownValues = $derived(
+    speakerGrid ? speakerGrid.values : layers && !field ? layers.values[ui.layer as LayerId] : null,
+  );
+  const range = $derived(
+    ui.heatScale === 'absolute' || !shownValues ? ABSOLUTE : roomRange(shownValues),
+  );
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
     if (heat && layers && !field && ui.layer !== 'speakers') {
-      paintHeat(heat, layers, layers.values[ui.layer], renderScale(layers.step * frame.scale));
+      const scale = renderScale(layers.step * frame.scale);
+      paintHeat(heat, layers, layers.values[ui.layer], scale, ui.heatStyle, range);
     }
   });
   let speakerCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
     if (speakerCanvas && speakerGrid) {
-      paintSpeakerMap(speakerCanvas, speakerGrid, renderScale(speakerGrid.step * frame.scale));
+      const scale = renderScale(speakerGrid.step * frame.scale);
+      paintSpeakerMap(speakerCanvas, speakerGrid, scale, ui.heatStyle, range);
     }
   });
   let fieldCanvas = $state<HTMLCanvasElement>();
@@ -128,6 +146,14 @@
   });
 
   const showHeat = $derived(known && layers !== null);
+  /** The speaker zone, drawn around speakers the user has placed, when they may move. */
+  const zoneRadius = $derived.by(() => {
+    const zone = project.constraints.speakerZone;
+    const placed = speakers.some((sp) => !sp.isDefault);
+    return zone !== undefined && placed && !project.constraints.speakersFixed && !field
+      ? zone
+      : null;
+  });
 
   const probeAt = $derived(
     probe.point && probe.explanation
@@ -459,6 +485,16 @@
           </g>
         {/each}
 
+        {#if showHeat && !speakerGrid && !field && speakers.length === 2}
+          <!-- In front of the speakers' line no seat is scored: the map fades out there. -->
+          {@const noteY = Math.max(speakers[0]!.p.base.y, speakers[1]!.p.base.y) + cab.d / 2 + 0.28}
+          {#if noteY < L - 0.3}
+            <text class="zone-note" x={px(W / 2)} y={py(noteY)} text-anchor="middle"
+              >{i18n.t('map.notListening')}</text
+            >
+          {/if}
+        {/if}
+
         {#if seat && speakers.length === 2}
           {@const [a, b] = speakers}
           <polyline
@@ -479,6 +515,22 @@
         {#each reflectionRings as f (f.messageKey + String(f.params.speaker) + String(f.params.boundary))}
           <circle class="ring" cx={px(f.location!.x)} cy={py(f.location!.y)} r="9" />
         {/each}
+
+        {#if zoneRadius !== null}
+          <!-- Where suggestions may move each speaker (the user's zone, docs/DESIGN_BRIEF_V4.md). -->
+          <clipPath id="plan-room-clip">
+            <rect x={px(0)} y={py(0)} width={W * frame.scale} height={L * frame.scale} />
+          </clipPath>
+          {#each speakers as s (s.side)}
+            <circle
+              class="zone"
+              clip-path="url(#plan-room-clip)"
+              cx={px(s.p.base.x)}
+              cy={py(s.p.base.y)}
+              r={zoneRadius * frame.scale}
+            />
+          {/each}
+        {/if}
 
         {#each speakers as s (s.side)}
           {@const isSelected = selected.kind === 'speaker' && selected.side === s.side}
@@ -692,6 +744,14 @@
       />
     {/if}
 
+    {#if shownValues && known && !field}
+      <MapLegend
+        values={shownValues}
+        named={ui.layer === 'overall' || ui.layer === 'goals' || ui.layer === 'speakers'}
+        hatched={!speakerGrid}
+      />
+    {/if}
+
     {#if field}
       <p class="hint">
         {i18n.t('mode.caption', { frequency: `${Math.round(field.frequency)} Hz` })}
@@ -746,7 +806,6 @@
   .heat {
     position: absolute;
     pointer-events: none;
-    opacity: 0.88;
   }
   /* Heat sits under the drawing: same rounded corners and soft shadow as the empty room. */
   .heat {
@@ -834,6 +893,13 @@
     fill: var(--ink-muted);
     font-size: var(--text-xs);
   }
+  .zone-note {
+    fill: var(--ink-muted);
+    font-size: var(--text-xs);
+    letter-spacing: 0.02em;
+    opacity: 0.8;
+    pointer-events: none;
+  }
   .dim line {
     stroke: var(--accent);
     stroke-width: 1;
@@ -873,6 +939,14 @@
     .plan :global([data-group]) {
       transition: none !important;
     }
+  }
+  .zone {
+    fill: color-mix(in srgb, var(--accent-fill) 7%, transparent);
+    stroke: var(--accent-fill);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+    opacity: 0.8;
+    pointer-events: none;
   }
   .triangle {
     fill: none;
