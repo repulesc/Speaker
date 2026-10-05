@@ -237,3 +237,21 @@ describe('finding texts', () => {
     expect(scoreWord(0.6)).toBe('fair');
   });
 });
+
+describe('advice in plain words (docs/ROADMAP_V5.md, V6)', () => {
+  /** Numbers a listener does not act on: frequencies, reverberation, decibels, areas, angles. */
+  const TECHNICAL =
+    /\{(frequency|t60|after|absorption|stepDb|suggestDb|gain|quarterWavelength|angle|thickness)\}/;
+
+  it('every piece of advice has a plain sentence in both languages, with no technical numbers', () => {
+    for (const locale of ['en', 'hu'] as const) {
+      for (const full of adviceMessageKeys()) {
+        const key = full.replace('advice.', 'advicePlain.');
+        const text = translate(locale, key);
+        expect(text, `${locale} ${key}`).not.toBe(key);
+        expect(text, `${locale} ${key}`).not.toMatch(TECHNICAL);
+        expect(text, `${locale} ${key}`).not.toMatch(/\bHz\b|\bdB\b|m²/);
+      }
+    }
+  });
+});

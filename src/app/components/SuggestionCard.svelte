@@ -2,7 +2,7 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { formatFrequency, formatLength } from '../../units/format';
   import type { Advice } from '../../engine/types';
-  import { adviceText, scoreWord } from '../findings/text';
+  import { advicePlainText, scoreWord } from '../findings/text';
   import { visibleAdvice } from '../findings/visible';
   import { applyCandidate, cabinet } from '../plan/placement';
   import { analysis, showNotice, workspace } from '../session.svelte';
@@ -320,7 +320,7 @@
         <h3 id="idea-title">{i18n.t('result.idea')}</h3>
         {#each picks as idea (idea.messageKey)}
           <div class="idea-item">
-            <p class="idea">{adviceText(idea, system)}</p>
+            <p class="idea">{advicePlainText(idea, system)}</p>
             <p class="caption">{LEVEL_ICON[idea.level]} {i18n.t(`evidence.${idea.level}`)}</p>
           </div>
         {/each}

@@ -1176,6 +1176,7 @@ export const hu: Messages = {
     title: 'Még kipróbálhatod',
     intro:
       'Mi segítene a legtöbbet, sorrendben. A méretek durva tájékoztatók, nem ígéretek: változtass meg egyszerre egy dolgot, aztán hallgasd meg.',
+    details: 'Részletek',
     first: 'Ha csak egy dolgot tudsz megtenni',
     roomTitle: 'Hangtechnikai kezelés',
     settingsTitle: 'A hangfal beállításai',
@@ -1280,6 +1281,73 @@ export const hu: Messages = {
         'A szoba elnyeli a magas hangokat (utózengés {t60}). Ha a hangfaladon vagy az erősítődön van magasszabályzó, próbálj egy kis emelést ({suggestDb}), aztán hallgasd meg.',
       trebleCut:
         'A szobában a magas hangok sokáig csengenek (utózengés {t60}). Ha a hangfaladon vagy az erősítődön van magasszabályzó, próbálj egy kis vágást ({suggestDb}), aztán hallgasd meg.',
+    },
+  },
+  advicePlain: {
+    T01: {
+      absorb:
+        '{speaker}: a hangja a jelölt ponton ({boundary}) egy kemény felületről verődik vissza. Egy puha panel vagy diffúzor ott élesebbé teszi a sztereó képet.',
+      experiment:
+        '{speaker}: a hangja a jelölt ponton ({boundary}) egy kemény felületről verődik vissza. A vélemények eltérnek: tegyél oda valami puhát, hallgasd meg, és tartsd meg, ami tetszik.',
+    },
+    T02: {
+      rug: 'Egy vastag szőnyeg a padlón közted és a hangfalak között, a jelölt ponton, tompítja a padlóról visszaverődő hangot. Olcsó: próbáld ki.',
+      ceilingPanel:
+        'Egy panel a mennyezeten a jelölt ponton tompítaná a visszaverődést. Az oldalfalak fontosabbak, azokkal kezdd.',
+    },
+    T03: {
+      moveFirst:
+        'A hangfalak mögötti fal a basszus egy részét kioltja az ülőhelyeden. A hangfalak áthelyezése sokkal többet segít bármi falra tehető dolognál: lásd a legjobb helyeket.',
+      thickPanel:
+        'A hangfalak mögötti fal a basszus egy részét kioltja az ülőhelyeden. Egy vastag elnyelő mögöttük kicsit enyhít ezen, de megszüntetni nem tudja.',
+    },
+    T04: {
+      corners:
+        'A sarkokba tett basszuscsapdák lecsendesítik a dübörgő basszust. Nagynak és mélynek kell lenniük: a kis szivacsdarabok alig segítenek.',
+    },
+    T05: {
+      soften: 'A szoba élénk, visszhangos. Egy nagy szőnyeg és nehéz függönyök lecsendesítenék.',
+      liven: 'A szoba elég tompa. Kevesebb szőnyeg vagy függöny visszahozna némi életet.',
+    },
+    T06: {
+      moveFirst:
+        'A fejed {distance} távolságra van a hátsó faltól. Ha teheted, told előrébb az ülőhelyet: ez mindennél többet segít.',
+      absorber:
+        'A fejed {distance} távolságra van a hátsó faltól, és az ülőhely nem mozdulhat. Valami vastag, puha a fejed mögött segít.',
+    },
+    D01: {
+      match:
+        'Állítsd be a hangfal fal-távolság beállítását a hátulja és a fal közötti {clearance} távolságra. {zone}',
+    },
+    D02: {
+      cut: 'A hangfalak közel vannak a falakhoz, ettől erősebb a basszus. Próbáld egy lépéssel lejjebb venni a basszust a hangfalon, aztán hallgasd meg.',
+    },
+    D03: {
+      lift: 'A szoba elnyeli a magas hangokat. Próbáld egy lépéssel feljebb venni a magasakat a hangfalon, aztán hallgasd meg.',
+      cut: 'A szobában csengenek a magas hangok. Próbáld egy lépéssel lejjebb venni a magasakat a hangfalon, aztán hallgasd meg.',
+    },
+    D04: {
+      height:
+        'A magassugárzók nincsenek fülmagasságban. Tedd a hangfalakat kb. {baseHeight} magasra a padlótól (állvány vagy asztal), vagy döntsd őket feléd.',
+      tilt: 'A magassugárzók a füled fölé néznek, még a padlón állva is. Döntsd őket kissé lefelé, feléd, vagy ülj kicsit magasabbra.',
+    },
+    D05: {
+      moveOut:
+        'A hátsó reflexnyílás csak {clearance} távolságra van a faltól, pedig {minimum} kellene neki. Húzd kicsit előrébb a hangfalakat.',
+      fixed:
+        'A hátsó reflexnyílás csak {clearance} távolságra van a faltól, pedig {minimum} kellene neki. A kézikönyv szerint lehet, hogy van hozzá dugó vagy falközeli beállítás.',
+    },
+    D06: {
+      desk: 'A hangfalad rendelkezik asztali móddal, és a hangfalak asztalon állnak: kapcsold be.',
+      stand: 'Használd a hangfal állvány módját: a hangfalak nem asztalon állnak.',
+    },
+    D07: {
+      bassCut:
+        'A hangfalak közel vannak a falakhoz, ettől erősebb a basszus. Ha a hangfaladon vagy erősítődön van mélyszabályzó, vedd kicsit lejjebb, aztán hallgasd meg.',
+      trebleLift:
+        'A szoba elnyeli a magas hangokat. Ha a hangfaladon vagy erősítődön van magasszabályzó, vedd kicsit feljebb, aztán hallgasd meg.',
+      trebleCut:
+        'A szobában csengenek a magas hangok. Ha a hangfaladon vagy erősítődön van magasszabályzó, vedd kicsit lejjebb, aztán hallgasd meg.',
     },
   },
   analysis: {
