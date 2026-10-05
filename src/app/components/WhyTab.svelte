@@ -17,14 +17,14 @@
 
   function show(id: LayerId) {
     ui.modeFrequency = null;
-    ui.layer = showing === id ? 'overall' : id;
+    ui.layer = showing === id ? 'goals' : id;
   }
 </script>
 
 <div class="why-tab">
   <WhyPanel />
 
-  <section aria-labelledby="on-map-title">
+  <section class="card" aria-labelledby="on-map-title">
     <h3 id="on-map-title">{i18n.t('whyTab.onMap')}</h3>
     <p class="muted">{i18n.t('whyTab.onMapHelp')}</p>
     <div class="chips" role="group" aria-label={i18n.t('map.whyLabel')}>
@@ -36,12 +36,12 @@
     </div>
   </section>
 
-  <section aria-labelledby="bass-title">
+  <section class="card" aria-labelledby="bass-title">
     <h3 id="bass-title">{i18n.t('nav.bass')}</h3>
     <BassChart />
   </section>
 
-  <section aria-labelledby="closer-title">
+  <section class="card" aria-labelledby="closer-title">
     <h3 id="closer-title">{i18n.t('whyTab.closer')}</h3>
     <div class="chips">
       <button
@@ -63,10 +63,9 @@
 <style>
   .why-tab {
     display: grid;
-    gap: 22px;
+    gap: 14px;
   }
   section {
-    display: grid;
     gap: 8px;
   }
   h3 {

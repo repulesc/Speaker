@@ -1,81 +1,62 @@
-import { SPEAKER_TYPES } from '../../engine/presets/speakerTypes';
-import { DEFAULTS } from '../../engine/presets/defaults';
+import {
+  baseHeight,
+  placedOnOf,
+  typicalQ,
+  type SpeakerChoices,
+  type Spread,
+} from '../../engine/presets/speakerKinds';
 import type { Project, SpeakerProfile } from '../../engine/types';
 import { activeVariant, roomSize } from '../plan/placement';
-import { speakerFromType } from './defaults';
+import { speakerFromChoices } from './defaults';
 import { newId } from './ids';
 import { SIZE_LIMITS } from './limits';
 import { speakerSchema } from './schema';
 import { isRecord } from './validate';
 
-/** Fills the speaker from a generic type. Brand, model and identity stay; every value becomes an estimate. */
-export function applySpeakerType(project: Project, typeId: string): void {
-  const type = SPEAKER_TYPES.find((t) => t.id === typeId);
-  if (!type) return;
-  const { id, brand, model } = project.speaker;
-  project.speaker = { ...speakerFromType(type), id, brand, model };
-}
-
 /**
- * The generic type the speaker still matches: by size and drivers, and by the port when that is
- * what tells two types apart. Changing only the port keeps the type (survey, docs/ROADMAP_V5.md).
+ * Answers one speaker question (undefined = "Not sure") and fills the speaker with the typical
+ * values for all answers so far (docs/ROADMAP_V7.md, Phase 2). Brand, model, identity, controls
+ * and the maker's wall distance stay; every filled value is an estimate. Where the speakers stand
+ * (floor, stand, desk) sets the base height of both speakers in every setup; their position on the
+ * floor is not touched.
  */
-export function speakerTypeOf(speaker: SpeakerProfile) {
-  const sameBox = SPEAKER_TYPES.filter(
-    (t) =>
-      Math.abs((speaker.dimensions.w.value ?? -1) - t.w) < 1e-6 &&
-      Math.abs((speaker.dimensions.h.value ?? -1) - t.h) < 1e-6 &&
-      Math.abs((speaker.dimensions.d.value ?? -1) - t.d) < 1e-6 &&
-      speaker.driverLayout.value === t.driverLayout,
-  );
-  return (
-    sameBox.find(
-      (t) =>
-        speaker.enclosure.value === t.enclosure && speaker.portLocation.value === t.portLocation,
-    ) ??
-    sameBox[0] ??
-    null
-  );
+export function setSpeakerChoice<K extends keyof SpeakerChoices>(
+  project: Project,
+  key: K,
+  value: SpeakerChoices[K] | undefined,
+): void {
+  const old = project.speaker;
+  const choices: SpeakerChoices = { ...old.choices };
+  if (value === undefined) delete choices[key];
+  else choices[key] = value;
+  const { id, brand, model, dsp, minWallDistance, designedForCorner, manufacturerNotes } = old;
+  project.speaker = {
+    ...speakerFromChoices(choices),
+    id,
+    brand,
+    model,
+    dsp,
+    ...(minWallDistance ? { minWallDistance } : {}),
+    ...(designedForCorner ? { designedForCorner } : {}),
+    manufacturerNotes,
+  };
+  if (Object.keys(choices).length === 0) delete project.speaker.choices;
+  // The base height follows the place (and the tweeter height) once the kind or place is known.
+  if (choices.kind || choices.placedOn) {
+    const z = baseHeight(placedOnOf(choices), project.speaker.acousticAxisHeight.value!);
+    for (const v of project.variants) {
+      v.speakers.left.base.z = z;
+      v.speakers.right.base.z = z;
+    }
+  }
 }
 
-// ── Port and dispersion, the two quick speaker questions ──────────────────
-
-export type PortChoice = 'sealed' | 'front' | 'rear';
-export const PORT_CHOICES: readonly PortChoice[] = ['sealed', 'front', 'rear'];
-
-export function portChoice(speaker: SpeakerProfile): PortChoice | null {
-  if (speaker.enclosure.value === 'sealed') return 'sealed';
-  const at = speaker.portLocation.value;
-  return at === 'front' || at === 'rear' ? at : null;
-}
-
-export function setPort(project: Project, choice: PortChoice): void {
-  const s = project.speaker;
-  s.enclosure = { value: choice === 'sealed' ? 'sealed' : 'ported', certainty: 'estimated' };
-  s.portLocation = { value: choice === 'sealed' ? 'none' : choice, certainty: 'estimated' };
-}
-
-/**
- * How widely the speaker spreads sound, as a factor on the type's estimated directivity factor Q
- * (🟡): narrow doubles it (+3 dB directivity index), wide halves it (−3 dB). Q only enters the
- * critical-distance advice (P10), never the map or the score.
- */
-export type Dispersion = 'narrow' | 'typical' | 'wide';
-export const DISPERSIONS: readonly Dispersion[] = ['narrow', 'typical', 'wide'];
-const DISPERSION_FACTOR: Record<Dispersion, number> = { narrow: 2, typical: 1, wide: 0.5 };
-
-function typicalQ(speaker: SpeakerProfile): number {
-  return speakerTypeOf(speaker)?.qMid ?? DEFAULTS.qMid;
-}
-
-export function dispersionOf(speaker: SpeakerProfile): Dispersion {
-  const ratio = (speaker.directivity.qMid.value ?? typicalQ(speaker)) / typicalQ(speaker);
+/** How widely the speaker spreads sound: the answer, else read from the directivity factor. */
+export function dispersionOf(speaker: SpeakerProfile): Spread {
+  if (speaker.choices?.spread) return speaker.choices.spread;
+  const typical = typicalQ(speaker.choices ?? {});
+  const ratio = (speaker.directivity.qMid.value ?? typical) / typical;
   return ratio > 1.4 ? 'narrow' : ratio < 0.7 ? 'wide' : 'typical';
-}
-
-export function setDispersion(project: Project, value: Dispersion): void {
-  const q = typicalQ(project.speaker) * DISPERSION_FACTOR[value];
-  project.speaker.directivity.qMid = { value: Math.max(1, q), certainty: 'estimated' };
 }
 
 // ── Can the seat move? ────────────────────────────────────────────────────

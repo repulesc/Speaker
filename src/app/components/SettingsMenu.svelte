@@ -92,6 +92,14 @@
         (o) => i18n.t(`theme.${o}`),
         (o) => (prefs.theme = o as ThemePref),
       )}
+      {@render segment(
+        i18n.t('numbers.label'),
+        'numbers',
+        ['off', 'on'],
+        prefs.numbers ? 'on' : 'off',
+        (o) => i18n.t(`numbers.${o}`),
+        (o) => (prefs.numbers = o === 'on'),
+      )}
 
       <p class="group-title">{i18n.t('project.switcher')}</p>
       {#if renaming}

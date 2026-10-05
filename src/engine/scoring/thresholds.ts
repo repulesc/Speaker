@@ -47,6 +47,11 @@ export const THRESHOLDS = {
   minScoredDistance: 0.3,
   /** Listener at least this far in front of the speaker baffles (m). */
   minListenerAhead: 0.5,
+  /**
+   * A pair beside or behind the listener is not a stereo setup (G11): its score is capped here,
+   * below the "Poor" word line at 0.5 (owner decision, docs/ROADMAP_V7.md: kept, but as Poor).
+   */
+  notStereoScoreCap: 0.45,
   candidateSeparation: 0.2,
   goodZoneMargin: 0.05,
   /**

@@ -18,7 +18,8 @@ test('journey 1 — first answer: room, speaker, then results within 3 seconds',
   await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
-  await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
+  await page.getByLabel('What kind of speakers?').selectOption('monitor');
+  await page.getByLabel('Drivers', { exact: true }).selectOption('coaxial');
   await goStep(page, 'Results');
 
   await expect(page.getByTestId('suggestion')).toBeVisible({ timeout: 3000 });
@@ -35,7 +36,8 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
   await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
-  await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
+  await page.getByLabel('What kind of speakers?').selectOption('monitor');
+  await page.getByLabel('Drivers', { exact: true }).selectOption('coaxial');
   await goStep(page, 'Results');
   await expect(page.getByTestId('suggestion')).toBeVisible();
 
@@ -52,8 +54,8 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
   await goStep(page, 'Speakers');
   await openSpeakerDetails(page);
   await expect(group(page, 'speakers').getByLabel('Width', { exact: true })).toHaveValue(
-    '16\u00a0cm',
-  ); // the coaxial type's size
+    '19\u00a0cm',
+  ); // a medium monitor's typical width
 });
 
 test.describe('with a room', () => {

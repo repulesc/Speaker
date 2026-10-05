@@ -17,13 +17,14 @@ describe('the speaker map', () => {
     expect(grid.x0 + (grid.nx - 1) * grid.step).toBeCloseTo(2.6 - grid.step / 2, 6); // W / 2
   });
 
-  it('shows the whole room: stereo scores where the speakers can stand, bass only (hatched) elsewhere', () => {
+  it('scores the spots where a stereo pair can stand, and marks the rest "not a stereo spot"', () => {
     const scored = grid.values.filter(Number.isFinite).length;
-    expect(scored).toBeGreaterThan(grid.values.length * 0.85);
-    // Behind the seat there is no stereo setup, but the room's bass is still shown, flagged.
+    expect(scored).toBeGreaterThan(grid.values.length * 0.3);
+    // Behind the seat there is no stereo setup: no score on the good-to-poor scale (docs/ROADMAP_V7.md).
     const k = (grid.ny - 2) * grid.nx + 3;
-    expect(Number.isFinite(grid.values[k]!)).toBe(true);
-    expect(grid.redFlag![k]).toBe(true);
+    expect(Number.isNaN(grid.values[k]!)).toBe(true);
+    expect(grid.inert![k]).toBe(true);
+    grid.values.forEach((v, i) => expect(Number.isFinite(v)).toBe(!grid.inert![i]));
   });
 
   it('is computed in reasonable time', () => {

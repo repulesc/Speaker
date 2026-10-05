@@ -1,3 +1,12 @@
+import {
+  DRIVER_CHOICES,
+  MADE_FOR,
+  PLACED_ON,
+  PORT_CHOICES,
+  SPEAKER_KINDS,
+  SPEAKER_SIZES,
+  SPREADS,
+} from '../../engine/presets/speakerKinds';
 import { SURFACE_PRESETS } from '../../engine/presets/surfaces';
 import { ROOM_LIMITS, SIZE_LIMITS } from './limits';
 import {
@@ -82,6 +91,14 @@ const variant = obj({
   }),
   objects: distinctIds(arr(object, SIZE_LIMITS.objects)),
   busyness: optional(known(oneOf(['bare', 'some', 'busy', 'very-busy']))),
+  previous: optional(
+    obj({
+      key: str(SIZE_LIMITS.name),
+      score: num(0, 1),
+      at: str(40),
+      hidden: optional(bool),
+    }),
+  ),
 });
 
 const patch = obj({
@@ -126,6 +143,17 @@ export const speakerSchema: Check = obj({
   }),
   minWallDistance: optional(known(num(0, 3))),
   designedForCorner: optional(bool),
+  choices: optional(
+    obj({
+      kind: optional(oneOf(SPEAKER_KINDS)),
+      size: optional(oneOf(SPEAKER_SIZES)),
+      drivers: optional(oneOf(DRIVER_CHOICES)),
+      port: optional(oneOf(PORT_CHOICES)),
+      madeFor: optional(oneOf(MADE_FOR)),
+      spread: optional(oneOf(SPREADS)),
+      placedOn: optional(oneOf(PLACED_ON)),
+    }),
+  ),
   manufacturerNotes: arr(
     obj({
       text,
@@ -192,6 +220,7 @@ export const projectSchema: Check = obj({
         text: optional(text),
         experimentId: optional(str(SIZE_LIMITS.name)),
         setupKey: optional(str(SIZE_LIMITS.name)),
+        about: optional(oneOf(['position', 'before', 'speakers'])),
       }),
       SIZE_LIMITS.notes,
     ),

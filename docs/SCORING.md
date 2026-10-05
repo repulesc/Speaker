@@ -163,3 +163,12 @@ Caps limit an output's confidence however complete the inputs are:
 - **Preferred listening distance.** The search keeps both speakers at least 1.5 m from the seat unless the user chooses "desk" (0.6 m). It tries, in order: red-flag-free and far enough; red-flag-free and closer (`closer` on the candidates); then the least bad (`compromise`). 🟡 heuristic; ITU-R BS.1116 places reference listeners 2–4 m away.
 - **Rear ports** keep their clearance in the search (the manufacturer's minimum, else 0.2 m).
 - **Seat layers** are scored wherever the seat is in front of both speakers and at least 0.3 m from them. Blocked, occupied and red-flagged cells keep their score and are marked (dimmed on the map).
+
+## V7: one score, one meaning
+
+- **Not a stereo setup is Poor.** A setup with the seat not clearly in front of both speakers (G11) has its score capped at 0.45, below "Poor" (`scorer.ts`, `notStereoScoreCap`). The cap applies everywhere the score is used: the current setup, the search, the maps.
+- **Every word is the cautious score.** "Now", the suggestions, the hover on the speaker map (`explainSpeakerSpot`), the seat probe (`explainPoint().robust`) and the legend's "Best here" (`Grid.best`, `SeatLayers.best`: the robust score of the cell at the 98th percentile) all use the robust score (§4) with the analysis seed (`ANALYSIS_SEED`). A spot's word is the word it gets after Apply. The map colours stay nominal scores (one per cell, far cheaper); only the words are robust.
+- **The seat map shows the goals score.** The main seat map is the "my goals" layer, the score "Now" uses; "overall" (no goals) stays a layer of its own.
+- **Not a spot is not a colour.** On the speaker map, spots where no stereo pair can stand (beside, behind or too close to the seat, cabinets overlapping, outside the room) are `inert`: no score, drawn in one neutral tone with the words "Not a stereo spot". Before V7 they showed the bass part of the score, hatched, which read as "good here". On the seat map, cells where no seat can be scored are drawn the same way ("No seat here").
+- **Line of sight already used height.** The owner saw a sofa hatch the seats behind it. Checked: `isObstructed` (G10) tests the object's top against the sound path, so a 0.85 m sofa does not block a seat behind it and a 2 m wardrobe does (tests in `trust.test.ts`). The hatching came from the not-a-stereo spots above.
+

@@ -27,18 +27,18 @@
 
 <style>
   .card {
-    display: grid;
     gap: 6px;
-    padding: 12px 14px;
-    border: 1px solid var(--grid-strong);
-    border-radius: var(--radius-md);
-    background: var(--surface);
   }
+  /* Severity as a quiet bar on the card's edge, not a frame. */
   .card.red-flag {
-    border-color: var(--danger);
+    box-shadow:
+      inset 3px 0 0 var(--danger),
+      var(--card-shadow);
   }
   .card.caution {
-    border-color: color-mix(in srgb, var(--caution) 60%, var(--grid-strong));
+    box-shadow:
+      inset 3px 0 0 var(--caution),
+      var(--card-shadow);
   }
   .meta {
     display: flex;

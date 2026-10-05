@@ -131,6 +131,7 @@ const ADVICE_SAMPLE: Record<string, Record<string, number | string>> = {
   'D07.bassCut': { gain: 'high' },
   'D07.trebleLift': { t60: 0.2, suggestDb: 0.5 },
   'D07.trebleCut': { t60: 0.8, suggestDb: -0.5 },
+  'C02.quiet': { lowFrequencyMinus6dB: 60, frequency: 28.6 },
 };
 
 describe('advice texts', () => {
@@ -253,5 +254,14 @@ describe('advice in plain words (docs/ROADMAP_V5.md, V6)', () => {
         expect(text, `${locale} ${key}`).not.toMatch(/\bHz\b|\bdB\b|m²/);
       }
     }
+  });
+});
+
+describe('"Show the numbers"', () => {
+  it('adds the score to the word only when asked, in the reader’s locale', async () => {
+    const { scoreLabel, scoreNumber } = await import('../../src/app/findings/text');
+    expect(scoreLabel(0.74, false)).toBe('Good');
+    expect(scoreLabel(0.74, true)).toBe('Good · 0.74');
+    expect(scoreNumber(0.5, 'hu')).toBe('0,50');
   });
 });

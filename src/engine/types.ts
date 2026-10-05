@@ -5,6 +5,8 @@
  * y along the length (L) away from the front (speaker) wall, z up (H).
  */
 
+import type { SpeakerChoices } from './presets/speakerKinds';
+
 export type Certainty = 'measured' | 'estimated' | 'unknown';
 
 /** A user-provided value plus its certainty. `value` is null only when certainty is 'unknown'. */
@@ -172,6 +174,8 @@ export interface SpeakerProfile {
   /** Manufacturer minimum distance, rear panel to wall (G07). */
   minWallDistance?: Known<number>;
   designedForCorner?: boolean;
+  /** The answers to the speaker questions the typical values came from (V7); none = not asked. */
+  choices?: SpeakerChoices;
   manufacturerNotes: { text: string; source: SourceRef }[];
   provenance: { sources: SourceRef[]; verified: boolean; lastReviewed?: string };
 }
@@ -247,6 +251,8 @@ export interface ListeningNote {
   experimentId?: string;
   /** Fingerprint of the setup as it stood when the note was written (positions, objects). */
   setupKey?: string;
+  /** A "Live with it" face: this position, the one before Apply, or the speakers overall (V7). */
+  about?: 'position' | 'before' | 'speakers';
 }
 
 // ── Project ───────────────────────────────────────────────────────────────
@@ -259,6 +265,11 @@ export interface SetupVariant {
   objects: RoomObject[];
   /** How full the room is; placed objects can raise this estimate, never lower it. */
   busyness?: Known<Busyness>;
+  /**
+   * The arrangement before the last Apply (V7, "Live with it"): its fingerprint and the app's
+   * score for it, so the listener can rate both and see the two side by side.
+   */
+  previous?: { key: string; score: number; at: string; hidden?: boolean };
 }
 
 export interface Project {
@@ -352,6 +363,13 @@ export interface Grid {
   values: number[];
   /** Scored, but the app advises against it (e.g. a speaker on furniture): drawn hatched. */
   redFlag?: boolean[];
+  /** Not a candidate at all (e.g. speakers beside or behind the seat): no score, a neutral tone. */
+  inert?: boolean[];
+  /**
+   * The cautious (robust) score of the best spot shown, the one the legend names, so the legend's
+   * word is the word Apply would give there (docs/ROADMAP_V7.md, "one score, one meaning").
+   */
+  best?: number;
 }
 
 /** One heatmap per concern (docs/REVAMP_PLAN.md, "Layers"). */
@@ -369,6 +387,8 @@ export interface SeatLayers {
   values: Record<LayerId, number[]>;
   /** True where the app red-flags the seat itself (room midpoint, back wall, stereo angle). */
   redFlag: boolean[];
+  /** The cautious score of the best seat on the goals layer, as for `Grid.best`. */
+  best?: number;
 }
 
 export type FragilityLevel = 'steady' | 'sensitive' | 'fragile';
@@ -408,9 +428,14 @@ export interface PointExplanation {
   valid: boolean;
   /** The app would red-flag this spot itself. */
   redFlag: boolean;
-  /** Goal-weighted score and the same without goals. */
+  /** Goal-weighted score (nominal) and the same without goals. */
   score: number;
   overall: number;
+  /**
+   * The cautious score (robust, with the listening area if any): the number every word on screen
+   * uses, the same as "Now" and the suggestions (owner decision, docs/ROADMAP_V7.md).
+   */
+  robust: number;
   breakdown: ScoreBreakdownItem[];
   /** Findings that depend on where things stand, red flags first. */
   findings: Finding[];

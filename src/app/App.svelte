@@ -58,12 +58,12 @@
 
   // The map shows what the goal asks: where the speakers go (seat fixed) or where to sit.
   let shownGoal = goalOf(workspace.project);
-  ui.layer = shownGoal === 'speakers' ? 'speakers' : 'overall';
+  ui.layer = shownGoal === 'speakers' ? 'speakers' : 'goals';
   $effect(() => {
     const goal = goalOf(workspace.project);
     if (goal === shownGoal) return;
     shownGoal = goal;
-    ui.layer = goal === 'speakers' ? 'speakers' : 'overall';
+    ui.layer = goal === 'speakers' ? 'speakers' : 'goals';
   });
 
   // A new section starts at the top of the panel, not wherever the last one was scrolled to.

@@ -1,5 +1,5 @@
 import { DEFAULTS } from '../../engine/presets/defaults';
-import { SPEAKER_TYPES, type SpeakerTypePreset } from '../../engine/presets/speakerTypes';
+import { speakerValues, type SpeakerChoices } from '../../engine/presets/speakerKinds';
 import type {
   BoundaryId,
   Certainty,
@@ -19,21 +19,26 @@ const BOUNDARIES: BoundaryId[] = ['front', 'back', 'left', 'right', 'floor', 'ce
 const estimated = <T>(value: T): Known<T> => ({ value, certainty: 'estimated' });
 const unknownValue = <T>(): Known<T> => ({ value: null, certainty: 'unknown' });
 
-/** A speaker profile prefilled from a generic type. Every value is an estimate. */
-export function speakerFromType(type: SpeakerTypePreset = SPEAKER_TYPES[0]!): SpeakerProfile {
+/**
+ * A speaker profile with the typical values for the answers given (all estimates); no answers is
+ * the generic speaker. The answers are kept, so the speaker questions show them again.
+ */
+export function speakerFromChoices(choices: SpeakerChoices = {}): SpeakerProfile {
+  const t = speakerValues(choices);
   return {
     id: newId(),
     brand: '',
     model: '',
-    dimensions: { w: estimated(type.w), h: estimated(type.h), d: estimated(type.d) },
-    enclosure: estimated(type.enclosure),
-    portLocation: estimated(type.portLocation),
-    driverLayout: estimated(type.driverLayout),
-    acousticAxisHeight: estimated(type.acousticAxisHeight),
-    wooferCentreHeight: estimated(type.wooferCentreHeight),
-    lowFrequencyMinus6dB: estimated(type.lowFrequencyMinus6dB),
-    directivity: { omniBelowHz: estimated(type.omniBelowHz), qMid: estimated(type.qMid) },
+    dimensions: { w: estimated(t.w), h: estimated(t.h), d: estimated(t.d) },
+    enclosure: estimated(t.enclosure),
+    portLocation: estimated(t.portLocation),
+    driverLayout: estimated(t.driverLayout),
+    acousticAxisHeight: estimated(t.acousticAxisHeight),
+    wooferCentreHeight: estimated(t.wooferCentreHeight),
+    lowFrequencyMinus6dB: estimated(t.lowFrequencyMinus6dB),
+    directivity: { omniBelowHz: estimated(t.omniBelowHz), qMid: estimated(t.qMid) },
     dsp: {},
+    ...(Object.keys(choices).length ? { choices: { ...choices } } : {}),
     manufacturerNotes: [],
     provenance: { sources: [{ kind: 'user', title: 'generic type estimate' }], verified: false },
   };
@@ -99,7 +104,7 @@ export function createDefaultProject(options: {
   now?: string;
 }): Project {
   const now = options.now ?? new Date().toISOString();
-  const speaker = speakerFromType();
+  const speaker = speakerFromChoices();
   const variant = emptyVariant(speaker);
   return {
     schemaVersion: 1,

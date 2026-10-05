@@ -2,7 +2,7 @@
   import type { LayerId } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
-  import { scoreWord } from '../findings/text';
+  import { scoreLabel, scoreWord } from '../findings/text';
   import { visibleAdvice } from '../findings/visible';
   import {
     ABSOLUTE,
@@ -25,6 +25,7 @@
   import { analysis, workspace } from '../session.svelte';
   import { preview } from '../state/preview.svelte';
   import { probe } from '../state/probe.svelte';
+  import { prefs } from '../prefs.svelte';
   import { ui } from '../ui.svelte';
   import { arrowDelta, startDrag } from '../plan/interaction';
   import { viewport } from '../viewport.svelte';
@@ -134,17 +135,8 @@
   const range = $derived(
     ui.heatScale === 'absolute' || !shownValues ? ABSOLUTE : roomRange(shownValues),
   );
-  /** The current setup's score word, shown on the map where it stands. */
-  const seatNow = $derived.by(() => {
-    if (!layers || !seat || ui.layer === 'speakers') return result?.current.score ?? 0;
-    const i = Math.min(layers.nx - 1, Math.max(0, Math.floor(seat.ears.x / layers.step)));
-    const j = Math.min(layers.ny - 1, Math.max(0, Math.floor(seat.ears.y / layers.step)));
-    const v = layers.values[ui.layer as LayerId][j * layers.nx + i];
-    return v !== undefined && Number.isFinite(v) ? v : (result?.current.score ?? 0);
-  });
-  const nowWord = $derived(
-    result && variant && seat ? scoreWord(speakerGrid ? result.current.score : seatNow) : null,
-  );
+  /** The current setup's score word, shown on the map where it stands: the same as "Now". */
+  const nowWord = $derived(result && variant && seat ? scoreWord(result.current.score) : null);
   /** Only a placement that really helps is tagged "Best" (else the brief and the map disagree). */
   const worthMoving = $derived(result?.topActions.some((a) => a.kind === 'move') ?? false);
   const nowAt = $derived.by(() => {
@@ -158,24 +150,37 @@
     return seat ? { x: px(seat.ears.x), y: py(seat.ears.y) + 28 } : { x: 0, y: 0 };
   });
 
+  /** A chip's width: the label measured in the chip's font, plus padding. */
+  let measure: CanvasRenderingContext2D | null | undefined;
+  function chipWidth(text: string): number {
+    measure ??=
+      typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d');
+    if (measure)
+      measure.font = '600 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const width = measure ? measure.measureText(text).width : text.length * 6.8;
+    return Math.ceil(width) + 18;
+  }
+
+  /** The heat colours follow the page's light or dark look. */
+  const theme = $derived(prefs.dark ? 'dark' : 'light');
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
     if (heat && layers && !field && ui.layer !== 'speakers') {
       const scale = renderScale(layers.step * frame.scale);
-      paintHeat(heat, layers, layers.values[ui.layer], scale, range);
+      paintHeat(heat, layers, layers.values[ui.layer], scale, range, theme);
     }
   });
   let speakerCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
     if (speakerCanvas && speakerGrid) {
       const scale = renderScale(speakerGrid.step * frame.scale);
-      paintSpeakerMap(speakerCanvas, speakerGrid, scale, range);
+      paintSpeakerMap(speakerCanvas, speakerGrid, scale, range, theme);
     }
   });
   let fieldCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
     if (fieldCanvas && field) {
-      paintField(fieldCanvas, field.grid, renderScale(field.grid.step * frame.scale));
+      paintField(fieldCanvas, field.grid, renderScale(field.grid.step * frame.scale), theme);
     }
   });
 
@@ -184,7 +189,7 @@
     const snapshot = $state.snapshot(workspace.project);
     const speakers = previewed ? $state.snapshot(previewed.speakers) : null;
     void preview.refresh(snapshot, speakers);
-    probe.refresh(snapshot, speakers ?? undefined);
+    probe.refresh(snapshot, speakers ?? undefined, speakerGrid !== null);
     void modeExplorer.refresh(snapshot, ui.modeFrequency);
   });
 
@@ -226,21 +231,14 @@
     ui.candidate = next;
   }
 
-  /** The speaker map's value under the pointer (the grid covers the left half; mirrored). */
+  /**
+   * The speaker map under the pointer, from the engine: the cautious score of the pair standing
+   * there, the word Apply would give (docs/ROADMAP_V7.md), or "not a stereo spot".
+   */
   const speakerProbe = $derived.by(() => {
-    const at = probe.point;
-    if (!at || !speakerGrid || !seat) return null;
-    const { x0, y0, step, nx, ny, values } = speakerGrid;
-    const centre = project.constraints.keepSymmetric ? W / 2 : seat.ears.x;
-    const x = at.x <= centre ? at.x : 2 * centre - at.x;
-    const i = Math.round((x - x0) / step);
-    const j = Math.round((at.y - y0) / step);
-    if (i < 0 || j < 0 || i >= nx || j >= ny) return { value: null, flagged: false };
-    const v = values[j * nx + i]!;
-    return {
-      value: Number.isFinite(v) ? v : null,
-      flagged: speakerGrid.redFlag?.[j * nx + i] ?? false,
-    };
+    const spot = probe.spot;
+    if (!probe.point || !speakerGrid || !spot) return null;
+    return { value: spot.stereo ? spot.robust : null, flagged: spot.flagged };
   });
 
   function moveSpeakersToProbe() {
@@ -340,6 +338,15 @@
       : '',
   );
 </script>
+
+<!-- One label style on the map (V7): a small soft chip, readable on every heat colour. -->
+{#snippet chip(x: number, y: number, text: string, testid?: string)}
+  {@const w = chipWidth(text)}
+  <g class="chip">
+    <rect x={x - w / 2} y={y - 13} width={w} height="18" rx="9" />
+    <text {x} {y} text-anchor="middle" data-testid={testid}>{text}</text>
+  </g>
+{/snippet}
 
 <div
   class="plan"
@@ -740,9 +747,14 @@
 
         {#if nowWord && !field}
           <!-- "You are here": where the current setup sits on this map, with its score word. -->
-          <text class="tag" x={nowAt.x} y={nowAt.y} text-anchor="middle" data-testid="map-now"
-            >{i18n.t('map.now', { word: i18n.t(`results.score.${nowWord}`) })}</text
-          >
+          {@render chip(
+            nowAt.x,
+            nowAt.y,
+            i18n.t('map.now', {
+              word: scoreLabel(result!.current.score, prefs.numbers),
+            }),
+            'map-now',
+          )}
         {/if}
 
         {#if suggested}
@@ -793,9 +805,7 @@
           </g>
           {#if shownIndex === 0 && worthMoving && !(nowWord && Math.abs(nowAt.x - px(pinAt!.x)) < 80 && Math.abs(nowAt.y - (py(pinAt!.y) - 20)) < 18)}
             <!-- Left out where it would cover the "Now" label (small maps): the pin still marks it. -->
-            <text class="tag" x={px(pinAt!.x)} y={py(pinAt!.y) - 20} text-anchor="middle"
-              >{i18n.t('map.best')}</text
-            >
+            {@render chip(px(pinAt!.x), py(pinAt!.y) - 22, i18n.t('map.best'))}
           {/if}
         {/if}
       {/if}
@@ -873,8 +883,12 @@
 
     {#if shownValues && known && !field}
       <MapLegend
-        values={shownValues}
-        named={ui.layer === 'overall' || ui.layer === 'goals' || ui.layer === 'speakers'}
+        best={speakerGrid
+          ? (speakerGrid.best ?? null)
+          : ui.layer === 'goals'
+            ? (layers?.best ?? null)
+            : null}
+        none={speakerGrid ? 'notStereo' : 'notSeat'}
         hatched
       />
     {/if}
@@ -902,7 +916,7 @@
           {speakerProbe.value === null
             ? i18n.t('probe.speakersNot')
             : i18n.t('probe.speakersHere', {
-                word: i18n.t(`results.score.${scoreWord(speakerProbe.value)}`),
+                word: scoreLabel(speakerProbe.value, prefs.numbers),
               })}
         </p>
         {#if speakerProbe.flagged}<p class="spot-flag">{i18n.t('probe.speakersFlagged')}</p>{/if}
@@ -1017,16 +1031,18 @@
     stroke-width: 2.5;
     pointer-events: none;
   }
-  /* Quiet labels on the map: dark text with a light halo, readable on any colour. */
-  .tag {
-    fill: #1d1d1f;
-    stroke: #fff;
-    stroke-width: 4;
-    paint-order: stroke;
-    stroke-linejoin: round;
+  /* Map labels: a soft chip, the same in light and dark (no outlined text). */
+  .chip {
+    pointer-events: none;
+  }
+  .chip rect {
+    fill: var(--surface);
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.22));
+  }
+  .chip text {
+    fill: var(--ink);
     font-size: var(--text-xs);
     font-weight: 600;
-    pointer-events: none;
   }
   .advice-ring {
     pointer-events: none;
@@ -1261,13 +1277,16 @@
     font-weight: 500;
     pointer-events: none;
   }
+  /* Speakers: dark graphite with a white ring, so they read on every heat colour (V7). */
   .cabinet {
     fill: var(--speaker);
-    stroke: var(--speaker);
-    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
+    stroke: #fff;
+    stroke-width: 1.5;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.3));
   }
   .cabinet.default {
-    fill: color-mix(in srgb, var(--speaker) 45%, transparent);
+    fill: color-mix(in srgb, var(--speaker) 60%, transparent);
+    stroke-dasharray: 3 2;
   }
   .baffle {
     fill: var(--speaker-baffle);

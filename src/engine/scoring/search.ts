@@ -398,6 +398,12 @@ const shift = (p: Vec3, by: Vec2): Vec3 => ({ x: p.x + by.x, y: p.y + by.y, z: p
  * With a listening area (sofa, desk, bed), each run scores the area's spots and weighs them
  * (scoring/area.ts), so a spot that is good only for the middle seat ranks lower.
  */
+/**
+ * The seed the analysis uses by default (analyze.ts). Every other word shown for a spot (the map's
+ * hover, its legend, the probe) uses it too, so it is the word the analysis gives after Apply.
+ */
+export const ANALYSIS_SEED = 1;
+
 export function robustScores(
   baseScorer: Scorer,
   placements: Placement[],

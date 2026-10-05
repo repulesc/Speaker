@@ -206,3 +206,30 @@ describe('analyze() carries the advice', () => {
     expect(a.advice).toEqual(adviceFor(busyRoom()));
   });
 });
+
+describe('contextual tips (V7): only for their situation', () => {
+  const ids = (p: Project) => adviceFor(p).settings.map((a) => a.ruleId);
+
+  it('nobody gets them by default', () => {
+    for (const id of ['C01', 'C02', 'C03']) expect(ids(makeProject())).not.toContain(id);
+  });
+
+  it('a desk gets the desk-reflection tip; a bed gets the bed tip', () => {
+    const desk = makeProject();
+    desk.constraints.listeningDistance = 'near';
+    expect(ids(desk)).toContain('C01');
+    const bed = makeProject();
+    bed.variants[0]!.listener.area = 'bed';
+    expect(ids(bed)).toContain('C03');
+  });
+
+  it('small speakers in a long room: the deepest resonance stays quiet; never for a generic speaker', () => {
+    const p = makeProject({ W: 4, L: 7 }); // first length resonance ≈ 24.5 Hz
+    p.speaker.choices = { kind: 'desktop', size: 'small' };
+    p.speaker.lowFrequencyMinus6dB = estimated(85);
+    expect(ids(p)).toContain('C02');
+    delete p.speaker.choices;
+    p.speaker.lowFrequencyMinus6dB = estimated(85);
+    expect(ids(p)).not.toContain('C02');
+  });
+});

@@ -25,7 +25,15 @@ const MODES = ['quick', 'detailed'] as const;
 
 let theme = $state<ThemePref>(read('spa:theme', THEMES, 'auto'));
 let mode = $state<Mode>(read('spa:mode', MODES, 'quick'));
+/** "Show the numbers" (owner decision, V7): everyday words by default, the numbers on request. */
+let numbers = $state(read('spa:numbers', ['on', 'off'], 'off') === 'on');
 let welcomed = $state(read('spa:welcomed', ['yes', 'no'], 'no') === 'yes');
+
+/** The system's light or dark setting, followed live (the map's colours are painted, not styled). */
+const media =
+  typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : undefined;
+let systemDark = $state(media?.matches ?? false);
+media?.addEventListener('change', (event) => (systemDark = event.matches));
 
 function applyTheme(value: ThemePref): void {
   if (value === 'auto') delete document.documentElement.dataset.theme;
@@ -41,12 +49,23 @@ export const prefs = {
     write('spa:theme', value);
     applyTheme(value);
   },
+  /** Whether the page is dark now (the user's choice, else the system's). */
+  get dark() {
+    return theme === 'dark' || (theme === 'auto' && systemDark);
+  },
   get mode() {
     return mode;
   },
   set mode(value: Mode) {
     mode = value;
     write('spa:mode', value);
+  },
+  get numbers() {
+    return numbers;
+  },
+  set numbers(value: boolean) {
+    numbers = value;
+    write('spa:numbers', value ? 'on' : 'off');
   },
   get welcomed() {
     return welcomed;

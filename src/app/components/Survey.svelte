@@ -1,6 +1,5 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import { SPEAKER_TYPES } from '../../engine/presets/speakerTypes';
   import { i18n } from '../../i18n/locale.svelte';
   import { LOCALES } from '../../i18n/translate';
   import { APP_NAME } from '../config';
@@ -16,20 +15,10 @@
   import { workspace } from '../session.svelte';
   import { GOALS, goalOf, setGoal } from '../state/goal';
   import { ROOM_LIMITS, USUAL_ROOM_RANGE } from '../state/limits';
-  import {
-    applySpeakerType,
-    DISPERSIONS,
-    dispersionOf,
-    PORT_CHOICES,
-    portChoice,
-    setDispersion,
-    setPort,
-    speakerTypeOf,
-  } from '../state/speaker';
   import { ui } from '../ui.svelte';
   import LengthField from './LengthField.svelte';
   import LengthInput from './LengthInput.svelte';
-  import SpeakerTypeIcon from './SpeakerTypeIcon.svelte';
+  import SpeakerQuestions from './SpeakerQuestions.svelte';
 
   /**
    * First run: four calm questions on one card, then the room is revealed (owner decisions,
@@ -51,11 +40,6 @@
   const ZONES = [0.25, 0.5, 1, null] as const;
   const fmt = (m: number) => formatLength(m, system, 'position', i18n.locale);
   const dims = ['width', 'length', 'height'] as const;
-
-  /** The type whose typical values the speaker still has (as on the Speakers page). */
-  const chosenType = $derived(speakerTypeOf(project.speaker)?.id ?? null);
-  const port = $derived(portChoice(project.speaker));
-  const dispersion = $derived(dispersionOf(project.speaker));
 
   /** A typical ceiling, assumed when it is left empty (the analysis needs one). */
   const TYPICAL_CEILING = 2.5;
@@ -164,56 +148,7 @@
     {:else if screen === 3}
       <h2 id="survey-title" tabindex="-1">{i18n.t('survey.speaker.title')}</h2>
       <p class="help">{i18n.t('survey.speaker.help')}</p>
-      <div class="types" role="radiogroup" aria-labelledby="survey-title">
-        {#each SPEAKER_TYPES as type (type.id)}
-          <label class="type">
-            <input
-              type="radio"
-              name="survey-type"
-              checked={chosenType === type.id}
-              onchange={() => workspace.edit((p) => applySpeakerType(p, type.id))}
-            />
-            <SpeakerTypeIcon {type} />
-            <span class="choice-title">{i18n.t(`speakers.type.${type.id}.name`)}</span>
-          </label>
-        {/each}
-      </div>
-      <fieldset>
-        <legend>{i18n.t('speakers.quick.port.label')}</legend>
-        <div class="seg" role="radiogroup" aria-label={i18n.t('speakers.quick.port.label')}>
-          {#each PORT_CHOICES as c (c)}
-            <label>
-              <input
-                type="radio"
-                name="survey-port"
-                checked={port === c}
-                onchange={() => workspace.edit((p) => setPort(p, c))}
-              />
-              {i18n.t(`speakers.quick.port.${c}`)}
-            </label>
-          {/each}
-        </div>
-      </fieldset>
-      <details class="more">
-        <summary>{i18n.t('speakers.quick.more')}</summary>
-        <fieldset>
-          <legend>{i18n.t('speakers.quick.dispersion.label')}</legend>
-          <p class="note">{i18n.t('speakers.quick.dispersion.help')}</p>
-          <div class="seg" role="radiogroup" aria-label={i18n.t('speakers.quick.dispersion.label')}>
-            {#each DISPERSIONS as d (d)}
-              <label>
-                <input
-                  type="radio"
-                  name="survey-dispersion"
-                  checked={dispersion === d}
-                  onchange={() => workspace.edit((p) => setDispersion(p, d))}
-                />
-                {i18n.t(`speakers.quick.dispersion.${d}`)}
-              </label>
-            {/each}
-          </div>
-        </fieldset>
-      </details>
+      <SpeakerQuestions questions={['kind', 'size', 'port']} idPrefix="survey" />
     {:else}
       <h2 id="survey-title" tabindex="-1">{i18n.t('survey.where.title')}</h2>
       {#if goal === 'both' || !room}
@@ -423,8 +358,7 @@
     display: grid;
     gap: 8px;
   }
-  .choice,
-  .type {
+  .choice {
     position: relative;
     display: grid;
     gap: 2px;
@@ -433,20 +367,17 @@
     box-shadow: 0 0 0 1px var(--grid);
     cursor: pointer;
   }
-  .choice input,
-  .type input {
+  .choice input {
     position: absolute;
     inset: 0;
     margin: 0;
     opacity: 0;
     cursor: pointer;
   }
-  .choice:has(input:checked),
-  .type:has(input:checked) {
+  .choice:has(input:checked) {
     box-shadow: 0 0 0 2px var(--accent-fill);
   }
-  .choice:has(input:focus-visible),
-  .type:has(input:focus-visible) {
+  .choice:has(input:focus-visible) {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
   }
@@ -456,22 +387,6 @@
   }
   .choice-sub {
     color: var(--ink-muted);
-    font-size: var(--text-sm);
-  }
-  .types {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 8px;
-  }
-  .type {
-    justify-items: center;
-    text-align: center;
-  }
-  .type :global(.icon) {
-    width: 40px;
-    height: 54px;
-  }
-  .type .choice-title {
     font-size: var(--text-sm);
   }
   fieldset {
@@ -487,21 +402,6 @@
   }
   fieldset .seg {
     display: flex;
-  }
-  .more summary {
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    color: var(--accent);
-    cursor: pointer;
-  }
-  .more fieldset {
-    margin-top: 4px;
-  }
-  .note {
-    margin: 0;
-    color: var(--ink-muted);
-    font-size: var(--text-sm);
   }
   .actions {
     display: flex;

@@ -10,6 +10,11 @@ export const en = {
     en: 'English',
     hu: 'Magyar',
   },
+  numbers: {
+    label: 'Show the numbers',
+    off: 'Off',
+    on: 'On',
+  },
   theme: {
     label: 'Theme',
     auto: 'Match device',
@@ -287,84 +292,72 @@ export const en = {
     remove: 'Remove',
   },
   speakers: {
-    quick: {
+    ask: {
+      notSure: 'Not sure',
+      note: 'These fill in typical values, marked as estimates. Have the manual? Type the exact numbers under More details.',
+      kind: {
+        label: 'What kind of speakers?',
+        bookshelf: 'Bookshelf or stand speakers',
+        floorstander: 'Floor-standing (tower)',
+        monitor: 'Studio monitors',
+        desktop: 'Small desktop speakers',
+        wall: 'On or in the wall',
+      },
+      size: {
+        label: 'How big?',
+        small: 'Small',
+        medium: 'Medium',
+        large: 'Large',
+        tall: '{size}, about {height} tall',
+      },
+      drivers: {
+        label: 'Drivers',
+        'two-way': 'Two-way (tweeter and woofer)',
+        'three-way': 'Three-way',
+        coaxial: 'Coaxial (tweeter in the middle of the woofer)',
+      },
       port: {
         label: 'Bass port',
         sealed: 'None (sealed)',
         front: 'At the front',
         rear: 'At the back',
+        down: 'At the bottom',
+        side: 'At the side',
       },
-      more: 'More (optional)',
-      dispersion: {
+      madeFor: {
+        label: 'Made for',
+        hifi: 'Listening at home (hi-fi)',
+        studio: 'Studio work (monitors)',
+        studioHint: 'Monitors are made for listening up close. If you sit at a desk, tell us:',
+        studioDesk: 'I listen at a desk',
+      },
+      spread: {
         label: 'How widely they spread sound',
-        help: 'Not sure? Leave it on Typical. It is an estimate and only changes advice about listening distance, never the map.',
+        help: 'Only changes the advice about listening distance, never the map.',
         narrow: 'Narrow',
         typical: 'Typical',
         wide: 'Wide',
       },
+      placedOn: {
+        label: 'They stand on',
+        floor: 'The floor',
+        stand: 'A stand or shelf',
+        desk: 'A desk',
+      },
     },
     title: 'Speakers',
-    intro: 'Pick the closest type and say where they stand. Everything else is optional.',
-    type: {
-      legend: 'Which speakers are closest to yours?',
-      help: 'This fills in typical sizes. You can change them under More details.',
-      'small-bookshelf-rear-port': {
-        name: 'Small bookshelf speaker',
-        short: 'Bookshelf',
-        help: 'Two-way, port at the back',
-      },
-      'coaxial-active-monitor': {
-        name: 'Coaxial active monitor',
-        short: 'Coaxial monitor',
-        help: 'Tweeter in the middle of the woofer',
-      },
-      'sealed-bookshelf': {
-        name: 'Sealed bookshelf speaker',
-        short: 'Sealed bookshelf',
-        help: 'No port',
-      },
-      'floorstander-front-port': {
-        name: 'Floor-standing, port at the front',
-        short: 'Floor-standing',
-        help: 'Tall, three-way',
-      },
-      'floorstander-rear-port': {
-        name: 'Floor-standing, port at the back',
-        short: 'Floor-standing',
-        help: 'Tall, three-way',
-      },
-    },
+    intro: 'Answer what you know and say where they stand. Everything is optional.',
     describe: { title: 'Your speaker' },
-    more: { summary: 'More details', hint: 'Size, port, seat, toe-in, speaker file' },
+    more: { summary: 'More details', hint: 'Exact sizes, seat, toe-in, speaker file' },
     brand: 'Brand (for your own reference)',
     model: 'Model (for your own reference)',
     size: { width: 'Width', height: 'Height', depth: 'Depth' },
-    port: {
-      label: 'Where is the bass port?',
-      help: 'The opening that lets bass out. Near a wall, a rear port matters more.',
-      front: 'At the front',
-      rear: 'At the back',
-      down: 'At the bottom',
-      side: 'At the side',
-      none: 'There is no port',
-      unknown: 'I don’t know',
-    },
     enclosure: {
       label: 'What kind of box is it?',
       sealed: 'Sealed',
       ported: 'Ported (has a port)',
       'passive-radiator': 'Passive radiator',
       'open-baffle': 'Open baffle',
-      unknown: 'I don’t know',
-    },
-    layout: {
-      label: 'How are the drivers arranged?',
-      help: 'Coaxial means the tweeter sits in the middle of the woofer.',
-      coaxial: 'Coaxial (tweeter in the middle of the woofer)',
-      'two-way': 'Two-way (tweeter and woofer)',
-      'three-way': 'Three-way',
-      'full-range': 'Full-range',
-      other: 'Something else',
       unknown: 'I don’t know',
     },
     controls: {
@@ -572,8 +565,8 @@ export const en = {
       both: { name: 'Both', help: 'I can move the speakers and my seat.' },
     },
     speaker: {
-      title: 'Which speakers are closest to yours?',
-      help: 'Pick the nearest match. It fills in typical sizes.',
+      title: 'Tell us about your speakers',
+      help: 'Answer what you know. “Not sure” is a fine answer.',
     },
     where: {
       title: 'Where are things now?',
@@ -602,6 +595,11 @@ export const en = {
     },
     speakers: 'Speakers',
     bass: 'Bass at that seat',
+    bassPlain: {
+      even: 'Even',
+      fair: 'Fairly even',
+      uneven: 'Uneven',
+    },
     bassWord: {
       even: 'Even',
       fair: 'Fairly even, weakest near {frequency}',
@@ -636,6 +634,34 @@ export const en = {
     nothing: 'No placement fits your limits. Let more things move.',
     zoneCost: 'Within {zone}: {inside}. With more room: {outside}.',
   },
+  found: {
+    label: 'What we found',
+    dead: 'A calm room, with plenty of soft things to soak up sound.',
+    balanced: 'A balanced room: not too echoey, not too dead.',
+    live: 'A lively room: sound bounces around a lot.',
+    note: 'Its deepest resonance is close to a {pitch} {letter}.',
+    veryLow: 'very low',
+    low: 'low',
+    numbers: 'Reverberation {t60} s; deepest resonance {note}, {f}.',
+    letters: 'C,C♯,D,D♯,E,F,F♯,G,G♯,A,A♯,B',
+  },
+  live: {
+    title: 'Live with it',
+    intro:
+      'Give it a few evenings. A quick listen can mislead; after a few days you hear more. Then tell yourself how it feels.',
+    position: 'This position',
+    before: 'The one before',
+    speakers: 'Your speakers, overall',
+    face: { 1: 'Not really', 3: 'It’s fine', 5: 'Love it' },
+    compare: {
+      agree: 'You like this one more, and so does the app.',
+      disagree:
+        'You liked the one before more. The app scores this one higher, but your ears decide: give it a few more evenings, then trust what you hear.',
+      same: 'You like both about the same. In your room, the difference may simply be small.',
+    },
+    local: 'Kept on this device only.',
+    hide: 'Hide',
+  },
   result: {
     title: 'Your result',
     brief: {
@@ -645,6 +671,8 @@ export const en = {
       same: '{now} now. The placement below fine-tunes it.',
     },
     idea: 'Also worth trying',
+    moreTips: 'More in Tips',
+    scores: 'Score now {now}, at its best {best}, out of 1.00.',
     area: {
       even: {
         sofa: 'About the same for everyone on the sofa.',
@@ -669,6 +697,7 @@ export const en = {
   map: {
     dimmed: 'Advised against',
     bestHere: 'Best here: {word}',
+    withScore: '{word} · {score}',
     absolute: 'Absolute scale',
     hidePanel: 'Hide the side panel',
     best: 'Best',
@@ -676,7 +705,8 @@ export const en = {
     before: 'Before',
     showPanel: 'Show the side panel',
     notListening: 'Not a listening position',
-    noSpeakers: 'The speakers can’t go here',
+    notStereo: 'Not a stereo spot',
+    notSeat: 'No seat here',
     label: 'Map',
     hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
     layerLabel: 'Map layer',
@@ -705,23 +735,23 @@ export const en = {
   layer: {
     speakers: {
       name: 'Where the speakers go',
-      what: 'Where the speakers would sound best, with your seat staying where it is. Each spot is where the speaker pair would stand, mirrored about your seat. Brighter is better.',
+      what: 'Where the speakers would sound best, with your seat staying where it is. Each spot is where the speaker pair would stand, mirrored about your seat. The stronger the colour, the better.',
     },
     overall: {
       name: 'Overall',
-      what: 'How good a seat is here, everything counted equally. Brighter is better.',
+      what: 'How good a seat is here, everything counted equally. The stronger the colour, the better.',
     },
     goals: {
       name: 'My goals',
-      what: 'The same, weighted by the goals you chose.',
+      what: 'How good a seat is here, with your speakers where they are. The stronger the colour, the better.',
     },
     bass: {
       name: 'Bass evenness',
-      what: 'How even the bass is at this seat. Dark means boomy or thin bass.',
+      what: 'How even the bass is at this seat. Pale means boomy or thin bass.',
     },
     nulls: {
       name: 'Bass holes',
-      what: 'Whether a bass note nearly vanishes here. Dark means a deep hole.',
+      what: 'Whether a bass note nearly vanishes here. Pale means a deep hole.',
     },
     frontWall: {
       name: 'Wall interference',
@@ -737,7 +767,7 @@ export const en = {
     },
     backWall: {
       name: 'Back wall',
-      what: 'Dark means too close to the back wall.',
+      what: 'Pale means too close to the back wall.',
     },
   },
   evidence: {
@@ -839,9 +869,9 @@ export const en = {
     moveHere: 'Move my seat here',
     speakersTitle: 'Speakers here',
     speakersHere: 'Speakers here: {word}',
-    speakersNot: 'The speakers cannot stand here.',
-    speakersFlagged:
-      'Advised against: not a good stereo setup, or on furniture. The score is the bass only where the seat is not in front of the speakers.',
+    speakersNot:
+      'Not a stereo spot: here the speakers would be too close to you, beside or behind you, or would not fit.',
+    speakersFlagged: 'Advised against: furniture is in the way here.',
     moveSpeakers: 'Move the speakers here',
     close: 'Close',
     notAllowed: 'The seat cannot go here: too close to a speaker, or something is in the way.',
@@ -1035,6 +1065,10 @@ export const en = {
       passiveSpeaker:
         'Another speaker ({object}) is {distance} from {speakerFrom}. It can resonate along: try covering or moving it, and listen.',
     },
+    G11: {
+      notInFront:
+        'The speakers are beside or behind you, so this is not a stereo setup. Put them in front of you, facing you.',
+    },
     H01: {
       overlay:
         'A popular rule of thumb puts the seat 38% into the room: {listenerY} here. Where it comes from is unclear.',
@@ -1163,7 +1197,7 @@ export const en = {
     details: 'Details',
     first: 'If you can only do one thing',
     roomTitle: 'Room treatment',
-    settingsTitle: 'Speaker settings',
+    settingsTitle: 'Your speakers and how you listen',
     none: 'Nothing to suggest for this setup.',
     invest: 'Bigger investment',
     heldBack:
@@ -1180,7 +1214,7 @@ export const en = {
   mode: {
     chip: 'Bass note',
     name: 'Bass note',
-    what: 'Where one bass note is loud or silent in your room, with the speakers as they are. Bright is loud, dark is quiet.',
+    what: 'Where one bass note is loud or silent in your room, with the speakers as they are. Strong colour is loud, pale is quiet.',
     frequency: 'Frequency',
     poorer: 'Quiet',
     better: 'Loud',
@@ -1230,6 +1264,16 @@ export const en = {
         'Your head is {distance} from the back wall. Move the seat forward if you can: it helps more than any treatment.',
       absorber:
         'Your head is {distance} from the back wall and the seat cannot move. Put a thick absorber (at least {thickness}) behind your head.',
+    },
+    C01: {
+      desk: 'At a desk, the desk top reflects sound from the speakers to your ears just after the direct sound, which colours it. Raising the speakers on small stands and aiming them at your ears, or setting them at the back edge of the desk, makes that reflection weaker.',
+    },
+    C02: {
+      quiet:
+        'Your speakers reach down to about {lowFrequencyMinus6dB}; the room’s deepest resonance is at {frequency}, well below that, so it is barely excited. The resonances they do reach are already in the map.',
+    },
+    C03: {
+      bed: 'In bed your ears are near the pillow, lower than when you sit. Lower the speakers or tilt them down so the tweeters point at your head: treble is most even on the speaker’s axis.',
     },
     D01: {
       match:
@@ -1299,6 +1343,16 @@ export const en = {
       absorber:
         'Your head is {distance} from the back wall and the seat cannot move. Something thick and soft behind your head helps.',
     },
+    C01: {
+      desk: 'At a desk, the desk top bounces sound to your ears. Raise the speakers a little and point them at your ears, or set them at the back edge of the desk.',
+    },
+    C02: {
+      quiet:
+        'Your speakers don’t play as low as your room’s deepest boom, so it stays quiet for you: one thing less to worry about. The map already counts the ones they do reach.',
+    },
+    C03: {
+      bed: 'In bed, your ears are lower than when you sit. Lower the speakers or tilt them down a little, so the tweeters point at your pillow.',
+    },
     D01: {
       match:
         'Set the speaker’s wall-distance setting for the {clearance} between its back and the wall. {zone}',
@@ -1363,7 +1417,7 @@ export const en = {
   whyTab: {
     onMap: 'See it on the map',
     onMapHelp:
-      'Each reason has its own map: brighter is better, darker is where that reason hurts.',
+      'Each reason has its own map: the stronger the colour, the better; pale is where that reason hurts.',
     closer: 'Look closer',
   },
   about: {

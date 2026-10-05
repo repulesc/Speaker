@@ -13,7 +13,7 @@ let selection = $state<Selection>({ kind: 'none' });
 let boundary = $state<BoundaryId>('left');
 let view = $state<'top' | 'side'>('top');
 /** A seat layer, or 'speakers': where the speakers would score best, the seat staying put. */
-let layer = $state<LayerId | 'speakers'>('overall');
+let layer = $state<LayerId | 'speakers'>('goals');
 /** The bass note shown by the room-mode explorer (Hz), or null when it is off. */
 let modeFrequency = $state<number | null>(null);
 /** The other setup drawn over the bass chart (Compare), or null. */

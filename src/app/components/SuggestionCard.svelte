@@ -2,11 +2,15 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { formatFrequency, formatLength } from '../../units/format';
   import type { Advice } from '../../engine/types';
-  import { advicePlainText, scoreWord } from '../findings/text';
+  import { advicePlainText, adviceText, scoreNumber, scoreWord } from '../findings/text';
+  import { prefs } from '../prefs.svelte';
+  import { roomFound } from '../findings/roomFacts';
   import { visibleAdvice } from '../findings/visible';
   import { applyCandidate, cabinet } from '../plan/placement';
   import { analysis, showNotice, workspace } from '../session.svelte';
   import { goalOf, type Goal } from '../state/goal';
+  import { liveWithItShown, rememberBefore } from '../listen/liveWithIt';
+  import LiveWithIt from './LiveWithIt.svelte';
   import MoodFace from './MoodFace.svelte';
   import PlacementOptions from './PlacementOptions.svelte';
   import { ui } from '../ui.svelte';
@@ -64,8 +68,8 @@
   });
 
   /**
-   * At most two other ideas: the most useful change to the room, and one about tone (bass or
-   * treble, D02, D03, D07), so the widget answers "what else?" without becoming a list.
+   * One other idea at most (owner feedback after V6: the result repeated the Tips tab): the most
+   * useful change to the room, else one about tone (D02, D03, D07). The rest lives on Tips.
    */
   const TONE = new Set(['D02', 'D03', 'D07']);
   const treatment = $derived(
@@ -76,7 +80,7 @@
     const { settings } = ok.advice;
     const other = treatment[0] ?? settings.find((a) => !TONE.has(a.ruleId));
     const tone = settings.find((a) => TONE.has(a.ruleId));
-    return [other, tone].filter((a): a is Advice => a !== undefined);
+    return [other ?? tone].filter((a): a is Advice => a !== undefined);
   });
 
   /**
@@ -132,7 +136,11 @@
     const placement = $state.snapshot(shown);
     const now = $state.snapshot(project.variants.find((v) => v.id === project.activeVariantId)!);
     ui.showChange({ speakers: now.speakers, listener: now.listener.ears });
-    workspace.edit((p) => void applyCandidate(p, placement));
+    const scoreBefore = ok?.current.score ?? 0;
+    workspace.edit((p) => {
+      rememberBefore(p, scoreBefore);
+      applyCandidate(p, placement);
+    });
     ui.candidate = null;
     showNotice('success', i18n.t('suggest.applied'), { undo: true });
   }
@@ -189,43 +197,66 @@
   });
 </script>
 
-<section class="suggest" aria-labelledby="result-title">
-  <h2 id="result-title">
-    {i18n.t('result.title')}
-    {#if ok}
-      <MoodFace
-        word={scoreWord(ok.current.score)}
-        label={i18n.t('suggest.mood', {
-          word: i18n.t(`results.score.${scoreWord(ok.current.score)}`),
-        })}
-      />
-    {/if}
-    {#if analysis.busy}<span class="spinner" role="status" aria-label={i18n.t('analysis.updating')}
-      ></span>{/if}
-  </h2>
+<div class="result">
+  <section class="card verdict" aria-labelledby="result-title">
+    <h2 id="result-title">
+      {i18n.t('result.title')}
+      {#if ok}
+        <MoodFace
+          word={scoreWord(ok.current.score)}
+          label={i18n.t('suggest.mood', {
+            word: i18n.t(`results.score.${scoreWord(ok.current.score)}`),
+          })}
+        />
+      {/if}
+      {#if analysis.busy}<span
+          class="spinner"
+          role="status"
+          aria-label={i18n.t('analysis.updating')}
+        ></span>{/if}
+    </h2>
 
-  {#if !analysis.result}
-    <p class="caption" role="status">{i18n.t('results.calculating')}</p>
-  {:else if !ok}
-    <p class="caption">{i18n.t('results.needRoom')}</p>
-  {:else}
-    <p class="brief" data-share="verdict" data-testid="brief">{brief}</p>
-    {#if areaLine}<p class="caption area" data-testid="area">{areaLine}</p>{/if}
-    <PlacementOptions parts={['moves']} plain />
-    <span class="visually-hidden" data-testid="score-current"
-      >{i18n.t(`results.score.${scoreWord(ok.current.score)}`)}</span
-    >
-    {#if spots[0]}
-      <span class="visually-hidden" data-testid="score-best"
-        >{i18n.t(`results.score.${scoreWord(spots[0].score)}`)}</span
-      >
-    {/if}
-
-    {#if allFixed}
-      <p class="caption">{i18n.t('why.allFixed')}</p>
+    {#if !analysis.result}
+      <p class="caption" role="status">{i18n.t('results.calculating')}</p>
+    {:else if !ok}
+      <p class="caption">{i18n.t('results.needRoom')}</p>
     {:else}
-      <section class="try" aria-labelledby="suggest-title">
-        <h3 id="suggest-title">{i18n.t('suggest.title')}</h3>
+      <p class="brief" data-share="verdict" data-testid="brief">{brief}</p>
+      {#if areaLine}<p class="caption area" data-testid="area">{areaLine}</p>{/if}
+      <p class="found" data-testid="found">
+        <span class="found-label">{i18n.t('found.label')}</span>
+        {roomFound(ok, prefs.numbers)}
+      </p>
+      {#if prefs.numbers}
+        <p class="caption" data-testid="score-numbers">
+          {i18n.t('result.scores', {
+            now: scoreNumber(ok.current.score, i18n.locale),
+            best: scoreNumber(Math.max(ok.current.score, spots[0]?.score ?? 0), i18n.locale),
+          })}
+        </p>
+      {/if}
+      <PlacementOptions parts={['moves']} plain />
+      <span class="visually-hidden" data-testid="score-current"
+        >{i18n.t(`results.score.${scoreWord(ok.current.score)}`)}</span
+      >
+      {#if spots[0]}
+        <span class="visually-hidden" data-testid="score-best"
+          >{i18n.t(`results.score.${scoreWord(spots[0].score)}`)}</span
+        >
+      {/if}
+    {/if}
+  </section>
+
+  {#if ok && liveWithItShown(project)}
+    <LiveWithIt scoreNow={ok.current.score} />
+  {/if}
+
+  {#if ok}
+    {#if allFixed}
+      <p class="card caption">{i18n.t('why.allFixed')}</p>
+    {:else}
+      <section class="card" aria-labelledby="suggest-title">
+        <h3 id="suggest-title" class="card-title">{i18n.t('suggest.title')}</h3>
         {#if !shown}
           <p class="caption">{i18n.t('suggest.nothing')}</p>
         {:else}
@@ -259,9 +290,11 @@
                 <dd class="bass">
                   <button type="button" class="spark" onclick={() => (ui.step = 'bass')}>
                     <span>
-                      {i18n.t(`suggest.bassWord.${bass.word}`, {
-                        frequency: formatFrequency(bass.worst.f, i18n.locale, true),
-                      })}
+                      {prefs.numbers
+                        ? i18n.t(`suggest.bassWord.${bass.word}`, {
+                            frequency: formatFrequency(bass.worst.f, i18n.locale, true),
+                          })
+                        : i18n.t(`suggest.bassPlain.${bass.word}`)}
                     </span>
                     <svg width={SPARK_W} height={SPARK_H} aria-hidden="true">
                       <line x1="0" x2={SPARK_W} y1={SPARK_H / 2} y2={SPARK_H / 2} class="mid" />
@@ -286,7 +319,7 @@
             </p>
           {/if}
 
-          <div class="actions">
+          <div class="card-actions actions">
             <button type="button" class="btn primary" onclick={apply}
               >{i18n.t('suggest.apply')}</button
             >
@@ -315,25 +348,29 @@
     {/if}
 
     {#if picks.length}
-      <section class="try" aria-labelledby="idea-title" data-testid="idea">
-        <h3 id="idea-title">{i18n.t('result.idea')}</h3>
+      <section class="card" aria-labelledby="idea-title" data-testid="idea">
+        <h3 id="idea-title" class="card-title">{i18n.t('result.idea')}</h3>
         {#each picks as idea (idea.messageKey)}
-          <div class="idea-item">
-            <p class="idea">{advicePlainText(idea, system)}</p>
-          </div>
+          <p class="idea">
+            {prefs.numbers ? adviceText(idea, system) : advicePlainText(idea, system)}
+          </p>
         {/each}
+        <button type="button" class="card-link" onclick={() => (ui.tab = 'tips')}
+          >{i18n.t('result.moreTips')} ›</button
+        >
       </section>
     {/if}
   {/if}
-</section>
+</div>
 
 <style>
-  .suggest {
+  .result {
     display: grid;
-    gap: 16px;
-    padding: 20px 16px 0;
-    border-radius: var(--radius-md);
-    background: var(--surface);
+    gap: 12px;
+  }
+  .verdict {
+    gap: 14px;
+    padding-top: 18px;
   }
   .answer {
     display: grid;
@@ -428,9 +465,7 @@
     font-size: var(--text-sm);
   }
   .actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-wrap: nowrap;
   }
   .actions .primary {
     flex: 1;
@@ -442,6 +477,20 @@
   .area {
     margin: -8px 0 0;
   }
+  /* What we found: a quiet line about the room itself, apart from the verdict. */
+  .found {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+  .found-label {
+    display: block;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
   /* Three text styles only (owner feedback): the title, the answer in body text (the brief in
      bold), and quiet captions for the numbers. */
   .brief {
@@ -450,25 +499,9 @@
     font-weight: 600;
     line-height: 1.45;
   }
-  /* Each thing to try is its own block, with a quiet rule above it. */
-  .try {
-    display: grid;
-    gap: 12px;
-    padding-top: 14px;
-    border-top: 1px solid var(--grid);
-  }
-  h3 {
-    margin: 0;
-    font-size: var(--text-md);
-    font-weight: 600;
-  }
   .idea {
     margin: 0;
     font-size: var(--text-md);
     line-height: 1.45;
-  }
-  .idea-item {
-    display: grid;
-    gap: 4px;
   }
 </style>
