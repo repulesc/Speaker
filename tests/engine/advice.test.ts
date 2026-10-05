@@ -36,6 +36,39 @@ describe('every piece of advice', () => {
   });
 });
 
+describe('effort (docs/ROADMAP_V5.md, V5.1)', () => {
+  it('free or cheap things can be tried today; panels and traps are an investment', () => {
+    const effortOf = (list: Advice[], key: string) =>
+      list.find((a) => a.messageKey === `advice.${key}`)?.effort;
+    const precise = makeProject();
+    precise.goals.weights = { 'precise-imaging': 2 };
+    precise.constraints.speakersFixed = true;
+    precise.constraints.listenerFixed = true;
+    precise.variants[0]!.listener.ears.y = 4.8;
+    const t = adviceFor(precise).treatment;
+    expect(effortOf(t, 'T01.absorb')).toBe('invest');
+    expect(effortOf(t, 'T03.thickPanel')).toBe('invest');
+    expect(effortOf(t, 'T06.absorber')).toBe('invest');
+    expect(effortOf(t, 'T02.rug')).toBe('cheap');
+    const plain = adviceFor(makeProject()).treatment;
+    expect(effortOf(plain, 'T01.experiment')).toBe('free');
+    expect(effortOf(plain, 'T03.moveFirst')).toBe('free');
+    const live = makeProject();
+    live.variants[0]!.busyness = estimated('bare');
+    expect(effortOf(adviceFor(live).treatment, 'T05.soften')).toBe('cheap');
+    expect(effortOf(adviceFor(busyRoom()).treatment, 'T05.liven')).toBe('free');
+  });
+
+  it('every piece of advice says what it takes, and settings are never an investment', () => {
+    for (const p of [makeProject(), busyRoom()]) {
+      const { treatment, settings } = adviceFor(p);
+      for (const a of [...treatment, ...settings])
+        expect(['free', 'cheap', 'invest']).toContain(a.effort);
+      expect(settings.every((a) => a.effort === 'free')).toBe(true);
+    }
+  });
+});
+
 describe('treatment', () => {
   it('T01: side reflections follow the goals (absorb for imaging, leave for width)', () => {
     const precise = makeProject();

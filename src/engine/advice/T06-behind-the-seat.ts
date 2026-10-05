@@ -19,7 +19,7 @@ export const T06: AdviceRule = {
     const priority = backWall.severity === 'red-flag' ? 0.9 : 0.6;
     return [
       ctx.project.constraints.listenerFixed
-        ? makeAdvice(T06, 'absorber', { priority, effect: 'moderate', params })
+        ? makeAdvice(T06, 'absorber', { priority, effect: 'moderate', effort: 'invest', params })
         : makeAdvice(T06, 'moveFirst', { priority, effect: 'large', params }),
     ];
   },

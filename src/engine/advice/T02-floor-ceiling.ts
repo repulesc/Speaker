@@ -19,8 +19,18 @@ export const T02: AdviceRule = {
       .filter((r) => r.boundary === 'floor' || r.boundary === 'ceiling')
       .map((r) =>
         r.boundary === 'floor'
-          ? makeAdvice(T02, 'rug', { priority: 0.5, effect: 'moderate', location: r.point })
-          : makeAdvice(T02, 'ceilingPanel', { priority: 0.3, effect: 'small', location: r.point }),
+          ? makeAdvice(T02, 'rug', {
+              priority: 0.5,
+              effect: 'moderate',
+              effort: 'cheap',
+              location: r.point,
+            })
+          : makeAdvice(T02, 'ceilingPanel', {
+              priority: 0.3,
+              effect: 'small',
+              effort: 'invest',
+              location: r.point,
+            }),
       );
   },
 };

@@ -203,6 +203,33 @@ test('Hungarian: findings and the map speak Hungarian, with no keys leaking', as
   expect(body).not.toMatch(/finding\.[A-Z]\d\d|\{\w+\}/);
 });
 
+test('panels and bass traps stay out of sight until you say you are ready to invest', async ({
+  page,
+}) => {
+  await withResults(page);
+  await goStep(page, 'Goals');
+  await page
+    .getByRole('radiogroup', { name: 'Precise imaging' })
+    .getByRole('radio', { name: 'Important' })
+    .check({ force: true });
+  const heavy = /absorb|panel|bass traps|absorber/i;
+  await goHome(page);
+  expect(await page.getByTestId('idea').innerText()).not.toMatch(heavy);
+  await openSection(page, 'Improve the room');
+  expect(await page.locator('#panel').innerText()).not.toMatch(/porous panel|in the corners/i);
+  await expect(page.getByTestId('held-back')).toContainText('bigger options');
+  // The hint opens the settings, where the box is.
+  await page.getByRole('button', { name: 'Turn it on' }).click();
+  await page.getByRole('checkbox', { name: /ready to invest/ }).check();
+  expect((await savedProject(page)).constraints.treatmentReady).toBe(true);
+  await openSection(page, 'Improve the room');
+  await expect(page.getByTestId('held-back')).toHaveCount(0);
+  await expect(page.getByText('Bigger investment').first()).toBeVisible();
+  await openSettings(page);
+  await page.getByRole('checkbox', { name: /ready to invest/ }).uncheck();
+  expect((await savedProject(page)).constraints.treatmentReady).toBeUndefined();
+});
+
 test('the Treat tab lists advice in order, with no raw keys', async ({ page }) => {
   await withResults(page);
   await openSection(page, 'Improve the room');

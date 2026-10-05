@@ -49,6 +49,7 @@ export const hu: Messages = {
   menu: {
     image: 'Megosztás képként',
     label: 'Menü',
+    support: 'A projekt támogatása',
     undo: 'Visszavonás',
     redo: 'Újra',
     share: 'Megosztási link',
@@ -598,6 +599,10 @@ export const hu: Messages = {
       both: 'Mindkettőt',
       speakers: 'Hangfalakat',
       seat: 'Ülőhelyet',
+    },
+    ready: {
+      label: 'Készen állok az akusztikai kezelésre befektetni',
+      help: 'A panelek és basszuscsapdák is megjelennek. Kikapcsolva: csak az, amit ma ki tudsz próbálni.',
     },
     place: {
       label: 'Honnan hallgatod',
@@ -1178,6 +1183,10 @@ export const hu: Messages = {
     roomTitle: 'Hangtechnikai kezelés',
     settingsTitle: 'A hangfal beállításai',
     none: 'Ehhez az elrendezéshez nincs javaslatunk.',
+    invest: 'Nagyobb befektetés',
+    heldBack:
+      'Nagyobb megoldások is vannak (panelek, basszuscsapdák). Pénzbe és időbe kerülnek, ezért csak akkor jelennek meg, ha jelzed, hogy készen állsz rájuk.',
+    openSettings: 'Bekapcsolom',
     noSettings: 'Ehhez az elrendezéshez nincs mit változtatni a hangfalon.',
     onMap: 'A térképen jelölve ({n}).',
     effect: {
@@ -1298,5 +1307,6 @@ export const hu: Messages = {
     body: 'Az alkalmazás bevett teremakusztikai ismeretekkel javasol hangfal- és ülőhelyet, és megmondja, mennyire biztos a dolgában. Iránymutatás, nem garancia.',
     sources:
       'Minden szabály és a hozzá tartozó források a projekt szabálykatalógusában találhatók.',
+    support: 'A projekt támogatása (új lapon nyílik meg)',
   },
 };

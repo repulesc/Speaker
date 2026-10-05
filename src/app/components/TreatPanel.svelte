@@ -2,11 +2,16 @@
   import type { Advice } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { adviceText } from '../findings/text';
+  import { heldBack, visibleAdvice } from '../findings/visible';
   import { analysis, workspace } from '../session.svelte';
+  import { ui } from '../ui.svelte';
 
   const result = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
   const system = $derived(workspace.project.units);
-  const treatment = $derived(result?.advice.treatment ?? []);
+  const ready = $derived(workspace.project.constraints.treatmentReady);
+  const all = $derived(result?.advice.treatment ?? []);
+  const treatment = $derived(visibleAdvice(all, ready));
+  const held = $derived(heldBack(all, ready));
   const settings = $derived(result?.advice.settings ?? []);
 
   const LEVEL_ICON = { physics: '●', guideline: '◆', heuristic: '▲', subjective: '◇' } as const;
@@ -20,7 +25,11 @@
   <article class="card" class:first>
     <p class="meta">
       <span>{LEVEL_ICON[a.level]} {i18n.t(`evidence.${a.level}`)}</span>
-      <span>{i18n.t(`treat.effect.${a.effect}`)}</span>
+      <span>
+        {a.effort === 'invest' ? `${i18n.t('treat.invest')} · ` : ''}{i18n.t(
+          `treat.effect.${a.effect}`,
+        )}
+      </span>
     </p>
     <p class="text">{adviceText(a, system)}</p>
     {#if a.location}<p class="meta">{i18n.t('treat.onMap', { n: marker(a) })}</p>{/if}
@@ -42,6 +51,19 @@
       {:else}
         <p class="card">{i18n.t('treat.none')}</p>
       {/each}
+      {#if held}
+        <p class="card hint" data-testid="held-back">
+          {i18n.t('treat.heldBack')}
+          <button
+            type="button"
+            class="link"
+            onclick={() => {
+              ui.settingsOpen = true;
+              ui.step = 'results';
+            }}>{i18n.t('treat.openSettings')}</button
+          >
+        </p>
+      {/if}
     </section>
 
     <section aria-labelledby="treat-settings">
@@ -92,6 +114,21 @@
     margin: 0;
     color: var(--ink-muted);
     font-size: var(--text-sm);
+  }
+  .hint {
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+  }
+  .link {
+    display: block;
+    min-height: 44px;
+    margin-top: 4px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    cursor: pointer;
   }
   .text {
     margin: 0;

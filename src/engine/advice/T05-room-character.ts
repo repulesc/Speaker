@@ -30,8 +30,8 @@ export const T05: AdviceRule = {
     const params = { t60: ctx.t60.mid, after, absorption: Math.abs(change) };
     return [
       character === 'live'
-        ? makeAdvice(T05, 'soften', { priority: 0.6, effect: 'moderate', params })
-        : makeAdvice(T05, 'liven', { priority: 0.3, effect: 'moderate', params }),
+        ? makeAdvice(T05, 'soften', { priority: 0.6, effect: 'moderate', effort: 'cheap', params })
+        : makeAdvice(T05, 'liven', { priority: 0.3, effect: 'moderate', effort: 'free', params }),
     ];
   },
 };

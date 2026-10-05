@@ -213,6 +213,11 @@ export interface Constraints {
   /** "room": sit at least 1.5 m away (default); "near": a desk or near-field setup. */
   listeningDistance?: 'room' | 'near';
   /**
+   * The user is ready to buy and fit acoustic treatment (panels, bass traps). Absent: only free or
+   * cheap ideas are shown (docs/ROADMAP_V5.md, V5.1).
+   */
+  treatmentReady?: boolean;
+  /**
    * How far each speaker may move from where it stands now, in metres (a circle around each).
    * Absent: anywhere within the other limits (owner feedback: suggestions in the middle of the
    * room are unrealistic, docs/DESIGN_BRIEF_V4.md).
@@ -413,6 +418,8 @@ export interface PointExplanation {
   bassResponse: { f: number[]; dB: number[] };
 }
 
+/** free: move or change something; cheap: a rug, curtains; invest: panels, bass traps. */
+export type Effort = 'free' | 'cheap' | 'invest';
 export type EffectSize = 'small' | 'moderate' | 'large';
 
 /**
@@ -430,6 +437,8 @@ export interface Advice {
   priority: number;
   /** Direction is in the message; this is the rough size, never a promise. */
   effect: EffectSize;
+  /** What it takes: nothing to buy, ordinary household items, or buying and fitting treatment. */
+  effort: Effort;
   location?: Vec3;
 }
 

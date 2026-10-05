@@ -2,6 +2,7 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { LOCALES } from '../../i18n/translate';
   import type { Locale } from '../../i18n/types';
+  import { SUPPORT_URL } from '../config';
   import { prefs, type ThemePref } from '../prefs.svelte';
   import { projectLabel, workspace } from '../session.svelte';
   import Dropdown from './Dropdown.svelte';
@@ -123,6 +124,13 @@
             </button>
           </li>
         {/each}
+        {#if SUPPORT_URL}
+          <li>
+            <a class="row" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer"
+              >{i18n.t('menu.support')}</a
+            >
+          </li>
+        {/if}
       </ul>
       <ul class="list">
         <li>

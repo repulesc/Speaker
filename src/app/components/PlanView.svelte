@@ -3,6 +3,7 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { scoreWord } from '../findings/text';
+  import { visibleAdvice } from '../findings/visible';
   import {
     ABSOLUTE,
     paintField,
@@ -90,7 +91,7 @@
   /** Where the treatment advice points (Treat tab): numbered rings, as listed in the panel. */
   const adviceRings = $derived(
     ui.step === 'treat' && result
-      ? result.advice.treatment
+      ? visibleAdvice(result.advice.treatment, project.constraints.treatmentReady)
           .filter((a) => a.location)
           .map((a, i) => ({ n: i + 1, at: a.location! }))
       : [],

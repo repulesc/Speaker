@@ -23,7 +23,12 @@ export const T03: AdviceRule = {
     const fixed = ctx.project.constraints.speakersFixed;
     return [
       fixed
-        ? makeAdvice(T03, 'thickPanel', { priority: 0.3, effect: 'small', params })
+        ? makeAdvice(T03, 'thickPanel', {
+            priority: 0.3,
+            effect: 'small',
+            effort: 'invest',
+            params,
+          })
         : makeAdvice(T03, 'moveFirst', { priority: 0.35, effect: 'small', params }),
     ];
   },

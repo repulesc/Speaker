@@ -24,6 +24,7 @@ export const T01: AdviceRule = {
       .map((r): Advice =>
         makeAdvice(T01, precise && !wide ? 'absorb' : 'experiment', {
           priority: precise && !wide ? 0.7 : 0.4,
+          effort: precise && !wide ? 'invest' : 'free',
           effect: 'moderate',
           params: { speaker: r.speaker, boundary: r.boundary, thickness: 0.05 },
           location: r.point,

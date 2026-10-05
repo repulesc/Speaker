@@ -5,3 +5,9 @@
  */
 export const APP_NAME = 'Nodo';
 export const APP_SHORT_NAME = 'Nodo';
+
+/**
+ * Where "Support this project" goes (a Buy Me a Coffee, Ko-fi or PayPal.me page). Empty: the link
+ * is not shown. A plain link only, never an embedded widget, so the app loads no third-party code.
+ */
+export const SUPPORT_URL: string = '';

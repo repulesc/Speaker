@@ -45,6 +45,7 @@ export const en = {
   menu: {
     image: 'Share as image',
     label: 'Menu',
+    support: 'Support this project',
     undo: 'Undo',
     redo: 'Redo',
     share: 'Share link',
@@ -586,6 +587,10 @@ export const en = {
       both: 'Both',
       speakers: 'Speakers',
       seat: 'Seat',
+    },
+    ready: {
+      label: 'I’m ready to invest in acoustic treatment',
+      help: 'Shows panels and bass traps too. Off: only things you can try today.',
     },
     place: {
       label: 'Where you listen',
@@ -1162,6 +1167,10 @@ export const en = {
     roomTitle: 'Room treatment',
     settingsTitle: 'Speaker settings',
     none: 'Nothing to suggest for this setup.',
+    invest: 'Bigger investment',
+    heldBack:
+      'There are bigger options too (panels, bass traps). They need money and time, so they only show once you say you are ready.',
+    openSettings: 'Turn it on',
     noSettings: 'Nothing to change on the speaker for this setup.',
     onMap: 'Marked on the map ({n}).',
     effect: {
@@ -1280,5 +1289,6 @@ export const en = {
     title: 'About',
     body: 'This app uses established room acoustics to suggest speaker and seat positions, and tells you how sure it is. It is guidance, not a guarantee.',
     sources: 'Every rule and its sources are documented in the project’s rule catalogue.',
+    support: 'Support this project (opens in a new tab)',
   },
 } as const;
