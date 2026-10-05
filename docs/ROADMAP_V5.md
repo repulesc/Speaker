@@ -40,7 +40,7 @@ speakers sit on that map. The "you are here" marker (section 1) fixes the unders
    fill the whole room, hatch spots that cannot hold a seat (furniture, too close to a wall). Keep
    the relative scale and the Absolute switch.
 
-### B. Result widget (the main redesign)
+### B. Result widget (the main redesign) — DONE
 Replaces the "Results" submenus. Top of the side panel, always visible:
 1. One sentence verdict with the mood face and score word ("Good. One thing could be better: ...").
 2. **One or two suggestions**, each a single card with a before/after preview and an Apply button

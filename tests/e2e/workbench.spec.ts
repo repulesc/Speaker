@@ -3,11 +3,13 @@ import {
   fillRoom,
   goHome,
   goStep,
+  mapChoice,
   openApp,
   openMenu,
   openSection,
   openWhy,
   savedProject,
+  setMoves,
 } from './helpers';
 
 test.use({ locale: 'en-GB' });
@@ -23,13 +25,17 @@ async function withResults(page: Page) {
 test('the map shows a heatmap, layers that say what they mean, and a legend', async ({ page }) => {
   await withResults(page);
   await expect(page.locator('canvas.heat')).toBeVisible();
-  const layer = page.getByLabel('Map layer');
-  await expect(layer.locator('option')).toHaveCount(9); // eight seat layers + the speakers
-  await layer.selectOption({ label: 'Bass holes' });
+  // Two big choices; the layers that explain a seat sit behind "Why?" (docs/ROADMAP_V5.md).
+  await mapChoice(page, 'Seat').check({ force: true });
+  await expect(page.getByRole('button', { name: 'Bass holes' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Why?' }).click();
+  const reasons = page.getByRole('group', { name: 'What makes a seat good or poor' });
+  await expect(reasons.getByRole('button')).toHaveCount(6);
+  await reasons.getByRole('button', { name: 'Bass holes' }).click();
   await expect(page.getByText('Whether a bass note nearly vanishes here')).toBeVisible();
   await expect(page.getByText('Physics', { exact: false }).first()).toBeVisible();
   await expect(page.getByText('Poorer')).toBeVisible();
-  await layer.selectOption({ label: 'Overall' });
+  await reasons.getByRole('button', { name: 'Bass holes' }).click(); // back to the seat map
   await expect(page.getByTestId('best-here')).toHaveText(/^Best here: (Poor|Fair|Good|Very good)$/);
 });
 
@@ -62,8 +68,7 @@ test('best placement: shown first, other options, apply, and undo brings the set
 }) => {
   await withResults(page);
   // Both move (the default is speakers only, with the seat fixed).
-  await page.getByRole('button', { name: /^Options/ }).click();
-  await page.getByRole('radio', { name: 'Both' }).check({ force: true });
+  await setMoves(page, 'Both');
   const before = (await savedProject(page)).variants[0].listener.ears.y;
   const answer = page.getByTestId('suggestion');
   // Wait for the new answer: the suggested seat is no longer the current one.
@@ -95,8 +100,7 @@ test('best placement: shown first, other options, apply, and undo brings the set
 
 test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({ page }) => {
   await withResults(page);
-  await page.getByRole('button', { name: /^Options/ }).click();
-  await page.getByRole('radio', { name: 'Speakers' }).check({ force: true });
+  await setMoves(page, 'Speakers');
   await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
   const project = await savedProject(page);
   expect(project.constraints.listenerFixed).toBe(true);
@@ -108,7 +112,7 @@ test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({
 
 test('the probe: click the map to see why, then move the seat there', async ({ page }) => {
   await withResults(page);
-  await page.getByLabel('Map layer').selectOption({ label: 'Overall' }); // the seat map
+  await mapChoice(page, 'Seat').check({ force: true }); // the seat map
   const plan = page.getByRole('group', { name: 'Top view of the room' });
   const box = (await plan.boundingBox())!;
   const before = (await savedProject(page)).variants[0].listener.ears;
@@ -126,7 +130,7 @@ test('the probe: click the map to see why, then move the seat there', async ({ p
 
 test('on the speaker map, a click offers to move the speakers there', async ({ page }) => {
   await withResults(page);
-  await expect(page.getByLabel('Map layer')).toHaveValue('speakers'); // speakers only: the default
+  await expect(mapChoice(page, 'Speakers')).toBeChecked(); // speakers only: the default
   const plan = page.getByRole('group', { name: 'Top view of the room' });
   const box = (await plan.boundingBox())!;
   const before = (await savedProject(page)).variants[0].speakers.left.base;
@@ -275,7 +279,7 @@ test('the speaker layer shows where the speakers would sound best, mirrored abou
   page,
 }) => {
   await withResults(page);
-  await page.getByLabel('Map layer').selectOption({ label: 'Where the speakers go' });
+  await mapChoice(page, 'Speakers').check({ force: true });
   await expect(page.getByText(/Where the speakers would sound best/)).toBeVisible();
   const canvas = page.locator('canvas.heat');
   await expect(canvas).toBeVisible();

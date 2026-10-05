@@ -3,7 +3,15 @@ import { readFileSync } from 'node:fs';
 import { encodeShare } from '../../src/app/state/share';
 import { messageKeys, MESSAGES, translate } from '../../src/i18n/translate';
 import { makeProject } from '../fixtures/projects';
-import { fillRoom, goHome, openApp, openMenu, openSection, savedProject } from './helpers';
+import {
+  fillRoom,
+  goHome,
+  mapChoice,
+  openApp,
+  openMenu,
+  openSection,
+  savedProject,
+} from './helpers';
 
 // Metric by default, English UI.
 test.use({ locale: 'en-GB' });
@@ -185,7 +193,7 @@ test('journey 10 — keyboard only: skip to the panel, type, and open the result
   const done = page.getByRole('button', { name: 'Done' });
   await done.focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Best placement' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your result' })).toBeVisible();
 });
 
 test('undo and redo with the keyboard', async ({ page }) => {
@@ -271,5 +279,5 @@ test('first run: the survey asks four questions, then shows the answer', async (
   expect(project.variants[0].listener.ears.y).toBeCloseTo(3.2, 6);
   expect(project.speaker.driverLayout.value).toBe('coaxial');
   await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
-  await expect(page.getByLabel('Map layer')).toHaveValue('speakers'); // the map follows the goal
+  await expect(mapChoice(page, 'Speakers')).toBeChecked(); // the map follows the goal
 });

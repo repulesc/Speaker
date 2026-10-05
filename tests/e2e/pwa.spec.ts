@@ -37,7 +37,7 @@ test('after the first visit the app opens offline, with the saved project', asyn
 
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Best placement' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your result' })).toBeVisible();
   await openSection(page, 'Room');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00 m');
   // The engine runs in a worker that must also come from the cache.

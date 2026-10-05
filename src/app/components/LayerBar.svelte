@@ -6,14 +6,33 @@
   import ModeBar from './ModeBar.svelte';
   import VariantTabs from './VariantTabs.svelte';
   import { viewport } from '../viewport.svelte';
+  import { workspace } from '../session.svelte';
 
-  /** One quiet toolbar over the room: setups, what the map shows, bass note, side view. */
+  /**
+   * One quiet toolbar over the room: setups, what the map shows, bass note, side view. The map is
+   * one of two big choices, where the speakers go or where to sit; the layers that explain a seat
+   * sit behind "Why?" (owner decision, docs/ROADMAP_V5.md).
+   */
   const level = (id: LayerId | 'speakers') =>
     id === 'speakers' ? 'combined' : LAYERS.find((l) => l.id === id)!.level;
   const shape = (l: string) =>
     l === 'physics' ? '●' : l === 'guideline' ? '◆' : l === 'heuristic' ? '▲' : '◇';
   const active = $derived(ui.layer);
   const modeOn = $derived(ui.modeFrequency !== null);
+  /** The seat map: weighted by the user's goals once there are any. */
+  const seatMain = $derived<LayerId>(
+    Object.values(workspace.project.goals.weights).some((w) => w) ? 'goals' : 'overall',
+  );
+  const map = $derived(active === 'speakers' ? 'speakers' : 'seat');
+  /** The seat layers that explain one concern each. */
+  const REASONS = LAYERS.filter((l) => l.level !== 'combined').map((l) => l.id);
+  const reason = $derived(REASONS.includes(active as LayerId));
+  let whyOpen = $state(false);
+  const showWhy = $derived(map === 'seat' && (whyOpen || reason));
+  function pick(value: 'speakers' | 'seat') {
+    ui.layer = value === 'speakers' ? 'speakers' : seatMain;
+    if (value === 'speakers') whyOpen = false;
+  }
 </script>
 
 <div class="bar">
@@ -42,19 +61,39 @@
   {/if}
   <VariantTabs />
   <div class="tools">
-    <label class="visually-hidden" for="map-layer">{i18n.t('map.layerLabel')}</label>
-    <select
-      id="map-layer"
-      class="select"
-      value={active}
-      disabled={modeOn}
-      onchange={(e) => (ui.layer = e.currentTarget.value as LayerId | 'speakers')}
+    <div
+      class="seg pick"
+      role="radiogroup"
+      aria-label={i18n.t('map.layerLabel')}
+      class:disabled={modeOn}
     >
-      {#each LAYERS as layer (layer.id)}
-        <option value={layer.id}>{i18n.t(`layer.${layer.id}.name`)}</option>
+      {#each ['speakers', 'seat'] as const as m (m)}
+        <label>
+          <input
+            type="radio"
+            name="map-pick"
+            value={m}
+            checked={map === m}
+            disabled={modeOn}
+            onchange={() => pick(m)}
+          />
+          <span>{i18n.t(`map.pick.${m}`)}</span>
+        </label>
       {/each}
-      <option value="speakers">{i18n.t('layer.speakers.name')}</option>
-    </select>
+    </div>
+    {#if map === 'seat'}
+      <button
+        type="button"
+        class="toggle"
+        aria-expanded={showWhy}
+        aria-controls="map-reasons"
+        disabled={modeOn}
+        onclick={() => {
+          whyOpen = !showWhy;
+          if (!whyOpen && reason) ui.layer = seatMain;
+        }}>{i18n.t('map.why')}</button
+      >
+    {/if}
     <button
       type="button"
       class="toggle"
@@ -69,6 +108,20 @@
     >
   </div>
 </div>
+{#if showWhy && !modeOn}
+  <div class="reasons" id="map-reasons" role="group" aria-label={i18n.t('map.whyLabel')}>
+    {#each REASONS as id (id)}
+      <button
+        type="button"
+        class="chip"
+        aria-pressed={active === id}
+        onclick={() => (ui.layer = active === id ? seatMain : id)}
+      >
+        {i18n.t(`layer.${id}.name`)}
+      </button>
+    {/each}
+  </div>
+{/if}
 {#if modeOn}
   <ModeBar />
 {:else}
@@ -111,24 +164,40 @@
     align-items: center;
     gap: 6px;
   }
-  .select {
-    min-height: 40px;
-    max-width: 14rem;
-    padding: 0 30px 0 12px;
-    border: 0;
-    border-radius: 9px;
-    background: var(--fill)
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.5'/%3E%3C/svg%3E")
-      no-repeat right 12px center;
+  .pick label {
+    min-width: 5.5rem;
+    padding: 0 14px;
+    font-weight: 600;
+  }
+  .pick.disabled {
+    opacity: 0.5;
+  }
+  .toggle:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .reasons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 8px 16px 0;
+  }
+  .chip {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--grid-strong);
+    border-radius: 999px;
+    background: var(--surface);
     color: var(--ink);
     font: inherit;
     font-size: var(--text-sm);
-    font-weight: 500;
-    appearance: none;
     cursor: pointer;
   }
-  .select:disabled {
-    opacity: 0.5;
+  .chip[aria-pressed='true'] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--surface);
   }
   .toggle {
     min-height: 40px;
@@ -165,7 +234,7 @@
     color: var(--ink);
   }
   @media (pointer: coarse), (max-width: 1023px) {
-    .select,
+    .chip,
     .toggle {
       min-height: 44px;
     }
@@ -179,8 +248,8 @@
     .info {
       display: none;
     }
-    .select {
-      max-width: 9rem;
+    .pick label {
+      min-width: 0;
     }
   }
 </style>

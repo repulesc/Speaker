@@ -136,6 +136,8 @@
   const nowWord = $derived(
     result && variant && seat ? scoreWord(speakerGrid ? result.current.score : seatNow) : null,
   );
+  /** Only a placement that really helps is tagged "Best" (else the brief and the map disagree). */
+  const worthMoving = $derived(result?.topActions.some((a) => a.kind === 'move') ?? false);
   const nowAt = $derived.by(() => {
     if (speakerGrid && variant) {
       const { left, right } = variant.speakers;
@@ -759,7 +761,8 @@
               >{LETTERS[shownIndex]}</text
             >
           </g>
-          {#if shownIndex === 0}
+          {#if shownIndex === 0 && worthMoving && !(nowWord && Math.abs(nowAt.x - px(pinAt!.x)) < 80 && Math.abs(nowAt.y - (py(pinAt!.y) - 20)) < 18)}
+            <!-- Left out where it would cover the "Now" label (small maps): the pin still marks it. -->
             <text class="tag" x={px(pinAt!.x)} y={py(pinAt!.y) - 20} text-anchor="middle"
               >{i18n.t('map.best')}</text
             >
@@ -968,7 +971,7 @@
   }
   /* Quiet labels on the map: dark text with a light halo, readable on any colour. */
   .tag {
-    fill: var(--ink);
+    fill: #1d1d1f;
     stroke: #fff;
     stroke-width: 4;
     paint-order: stroke;
