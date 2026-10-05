@@ -36,16 +36,38 @@ the cards and visual polish second.
    (owner decision), but only real candidates are coloured by score.
 5. Reproduce and fix the speaker-progress marker (item 5).
 
-### Phase 2: speaker choice that means something (Sonnet, small engine part checked by Opus)
+### Phase 2: speaker choice that means something (Sonnet; Opus checks the numbers once)
 
-- Replace the five illustrated cards with one **dropdown "What kind of speakers?"** and, below it,
-  only details that change the result: size/height (monitor, bookshelf, tower), port (none, front,
-  back), driver layout (two-way, coaxial, three-way), dispersion (existing choice). Categories map
-  to the existing generic presets (`engine/presets/speakerTypes.ts`); more categories (small and
-  large monitor, tower, floorstander with side port, studio monitor with front port) each need a
-  typical size, a sourced or clearly marked estimate and a test. **No brand or model data from memory**
-  (CLAUDE.md).
-- Same dropdown in the survey screen.
+**Owner decisions (round 2):** speakers behind the seat are simply kept at "Poor" (capped, with the
+warning); every word on screen uses the cautious score. The speaker choice is several dropdowns,
+not picture cards, with the questions the owner listed (kind, size, number of drivers, hi-fi or
+monitor, dispersion) plus what the engine really needs.
+
+**What the engine really uses** (checked in `src/engine`): the cabinet size (it must fit and not hit
+walls), the tweeter height (the ear-height rule G08, the vertical angle), the woofer height (the
+front-wall dip and the floor bounce), how low the bass goes (`f6`) and whether the box is sealed or
+ported (the bass model P09), where the port is and how far from the wall it needs to be (G07),
+coaxial or not (G08 allows a wider vertical angle), whether the speaker is made for corners (G06),
+and the dispersion (only the listening-distance advice). Nothing else changes the result, so
+nothing else is asked.
+
+**The dropdowns** (all optional, all start at "Not sure", which keeps today's generic default):
+
+| Question | Choices | What it sets (all marked as estimates) |
+|---|---|---|
+| Kind | Bookshelf / standmount · Floorstander (tower) · Studio monitor (desktop or on a stand) · Compact desktop · Wall or in-wall · Other | cabinet height and depth class, where the tweeter sits (on a stand, on the floor, on a desk) |
+| Size | Small · Medium · Large (a hint with typical height, e.g. "about 30 cm") | cabinet width, height, depth, and how low the bass goes (`f6`) |
+| Drivers | 2-way · 3-way · Coaxial (one driver in the middle) · Don't know | tweeter and woofer heights; coaxial allows the wider vertical angle |
+| Bass port | None (sealed) · Front · Back · Bottom · Side | sealed or ported, rear clearance rule |
+| Made for | Hi-fi listening · Studio monitoring | only the default distance and wording: monitors are made for close listening (a desk or a stand), hi-fi for the room. It is a starting suggestion for "Where you listen", never a change to the physics, because there is no source that says a monitor sounds different in a room |
+| Spread of sound | Narrow · Typical · Wide | unchanged: advice only |
+| Placed on | Floor · Stand · Desk or shelf | base height (it matters for the tweeter height and the floor bounce) |
+
+Rules: every choice maps to typical values (`engine/presets/speakerTypes.ts`), each value is an
+estimate marked as such, there is a test per mapping, and **no brand or model data from memory**
+(CLAUDE.md). The exact numbers stay editable under "More details" for the person who has the
+manual. The same dropdowns appear on the survey's speaker screen, in fewer steps (Kind, Size, Port).
+A guard: combinations that cannot exist (a "small floorstander" with 2 cm depth) are not offered.
 
 ### Phase 3: one visual system (Sonnet; Opus reviews the result once)
 
@@ -82,8 +104,8 @@ dark, Hungarian and phone.
 Summary: **Opus for Phase 1 and the final review, Sonnet for everything else.** Do Phase 1 first and
 merge it on its own, so the app stops saying wrong things even if the polish takes longer.
 
-## Decisions I need from the owner before Phase 1
+## Decisions made
 
-1. Behind-the-seat setups: cap at "Poor" with a red flag (my recommendation), or refuse to score them?
-2. Which score for the words: the cautious robust one everywhere (my recommendation) or the plain one?
-3. Which speaker categories belong in the dropdown (my starting list is above)?
+1. Behind-the-seat setups are kept at "Poor" (capped, with a warning). Decided.
+2. Every word uses the cautious (robust) score. Decided.
+3. The speaker dropdowns are in Phase 2 above. Decided by the owner: several dropdowns, no picture cards.
