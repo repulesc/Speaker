@@ -289,3 +289,11 @@ test('first run: the survey asks four questions, then shows the answer', async (
   await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
   await expect(mapChoice(page, 'Speakers')).toBeChecked(); // the map follows the goal
 });
+
+test('the support link is in the menu and opens in a new tab', async ({ page }) => {
+  await openMenu(page);
+  const link = page.getByRole('link', { name: /Support this project/ });
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute('target', '_blank');
+  await expect(link).toHaveAttribute('rel', /noopener/);
+});

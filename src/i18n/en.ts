@@ -45,7 +45,7 @@ export const en = {
   menu: {
     image: 'Share as image',
     label: 'Menu',
-    support: 'Support this project',
+    support: 'Support this project ☕',
     undo: 'Undo',
     redo: 'Redo',
     share: 'Share link',
@@ -1370,6 +1370,6 @@ export const en = {
     title: 'About',
     body: 'This app uses established room acoustics to suggest speaker and seat positions, and tells you how sure it is. It is guidance, not a guarantee.',
     sources: 'Every rule and its sources are documented in the project’s rule catalogue.',
-    support: 'Support this project (opens in a new tab)',
+    support: 'Support this project ☕ (opens in a new tab)',
   },
 } as const;

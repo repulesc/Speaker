@@ -134,3 +134,17 @@ Owner decision after the first review: panels and bass traps are a real investme
 - Investment advice appears only after the box "I'm ready to invest in acoustic treatment" is ticked (Settings, under "Your room"; `constraints.treatmentReady`, off by default). Off: the result widget, Improve the room, the print sheet and the map rings show only free or cheap ideas, and Improve the room adds one line saying bigger options exist, with a button to the box. On: they appear in the same order, tagged "Bigger investment". The engine still computes everything; only what is shown changes.
 - The app never says what to buy: no products, shops, prices or affiliate links.
 - `SUPPORT_URL` in `src/app/config.ts` (empty for now) turns on a plain "Support this project" link in the menu and the About dialog (a Buy Me a Coffee, Ko-fi or PayPal.me page). No embedded widget, so the app loads no third-party code.
+
+## V6: a calm result view, one "Your room" sheet, plain words
+
+Owner review after V5.1. Built (plan: the owner's survey answers of this round):
+
+- **Panel:** a clear "Your room" button, then three tabs: Result, Why, Tips (swipe between them on a phone). No pages with Back except Listening notes, which moved to the menu.
+- **Your room:** every setting on one scrolling sheet, in groups with an index and Done: room size, walls and floor, furniture, speakers, where you listen, goals, treatment.
+- **Map and goal are one thing:** "Find the best place for" sits on the Result tab, and the map's Speakers | Seat switch changes it too (unless both may move, when it only changes the view). The layers that explain a seat, the bass notes and the side view moved into the Why tab.
+- **Seat furniture** is drawn at its typical size (a bed is 1.6 × 2 m), with the heads as dots.
+- **Plain words:** every tip has a plain sentence (no hertz, seconds or decibels); the numbers sit under Details on the Tips tab (docs/WORDING.md).
+- **Text hierarchy:** one title, the answer in bold body text, captions for numbers; no grey section labels.
+- **Support ☕** link in the menu and About, pointing to a placeholder until the owner's page exists (`SUPPORT_URL` in `src/app/config.ts`).
+
+Not changed: the reasons on the Why tab keep their numbers (that tab is for people who ask why).

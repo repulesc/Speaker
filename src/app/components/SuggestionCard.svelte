@@ -78,7 +78,6 @@
     const tone = settings.find((a) => TONE.has(a.ruleId));
     return [other, tone].filter((a): a is Advice => a !== undefined);
   });
-  const LEVEL_ICON = { physics: '●', guideline: '◆', heuristic: '▲', subjective: '◇' } as const;
 
   /**
    * The answer as one plain sentence: what to change, relative to the setup now (owner decision,
@@ -321,7 +320,6 @@
         {#each picks as idea (idea.messageKey)}
           <div class="idea-item">
             <p class="idea">{advicePlainText(idea, system)}</p>
-            <p class="caption">{LEVEL_ICON[idea.level]} {i18n.t(`evidence.${idea.level}`)}</p>
           </div>
         {/each}
       </section>
@@ -355,7 +353,6 @@
   .say {
     margin: -4px 0 0;
     font-size: var(--text-md);
-    font-weight: 600;
     line-height: 1.45;
   }
   dd {
@@ -445,9 +442,12 @@
   .area {
     margin: -8px 0 0;
   }
+  /* Three text styles only (owner feedback): the title, the answer in body text (the brief in
+     bold), and quiet captions for the numbers. */
   .brief {
     margin: -6px 0 0;
     font-size: var(--text-md);
+    font-weight: 600;
     line-height: 1.45;
   }
   /* Each thing to try is its own block, with a quiet rule above it. */
@@ -459,8 +459,7 @@
   }
   h3 {
     margin: 0;
-    color: var(--ink-muted);
-    font-size: var(--text-sm);
+    font-size: var(--text-md);
     font-weight: 600;
   }
   .idea {
@@ -471,8 +470,5 @@
   .idea-item {
     display: grid;
     gap: 4px;
-  }
-  .idea-item .caption {
-    margin: 0;
   }
 </style>

@@ -49,7 +49,7 @@ export const hu: Messages = {
   menu: {
     image: 'Megosztás képként',
     label: 'Menü',
-    support: 'A projekt támogatása',
+    support: 'A projekt támogatása ☕',
     undo: 'Visszavonás',
     redo: 'Újra',
     share: 'Megosztási link',
@@ -1387,6 +1387,6 @@ export const hu: Messages = {
     body: 'Az alkalmazás bevett teremakusztikai ismeretekkel javasol hangfal- és ülőhelyet, és megmondja, mennyire biztos a dolgában. Iránymutatás, nem garancia.',
     sources:
       'Minden szabály és a hozzá tartozó források a projekt szabálykatalógusában találhatók.',
-    support: 'A projekt támogatása (új lapon nyílik meg)',
+    support: 'A projekt támogatása ☕ (új lapon nyílik meg)',
   },
 };
