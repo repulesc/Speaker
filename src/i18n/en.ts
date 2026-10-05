@@ -52,6 +52,7 @@ export const en = {
     export: 'Export file',
     import: 'Import file',
     print: 'Print sheet',
+    listen: 'Listening notes',
     about: 'About and sources',
   },
   share: {
@@ -141,7 +142,7 @@ export const en = {
     },
   },
   room: {
-    title: 'Your room',
+    title: 'Room size',
     intro: 'Rough numbers are fine. Say how sure you are, and refine them later.',
     width: 'Width',
     length: 'Length',
@@ -679,6 +680,8 @@ export const en = {
     label: 'Map',
     hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
     layerLabel: 'Map layer',
+    showing: 'Showing',
+    backToMain: 'Back to the main map',
     pick: { speakers: 'Speakers', seat: 'Seat' },
     why: 'Why?',
     whyLabel: 'What makes a seat good or poor',
@@ -1055,12 +1058,6 @@ export const en = {
       cut: 'The room’s high frequencies ring on ({t60}). A small treble cut ({suggestDb}) may help: try it and listen.',
     },
   },
-  tabs: {
-    label: 'Panel',
-    why: 'Why',
-    treat: 'Treat',
-    listen: 'Listen',
-  },
   listen: {
     title: 'Listen and note',
     intro:
@@ -1160,7 +1157,7 @@ export const en = {
       'These are predictions, not measurements. Move one thing at a time and trust your ears.',
   },
   treat: {
-    title: 'Treat the room',
+    title: 'More to try',
     intro:
       'What would help most, in order. Sizes are rough guides, not promises: change one thing, then listen.',
     first: 'If you can only do one thing',
@@ -1284,6 +1281,21 @@ export const en = {
   sheet: {
     expand: 'Show more',
     collapse: 'Show less',
+    index: 'Jump to',
+    place: 'Where you listen',
+    treatment: 'Room treatment',
+  },
+  tabs: {
+    label: 'Result',
+    result: 'Result',
+    why: 'Why',
+    tips: 'Tips',
+  },
+  whyTab: {
+    onMap: 'See it on the map',
+    onMapHelp:
+      'Each reason has its own map: brighter is better, darker is where that reason hurts.',
+    closer: 'Look closer',
   },
   about: {
     title: 'About',

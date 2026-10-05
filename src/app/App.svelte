@@ -70,6 +70,8 @@
   let panel = $state<HTMLElement>();
   $effect(() => {
     void ui.step;
+    void ui.tab;
+    void ui.roomOpen;
     if (panel) panel.scrollTop = 0;
   });
 

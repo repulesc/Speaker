@@ -68,7 +68,7 @@ test('journey 5 — language: Hungarian shows no English UI text', async ({ page
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
   await page.keyboard.press('Escape');
   await expect(page.locator('html')).toHaveAttribute('lang', 'hu');
-  await expect(page.getByRole('heading', { name: 'A helyiséged' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A szoba mérete' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Beállítások' }).click();
   const text = await page.locator('body').innerText();
@@ -181,16 +181,17 @@ test('journey 10 — keyboard only: skip to the panel, type, and open the result
 }) => {
   await page.keyboard.press('Tab'); // the skip link comes first
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 12; i++) {
-    await page.keyboard.press('Tab');
+  for (let i = 0; i < 30; i++) {
     if (await page.evaluate(() => document.activeElement?.id === 'room-width')) break;
+    await page.keyboard.press('Tab');
   }
-  await expect(page.getByLabel('Width', { exact: true })).toBeFocused();
+  const width = page.locator('#room-width');
+  await expect(width).toBeFocused();
   await page.keyboard.type('4');
   await page.keyboard.press('Enter');
-  await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
+  await expect(width).toHaveValue('4.00\u00a0m');
 
-  const done = page.getByRole('button', { name: 'Done' });
+  const done = page.getByRole('button', { name: 'Done' }).first();
   await done.focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Your result' })).toBeVisible();

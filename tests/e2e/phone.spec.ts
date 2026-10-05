@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { fillRoom, goStep, openApp, openSection } from './helpers';
+import { fillRoom, goStep, openApp, openSection, openTab } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -57,6 +57,7 @@ test('phone: home, result pages and the bass-note bar keep 44 px targets', async
     await openSection(page, row);
     expect(await smallControls(page), row).toEqual([]);
   }
+  await openTab(page, 'Why');
   await page.getByRole('button', { name: 'Bass note' }).click();
   expect(await smallControls(page), 'bass note').toEqual([]);
 });
@@ -66,9 +67,11 @@ test('phone: one drawing at a time, switchable between top and side view', async
   const side = page.getByRole('region', { name: 'Side view of the room' });
   await expect(top).toBeVisible();
   await expect(side).toHaveCount(0);
+  await openTab(page, 'Why');
   await page.getByRole('button', { name: 'Side view' }).click();
   await expect(side).toBeVisible();
   await expect(top).toHaveCount(0);
+  await openTab(page, 'Why');
   await page.getByRole('button', { name: 'Side view' }).click();
   await expect(top).toBeVisible();
 });

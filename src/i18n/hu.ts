@@ -56,6 +56,7 @@ export const hu: Messages = {
     export: 'Exportálás fájlba',
     import: 'Importálás fájlból',
     print: 'Nyomtatható lap',
+    listen: 'Hallgatási jegyzetek',
     about: 'Névjegy és források',
   },
   share: {
@@ -147,7 +148,7 @@ export const hu: Messages = {
     },
   },
   room: {
-    title: 'A helyiséged',
+    title: 'A szoba mérete',
     intro: 'Elég a durva érték is. Jelöld, mennyire vagy biztos benne, és később pontosíthatod.',
     width: 'Szélesség',
     length: 'Hossz',
@@ -691,6 +692,8 @@ export const hu: Messages = {
     label: 'Térkép',
     hint: 'Húzz bármit. A térkép mozgatás közben újrarajzolódik. Kattints egy számra, és pontos értéket írhatsz be.',
     layerLabel: 'Térképréteg',
+    showing: 'Látható',
+    backToMain: 'Vissza a fő térképhez',
     pick: { speakers: 'Hangfalak', seat: 'Ülőhely' },
     why: 'Miért?',
     whyLabel: 'Mitől jó vagy gyenge egy hely',
@@ -1071,12 +1074,6 @@ export const hu: Messages = {
       cut: 'A helyiség magas hangjai sokáig csengenek ({t60}). Egy kis magashang-csökkentés ({suggestDb}) segíthet: próbáld ki, és hallgasd meg.',
     },
   },
-  tabs: {
-    label: 'Panel',
-    why: 'Miért',
-    treat: 'Javítás',
-    listen: 'Hallgatás',
-  },
   listen: {
     title: 'Hallgatás és jegyzet',
     intro:
@@ -1176,7 +1173,7 @@ export const hu: Messages = {
       'Ezek előrejelzések, nem mérések. Egyszerre csak egy dolgot változtass, és bízz a füledben.',
   },
   treat: {
-    title: 'A helyiség javítása',
+    title: 'Még kipróbálhatod',
     intro:
       'Mi segítene a legtöbbet, sorrendben. A méretek durva tájékoztatók, nem ígéretek: változtass meg egyszerre egy dolgot, aztán hallgasd meg.',
     first: 'Ha csak egy dolgot tudsz megtenni',
@@ -1301,6 +1298,21 @@ export const hu: Messages = {
   sheet: {
     expand: 'Több mutatása',
     collapse: 'Kevesebb mutatása',
+    index: 'Ugrás ide',
+    place: 'Honnan hallgatod',
+    treatment: 'Akusztikai kezelés',
+  },
+  tabs: {
+    label: 'Eredmény',
+    result: 'Eredmény',
+    why: 'Miért',
+    tips: 'Tippek',
+  },
+  whyTab: {
+    onMap: 'Nézd meg a térképen',
+    onMapHelp:
+      'Minden oknak saját térképe van: a világosabb jobb, a sötétebb ott, ahol az az ok ront.',
+    closer: 'Közelebbről',
   },
   about: {
     title: 'Névjegy',

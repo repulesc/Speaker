@@ -301,6 +301,11 @@
     color: var(--ink-muted);
     text-decoration: underline;
   }
+  @media (pointer: coarse), (max-width: 1023px) {
+    .link {
+      min-height: 44px;
+    }
+  }
   /* The palette is long: compact chips on desktop, finger-sized on touch screens. */
   .adds .btn {
     min-height: 34px;

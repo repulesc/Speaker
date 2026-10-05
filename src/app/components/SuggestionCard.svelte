@@ -4,10 +4,11 @@
   import type { Advice } from '../../engine/types';
   import { adviceText, scoreWord } from '../findings/text';
   import { visibleAdvice } from '../findings/visible';
-  import { activeVariant, applyCandidate, cabinet } from '../plan/placement';
-  import { analysis, showNotice, workspace, type StepId } from '../session.svelte';
+  import { applyCandidate, cabinet } from '../plan/placement';
+  import { analysis, showNotice, workspace } from '../session.svelte';
   import { goalOf, type Goal } from '../state/goal';
   import MoodFace from './MoodFace.svelte';
+  import PlacementOptions from './PlacementOptions.svelte';
   import { ui } from '../ui.svelte';
 
   /**
@@ -70,7 +71,6 @@
   const treatment = $derived(
     visibleAdvice(ok?.advice.treatment ?? [], project.constraints.treatmentReady),
   );
-  const ideas = $derived(ok ? [...treatment, ...ok.advice.settings] : []);
   const picks = $derived.by<Advice[]>(() => {
     if (!ok) return [];
     const { settings } = ok.advice;
@@ -79,20 +79,6 @@
     return [other, tone].filter((a): a is Advice => a !== undefined);
   });
   const LEVEL_ICON = { physics: '●', guideline: '◆', heuristic: '▲', subjective: '◇' } as const;
-
-  /** Ways to learn more, each its own page. */
-  const problems = $derived(
-    ok?.findings.filter((f) => f.severity === 'red-flag' || f.severity === 'caution').length ?? 0,
-  );
-  const notes = $derived(
-    project.notes.filter((n) => n.variantId === activeVariant(project).id).length,
-  );
-  const links = $derived<{ id: StepId; value: string }[]>([
-    { id: 'treat', value: ideas.length ? String(ideas.length) : '' },
-    { id: 'why', value: ok ? String(problems) : '' },
-    { id: 'bass', value: '' },
-    { id: 'listen', value: notes ? String(notes) : '' },
-  ]);
 
   /**
    * The answer as one plain sentence: what to change, relative to the setup now (owner decision,
@@ -226,6 +212,7 @@
   {:else}
     <p class="brief" data-share="verdict" data-testid="brief">{brief}</p>
     {#if areaLine}<p class="caption area" data-testid="area">{areaLine}</p>{/if}
+    <PlacementOptions parts={['moves']} plain />
     <span class="visually-hidden" data-testid="score-current"
       >{i18n.t(`results.score.${scoreWord(ok.current.score)}`)}</span
     >
@@ -340,18 +327,6 @@
       </section>
     {/if}
   {/if}
-
-  <ul class="list links">
-    {#each links as link (link.id)}
-      <li>
-        <button type="button" class="row" onclick={() => (ui.step = link.id)}>
-          <span>{i18n.t(`nav.${link.id}`)}</span>
-          <span class="value">{link.value}</span>
-          <span class="chevron" aria-hidden="true">›</span>
-        </button>
-      </li>
-    {/each}
-  </ul>
 </section>
 
 <style>
@@ -499,10 +474,5 @@
   }
   .idea-item .caption {
     margin: 0;
-  }
-  .links {
-    margin: 0 -16px;
-    border-top: 1px solid var(--grid);
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
   }
 </style>

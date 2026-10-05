@@ -381,249 +381,257 @@
       <span class="more-title">{i18n.t('speakers.more.summary')}</span>
       <span class="more-hint">{i18n.t('speakers.more.hint')}</span>
     </summary>
-
-    <div class="more-body">
-      {#if room}
-        <section class="group" aria-labelledby="seat-title">
-          <h3 id="seat-title">{i18n.t('speakers.placement.seatTitle')}</h3>
-          <div class="field">
-            <span class="label">{i18n.t('speakers.placement.certainty')}</span>
-            <CertaintyChips
-              name="placement-certainty"
-              value={placementCertainty}
-              onchange={setPlacementCertainty}
-            />
-          </div>
-          <div class="grid2">
-            <LengthInput
-              id="place-seat"
-              label={i18n.t('speakers.placement.seat')}
-              value={variant.listener.ears.y}
-              {system}
-              limits={{ min: 0.1, max: room.L - 0.1 }}
-              onchange={(y) =>
-                workspace.edit(
-                  (p) => void moveSeat(p, { y }, { grid: false, keepCertainty: true }),
-                )}
-            />
-            <LengthInput
-              id="place-ears"
-              label={i18n.t('speakers.placement.ears')}
-              value={variant.listener.ears.z}
-              {system}
-              limits={{ min: 0.3, max: Math.min(2, room.H - 0.1) }}
-              onchange={(v) => workspace.edit((p) => void setEarHeight(p, v))}
-            />
+    <!-- Rendered only when open: the room sheet shows every group at once, and these fields
+         (Width, Height…) would otherwise share names with the room's. -->
+    {#if ui.speakerDetails}
+      <div class="more-body">
+        {#if room}
+          <section class="group" aria-labelledby="seat-title">
+            <h3 id="seat-title">{i18n.t('speakers.placement.seatTitle')}</h3>
             <div class="field">
-              <label for="place-toe">{i18n.t('speakers.placement.toeIn')}</label>
+              <span class="label">{i18n.t('speakers.placement.certainty')}</span>
+              <CertaintyChips
+                name="placement-certainty"
+                value={placementCertainty}
+                onchange={setPlacementCertainty}
+              />
+            </div>
+            <div class="grid2">
+              <LengthInput
+                id="place-seat"
+                label={i18n.t('speakers.placement.seat')}
+                value={variant.listener.ears.y}
+                {system}
+                limits={{ min: 0.1, max: room.L - 0.1 }}
+                onchange={(y) =>
+                  workspace.edit(
+                    (p) => void moveSeat(p, { y }, { grid: false, keepCertainty: true }),
+                  )}
+              />
+              <LengthInput
+                id="place-ears"
+                label={i18n.t('speakers.placement.ears')}
+                value={variant.listener.ears.z}
+                {system}
+                limits={{ min: 0.3, max: Math.min(2, room.H - 0.1) }}
+                onchange={(v) => workspace.edit((p) => void setEarHeight(p, v))}
+              />
+              <div class="field">
+                <label for="place-toe">{i18n.t('speakers.placement.toeIn')}</label>
+                <input
+                  id="place-toe"
+                  class="input"
+                  inputmode="decimal"
+                  bind:value={toeText}
+                  onfocus={() => (editingToe = true)}
+                  onblur={commitToe}
+                  onkeydown={(e) => e.key === 'Enter' && commitToe()}
+                />
+              </div>
+            </div>
+            <p class="help">{i18n.t('speakers.placement.toeInHelp')}</p>
+            <label class="choice">
               <input
-                id="place-toe"
+                type="checkbox"
+                checked={constraints.keepSymmetric}
+                onchange={(e) =>
+                  workspace.edit(
+                    (p) => void (p.constraints.keepSymmetric = e.currentTarget.checked),
+                  )}
+              />
+              {i18n.t('speakers.placement.mirror')}
+            </label>
+          </section>
+        {/if}
+
+        <section class="group" aria-labelledby="describe-title">
+          <h3 id="describe-title">{i18n.t('speakers.describe.title')}</h3>
+          <div class="grid2">
+            <div class="field">
+              <label for="speaker-brand">{i18n.t('speakers.brand')}</label>
+              <input
+                id="speaker-brand"
                 class="input"
-                inputmode="decimal"
-                bind:value={toeText}
-                onfocus={() => (editingToe = true)}
-                onblur={commitToe}
-                onkeydown={(e) => e.key === 'Enter' && commitToe()}
+                maxlength="60"
+                value={speaker.brand}
+                onchange={(e) => editSpeaker((s) => void (s.brand = e.currentTarget.value.trim()))}
+              />
+            </div>
+            <div class="field">
+              <label for="speaker-model">{i18n.t('speakers.model')}</label>
+              <input
+                id="speaker-model"
+                class="input"
+                maxlength="60"
+                value={speaker.model}
+                onchange={(e) => editSpeaker((s) => void (s.model = e.currentTarget.value.trim()))}
               />
             </div>
           </div>
-          <p class="help">{i18n.t('speakers.placement.toeInHelp')}</p>
-          <label class="choice">
-            <input
-              type="checkbox"
-              checked={constraints.keepSymmetric}
-              onchange={(e) =>
-                workspace.edit((p) => void (p.constraints.keepSymmetric = e.currentTarget.checked))}
-            />
-            {i18n.t('speakers.placement.mirror')}
-          </label>
-        </section>
-      {/if}
 
-      <section class="group" aria-labelledby="describe-title">
-        <h3 id="describe-title">{i18n.t('speakers.describe.title')}</h3>
-        <div class="grid2">
-          <div class="field">
-            <label for="speaker-brand">{i18n.t('speakers.brand')}</label>
-            <input
-              id="speaker-brand"
-              class="input"
-              maxlength="60"
-              value={speaker.brand}
-              onchange={(e) => editSpeaker((s) => void (s.brand = e.currentTarget.value.trim()))}
-            />
-          </div>
-          <div class="field">
-            <label for="speaker-model">{i18n.t('speakers.model')}</label>
-            <input
-              id="speaker-model"
-              class="input"
-              maxlength="60"
-              value={speaker.model}
-              onchange={(e) => editSpeaker((s) => void (s.model = e.currentTarget.value.trim()))}
-            />
-          </div>
-        </div>
-
-        {#each [{ key: 'w', label: 'width' }, { key: 'h', label: 'height' }, { key: 'd', label: 'depth' }] as const as dim (dim.key)}
-          <LengthField
-            id="speaker-{dim.key}"
-            label={i18n.t(`speakers.size.${dim.label}`)}
-            kind="position"
-            value={speaker.dimensions[dim.key]}
-            {system}
-            limits={{ min: 0.02, max: 3 }}
-            onchange={(next) => editSpeaker((s) => void (s.dimensions[dim.key] = next))}
-          />
-        {/each}
-
-        <div class="field">
-          <label for="speaker-port">{i18n.t('speakers.port.label')}</label>
-          <select
-            id="speaker-port"
-            class="input"
-            value={speaker.portLocation.value ?? 'unknown'}
-            onchange={(e) => setKnown('portLocation', e.currentTarget.value)}
-          >
-            {#each ports as v (v)}<option value={v}>{i18n.t(`speakers.port.${v}`)}</option>{/each}
-          </select>
-          <p class="help">{i18n.t('speakers.port.help')}</p>
-        </div>
-
-        <div class="field">
-          <label for="speaker-enclosure">{i18n.t('speakers.enclosure.label')}</label>
-          <select
-            id="speaker-enclosure"
-            class="input"
-            value={speaker.enclosure.value ?? 'unknown'}
-            onchange={(e) => setKnown('enclosure', e.currentTarget.value)}
-          >
-            {#each enclosures as v (v)}<option value={v}>{i18n.t(`speakers.enclosure.${v}`)}</option
-              >{/each}
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="speaker-layout">{i18n.t('speakers.layout.label')}</label>
-          <select
-            id="speaker-layout"
-            class="input"
-            value={speaker.driverLayout.value ?? 'unknown'}
-            onchange={(e) => setKnown('driverLayout', e.currentTarget.value)}
-          >
-            {#each layouts as v (v)}<option value={v}>{i18n.t(`speakers.layout.${v}`)}</option
-              >{/each}
-          </select>
-          <p class="help">{i18n.t('speakers.layout.help')}</p>
-        </div>
-
-        <fieldset>
-          <legend>{i18n.t('speakers.quick.dispersion.label')}</legend>
-          <p class="help">{i18n.t('speakers.quick.dispersion.help')}</p>
-          <div
-            class="seg dispersion"
-            role="radiogroup"
-            aria-label={i18n.t('speakers.quick.dispersion.label')}
-          >
-            {#each DISPERSIONS as d (d)}
-              <label>
-                <input
-                  type="radio"
-                  name="speaker-dispersion"
-                  checked={dispersionOf(speaker) === d}
-                  onchange={() => workspace.edit((p) => setDispersion(p, d))}
-                />
-                {i18n.t(`speakers.quick.dispersion.${d}`)}
-              </label>
-            {/each}
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>{i18n.t('speakers.controls.legend')}</legend>
-          <label class="choice"
-            ><input
-              type="checkbox"
-              checked={Boolean(speaker.dsp.treble)}
-              onchange={(e) => toggleDsp('treble', e.currentTarget.checked)}
-            />{i18n.t('speakers.controls.treble')}</label
-          >
-          <label class="choice"
-            ><input
-              type="checkbox"
-              checked={Boolean(speaker.dsp.bass)}
-              onchange={(e) => toggleDsp('bass', e.currentTarget.checked)}
-            />{i18n.t('speakers.controls.bass')}</label
-          >
-          <label class="choice"
-            ><input
-              type="checkbox"
-              checked={Boolean(speaker.dsp.wallDistanceSetting)}
-              onchange={(e) =>
-                editSpeaker(
-                  (s) => void (s.dsp.wallDistanceSetting = e.currentTarget.checked || undefined),
-                )}
-            />{i18n.t('speakers.controls.wall')}</label
-          >
-          <label class="choice">
-            <input
-              type="checkbox"
-              checked={Boolean(speaker.minWallDistance)}
-              onchange={(e) =>
-                editSpeaker((s) => {
-                  if (e.currentTarget.checked)
-                    s.minWallDistance = { value: 0.1, certainty: 'measured' };
-                  else delete s.minWallDistance;
-                })}
-            />{i18n.t('speakers.controls.minWall')}
-          </label>
-          {#if speaker.minWallDistance?.value != null}
-            <LengthInput
-              id="speaker-minwall"
-              label={i18n.t('speakers.controls.minWallValue')}
-              value={speaker.minWallDistance.value}
+          {#each [{ key: 'w', label: 'width' }, { key: 'h', label: 'height' }, { key: 'd', label: 'depth' }] as const as dim (dim.key)}
+            <LengthField
+              id="speaker-{dim.key}"
+              label={i18n.t(`speakers.size.${dim.label}`)}
+              kind="position"
+              value={speaker.dimensions[dim.key]}
               {system}
-              limits={{ min: 0, max: 3 }}
-              onchange={(v) =>
-                editSpeaker((s) => void (s.minWallDistance = { value: v, certainty: 'measured' }))}
+              limits={{ min: 0.02, max: 3 }}
+              onchange={(next) => editSpeaker((s) => void (s.dimensions[dim.key] = next))}
             />
-          {/if}
-        </fieldset>
+          {/each}
 
-        <div class="field">
-          <label for="speaker-f6">{i18n.t('speakers.advanced.f6')}</label>
-          <p class="help">{i18n.t('speakers.advanced.f6Help')}</p>
-          <input
-            id="speaker-f6"
-            class="input narrow"
-            inputmode="numeric"
-            bind:value={f6Text}
-            onfocus={() => (editingF6 = true)}
-            onblur={commitF6}
-            onkeydown={(e) => e.key === 'Enter' && commitF6()}
-          />
-        </div>
+          <div class="field">
+            <label for="speaker-port">{i18n.t('speakers.port.label')}</label>
+            <select
+              id="speaker-port"
+              class="input"
+              value={speaker.portLocation.value ?? 'unknown'}
+              onchange={(e) => setKnown('portLocation', e.currentTarget.value)}
+            >
+              {#each ports as v (v)}<option value={v}>{i18n.t(`speakers.port.${v}`)}</option>{/each}
+            </select>
+            <p class="help">{i18n.t('speakers.port.help')}</p>
+          </div>
 
-        <div class="actions">
-          <button type="button" class="btn" onclick={saveProfile}
-            >{i18n.t('speakers.file.save')}</button
-          >
-          <button type="button" class="btn" onclick={() => fileInput?.click()}
-            >{i18n.t('speakers.file.load')}</button
-          >
-          <input
-            id="speaker-file"
-            bind:this={fileInput}
-            class="visually-hidden"
-            type="file"
-            accept=".json,application/json"
-            tabindex="-1"
-            aria-hidden="true"
-            onchange={loadProfile}
-          />
-        </div>
-      </section>
-    </div>
+          <div class="field">
+            <label for="speaker-enclosure">{i18n.t('speakers.enclosure.label')}</label>
+            <select
+              id="speaker-enclosure"
+              class="input"
+              value={speaker.enclosure.value ?? 'unknown'}
+              onchange={(e) => setKnown('enclosure', e.currentTarget.value)}
+            >
+              {#each enclosures as v (v)}<option value={v}
+                  >{i18n.t(`speakers.enclosure.${v}`)}</option
+                >{/each}
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="speaker-layout">{i18n.t('speakers.layout.label')}</label>
+            <select
+              id="speaker-layout"
+              class="input"
+              value={speaker.driverLayout.value ?? 'unknown'}
+              onchange={(e) => setKnown('driverLayout', e.currentTarget.value)}
+            >
+              {#each layouts as v (v)}<option value={v}>{i18n.t(`speakers.layout.${v}`)}</option
+                >{/each}
+            </select>
+            <p class="help">{i18n.t('speakers.layout.help')}</p>
+          </div>
+
+          <fieldset>
+            <legend>{i18n.t('speakers.quick.dispersion.label')}</legend>
+            <p class="help">{i18n.t('speakers.quick.dispersion.help')}</p>
+            <div
+              class="seg dispersion"
+              role="radiogroup"
+              aria-label={i18n.t('speakers.quick.dispersion.label')}
+            >
+              {#each DISPERSIONS as d (d)}
+                <label>
+                  <input
+                    type="radio"
+                    name="speaker-dispersion"
+                    checked={dispersionOf(speaker) === d}
+                    onchange={() => workspace.edit((p) => setDispersion(p, d))}
+                  />
+                  {i18n.t(`speakers.quick.dispersion.${d}`)}
+                </label>
+              {/each}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>{i18n.t('speakers.controls.legend')}</legend>
+            <label class="choice"
+              ><input
+                type="checkbox"
+                checked={Boolean(speaker.dsp.treble)}
+                onchange={(e) => toggleDsp('treble', e.currentTarget.checked)}
+              />{i18n.t('speakers.controls.treble')}</label
+            >
+            <label class="choice"
+              ><input
+                type="checkbox"
+                checked={Boolean(speaker.dsp.bass)}
+                onchange={(e) => toggleDsp('bass', e.currentTarget.checked)}
+              />{i18n.t('speakers.controls.bass')}</label
+            >
+            <label class="choice"
+              ><input
+                type="checkbox"
+                checked={Boolean(speaker.dsp.wallDistanceSetting)}
+                onchange={(e) =>
+                  editSpeaker(
+                    (s) => void (s.dsp.wallDistanceSetting = e.currentTarget.checked || undefined),
+                  )}
+              />{i18n.t('speakers.controls.wall')}</label
+            >
+            <label class="choice">
+              <input
+                type="checkbox"
+                checked={Boolean(speaker.minWallDistance)}
+                onchange={(e) =>
+                  editSpeaker((s) => {
+                    if (e.currentTarget.checked)
+                      s.minWallDistance = { value: 0.1, certainty: 'measured' };
+                    else delete s.minWallDistance;
+                  })}
+              />{i18n.t('speakers.controls.minWall')}
+            </label>
+            {#if speaker.minWallDistance?.value != null}
+              <LengthInput
+                id="speaker-minwall"
+                label={i18n.t('speakers.controls.minWallValue')}
+                value={speaker.minWallDistance.value}
+                {system}
+                limits={{ min: 0, max: 3 }}
+                onchange={(v) =>
+                  editSpeaker(
+                    (s) => void (s.minWallDistance = { value: v, certainty: 'measured' }),
+                  )}
+              />
+            {/if}
+          </fieldset>
+
+          <div class="field">
+            <label for="speaker-f6">{i18n.t('speakers.advanced.f6')}</label>
+            <p class="help">{i18n.t('speakers.advanced.f6Help')}</p>
+            <input
+              id="speaker-f6"
+              class="input narrow"
+              inputmode="numeric"
+              bind:value={f6Text}
+              onfocus={() => (editingF6 = true)}
+              onblur={commitF6}
+              onkeydown={(e) => e.key === 'Enter' && commitF6()}
+            />
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn" onclick={saveProfile}
+              >{i18n.t('speakers.file.save')}</button
+            >
+            <button type="button" class="btn" onclick={() => fileInput?.click()}
+              >{i18n.t('speakers.file.load')}</button
+            >
+            <input
+              id="speaker-file"
+              bind:this={fileInput}
+              class="visually-hidden"
+              type="file"
+              accept=".json,application/json"
+              tabindex="-1"
+              aria-hidden="true"
+              onchange={loadProfile}
+            />
+          </div>
+        </section>
+      </div>
+    {/if}
   </details>
 </div>
 

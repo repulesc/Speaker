@@ -58,8 +58,7 @@
             type="button"
             class="link"
             onclick={() => {
-              ui.settingsOpen = true;
-              ui.step = 'results';
+              ui.openRoom('ready');
             }}>{i18n.t('treat.openSettings')}</button
           >
         </p>

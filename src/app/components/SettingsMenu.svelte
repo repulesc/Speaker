@@ -3,6 +3,7 @@
   import { LOCALES } from '../../i18n/translate';
   import type { Locale } from '../../i18n/types';
   import { SUPPORT_URL } from '../config';
+  import { ui } from '../ui.svelte';
   import { prefs, type ThemePref } from '../prefs.svelte';
   import { projectLabel, workspace } from '../session.svelte';
   import Dropdown from './Dropdown.svelte';
@@ -173,7 +174,7 @@
       </ul>
 
       <ul class="list">
-        {#each [['menu.share', onshare], ['menu.image', onimage], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.about', onabout]] as const as [key, action] (key)}
+        {#each [['menu.share', onshare], ['menu.image', onimage], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.listen', () => (ui.step = 'listen')], ['menu.about', onabout]] as const as [key, action] (key)}
           <li>
             <button
               type="button"
