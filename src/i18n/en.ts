@@ -621,6 +621,8 @@ export const en = {
     bestHere: 'Best here: {word}',
     absolute: 'Absolute scale',
     hidePanel: 'Hide the side panel',
+    best: 'Best',
+    now: 'Now: {word}',
     before: 'Before',
     showPanel: 'Show the side panel',
     notListening: 'Not a listening position',

@@ -633,6 +633,8 @@ export const hu: Messages = {
     bestHere: 'A legjobb itt: {word}',
     absolute: 'Abszolút skála',
     hidePanel: 'Oldalsáv elrejtése',
+    best: 'Legjobb',
+    now: 'Most: {word}',
     before: 'Előtte',
     showPanel: 'Oldalsáv megjelenítése',
     notListening: 'Nem hallgatási hely',

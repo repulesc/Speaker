@@ -29,7 +29,7 @@ speakers sit on that map. The "you are here" marker (section 1) fixes the unders
 
 ## 3. Work items, in order
 
-### A. Quick wins (small, no model change)
+### A. Quick wins (small, no model change) — DONE (A1–A3 implemented)
 1. **Recommended-placement marker much more noticeable.** Today: thin dashed blue square. Make it:
    solid accent outline 2.5 px, white inner ring + soft shadow so it reads on every heat colour,
    semi-opaque accent fill, a "Best" label chip. Actual speakers stay white. Check on all heat

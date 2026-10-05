@@ -92,9 +92,9 @@ export function bestShown(values: readonly number[]): number | null {
 
 /**
  * Cells without a score (in front of the speakers' line, on top of a speaker) take the value of the
- * nearest scored cell, and their distance to it, so the map can fade out softly over a short
- * distance instead of stopping at a hard line. The faded part is drawing, not data: it is
- * transparent beyond the fade and labelled "not a listening position" on the plan.
+ * nearest scored cell, and their distance to it, so the map can cover the whole room, hatching the filled
+ * part instead of stopping at a hard line. The filled part is drawing, not data: it is
+ * hatched as "advised against".
  */
 export function fillGaps(
   nx: number,
@@ -279,10 +279,6 @@ const CONTOUR_HALF_WIDTH = 0.9;
 /** Zones style: number of bands and the width of the soft blend between two bands. */
 const ZONES = 4;
 const ZONE_EDGE = 0.18;
-/** Gaps up to this wide (metres) inside the field are filled, not faded. */
-const GAP_FILLED_M = 0.22;
-/** The fade where the map runs out of scored seats, in metres. */
-const FADE_M = 0.45;
 /** "Advised against": light diagonal hatch (period in CSS pixels, strength 0..1). */
 const HATCH_PERIOD = 8;
 const HATCH_STRENGTH = 0.14;
@@ -388,13 +384,18 @@ function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOpti
   ctx.putImageData(image, 0, 0);
 }
 
-/** Visibility per cell after fillGaps: scored cells full, the rest fading out over FADE_M. */
-function fadeAlpha(dist: Float32Array, step: number): Float32Array {
-  const fade = Math.max(1, FADE_M / step);
-  // A narrow gap inside the field (two cabinets cannot overlap along the centre line) is filled
-  // from its neighbours at full strength; only a real edge fades.
-  const grace = GAP_FILLED_M / step;
-  return dist.map((d) => (d <= grace ? 1 : Math.max(0, 1 - (d - grace) / fade) ** 1.5));
+/**
+ * The map covers the whole room (owner decision, docs/ROADMAP_V5.md): every cell is visible, and
+ * cells that had no score of their own (filled from their neighbours) are hatched like every spot
+ * the app advises against. Cells with no data at all stay empty.
+ */
+function wholeRoom(
+  dist: Float32Array,
+  flagged: readonly boolean[] | undefined,
+): { alpha: Float32Array; marks: boolean[] } {
+  const alpha = dist.map((d) => (Number.isFinite(d) ? 1 : 0));
+  const marks = Array.from(dist, (d, k) => (Number.isFinite(d) && d > 0) || !!flagged?.[k]);
+  return { alpha, marks };
 }
 
 /** One seat layer: calm zones over its own colour range; "advised against" outlined and hatched. */
@@ -406,21 +407,16 @@ export function paintHeat(
   range: ColourRange = roomRange(values),
 ): void {
   const { filled, dist } = fillGaps(layers.nx, layers.ny, values);
-  const field = smoothField(
-    layers.nx,
-    layers.ny,
-    filled,
-    scale,
-    layers.redFlag,
-    fadeAlpha(dist, layers.step),
-  );
+  const { alpha, marks } = wholeRoom(dist, layers.redFlag);
+  const field = smoothField(layers.nx, layers.ny, filled, scale, marks, alpha);
   paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }
 
 /** Pressure pattern of one bass note: loud is bright, −40 dB or quieter is the darkest. */
 export function paintField(canvas: HTMLCanvasElement, grid: Grid, scale = 8): void {
   const { filled, dist } = fillGaps(grid.nx, grid.ny, grid.values);
-  const field = smoothField(grid.nx, grid.ny, filled, scale, undefined, fadeAlpha(dist, grid.step));
+  const { alpha } = wholeRoom(dist, undefined);
+  const field = smoothField(grid.nx, grid.ny, filled, scale, undefined, alpha);
   // A physical level, not a score: always the absolute −40…0 dB scale.
   paint(canvas, field, { style: 'gradient', toRamp: (db) => (db + 40) / 40 });
 }
@@ -450,13 +446,7 @@ export function paintSpeakerMap(
     }
   }
   const { filled, dist } = fillGaps(nx * 2, ny, mirrored);
-  // The grid stops halfway down the room (speakers never go further): fade out there too.
-  const visible = fadeAlpha(dist, grid.step);
-  const fadeRows = Math.max(1, FADE_M / grid.step);
-  for (let j = 0; j < ny; j++) {
-    const edge = Math.min(1, (ny - 0.5 - j) / fadeRows);
-    for (let i = 0; i < nx * 2; i++) visible[j * nx * 2 + i]! *= smoothstep(0, 1, edge);
-  }
-  const field = smoothField(nx * 2, ny, filled, scale, marks, visible);
+  const { alpha, marks: shaded } = wholeRoom(dist, marks);
+  const field = smoothField(nx * 2, ny, filled, scale, shaded, alpha);
   paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }
