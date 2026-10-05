@@ -646,6 +646,34 @@ export const hu: Messages = {
     nothing: 'Egyetlen elhelyezés sem fér bele a korlátaidba. Engedj több mindent mozdulni.',
     zoneCost: 'Ha legfeljebb {zone}-t mozdulnak: {inside}. Több hellyel: {outside}.',
   },
+  found: {
+    label: 'Amit találtunk',
+    dead: 'Nyugodt szoba, sok puha, hangelnyelő dologgal.',
+    balanced: 'Kiegyensúlyozott szoba: se nem túl visszhangos, se nem túl tompa.',
+    live: 'Élénk szoba: a hang sokat verődik benne.',
+    note: 'A legmélyebb rezonanciája egy {pitch} {letter} hang közelében van.',
+    veryLow: 'nagyon mély',
+    low: 'mély',
+    numbers: 'Utózengés {t60} s; a legmélyebb rezonancia {note}, {f}.',
+    letters: 'C,Cisz,D,Disz,E,F,Fisz,G,Gisz,A,B,H',
+  },
+  live: {
+    title: 'Élj vele egy kicsit',
+    intro:
+      'Adj neki néhány estét. Egy gyors meghallgatás félrevezethet; pár nap után többet hallasz. Utána jelöld, milyen.',
+    position: 'Ez a hely',
+    before: 'Az előző',
+    speakers: 'A hangfalaid összességében',
+    face: { 1: 'Nem igazán', 3: 'Rendben van', 5: 'Imádom' },
+    compare: {
+      agree: 'Ezt jobban szereted, és az alkalmazás is.',
+      disagree:
+        'Az előzőt jobban szeretted. Az alkalmazás ezt értékeli többre, de a füled dönt: adj neki még néhány estét, aztán bízz abban, amit hallasz.',
+      same: 'Mindkettőt nagyjából egyformán szereted. A te szobádban a különbség egyszerűen kicsi lehet.',
+    },
+    local: 'Csak ezen az eszközön marad.',
+    hide: 'Elrejtés',
+  },
   result: {
     title: 'Az eredményed',
     brief: {
@@ -1185,7 +1213,7 @@ export const hu: Messages = {
     details: 'Részletek',
     first: 'Ha csak egy dolgot tudsz megtenni',
     roomTitle: 'Hangtechnikai kezelés',
-    settingsTitle: 'A hangfal beállításai',
+    settingsTitle: 'A hangfalaid és ahogyan hallgatod',
     none: 'Ehhez az elrendezéshez nincs javaslatunk.',
     invest: 'Nagyobb befektetés',
     heldBack:
@@ -1254,6 +1282,16 @@ export const hu: Messages = {
       absorber:
         'A fejed {distance} távolságra van a hátsó faltól, és az ülőhely nem mozdítható. Tegyél egy vastag elnyelőt (legalább {thickness}) a fejed mögé.',
     },
+    C01: {
+      desk: 'Asztalnál az asztallap a hangfalak hangját közvetlenül a direkt hang után a füledhez veri vissza, és ez színezi a hangot. Ha kis állványokkal megemeled a hangfalakat és a füled felé fordítod őket, vagy az asztal hátsó szélére teszed, ez a visszaverődés gyengül.',
+    },
+    C02: {
+      quiet:
+        'A hangfalaid nagyjából {lowFrequencyMinus6dB}-ig szólnak; a szoba legmélyebb rezonanciája {frequency}, jóval ez alatt, így alig gerjesztik. Azokat a rezonanciákat, amelyeket elérnek, a térkép már figyelembe veszi.',
+    },
+    C03: {
+      bed: 'Az ágyban a füled a párna közelében van, lejjebb, mint ülve. Engedd lejjebb a hangfalakat, vagy döntsd őket lefelé, hogy a magassugárzók a fejed felé nézzenek: a magas hangok a hangfal tengelyében a legegyenletesebbek.',
+    },
     D01: {
       match:
         'Állítsd be a hangfal fal-távolság beállítását a hátulja és a fal közötti {clearance} távolságra. {zone}',
@@ -1320,6 +1358,16 @@ export const hu: Messages = {
         'A fejed {distance} távolságra van a hátsó faltól. Ha teheted, told előrébb az ülőhelyet: ez mindennél többet segít.',
       absorber:
         'A fejed {distance} távolságra van a hátsó faltól, és az ülőhely nem mozdulhat. Valami vastag, puha a fejed mögött segít.',
+    },
+    C01: {
+      desk: 'Asztalnál az asztallap a füledhez veri vissza a hangot. Emeld meg kicsit a hangfalakat és fordítsd őket a füled felé, vagy tedd őket az asztal hátsó szélére.',
+    },
+    C02: {
+      quiet:
+        'A hangfalaid nem szólnak olyan mélyen, mint a szobád legmélyebb búgása, így az nálad csendes marad: eggyel kevesebb gond. Azokat, amelyeket elérnek, a térkép már figyelembe veszi.',
+    },
+    C03: {
+      bed: 'Az ágyban a füled lejjebb van, mint ülve. Engedd lejjebb a hangfalakat, vagy döntsd őket kicsit lefelé, hogy a magassugárzók a párnád felé nézzenek.',
     },
     D01: {
       match:

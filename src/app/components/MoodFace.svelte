@@ -17,7 +17,14 @@
 </script>
 
 {#key word}
-  <span class="face {word}" role="img" aria-label={label} title={label}>
+  <!-- Without a label it is decoration (the button around it says what it means). -->
+  <span
+    class="face {word}"
+    role={label ? 'img' : undefined}
+    aria-label={label || undefined}
+    aria-hidden={label ? undefined : 'true'}
+    title={label || undefined}
+  >
     {#if style === 'emoji'}
       <span class="emoji" aria-hidden="true">{EMOJI[word]}</span>
     {:else}

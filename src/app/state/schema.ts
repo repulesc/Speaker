@@ -91,6 +91,14 @@ const variant = obj({
   }),
   objects: distinctIds(arr(object, SIZE_LIMITS.objects)),
   busyness: optional(known(oneOf(['bare', 'some', 'busy', 'very-busy']))),
+  previous: optional(
+    obj({
+      key: str(SIZE_LIMITS.name),
+      score: num(0, 1),
+      at: str(40),
+      hidden: optional(bool),
+    }),
+  ),
 });
 
 const patch = obj({
@@ -212,6 +220,7 @@ export const projectSchema: Check = obj({
         text: optional(text),
         experimentId: optional(str(SIZE_LIMITS.name)),
         setupKey: optional(str(SIZE_LIMITS.name)),
+        about: optional(oneOf(['position', 'before', 'speakers'])),
       }),
       SIZE_LIMITS.notes,
     ),

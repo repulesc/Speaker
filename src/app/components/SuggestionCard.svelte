@@ -4,10 +4,13 @@
   import type { Advice } from '../../engine/types';
   import { advicePlainText, adviceText, scoreNumber, scoreWord } from '../findings/text';
   import { prefs } from '../prefs.svelte';
+  import { roomFound } from '../findings/roomFacts';
   import { visibleAdvice } from '../findings/visible';
   import { applyCandidate, cabinet } from '../plan/placement';
   import { analysis, showNotice, workspace } from '../session.svelte';
   import { goalOf, type Goal } from '../state/goal';
+  import { liveWithItShown, rememberBefore } from '../listen/liveWithIt';
+  import LiveWithIt from './LiveWithIt.svelte';
   import MoodFace from './MoodFace.svelte';
   import PlacementOptions from './PlacementOptions.svelte';
   import { ui } from '../ui.svelte';
@@ -133,7 +136,11 @@
     const placement = $state.snapshot(shown);
     const now = $state.snapshot(project.variants.find((v) => v.id === project.activeVariantId)!);
     ui.showChange({ speakers: now.speakers, listener: now.listener.ears });
-    workspace.edit((p) => void applyCandidate(p, placement));
+    const scoreBefore = ok?.current.score ?? 0;
+    workspace.edit((p) => {
+      rememberBefore(p, scoreBefore);
+      applyCandidate(p, placement);
+    });
     ui.candidate = null;
     showNotice('success', i18n.t('suggest.applied'), { undo: true });
   }
@@ -216,6 +223,10 @@
     {:else}
       <p class="brief" data-share="verdict" data-testid="brief">{brief}</p>
       {#if areaLine}<p class="caption area" data-testid="area">{areaLine}</p>{/if}
+      <p class="found" data-testid="found">
+        <span class="found-label">{i18n.t('found.label')}</span>
+        {roomFound(ok, prefs.numbers)}
+      </p>
       {#if prefs.numbers}
         <p class="caption" data-testid="score-numbers">
           {i18n.t('result.scores', {
@@ -235,6 +246,10 @@
       {/if}
     {/if}
   </section>
+
+  {#if ok && liveWithItShown(project)}
+    <LiveWithIt scoreNow={ok.current.score} />
+  {/if}
 
   {#if ok}
     {#if allFixed}
@@ -461,6 +476,20 @@
   }
   .area {
     margin: -8px 0 0;
+  }
+  /* What we found: a quiet line about the room itself, apart from the verdict. */
+  .found {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+  }
+  .found-label {
+    display: block;
+    color: var(--ink-muted);
+    font-weight: 600;
   }
   /* Three text styles only (owner feedback): the title, the answer in body text (the brief in
      bold), and quiet captions for the numbers. */

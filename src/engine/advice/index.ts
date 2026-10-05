@@ -1,5 +1,8 @@
 import type { AnalysisContext } from '../context';
 import type { Advice, Finding, Placement } from '../types';
+import { C01 } from './C01-desk-reflection';
+import { C02 } from './C02-below-the-boom';
+import { C03 } from './C03-bed';
 import { D01 } from './D01-wall-setting';
 import { D02 } from './D02-bass-trim';
 import { D03 } from './D03-treble-trim';
@@ -17,7 +20,22 @@ import { T06 } from './T06-behind-the-seat';
 
 /** Treatment advisor (T) and speaker settings (D), docs/RULE_CATALOGUE.md. */
 export const TREATMENT_RULES: readonly AdviceRule[] = [T01, T02, T03, T04, T05, T06];
-export const SETTINGS_RULES: readonly AdviceRule[] = [D01, D02, D03, D04, D05, D06, D07];
+/**
+ * Speaker settings (D) and the contextual tips (C, V7): they speak only for a specific situation
+ * (a desk, a bed, small speakers in a long room), never as tips for everyone.
+ */
+export const SETTINGS_RULES: readonly AdviceRule[] = [
+  D01,
+  D02,
+  D03,
+  D04,
+  D05,
+  D06,
+  D07,
+  C01,
+  C02,
+  C03,
+];
 
 function run(
   rules: readonly AdviceRule[],

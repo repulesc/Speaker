@@ -251,6 +251,8 @@ export interface ListeningNote {
   experimentId?: string;
   /** Fingerprint of the setup as it stood when the note was written (positions, objects). */
   setupKey?: string;
+  /** A "Live with it" face: this position, the one before Apply, or the speakers overall (V7). */
+  about?: 'position' | 'before' | 'speakers';
 }
 
 // ── Project ───────────────────────────────────────────────────────────────
@@ -263,6 +265,11 @@ export interface SetupVariant {
   objects: RoomObject[];
   /** How full the room is; placed objects can raise this estimate, never lower it. */
   busyness?: Known<Busyness>;
+  /**
+   * The arrangement before the last Apply (V7, "Live with it"): its fingerprint and the app's
+   * score for it, so the listener can rate both and see the two side by side.
+   */
+  previous?: { key: string; score: number; at: string; hidden?: boolean };
 }
 
 export interface Project {

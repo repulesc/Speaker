@@ -634,6 +634,34 @@ export const en = {
     nothing: 'No placement fits your limits. Let more things move.',
     zoneCost: 'Within {zone}: {inside}. With more room: {outside}.',
   },
+  found: {
+    label: 'What we found',
+    dead: 'A calm room, with plenty of soft things to soak up sound.',
+    balanced: 'A balanced room: not too echoey, not too dead.',
+    live: 'A lively room: sound bounces around a lot.',
+    note: 'Its deepest resonance is close to a {pitch} {letter}.',
+    veryLow: 'very low',
+    low: 'low',
+    numbers: 'Reverberation {t60} s; deepest resonance {note}, {f}.',
+    letters: 'C,C♯,D,D♯,E,F,F♯,G,G♯,A,A♯,B',
+  },
+  live: {
+    title: 'Live with it',
+    intro:
+      'Give it a few evenings. A quick listen can mislead; after a few days you hear more. Then tell yourself how it feels.',
+    position: 'This position',
+    before: 'The one before',
+    speakers: 'Your speakers, overall',
+    face: { 1: 'Not really', 3: 'It’s fine', 5: 'Love it' },
+    compare: {
+      agree: 'You like this one more, and so does the app.',
+      disagree:
+        'You liked the one before more. The app scores this one higher, but your ears decide: give it a few more evenings, then trust what you hear.',
+      same: 'You like both about the same. In your room, the difference may simply be small.',
+    },
+    local: 'Kept on this device only.',
+    hide: 'Hide',
+  },
   result: {
     title: 'Your result',
     brief: {
@@ -1169,7 +1197,7 @@ export const en = {
     details: 'Details',
     first: 'If you can only do one thing',
     roomTitle: 'Room treatment',
-    settingsTitle: 'Speaker settings',
+    settingsTitle: 'Your speakers and how you listen',
     none: 'Nothing to suggest for this setup.',
     invest: 'Bigger investment',
     heldBack:
@@ -1236,6 +1264,16 @@ export const en = {
         'Your head is {distance} from the back wall. Move the seat forward if you can: it helps more than any treatment.',
       absorber:
         'Your head is {distance} from the back wall and the seat cannot move. Put a thick absorber (at least {thickness}) behind your head.',
+    },
+    C01: {
+      desk: 'At a desk, the desk top reflects sound from the speakers to your ears just after the direct sound, which colours it. Raising the speakers on small stands and aiming them at your ears, or setting them at the back edge of the desk, makes that reflection weaker.',
+    },
+    C02: {
+      quiet:
+        'Your speakers reach down to about {lowFrequencyMinus6dB}; the room’s deepest resonance is at {frequency}, well below that, so it is barely excited. The resonances they do reach are already in the map.',
+    },
+    C03: {
+      bed: 'In bed your ears are near the pillow, lower than when you sit. Lower the speakers or tilt them down so the tweeters point at your head: treble is most even on the speaker’s axis.',
     },
     D01: {
       match:
@@ -1304,6 +1342,16 @@ export const en = {
         'Your head is {distance} from the back wall. Move the seat forward if you can: it helps more than anything else.',
       absorber:
         'Your head is {distance} from the back wall and the seat cannot move. Something thick and soft behind your head helps.',
+    },
+    C01: {
+      desk: 'At a desk, the desk top bounces sound to your ears. Raise the speakers a little and point them at your ears, or set them at the back edge of the desk.',
+    },
+    C02: {
+      quiet:
+        'Your speakers don’t play as low as your room’s deepest boom, so it stays quiet for you: one thing less to worry about. The map already counts the ones they do reach.',
+    },
+    C03: {
+      bed: 'In bed, your ears are lower than when you sit. Lower the speakers or tilt them down a little, so the tweeters point at your pillow.',
     },
     D01: {
       match:

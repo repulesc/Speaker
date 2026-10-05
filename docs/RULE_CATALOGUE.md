@@ -285,6 +285,18 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Sources:** [ITU775] (the stereo pair at ±30° in front of the listener), [TOOLE]. The 0.5 m margin and the cap are design choices, not from a source.
 - **Test case:** `tests/engine/trust.test.ts`: speakers 1 m behind the seat → Poor with this red flag; beside the seat → Poor; a normal setup → untouched.
 
+### C01–C03 · Contextual tips (V7)
+
+Tips that speak only in one situation, never as advice for everyone (owner decision, docs/ROADMAP_V7.md). Each has a plain sentence and the detailed one under Details or with "Show the numbers".
+
+| Rule | When | Says | Level | Sources |
+|---|---|---|---|---|
+| C01 | You listen at a desk (Desk, or close listening) | The desk top reflects sound to the ears just after the direct sound; raise the speakers and aim them at the ears, or set them at the back edge. | 🟠 (the reflection is geometry, as P06; no size claimed) | [KUT], [TOOLE] (chapter not checked) |
+| C02 | You told us about the speakers, and their −6 dB point is at least 1.5 × the room's deepest resonance | That resonance is barely excited (output below f6 falls 12–24 dB per octave, as in P09); the ones they reach are already in the map. | 🔴 | [KUT], [TOOLE] |
+| C03 | You listen in bed | Ears are lower than seated; lower or tilt the speakers so the tweeters point at the pillow. No angle is computed (the pillow height is unknown). | 🟠 | [ITU1116], [TOOLE] |
+
+Tests: `tests/engine/advice.test.ts` ("contextual tips"): none by default, each in its situation, C02 never for the generic speaker.
+
 ---
 
 ## 🟡 Heuristics (shown as reference guides, never scored)

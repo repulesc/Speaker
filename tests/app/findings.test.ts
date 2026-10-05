@@ -131,6 +131,7 @@ const ADVICE_SAMPLE: Record<string, Record<string, number | string>> = {
   'D07.bassCut': { gain: 'high' },
   'D07.trebleLift': { t60: 0.2, suggestDb: 0.5 },
   'D07.trebleCut': { t60: 0.8, suggestDb: -0.5 },
+  'C02.quiet': { lowFrequencyMinus6dB: 60, frequency: 28.6 },
 };
 
 describe('advice texts', () => {

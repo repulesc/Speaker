@@ -76,7 +76,8 @@ export function ratingsBySetup(
   const current = new Map(variants.map((v) => [v.id, setupKey(v)]));
   const map = new Map<string, number[]>();
   for (const n of notes) {
-    if (n.rating && n.setupKey === current.get(n.variantId)) {
+    // A face for the speakers overall says nothing about where they stand.
+    if (n.rating && n.about !== 'speakers' && n.setupKey === current.get(n.variantId)) {
       map.set(n.variantId, [...(map.get(n.variantId) ?? []), n.rating]);
     }
   }
