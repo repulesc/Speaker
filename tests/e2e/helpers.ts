@@ -1,5 +1,11 @@
 import type { Page } from '@playwright/test';
 
+/** The first-run survey opens on a welcome card; "Start" moves on to the first question. */
+export async function startSurvey(page: Page) {
+  const start = page.getByRole('dialog').getByRole('button', { name: 'Start', exact: true });
+  if (await start.count()) await start.click();
+}
+
 /**
  * Fills the three room fields (English labels) and moves focus away so the values commit. On a
  * new project they are the survey's first screen; the rest of the survey is skipped (defaults:
@@ -12,6 +18,7 @@ export async function fillRoom(
   height: string,
   goal?: 'Where to put my speakers' | 'Where to sit' | 'Both',
 ) {
+  await startSurvey(page);
   await page.getByLabel('Width', { exact: true }).fill(width);
   await page.getByLabel('Length', { exact: true }).fill(length);
   await page.getByLabel('Ceiling height').fill(height);

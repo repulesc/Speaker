@@ -332,7 +332,12 @@
         style="left:{px(0)}px; top:{py(0)}px; width:{speakerGrid.nx *
           2 *
           speakerGrid.step *
-          frame.scale}px; height:{speakerGrid.ny * speakerGrid.step * frame.scale}px"
+          frame.scale}px; height:{speakerGrid.ny *
+          speakerGrid.step *
+          frame.scale}px; clip-path: inset(0 {Math.max(
+          0,
+          speakerGrid.nx * 2 * speakerGrid.step * frame.scale - W * frame.scale,
+        )}px 0 0)"
       ></canvas>
     {:else if showHeat && layers}
       <canvas

@@ -2,6 +2,8 @@
   import { tick } from 'svelte';
   import { SPEAKER_TYPES } from '../../engine/presets/speakerTypes';
   import { i18n } from '../../i18n/locale.svelte';
+  import { LOCALES } from '../../i18n/translate';
+  import { APP_NAME } from '../config';
   import { formatLength } from '../../units/format';
   import {
     activeVariant,
@@ -27,7 +29,8 @@
    */
   const TOTAL = 4;
   const STEPS = [1, 2, 3, 4];
-  let screen = $state(1);
+  /** 0 is the welcome: what this is, that it is free, and the language. */
+  let screen = $state(0);
   let card = $state<HTMLElement>();
 
   const project = $derived(workspace.project);
@@ -83,14 +86,40 @@
 <div class="backdrop" onkeydown={onKeydown} role="presentation">
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="survey-title" bind:this={card}>
     <div class="top">
-      <span class="count">{i18n.t('survey.step', { n: screen, total: TOTAL })}</span>
-      <div class="dots" aria-hidden="true">
-        {#each STEPS as n (n)}<span class:on={n <= screen}></span>{/each}
+      {#if screen > 0}
+        <span class="count">{i18n.t('survey.step', { n: screen, total: TOTAL })}</span>
+        <div class="dots" aria-hidden="true">
+          {#each STEPS as n (n)}<span class:on={n <= screen}></span>{/each}
+        </div>
+      {:else}
+        <span class="brand">{APP_NAME}</span>
+        <span class="grow"></span>
+      {/if}
+      <div class="lang" role="radiogroup" aria-label={i18n.t('language.label')}>
+        {#each LOCALES as l (l)}
+          <label>
+            <input
+              type="radio"
+              name="survey-language"
+              checked={i18n.locale === l}
+              onchange={() => (i18n.locale = l)}
+            />
+            <span>{l.toUpperCase()}</span>
+          </label>
+        {/each}
       </div>
       <button type="button" class="link" onclick={finish}>{i18n.t('survey.skip')}</button>
     </div>
 
-    {#if screen === 1}
+    {#if screen === 0}
+      <h2 id="survey-title" tabindex="-1">{i18n.t('survey.welcome.title')}</h2>
+      <p class="lead">{i18n.t('survey.welcome.body')}</p>
+      <ul class="promises">
+        <li>{i18n.t('survey.welcome.free')}</li>
+        <li>{i18n.t('survey.welcome.private')}</li>
+        <li>{i18n.t('survey.welcome.short')}</li>
+      </ul>
+    {:else if screen === 1}
       <h2 id="survey-title" tabindex="-1">{i18n.t('survey.room.title')}</h2>
       <p class="help">
         {i18n.t('survey.room.help', {
@@ -206,7 +235,7 @@
     {/if}
 
     <div class="actions">
-      {#if screen > 1}
+      {#if screen > 0}
         <button type="button" class="link" onclick={() => go(screen - 1)}
           >{i18n.t('survey.back')}</button
         >
@@ -216,7 +245,8 @@
           type="button"
           class="btn primary"
           disabled={screen === 1 && !room}
-          onclick={() => go(screen + 1)}>{i18n.t('survey.next')}</button
+          onclick={() => go(screen + 1)}
+          >{i18n.t(screen === 0 ? 'survey.start' : 'survey.next')}</button
         >
       {:else}
         <button type="button" class="btn primary" onclick={finish}>{i18n.t('survey.done')}</button>
@@ -255,6 +285,72 @@
     gap: 12px;
     color: var(--ink-muted);
     font-size: var(--text-sm);
+  }
+  .brand {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .grow {
+    flex: 1;
+  }
+  .lang {
+    display: flex;
+    padding: 2px;
+    border-radius: 8px;
+    background: var(--fill);
+  }
+  .lang label {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-width: 36px;
+    min-height: 32px;
+    border-radius: 6px;
+    color: var(--ink);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+  .lang input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .lang label:has(input:checked) {
+    background: var(--thumb);
+    color: var(--thumb-ink);
+    font-weight: 600;
+  }
+  .lang label:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  @media (pointer: coarse) {
+    .lang label {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+  .lead {
+    margin: -4px 0 0;
+    font-size: var(--text-md);
+    line-height: 1.5;
+  }
+  .promises {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--ink-muted);
+    font-size: var(--text-md);
+  }
+  .promises li::before {
+    content: '✓';
+    margin-right: 10px;
+    color: var(--ok);
+    font-weight: 700;
   }
   .dots {
     display: flex;

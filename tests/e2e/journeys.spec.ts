@@ -218,7 +218,8 @@ test('projects: new, switch, rename and delete', async ({ page }) => {
   await openMenu(page);
   await page.getByRole('button', { name: 'New project' }).click();
   // A new project starts with the survey.
-  await expect(page.getByRole('dialog', { name: 'How big is your room?' })).toBeVisible();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button', { name: 'Start', exact: true }).click();
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('');
   await page.getByRole('button', { name: 'Skip' }).click();
 
@@ -236,12 +237,20 @@ test('projects: new, switch, rename and delete', async ({ page }) => {
 test('first run: the survey asks four questions, then shows the answer', async ({ page }) => {
   await page.goto('/');
   const survey = page.getByRole('dialog');
+  // The welcome says what this is, that it is free, and lets you pick the language.
+  await expect(survey).toContainText('Where should your speakers go?');
+  await expect(survey).toContainText('Free, with no sign-up and no email');
+  await survey.getByRole('radio', { name: 'HU' }).check({ force: true });
+  await expect(survey).toContainText('Ingyenes');
+  await survey.getByRole('radio', { name: 'EN' }).check({ force: true });
+  await survey.getByRole('button', { name: 'Start' }).click();
   await expect(survey).toContainText('1 of 4');
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled(); // a room size first
   await fillRoom(page, '4.2', '5.5', '2.6', 'Where to put my speakers');
   // fillRoom skips after the goal; start again to walk all four screens.
   await openMenu(page);
   await page.getByRole('button', { name: 'New project' }).click();
+  await page.getByRole('button', { name: 'Start', exact: true }).click();
   await page.getByLabel('Width', { exact: true }).fill('4.2');
   await page.getByLabel('Length', { exact: true }).fill('5.5');
   await page.getByLabel('Length', { exact: true }).blur();

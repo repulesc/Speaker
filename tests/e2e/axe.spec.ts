@@ -24,6 +24,8 @@ for (const scheme of ['light', 'dark'] as const) {
 
     test('empty workbench (the first-run survey)', async ({ page }) => {
       await page.goto('/');
+      await page.getByRole('dialog').waitFor();
+      await page.waitForTimeout(800); // the card fades in; scan the finished colours
       await expectAccessible(page);
     });
 
