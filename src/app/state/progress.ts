@@ -1,6 +1,6 @@
 import type { Project, SpeakerProfile } from '../../engine/types';
 import { activeVariant } from '../plan/placement';
-import { speakerFromType } from './defaults';
+import { speakerFromChoices } from './defaults';
 import type { SectionId } from '../session.svelte';
 
 /**
@@ -33,14 +33,15 @@ export function setupProgress(project: Project): Record<SectionId, Status> {
 
 /**
  * Whether the user has said anything about the speakers themselves: a name, or any value that is
- * not the generic starting speaker's (a type, a port, a size typed in). Before V7 only placing the
+ * not the generic starting speaker's (an answer to a speaker question, a size typed in). Before V7 only placing the
  * speakers counted, so filling in the speaker data left the section unticked (owner feedback).
  */
 function speakerTold(speaker: SpeakerProfile): boolean {
   if (speaker.brand.trim() || speaker.model.trim()) return true;
+  if (speaker.choices && Object.keys(speaker.choices).length > 0) return true;
   const values = (s: SpeakerProfile) =>
     JSON.stringify({ ...s, id: '', brand: '', model: '', provenance: null });
-  return values(speaker) !== values(speakerFromType());
+  return values(speaker) !== values(speakerFromChoices());
 }
 
 /** How many of the five sections are set, for "3 of 5 set". */

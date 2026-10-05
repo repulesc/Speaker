@@ -5,6 +5,8 @@
  * y along the length (L) away from the front (speaker) wall, z up (H).
  */
 
+import type { SpeakerChoices } from './presets/speakerKinds';
+
 export type Certainty = 'measured' | 'estimated' | 'unknown';
 
 /** A user-provided value plus its certainty. `value` is null only when certainty is 'unknown'. */
@@ -172,6 +174,8 @@ export interface SpeakerProfile {
   /** Manufacturer minimum distance, rear panel to wall (G07). */
   minWallDistance?: Known<number>;
   designedForCorner?: boolean;
+  /** The answers to the speaker questions the typical values came from (V7); none = not asked. */
+  choices?: SpeakerChoices;
   manufacturerNotes: { text: string; source: SourceRef }[];
   provenance: { sources: SourceRef[]; verified: boolean; lastReviewed?: string };
 }

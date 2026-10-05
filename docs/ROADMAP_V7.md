@@ -36,7 +36,7 @@ the cards and visual polish second.
    (owner decision), but only real candidates are coloured by score.
 5. Reproduce and fix the speaker-progress marker (item 5).
 
-### Phase 2: speaker choice that means something (Sonnet; Opus checks the numbers once)
+### Phase 2: speaker choice that means something — DONE
 
 **Owner decisions (round 2):** speakers behind the seat are simply kept at "Poor" (capped, with the
 warning); every word on screen uses the cautious score. The speaker choice is several dropdowns,
@@ -63,11 +63,13 @@ nothing else is asked.
 | Spread of sound | Narrow · Typical · Wide | unchanged: advice only |
 | Placed on | Floor · Stand · Desk or shelf | base height (it matters for the tweeter height and the floor bounce) |
 
-Rules: every choice maps to typical values (`engine/presets/speakerTypes.ts`), each value is an
+Rules: every choice maps to typical values (`engine/presets/speakerKinds.ts`), each value is an
 estimate marked as such, there is a test per mapping, and **no brand or model data from memory**
 (CLAUDE.md). The exact numbers stay editable under "More details" for the person who has the
 manual. The same dropdowns appear on the survey's speaker screen, in fewer steps (Kind, Size, Port).
 A guard: combinations that cannot exist (a "small floorstander" with 2 cm depth) are not offered.
+
+**As built:** `engine/presets/speakerKinds.ts` holds one table: five kinds (bookshelf or stand, floorstander, studio monitor, small desktop, on or in the wall) × three sizes, each with a typical box and bass point, the kind's usual drivers, port and place, and its typical directivity. All 🟡 typical values, not from a source and never a brand. "Not sure" everywhere is the medium bookshelf speaker the app always used. Tweeter and woofer heights follow from the box height and the drivers. "They stand on" sets the base height of both speakers in every setup: the floor, a 0.75 m desk top, or a stand that puts the tweeter at seated ear height (1.1 m). "Made for" changes nothing in the physics; for studio monitors it offers "I listen at a desk". Every kind and size has a test that the tweeter sits inside the cabinet and bigger boxes go at least as low. The old picture cards are gone; the survey asks Kind, Size and Port.
 
 ### Phase 3: one visual system (Sonnet; Opus reviews the result once)
 

@@ -3,7 +3,12 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { analyze } from '../../src/engine/analyze';
 import { buildContext } from '../../src/engine/context';
 import { modeField } from '../../src/engine/modeField';
-import { SPEAKER_TYPES } from '../../src/engine/presets/speakerTypes';
+import {
+  DRIVER_CHOICES,
+  PORT_CHOICES,
+  SPEAKER_KINDS,
+  SPEAKER_SIZES,
+} from '../../src/engine/presets/speakerKinds';
 import { SURFACE_PRESETS } from '../../src/engine/presets/surfaces';
 import { avoidsRedFlags, isValidPlacement, makeScorer } from '../../src/engine/scoring/search';
 import type {
@@ -16,7 +21,7 @@ import type {
   SurfacePresetId,
 } from '../../src/engine/types';
 import { adviceText, findingText } from '../../src/app/findings/text';
-import { speakerFromType } from '../../src/app/state/defaults';
+import { speakerFromChoices } from '../../src/app/state/defaults';
 import { OBJECT_DEFAULTS } from '../../src/app/plan/placement';
 import { i18n } from '../../src/i18n/locale.svelte';
 import { estimated, makeProject } from '../fixtures/projects';
@@ -53,7 +58,15 @@ const projectArb = fc
     seat: unit,
     earZ: fc.double({ min: 0.7, max: 1.5, noNaN: true }),
     standZ: fc.double({ min: 0, max: 1.1, noNaN: true }),
-    type: fc.integer({ min: 0, max: SPEAKER_TYPES.length - 1 }),
+    choices: fc.record(
+      {
+        kind: fc.constantFrom(...SPEAKER_KINDS),
+        size: fc.constantFrom(...SPEAKER_SIZES),
+        drivers: fc.constantFrom(...DRIVER_CHOICES),
+        port: fc.constantFrom(...PORT_CHOICES),
+      },
+      { requiredKeys: [] },
+    ),
     surfaces: fc.array(fc.constantFrom(...PRESETS), { minLength: 6, maxLength: 6 }),
     busy: fc.constantFrom(...BUSY),
     goals: fc.array(fc.integer({ min: 0, max: 2 }), { minLength: 5, maxLength: 5 }),
@@ -72,7 +85,7 @@ const projectArb = fc
     ),
   })
   .map((r): Project => {
-    const speaker = speakerFromType(SPEAKER_TYPES[r.type]);
+    const speaker = speakerFromChoices(r.choices);
     if (r.dsp) {
       speaker.dsp = {
         treble: { minDb: -3, maxDb: 3, stepDb: 0.5 },

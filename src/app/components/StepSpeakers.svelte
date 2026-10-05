@@ -1,13 +1,5 @@
 <script lang="ts">
-  import { SPEAKER_TYPES } from '../../engine/presets/speakerTypes';
-  import type {
-    Certainty,
-    DriverLayout,
-    EnclosureType,
-    Known,
-    PortLocation,
-    SpeakerProfile,
-  } from '../../engine/types';
+  import type { Certainty, EnclosureType, Known, SpeakerProfile } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { downloadText } from '../download';
@@ -25,7 +17,6 @@
   import { showNotice, workspace } from '../session.svelte';
   import { SIZE_LIMITS } from '../state/limits';
   import {
-    applySpeakerType,
     parseSpeakerJson,
     seatMode,
     serializeSpeaker,
@@ -33,16 +24,12 @@
     setSeatRange,
     speakerFileName,
     type SeatMode,
-    speakerTypeOf,
-    DISPERSIONS,
-    dispersionOf,
-    setDispersion,
   } from '../state/speaker';
   import { ui } from '../ui.svelte';
   import CertaintyChips from './CertaintyChips.svelte';
   import LengthField from './LengthField.svelte';
   import LengthInput from './LengthInput.svelte';
-  import SpeakerTypeIcon from './SpeakerTypeIcon.svelte';
+  import SpeakerQuestions from './SpeakerQuestions.svelte';
 
   const project = $derived(workspace.project);
   const speaker = $derived(project.speaker);
@@ -52,20 +39,11 @@
   const cab = $derived(cabinet(project));
   const constraints = $derived(project.constraints);
 
-  const ports: PortLocation[] = ['front', 'rear', 'down', 'side', 'none', 'unknown'];
   const enclosures: EnclosureType[] = [
     'sealed',
     'ported',
     'passive-radiator',
     'open-baffle',
-    'unknown',
-  ];
-  const layouts: DriverLayout[] = [
-    'coaxial',
-    'two-way',
-    'three-way',
-    'full-range',
-    'other',
     'unknown',
   ];
   const modes: SeatMode[] = ['free', 'range', 'fixed'];
@@ -76,10 +54,7 @@
   let fileInput = $state<HTMLInputElement>();
 
   /** A categorical answer is the user's own ('measured'); "don't know" clears it. */
-  function setKnown<K extends 'portLocation' | 'enclosure' | 'driverLayout'>(
-    key: K,
-    value: string,
-  ) {
+  function setKnown<K extends 'enclosure'>(key: K, value: string) {
     workspace.edit((p) => {
       const known = (
         value === 'unknown'
@@ -178,9 +153,6 @@
   }
 
   const range = $derived<[number, number]>(constraints.listenerYRange ?? [0.5, 4.7]);
-
-  /** The type whose typical values the speaker still has; none once the user changes them. */
-  const chosenType = $derived(speakerTypeOf(speaker)?.id ?? null);
 </script>
 
 <div class="step">
@@ -189,31 +161,7 @@
     <p class="intro">{i18n.t('speakers.intro')}</p>
   </div>
 
-  <!-- Configurator: the closest type, where they stand, what can move. The rest is folded away. -->
-  <fieldset>
-    <legend>{i18n.t('speakers.type.legend')}</legend>
-    <p class="help">{i18n.t('speakers.type.help')}</p>
-    <div class="cards" role="radiogroup" aria-label={i18n.t('speakers.type.legend')}>
-      {#each SPEAKER_TYPES as type (type.id)}
-        <label class="card">
-          <input
-            type="radio"
-            name="speaker-type"
-            value={type.id}
-            checked={chosenType === type.id}
-            onchange={() => workspace.edit((p) => applySpeakerType(p, type.id))}
-          />
-          <SpeakerTypeIcon {type} />
-          <span class="card-title">{i18n.t(`speakers.type.${type.id}.name`)}</span>
-          <span class="card-sub">{i18n.t(`speakers.type.${type.id}.help`)}</span>
-          <svg class="check" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-            <circle cx="10" cy="10" r="10" />
-            <path d="M5.5 10.5l3 3 6-6.5" />
-          </svg>
-        </label>
-      {/each}
-    </div>
-  </fieldset>
+  <SpeakerQuestions />
 
   {#if !room}
     <section class="group">
@@ -482,19 +430,6 @@
           {/each}
 
           <div class="field">
-            <label for="speaker-port">{i18n.t('speakers.port.label')}</label>
-            <select
-              id="speaker-port"
-              class="input"
-              value={speaker.portLocation.value ?? 'unknown'}
-              onchange={(e) => setKnown('portLocation', e.currentTarget.value)}
-            >
-              {#each ports as v (v)}<option value={v}>{i18n.t(`speakers.port.${v}`)}</option>{/each}
-            </select>
-            <p class="help">{i18n.t('speakers.port.help')}</p>
-          </div>
-
-          <div class="field">
             <label for="speaker-enclosure">{i18n.t('speakers.enclosure.label')}</label>
             <select
               id="speaker-enclosure"
@@ -507,42 +442,6 @@
                 >{/each}
             </select>
           </div>
-
-          <div class="field">
-            <label for="speaker-layout">{i18n.t('speakers.layout.label')}</label>
-            <select
-              id="speaker-layout"
-              class="input"
-              value={speaker.driverLayout.value ?? 'unknown'}
-              onchange={(e) => setKnown('driverLayout', e.currentTarget.value)}
-            >
-              {#each layouts as v (v)}<option value={v}>{i18n.t(`speakers.layout.${v}`)}</option
-                >{/each}
-            </select>
-            <p class="help">{i18n.t('speakers.layout.help')}</p>
-          </div>
-
-          <fieldset>
-            <legend>{i18n.t('speakers.quick.dispersion.label')}</legend>
-            <p class="help">{i18n.t('speakers.quick.dispersion.help')}</p>
-            <div
-              class="seg dispersion"
-              role="radiogroup"
-              aria-label={i18n.t('speakers.quick.dispersion.label')}
-            >
-              {#each DISPERSIONS as d (d)}
-                <label>
-                  <input
-                    type="radio"
-                    name="speaker-dispersion"
-                    checked={dispersionOf(speaker) === d}
-                    onchange={() => workspace.edit((p) => setDispersion(p, d))}
-                  />
-                  {i18n.t(`speakers.quick.dispersion.${d}`)}
-                </label>
-              {/each}
-            </div>
-          </fieldset>
 
           <fieldset>
             <legend>{i18n.t('speakers.controls.legend')}</legend>
@@ -663,81 +562,6 @@
     padding: 0;
     font-weight: 600;
   }
-  /* Type cards: a drawing, a name, a check when chosen (like a product configurator). */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-top: 8px;
-  }
-  .card {
-    position: relative;
-    display: grid;
-    justify-items: center;
-    align-content: start;
-    gap: 4px;
-    min-height: 44px;
-    padding: 14px 10px 12px;
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    box-shadow: 0 0 0 1px var(--grid);
-    text-align: center;
-    cursor: pointer;
-    transition: box-shadow 0.15s ease;
-  }
-  .card input {
-    position: absolute;
-    inset: 0;
-    margin: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-  .card:has(input:checked) {
-    box-shadow: 0 0 0 2px var(--accent-fill);
-  }
-  .card:has(input:focus-visible) {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-  }
-  .card :global(.icon) {
-    margin-bottom: 4px;
-  }
-  .card-title {
-    font-size: var(--text-md);
-    font-weight: 600;
-    line-height: 1.25;
-  }
-  .card-sub {
-    color: var(--ink-muted);
-    font-size: var(--text-sm);
-    line-height: 1.3;
-  }
-  .check {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 20px;
-    height: 20px;
-    opacity: 0;
-    transform: scale(0.6);
-    transition:
-      opacity 0.15s ease,
-      transform 0.15s ease;
-  }
-  .check circle {
-    fill: var(--accent-fill);
-  }
-  .check path {
-    fill: none;
-    stroke: #fff;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .card:has(input:checked) .check {
-    opacity: 1;
-    transform: none;
-  }
   .questions {
     display: grid;
     gap: 12px;
@@ -832,8 +656,6 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .card,
-    .check,
     .more-title::after {
       transition: none;
     }

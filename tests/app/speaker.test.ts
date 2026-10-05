@@ -1,8 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { SPEAKER_TYPES } from '../../src/engine/presets/speakerTypes';
+import {
+  DESK_HEIGHT,
+  KIND_PRESETS,
+  PORT_CHOICES,
+  SPEAKER_KINDS,
+  SPEAKER_SIZES,
+  speakerValues,
+} from '../../src/engine/presets/speakerKinds';
+import { DEFAULTS } from '../../src/engine/presets/defaults';
+import { speakerSchema } from '../../src/app/state/schema';
+import { speakerFromChoices } from '../../src/app/state/defaults';
 import { activeVariant, moveSpeaker, setSpeakerSpacing } from '../../src/app/plan/placement';
 import {
-  applySpeakerType,
   parseSpeakerJson,
   seatMode,
   serializeSpeaker,
@@ -10,32 +19,103 @@ import {
   setSeatRange,
   speakerFileName,
   dispersionOf,
-  portChoice,
-  setDispersion,
-  setPort,
-  speakerTypeOf,
+  setSpeakerChoice,
 } from '../../src/app/state/speaker';
 import { genericSpeaker, makeProject } from '../fixtures/projects';
 
-describe('speaker types', () => {
-  it('apply the type but keep brand, model and identity; everything is an estimate', () => {
+describe('the speaker questions (docs/ROADMAP_V7.md, Phase 2)', () => {
+  it('an answer fills in typical values, keeps brand, model and identity; all are estimates', () => {
     const p = makeProject();
     p.speaker.brand = 'Acme';
     p.speaker.model = 'One';
     const id = p.speaker.id;
-    const type = SPEAKER_TYPES.find((t) => t.id === 'floorstander-front-port')!;
-    applySpeakerType(p, type.id);
+    setSpeakerChoice(p, 'kind', 'floorstander');
     expect(p.speaker).toMatchObject({ id, brand: 'Acme', model: 'One' });
-    expect(p.speaker.portLocation).toEqual({ value: 'front', certainty: 'estimated' });
-    expect(p.speaker.dimensions.h.value).toBe(type.h);
+    expect(p.speaker.choices).toEqual({ kind: 'floorstander' });
+    expect(p.speaker.dimensions.h).toEqual({ value: 1.0, certainty: 'estimated' });
+    expect(p.speaker.driverLayout.value).toBe('three-way');
+    expect(p.speaker.portLocation.value).toBe('front');
     expect(p.speaker.provenance.verified).toBe(false);
+    expect(speakerSchema(p.speaker, 'speaker')).toBeNull();
   });
 
-  it('an unknown type id changes nothing', () => {
+  it('"Not sure" everywhere is the generic speaker, and clearing an answer goes back to it', () => {
     const p = makeProject();
-    const before = JSON.stringify(p.speaker);
-    applySpeakerType(p, 'nope');
-    expect(JSON.stringify(p.speaker)).toBe(before);
+    p.speaker = speakerFromChoices();
+    const generic = JSON.stringify({ ...p.speaker, id: '' });
+    setSpeakerChoice(p, 'port', 'sealed');
+    setSpeakerChoice(p, 'port', undefined);
+    expect(p.speaker.choices).toBeUndefined();
+    expect(JSON.stringify({ ...p.speaker, id: '' })).toBe(generic);
+  });
+
+  it('every kind and size is a real box: sizes grow, the tweeter sits inside the cabinet', () => {
+    for (const kind of SPEAKER_KINDS) {
+      let previous = 0;
+      for (const size of SPEAKER_SIZES) {
+        for (const drivers of ['two-way', 'three-way', 'coaxial'] as const) {
+          const v = speakerValues({ kind, size, drivers });
+          expect(v.acousticAxisHeight).toBeGreaterThan(0);
+          expect(v.acousticAxisHeight).toBeLessThan(v.h);
+          expect(v.wooferCentreHeight).toBeGreaterThan(0);
+          expect(v.wooferCentreHeight).toBeLessThanOrEqual(v.acousticAxisHeight);
+          if (drivers === 'coaxial') expect(v.wooferCentreHeight).toBe(v.acousticAxisHeight);
+        }
+        const box = KIND_PRESETS[kind].sizes[size];
+        expect(box.h * box.w * box.d).toBeGreaterThan(previous);
+        previous = box.h * box.w * box.d;
+        // Bigger boxes go at least as low.
+        if (size !== 'small') {
+          const smaller = KIND_PRESETS[kind].sizes[size === 'large' ? 'medium' : 'small'];
+          expect(box.f6).toBeLessThanOrEqual(smaller.f6);
+        }
+      }
+    }
+  });
+
+  it('the port sets sealed or ported and where the port is', () => {
+    for (const port of PORT_CHOICES) {
+      const v = speakerValues({ port });
+      expect(v.enclosure).toBe(port === 'sealed' ? 'sealed' : 'ported');
+      expect(v.portLocation).toBe(port === 'sealed' ? 'none' : port);
+    }
+  });
+
+  it('where they stand sets the base height in every setup: floor, desk top, or tweeter at ear height', () => {
+    const p = makeProject();
+    p.variants.push(structuredClone({ ...p.variants[0]!, id: 'b' }));
+    setSpeakerChoice(p, 'kind', 'floorstander');
+    for (const v of p.variants) expect(v.speakers.left.base.z).toBe(0);
+    setSpeakerChoice(p, 'placedOn', 'desk');
+    for (const v of p.variants) expect(v.speakers.right.base.z).toBe(DESK_HEIGHT);
+    setSpeakerChoice(p, 'kind', 'bookshelf');
+    setSpeakerChoice(p, 'placedOn', 'stand');
+    const z = p.variants[1]!.speakers.left.base.z;
+    expect(z + p.speaker.acousticAxisHeight.value!).toBeCloseTo(DEFAULTS.earHeight, 6);
+  });
+
+  it('a bookshelf answer alone puts the speakers on a stand, not where they were', () => {
+    const p = makeProject();
+    for (const s of ['left', 'right'] as const) p.variants[0]!.speakers[s].base.z = 0;
+    setSpeakerChoice(p, 'kind', 'bookshelf');
+    expect(p.variants[0]!.speakers.left.base.z).toBeGreaterThan(0.5);
+  });
+
+  it('"made for" only records the answer: no physics changes', () => {
+    const p = makeProject();
+    setSpeakerChoice(p, 'kind', 'monitor');
+    const before = JSON.stringify({ ...p.speaker, choices: null });
+    setSpeakerChoice(p, 'madeFor', 'studio');
+    expect(JSON.stringify({ ...p.speaker, choices: null })).toBe(before);
+    expect(p.speaker.choices?.madeFor).toBe('studio');
+  });
+
+  it('a profile with choices round-trips through the speaker file', () => {
+    const p = makeProject();
+    setSpeakerChoice(p, 'kind', 'desktop');
+    setSpeakerChoice(p, 'size', 'small');
+    const back = parseSpeakerJson(serializeSpeaker(p.speaker));
+    expect(back.ok && back.speaker.choices).toEqual({ kind: 'desktop', size: 'small' });
   });
 });
 
@@ -123,41 +203,24 @@ describe('speaker profile files', () => {
   });
 });
 
-describe('the quick speaker questions (survey, docs/ROADMAP_V5.md)', () => {
-  it('the port changes the enclosure and port, and keeps the type', () => {
+describe('how widely they spread sound', () => {
+  it("doubles or halves the kind's estimated Q", () => {
     const p = makeProject();
-    applySpeakerType(p, 'small-bookshelf-rear-port');
-    setPort(p, 'sealed');
-    expect(p.speaker.enclosure.value).toBe('sealed');
-    expect(p.speaker.portLocation.value).toBe('none');
-    expect(portChoice(p.speaker)).toBe('sealed');
-    expect(speakerTypeOf(p.speaker)?.id).toBe('small-bookshelf-rear-port');
-    setPort(p, 'front');
-    expect(p.speaker.enclosure.value).toBe('ported');
-    expect(portChoice(p.speaker)).toBe('front');
-    expect(p.speaker.portLocation.certainty).toBe('estimated');
-  });
-
-  it('two floorstanders that differ only in their port are told apart by it', () => {
-    const p = makeProject();
-    applySpeakerType(p, 'floorstander-rear-port');
-    expect(speakerTypeOf(p.speaker)?.id).toBe('floorstander-rear-port');
-    setPort(p, 'front');
-    expect(speakerTypeOf(p.speaker)?.id).toBe('floorstander-front-port');
-  });
-
-  it("dispersion doubles or halves the type's estimated Q, never below 1", () => {
-    const p = makeProject();
-    applySpeakerType(p, 'floorstander-front-port');
-    const q = SPEAKER_TYPES.find((t) => t.id === 'floorstander-front-port')!.qMid;
+    setSpeakerChoice(p, 'kind', 'floorstander');
+    const q = KIND_PRESETS.floorstander.qMid;
     expect(dispersionOf(p.speaker)).toBe('typical');
-    setDispersion(p, 'narrow');
+    setSpeakerChoice(p, 'spread', 'narrow');
     expect(p.speaker.directivity.qMid.value).toBe(2 * q);
     expect(dispersionOf(p.speaker)).toBe('narrow');
-    setDispersion(p, 'wide');
-    expect(p.speaker.directivity.qMid.value).toBe(Math.max(1, q / 2));
+    setSpeakerChoice(p, 'spread', 'wide');
+    expect(p.speaker.directivity.qMid.value).toBe(q / 2);
     expect(dispersionOf(p.speaker)).toBe('wide');
-    setDispersion(p, 'typical');
-    expect(p.speaker.directivity.qMid.value).toBe(q);
+  });
+
+  it('is read from Q for a loaded profile without answers', () => {
+    const p = makeProject();
+    p.speaker = speakerFromChoices();
+    p.speaker.directivity.qMid = { value: 5, certainty: 'measured' };
+    expect(dispersionOf(p.speaker)).toBe('narrow');
   });
 });

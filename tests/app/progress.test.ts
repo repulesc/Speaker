@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { speakerFromType } from '../../src/app/state/defaults';
-import { setPort } from '../../src/app/state/speaker';
+import { speakerFromChoices } from '../../src/app/state/defaults';
+import { setSpeakerChoice } from '../../src/app/state/speaker';
 import { countDone, setupProgress } from '../../src/app/state/progress';
 import { makeProject, measured } from '../fixtures/projects';
 
@@ -9,7 +9,7 @@ describe('setup progress', () => {
     const p = makeProject();
     p.room.height = { value: null, certainty: 'unknown' };
     p.variants[0]!.speakers.left.certainty = 'unknown';
-    p.speaker = speakerFromType();
+    p.speaker = speakerFromChoices();
     p.surfaces.baseCertainty = {
       front: 'unknown',
       back: 'unknown',
@@ -41,10 +41,10 @@ describe('setup progress', () => {
 
   it('ticks the speakers half when only the speaker data is filled in, fully once placed too', () => {
     const p = makeProject();
-    p.speaker = speakerFromType();
+    p.speaker = speakerFromChoices();
     p.variants[0]!.speakers.left.certainty = 'unknown';
     expect(setupProgress(p).speakers).toBe('todo');
-    setPort(p, 'sealed');
+    setSpeakerChoice(p, 'port', 'sealed');
     expect(setupProgress(p).speakers).toBe('partial');
     p.variants[0]!.speakers.left.certainty = 'estimated';
     expect(setupProgress(p).speakers).toBe('done');

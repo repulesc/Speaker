@@ -266,12 +266,12 @@ test('first run: the survey asks four questions, then shows the answer', async (
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('radio', { name: /^Where to put my speakers/ }).check({ force: true });
   await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('radio', { name: /Coaxial active monitor/ }).check({ force: true });
-  // The port and, folded away, how widely they spread sound.
-  await page.getByRole('radio', { name: 'None (sealed)' }).check({ force: true });
-  await page.getByText('More (optional)').click();
-  await page.getByRole('radio', { name: 'Wide', exact: true }).check({ force: true });
-  await expect(page.getByRole('radio', { name: /Coaxial active monitor/ })).toBeChecked();
+  // Three dropdowns, each starting at "Not sure": kind, size and the bass port.
+  await expect(page.getByLabel('How big?')).toHaveValue('');
+  await page.getByLabel('What kind of speakers?').selectOption('monitor');
+  await page.getByLabel('How big?').selectOption('large');
+  await page.getByLabel('Bass port').selectOption('sealed');
+  await expect(page.getByLabel('What kind of speakers?')).toHaveValue('monitor');
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByLabel('Seat to the front wall').fill('3.2');
   await page.getByLabel('Distance between the speakers').fill('1.8');
@@ -283,9 +283,9 @@ test('first run: the survey asks four questions, then shows the answer', async (
   expect(project.constraints.listenerFixed).toBe(true);
   expect(project.constraints.speakersFixed).toBe(false);
   expect(project.variants[0].listener.ears.y).toBeCloseTo(3.2, 6);
-  expect(project.speaker.driverLayout.value).toBe('coaxial');
+  expect(project.speaker.choices).toEqual({ kind: 'monitor', size: 'large', port: 'sealed' });
   expect(project.speaker.enclosure.value).toBe('sealed');
-  expect(project.speaker.directivity.qMid.value).toBe(1);
+  expect(project.speaker.dimensions.h).toEqual({ value: 0.4, certainty: 'estimated' });
   await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
   await expect(mapChoice(page, 'Speakers')).toBeChecked(); // the map follows the goal
 });
