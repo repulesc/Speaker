@@ -583,10 +583,12 @@ export const hu: Messages = {
       speakers: 'Hangfalakat',
       seat: 'Ülőhelyet',
     },
-    distance: {
-      label: 'Hallgatási távolság',
-      room: 'Szoba',
-      near: 'Asztal',
+    place: {
+      label: 'Honnan hallgatod',
+      chair: 'Fotel',
+      sofa: 'Kanapé',
+      desk: 'Asztal',
+      bed: 'Ágy',
     },
     speakers: 'Hangfalak',
     bass: 'Basszus azon a helyen',
@@ -633,6 +635,20 @@ export const hu: Messages = {
       same: 'Most: {now}. Az alábbi elhelyezés még finomít rajta.',
     },
     idea: 'Ezt is érdemes kipróbálni',
+    area: {
+      even: {
+        sofa: 'A kanapén mindenkinek nagyjából ugyanilyen.',
+        desk: 'Az asztalnál mozogva is nagyjából ugyanilyen.',
+        bed: 'Az ágy egészén nagyjából ugyanilyen.',
+      },
+      uneven: 'Középen: {centre}. {where}: {worst}.',
+      where: {
+        left: 'A bal szélén',
+        right: 'A jobb szélén',
+        front: 'Elöl',
+        back: 'Hátul',
+      },
+    },
   },
   panel: {
     label: 'Beállítások és eredmények',

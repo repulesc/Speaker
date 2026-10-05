@@ -53,7 +53,9 @@ Replaces the "Results" submenus. Top of the side panel, always visible:
 Acceptance: a first-time user can read the verdict, apply a suggestion and see the face change without
 opening any settings section. HU copy fits (type-scale and overflow e2e tests stay green).
 
-### C. Listening area (replaces the single point)
+### C. Listening area (replaces the single point) — DONE
+
+As built: presets only (Chair, Sofa, Desk, Bed), no dragging or resizing, so it does not become one more thing to tweak. Desk replaces the old "listening distance" switch (Desk = sit close). Scoring: the area's spots, middle counting twice, inside the robustness runs (docs/SCORING.md §4). The plan below was the starting point.
 **Default** (owner has not picked yet; chosen because it is simplest for non-engineers):
 - Presets by what you sit on: armchair, sofa (2–3 people), desk, bed. Each is a rectangle of typical
   size with a centre point (armchair ~0.8 x 0.8 m, sofa ~2.0 x 0.9 m, desk ~0.8 x 0.6 m, bed ~1.6 x 0.8 m

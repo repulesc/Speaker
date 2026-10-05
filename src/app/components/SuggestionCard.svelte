@@ -40,6 +40,22 @@
       : i18n.t('result.brief.better', { now, best: bestWord });
   });
 
+  /** With a sofa, desk or bed: whether the whole area does as well as its middle. */
+  const areaLine = $derived.by(() => {
+    const area = ok?.area;
+    if (!area) return '';
+    const word = (score: number) => i18n.t(`results.score.${scoreWord(score)}`);
+    const centre = area.spots.find((s) => s.where === 'centre')!;
+    const worst = area.spots.reduce((w, s) => (s.score < w.score ? s : w), centre);
+    return word(worst.score) === word(centre.score)
+      ? i18n.t(`result.area.even.${area.kind}`)
+      : i18n.t('result.area.uneven', {
+          centre: word(centre.score),
+          where: i18n.t(`result.area.where.${worst.where}`),
+          worst: word(worst.score),
+        });
+  });
+
   /** The one other idea worth trying: the most useful room or speaker-settings advice. */
   const ideas = $derived(ok ? [...ok.advice.treatment, ...ok.advice.settings] : []);
   const idea = $derived<Advice | null>(
@@ -192,6 +208,7 @@
     <p class="caption">{i18n.t('results.needRoom')}</p>
   {:else}
     <p class="brief" data-share="verdict" data-testid="brief">{brief}</p>
+    {#if areaLine}<p class="caption area" data-testid="area">{areaLine}</p>{/if}
     <span class="visually-hidden" data-testid="score-current"
       >{i18n.t(`results.score.${scoreWord(ok.current.score)}`)}</span
     >
@@ -428,6 +445,9 @@
   .alts label {
     min-width: 40px;
     padding: 0 10px;
+  }
+  .area {
+    margin: -8px 0 0;
   }
   .brief {
     margin: -6px 0 0;

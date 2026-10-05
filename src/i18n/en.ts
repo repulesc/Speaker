@@ -571,10 +571,12 @@ export const en = {
       speakers: 'Speakers',
       seat: 'Seat',
     },
-    distance: {
-      label: 'Listening distance',
-      room: 'Room',
-      near: 'Desk',
+    place: {
+      label: 'Where you listen',
+      chair: 'Chair',
+      sofa: 'Sofa',
+      desk: 'Desk',
+      bed: 'Bed',
     },
     speakers: 'Speakers',
     bass: 'Bass at that seat',
@@ -621,6 +623,20 @@ export const en = {
       same: '{now} now. The placement below fine-tunes it.',
     },
     idea: 'Also worth trying',
+    area: {
+      even: {
+        sofa: 'About the same for everyone on the sofa.',
+        desk: 'About the same as you move at the desk.',
+        bed: 'About the same across the bed.',
+      },
+      uneven: 'In the middle: {centre}. {where}: {worst}.',
+      where: {
+        left: 'At the left end',
+        right: 'At the right end',
+        front: 'At the front',
+        back: 'At the back',
+      },
+    },
   },
   panel: {
     label: 'Settings and results',

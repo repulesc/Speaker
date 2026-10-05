@@ -75,7 +75,11 @@ const variant = obj({
   id: str(SIZE_LIMITS.name),
   name: str(SIZE_LIMITS.name),
   speakers: obj({ left: placement, right: placement }),
-  listener: obj({ ears: vec3, certainty: oneOf(CERTAINTY) }),
+  listener: obj({
+    ears: vec3,
+    certainty: oneOf(CERTAINTY),
+    area: optional(oneOf(['sofa', 'desk', 'bed'])),
+  }),
   objects: distinctIds(arr(object, SIZE_LIMITS.objects)),
   busyness: optional(known(oneOf(['bare', 'some', 'busy', 'very-busy']))),
 });

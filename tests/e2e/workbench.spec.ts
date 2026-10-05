@@ -7,6 +7,7 @@ import {
   openApp,
   openMenu,
   openSection,
+  openSettings,
   openWhy,
   savedProject,
   setMoves,
@@ -108,6 +109,25 @@ test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({
   await expect
     .poll(async () => (await savedProject(page)).constraints.listeningDistance)
     .toBe('near');
+});
+
+test('where you listen: a sofa is drawn on the map and judged at both ends', async ({ page }) => {
+  await withResults(page);
+  await openSettings(page);
+  await page
+    .getByRole('radiogroup', { name: 'Where you listen' })
+    .getByRole('radio', { name: 'Sofa' })
+    .check({ force: true });
+  await expect(page.getByTestId('listening-area')).toBeVisible();
+  await expect(page.getByTestId('area')).toHaveText(
+    /^(About the same for everyone on the sofa\.|In the middle: .+\. At the (left|right) end: .+\.)$/,
+  );
+  const project = await savedProject(page);
+  expect(project.variants[0].listener.area).toBe('sofa');
+  expect(project.constraints.listeningDistance).toBe('room');
+  // Back to one chair: no area.
+  await page.getByRole('radio', { name: 'Chair' }).check({ force: true });
+  await expect(page.getByTestId('listening-area')).toHaveCount(0);
 });
 
 test('the probe: click the map to see why, then move the seat there', async ({ page }) => {

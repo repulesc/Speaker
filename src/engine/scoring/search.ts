@@ -3,6 +3,7 @@ import { boxesOverlap2D, distance, pointInBox2D } from '../math/geometry';
 import { seededRandom, symmetric } from '../math/random';
 import { DEFAULTS } from '../presets/defaults';
 import { SEAT_KINDS } from '../presets/objects';
+import { areaPoints, areaScore } from './area';
 import { MIDPOINT_RED_FLAG, midpointOffsetFraction } from '../rules/G01-room-midpoint';
 import { BACK_WALL_RED_FLAG } from '../rules/G02-back-wall';
 import { angleRedFlag, stereoAngleDeg } from '../rules/G04-stereo-angle';
@@ -392,24 +393,33 @@ function perturbations(base: Scorer, seed: number): Perturbation[] {
 
 const shift = (p: Vec3, by: Vec2): Vec3 => ({ x: p.x + by.x, y: p.y + by.y, z: p.z });
 
-/** Scores with perturbed room size, reverberation and positions. Deterministic for a given seed. */
+/**
+ * Scores with perturbed room size, reverberation and positions. Deterministic for a given seed.
+ * With a listening area (sofa, desk, bed), each run scores the area's spots and weighs them
+ * (scoring/area.ts), so a spot that is good only for the middle seat ranks lower.
+ */
 export function robustScores(
   baseScorer: Scorer,
   placements: Placement[],
   seed: number,
 ): { mean: number; spread: number; robust: number }[] {
   const runs = perturbations(baseScorer, seed);
+  const { variant, room } = baseScorer.ctx;
   return placements.map(({ speakers, listener }) => {
-    const scores = runs.map(
-      ({ scorer, offsets: [left, right, seat] }) =>
-        scorer.score({
-          speakers: {
-            left: { ...speakers.left, base: shift(speakers.left.base, left) },
-            right: { ...speakers.right, base: shift(speakers.right.base, right) },
-          },
-          listener: shift(listener, seat),
-        }).score,
-    );
+    const spots = areaPoints(listener, variant.listener.area, room);
+    const scores = runs.map(({ scorer, offsets: [left, right, seat] }) => {
+      const moved = {
+        left: { ...speakers.left, base: shift(speakers.left.base, left) },
+        right: { ...speakers.right, base: shift(speakers.right.base, right) },
+      };
+      const coupling = scorer.coupling(moved);
+      return areaScore(
+        spots.map(({ where, at }) => ({
+          where,
+          score: scorer.score({ speakers: moved, listener: shift(at, seat) }, coupling).score,
+        })),
+      );
+    });
     const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
     const spread = Math.sqrt(scores.reduce((a, b) => a + (b - mean) ** 2, 0) / scores.length);
     return { mean, spread, robust: mean - 0.5 * spread };

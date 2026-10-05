@@ -2,18 +2,32 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { workspace } from '../session.svelte';
   import { goalOf, setGoal, type Goal } from '../state/goal';
+  import type { ListeningAreaKind } from '../../engine/types';
 
   /**
-   * The two choices that shape the answer: what may move, and how far from the speakers to sit.
-   * They are settings, so they live with the other settings, apart from the answer (owner decision,
-   * docs/ROADMAP_V5.md).
+   * The two choices that shape the answer: what may move, and where you listen from (one chair, a
+   * sofa, a desk or a bed; a desk also means sitting close). They are settings, so they live with
+   * the other settings, apart from the answer (owner decision, docs/ROADMAP_V5.md).
    */
   const project = $derived(workspace.project);
   const moves = $derived<Goal>(goalOf(project));
   const setMoves = (value: Goal) => workspace.edit((p) => setGoal(p, value));
-  const distance = $derived(project.constraints.listeningDistance ?? 'room');
-  function setDistance(value: 'room' | 'near') {
-    workspace.edit((p) => void (p.constraints.listeningDistance = value));
+  type Place = 'chair' | ListeningAreaKind;
+  const PLACES: readonly Place[] = ['chair', 'sofa', 'desk', 'bed'];
+  const place = $derived.by<Place>(() => {
+    const area = project.variants.find((v) => v.id === project.activeVariantId)?.listener.area;
+    if (project.constraints.listeningDistance === 'near') return 'desk';
+    return area && area !== 'desk' ? area : 'chair';
+  });
+  /** The listening place belongs to the room, not to one setup: every setup gets it. */
+  function setPlace(value: Place) {
+    workspace.edit((p) => {
+      p.constraints.listeningDistance = value === 'desk' ? 'near' : 'room';
+      for (const v of p.variants) {
+        if (value === 'chair') delete v.listener.area;
+        else v.listener.area = value;
+      }
+    });
   }
 </script>
 
@@ -36,18 +50,18 @@
     </div>
   </div>
   <div class="option">
-    <span class="caption" id="opt-distance">{i18n.t('suggest.distance.label')}</span>
-    <div class="seg" role="radiogroup" aria-labelledby="opt-distance">
-      {#each ['room', 'near'] as const as d (d)}
+    <span class="caption" id="opt-place">{i18n.t('suggest.place.label')}</span>
+    <div class="seg" role="radiogroup" aria-labelledby="opt-place">
+      {#each PLACES as d (d)}
         <label>
           <input
             type="radio"
-            name="distance"
+            name="place"
             value={d}
-            checked={distance === d}
-            onchange={() => setDistance(d)}
+            checked={place === d}
+            onchange={() => setPlace(d)}
           />
-          <span>{i18n.t(`suggest.distance.${d}`)}</span>
+          <span>{i18n.t(`suggest.place.${d}`)}</span>
         </label>
       {/each}
     </div>

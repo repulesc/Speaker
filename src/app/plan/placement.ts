@@ -127,6 +127,7 @@ export function moveSeat(project: Project, to: Target, options: MoveOptions = {}
   const x =
     options.grid !== false && Math.abs(rawX - room.W / 2) <= CENTRE_SNAP ? room.W / 2 : fit(rawX);
   variant.listener = {
+    ...variant.listener,
     ears: {
       x: round(clamp(x, 0.1, room.W - 0.1)),
       y: round(clamp(fit(to.y ?? current.y), 0.1, room.L - 0.1)),
@@ -179,6 +180,7 @@ export function applyCandidate(project: Project, placement: Placement): void {
   }
   const ears = placement.listener;
   variant.listener = {
+    ...variant.listener,
     ears: { x: round(ears.x), y: round(ears.y), z: variant.listener.ears.z },
     certainty: 'estimated',
   };

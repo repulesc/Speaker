@@ -28,6 +28,7 @@
   import { arrowDelta, startDrag } from '../plan/interaction';
   import { viewport } from '../viewport.svelte';
   import { ROOM_LIMITS } from '../state/limits';
+  import { LISTENING_AREAS } from '../../engine/presets/listeningArea';
   import DimLabel from './DimLabel.svelte';
   import MapLegend from './MapLegend.svelte';
   import ProbeCard from './ProbeCard.svelte';
@@ -647,6 +648,20 @@
           </g>
         {/each}
 
+        {#if seat?.area}
+          <!-- The listening area: where the heads can be on the sofa, at the desk or in the bed. -->
+          {@const size = LISTENING_AREAS[seat.area]}
+          <rect
+            class="listening-area"
+            data-testid="listening-area"
+            x={px(seat.ears.x - size.width / 2)}
+            y={py(seat.ears.y - size.depth / 2)}
+            width={size.width * frame.scale}
+            height={size.depth * frame.scale}
+            rx="6"
+          />
+        {/if}
+
         {#if seat}
           {@const isSelected = selected.kind === 'seat'}
           {@const sx = px(seat.ears.x)}
@@ -955,6 +970,13 @@
     opacity: 1;
     filter: none;
     box-shadow: none;
+  }
+  .listening-area {
+    fill: color-mix(in srgb, #fff 18%, transparent);
+    stroke: #fff;
+    stroke-width: 1.5;
+    stroke-dasharray: 5 3;
+    pointer-events: none;
   }
   /* The recommended spot must read on every heat colour: a white ring under a solid accent edge. */
   .ghost-halo {
