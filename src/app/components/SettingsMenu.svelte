@@ -9,12 +9,13 @@
   /** One place for everything that is not the room itself: language, units, look, projects, files. */
   interface Props {
     onshare: () => void;
+    onimage: () => void;
     onexport: () => void;
     onimport: () => void;
     onprint: () => void;
     onabout: () => void;
   }
-  let { onshare, onexport, onimport, onprint, onabout }: Props = $props();
+  let { onshare, onimage, onexport, onimport, onprint, onabout }: Props = $props();
 
   const themes: ThemePref[] = ['auto', 'light', 'dark'];
   const project = $derived(workspace.project);
@@ -164,7 +165,7 @@
       </ul>
 
       <ul class="list">
-        {#each [['menu.share', onshare], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.about', onabout]] as const as [key, action] (key)}
+        {#each [['menu.share', onshare], ['menu.image', onimage], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.about', onabout]] as const as [key, action] (key)}
           <li>
             <button
               type="button"

@@ -25,6 +25,8 @@
     type ReadResult,
   } from './state/projectFile';
   import { decodeShare, hasShare } from './state/share';
+  import { makeShareImage, shareOrSave } from './shareImage';
+  import { formatLength } from '../units/format';
 
   let sheet = $state<'peek' | 'half' | 'full'>('half');
   let shareDialog = $state<ReturnType<typeof ShareDialog>>();
@@ -114,6 +116,24 @@
     handleImport(parseProjectJson(await file.text()));
   }
 
+  /** A clean picture of the room, its map and the answer, to post or send. */
+  async function shareImage() {
+    const plan = document.querySelector<HTMLElement>('section.plan');
+    const size = roomSize(workspace.project);
+    if (!plan || !size) return showNotice('error', i18n.t('image.needRoom'));
+    const say = document.querySelector('[data-testid="say"]')?.textContent?.trim();
+    const verdict = document.querySelector('[data-share="verdict"]')?.textContent?.trim();
+    const fmt = (m: number) => formatLength(m, workspace.project.units, 'room', i18n.locale);
+    const blob = await makeShareImage(plan, {
+      title: projectLabel(workspace.project.name),
+      subtitle: i18n.t('image.subtitle', { width: fmt(size.W), length: fmt(size.L) }),
+      lines: [say, verdict].filter((t): t is string => Boolean(t)),
+      footer: `${APP_NAME} · ${location.host}${location.pathname}`,
+    });
+    if (!blob) return showNotice('error', i18n.t('image.failed'));
+    await shareOrSave(blob, `${projectLabel(workspace.project.name)}.png`);
+  }
+
   function exportFile() {
     const project = $state.snapshot(workspace.project);
     downloadText(exportFileName(project, i18n.t('project.untitled')), serializeProject(project));
@@ -187,6 +207,7 @@
       {/if}
       <Sidebar
         onshare={() => shareDialog?.show()}
+        onimage={shareImage}
         onexport={exportFile}
         onimport={() => fileInput?.click()}
         onprint={() => window.print()}

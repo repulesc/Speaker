@@ -47,6 +47,7 @@ export const hu: Messages = {
       'A mentés nem sikerült, lehet, hogy betelt a tárhely. Használd az exportálást, hogy ne vesszen el a munkád.',
   },
   menu: {
+    image: 'Megosztás képként',
     label: 'Menü',
     undo: 'Visszavonás',
     redo: 'Újra',
@@ -78,6 +79,11 @@ export const hu: Messages = {
       tooMany: 'Túl sok mentett projekted van. Előbb törölj egyet.',
     },
     dismiss: 'Bezárás',
+  },
+  image: {
+    subtitle: 'Szoba: {width} × {length}',
+    needRoom: 'Add meg előbb a szoba méretét, utána lesz mit megosztani.',
+    failed: 'Ebben a böngészőben nem sikerült elkészíteni a képet.',
   },
   notice: { undo: 'Visszavonás' },
   confidence: {
@@ -570,6 +576,7 @@ export const hu: Messages = {
     seatLine: '{front} az elülső faltól, {distance} mindkét hangfaltól',
     stay: 'Maradnak a helyükön',
     seatStays: 'Marad a helyén',
+    mood: 'A mostani beállításod: {word}',
     say: {
       speakers: 'Tedd a hangfalakat {parts}.',
       away: '{d}-rel messzebb az elülső faltól',

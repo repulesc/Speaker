@@ -297,3 +297,16 @@ test('the speaker layer shows where the speakers would sound best, mirrored abou
   expect(sample.left).toBeGreaterThan(50);
   expect(sample.right).toBe(sample.left);
 });
+
+test('share as image: the menu saves a picture of the room and the answer', async ({ page }) => {
+  await withResults(page);
+  await openMenu(page);
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Share as image' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe('Untitled room.png');
+  const path = await download.path();
+  const { size } = await import('node:fs').then((fs) => fs.statSync(path));
+  expect(size).toBeGreaterThan(20_000); // a real picture, not an empty canvas
+});

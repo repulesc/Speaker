@@ -5,6 +5,7 @@
   import { applyCandidate, cabinet } from '../plan/placement';
   import { analysis, showNotice, workspace } from '../session.svelte';
   import { goalOf, setGoal, type Goal } from '../state/goal';
+  import MoodFace from './MoodFace.svelte';
   import { ui } from '../ui.svelte';
 
   /**
@@ -144,6 +145,14 @@
 <section class="suggest" aria-labelledby="suggest-title">
   <h2 id="suggest-title">
     {i18n.t('suggest.title')}
+    {#if ok && !(project.constraints.listenerFixed && project.constraints.speakersFixed)}
+      <MoodFace
+        word={scoreWord(ok.current.score)}
+        label={i18n.t('suggest.mood', {
+          word: i18n.t(`results.score.${scoreWord(ok.current.score)}`),
+        })}
+      />
+    {/if}
     {#if analysis.busy}<span class="spinner" role="status" aria-label={i18n.t('analysis.updating')}
       ></span>{/if}
   </h2>
@@ -202,10 +211,12 @@
     </dl>
 
     <p class="caption">
-      {i18n.t('suggest.verdict', {
-        now: i18n.t(`results.score.${scoreWord(ok.current.score)}`),
-        best: i18n.t(`results.score.${scoreWord(shown.score)}`),
-      })}
+      <span data-share="verdict"
+        >{i18n.t('suggest.verdict', {
+          now: i18n.t(`results.score.${scoreWord(ok.current.score)}`),
+          best: i18n.t(`results.score.${scoreWord(shown.score)}`),
+        })}</span
+      >
       <span class="visually-hidden" data-testid="score-current"
         >{i18n.t(`results.score.${scoreWord(ok.current.score)}`)}</span
       >
@@ -347,6 +358,10 @@
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+  h2 :global(.face) {
+    order: 2;
+    margin-left: auto;
   }
   .spinner {
     width: 14px;

@@ -43,6 +43,7 @@ export const en = {
     failed: 'Could not save: storage may be full. Use Export to keep your work.',
   },
   menu: {
+    image: 'Share as image',
     label: 'Menu',
     undo: 'Undo',
     redo: 'Redo',
@@ -74,6 +75,11 @@ export const en = {
       tooMany: 'You have too many saved projects. Delete one first.',
     },
     dismiss: 'Dismiss',
+  },
+  image: {
+    subtitle: 'Room {width} × {length}',
+    needRoom: 'Enter the room size first, then there is something to share.',
+    failed: 'The picture could not be made in this browser.',
   },
   notice: { undo: 'Undo' },
   confidence: {
@@ -564,6 +570,7 @@ export const en = {
     seatLine: '{front} from the front wall, {distance} from each speaker',
     stay: 'Stay where they are',
     seatStays: 'Stays where it is',
+    mood: 'Your setup now: {word}',
     say: {
       speakers: 'Move the speakers {parts}.',
       away: '{d} further from the front wall',
