@@ -109,3 +109,39 @@ merge it on its own, so the app stops saying wrong things even if the polish tak
 1. Behind-the-seat setups are kept at "Poor" (capped, with a warning). Decided.
 2. Every word uses the cautious (robust) score. Decided.
 3. The speaker dropdowns are in Phase 2 above. Decided by the owner: several dropdowns, no picture cards.
+
+## Owner decisions, rounds 2 and 3 (feel, trust, learning)
+
+- **Feel:** calm and Apple-clean, with warmth. Not playful, not studio-pro. The owner trusts the design
+  taste and gives a **free hand on the left panel**: make it better, much better. Soft cards on a warm
+  background are liked; a better idea is welcome.
+- **Not an engineer's tool:** the user should feel like a speaker enthusiast having a good moment.
+  Everyday words everywhere, with a **"Show the numbers" switch** in the menu that turns on the
+  technical version of everything (Why tab, tips, layers, units).
+- **Trust is not a widget.** No confidence meter on screen, no sources panel as a feature. Trust comes
+  from quality in every aspect: correct advice, consistent numbers, careful words, a design where nothing
+  is out of balance. (The rules, sources and evidence levels still exist in the code and the docs.)
+- **Delight is intelligence, not charm.** No superficial fun. The fun is learning something and a good
+  feeling about it, even when the best position is not possible in this room.
+- **A "Live with it" card after Apply.** Calm card on the Result tab: give it a few evenings; short
+  impressions can mislead and longer listening tells more. Three optional one-tap faces, per setup:
+  how do you like this position; how did you like the one you tried before; how do you like your
+  speakers overall (plus an optional note). Stored on the device only (extends `ListeningNote.rating`).
+  Later a gentle, honest sentence compares your impressions with the app's score, never as a verdict.
+  Listening notes stay in the menu.
+- **Wise tips: very selective and contextual** (owner trusts Opus to choose): not two or three
+  commonplace tips for everyone, but tips that appear for a specific speaker type, room, or scenario
+  (for example a sealed bookshelf speaker near a wall, a desk setup, a bed, a lively room with small
+  speakers). Each tip is a rule with a condition, a plain sentence, an evidence level, a source or an
+  honest "by ear" label, and a test (CLAUDE.md). No invented citations. Room facts are welcome when
+  computed, for example the room's lowest bass note named as a musical note.
+- **Heat map colours:** a warm, calm scale (soft sand for poor to deep green or amber for best), still
+  colour-blind safe, with clear steps and a dark-mode version. Replaces viridis.
+- **First run:** keep the survey and the fade into the room; add one friendly "what we found" line that
+  names the room's character, computed from the room.
+- **Cards:** soft cards on a warm background, one idea per card, a big calm title, one clear button per
+  card; functions and buttons apart from text. Opus may propose something better.
+- **Devices:** desktop first; the phone keeps its bottom sheet and must keep working (44 px targets, no
+  sideways scroll).
+- **Process:** one Opus session. Phase 1 (engine) first and merged on its own; then the design system
+  and the new moments, with screenshots shown to the owner before the pull request.
