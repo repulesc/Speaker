@@ -349,6 +349,8 @@ What to change in the room or on the speaker, most useful first; the first item 
 | D06 | Desk mode when the speakers stand on a desk or table, otherwise stand mode | 🟠 | manufacturer | the profile lists those modes |
 | D07 | (V5) Tone, if you have the controls: the same bass cut as D02 and treble lift or cut as D03, worded "if your speakers or amplifier have a bass (treble) control", for profiles that list no such control. Same conditions: boundary gain high or very high (P05) and placed speakers; H06's treble thresholds in a described room. No new number: treble ±0.5 dB as in H06, bass "a small step" | 🟡 | [ALL74], [TOOLE], manufacturer | no bass (treble) control known, and the D02 (H06) condition holds |
 
+**(V5.1) Effort.** Every item also says what it takes. *free*: move or change something, or a setting (T01 experiment, T03 move first, T05 liven, T06 move first, every D rule). *cheap*: ordinary household items (T02 rug, T05 soften). *invest*: buying and fitting treatment (T01 absorb, T02 ceiling panel, T03 thick panel, T04 bass traps, T06 absorber). *invest* items are shown only when the user ticks "I'm ready to invest in acoustic treatment".
+
 ## 🟣 Subjective rules (symptom → hypotheses → experiment)
 
 Subjective input never changes the computed positions. It produces a **ranked list of likely causes**, using the user's room data, and one experiment for each. Ranking: hypotheses whose physical precondition is present in the room data rank first (for example "boomy" ranks "back wall too close" first only if G02 fired).

@@ -125,3 +125,12 @@ Each step: tests first for engine changes, i18n EN+HU, `npm test`, `check`, `lin
 - Speaker categories on the survey vs later in the sidebar (section D default).
 - Tone advice scope and wording (section E default; verified sources are the gate).
 - Earlier V4 items: face style (drawn), home list rows vs cards (rows), wording tone (friendly, short).
+
+## V5.1: light by default, treatment on opt-in, a support link
+
+Owner decision after the first review: panels and bass traps are a real investment (money, time, decisions) and cannot be tried instantly, so a random visitor should not be told to buy them.
+
+- Every piece of advice now says what it takes (`effort`: free, cheap, invest). Moves, settings and tone hints are free; a rug or heavier curtains are cheap; panels, bass traps and thick absorbers are an investment (`docs/RULE_CATALOGUE.md`, T/D table).
+- Investment advice appears only after the box "I'm ready to invest in acoustic treatment" is ticked (Settings, under "Your room"; `constraints.treatmentReady`, off by default). Off: the result widget, Improve the room, the print sheet and the map rings show only free or cheap ideas, and Improve the room adds one line saying bigger options exist, with a button to the box. On: they appear in the same order, tagged "Bigger investment". The engine still computes everything; only what is shown changes.
+- The app never says what to buy: no products, shops, prices or affiliate links.
+- `SUPPORT_URL` in `src/app/config.ts` (empty for now) turns on a plain "Support this project" link in the menu and the About dialog (a Buy Me a Coffee, Ko-fi or PayPal.me page). No embedded widget, so the app loads no third-party code.

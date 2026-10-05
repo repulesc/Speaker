@@ -29,6 +29,12 @@
       }
     });
   }
+  function setReady(on: boolean) {
+    workspace.edit((p) => {
+      if (on) p.constraints.treatmentReady = true;
+      else delete p.constraints.treatmentReady;
+    });
+  }
 </script>
 
 <div class="options">
@@ -66,6 +72,17 @@
       {/each}
     </div>
   </div>
+  <div class="option">
+    <label class="check">
+      <input
+        type="checkbox"
+        checked={project.constraints.treatmentReady === true}
+        onchange={(e) => setReady(e.currentTarget.checked)}
+      />
+      <span>{i18n.t('suggest.ready.label')}</span>
+    </label>
+    <span class="caption">{i18n.t('suggest.ready.help')}</span>
+  </div>
 </div>
 
 <style>
@@ -79,6 +96,19 @@
   .option {
     display: grid;
     gap: 6px;
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .check input {
+    width: 22px;
+    height: 22px;
+    flex: none;
   }
   .caption {
     color: var(--ink-muted);

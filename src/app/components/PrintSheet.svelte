@@ -3,6 +3,7 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
   import { adviceText, findingText } from '../findings/text';
+  import { visibleAdvice } from '../findings/visible';
   import { activeVariant, cabinet, roomSize } from '../plan/placement';
   import { tapeMeasure } from '../print/tape';
   import { analysis, projectLabel, variantLabel, workspace } from '../session.svelte';
@@ -28,7 +29,9 @@
   const problems = $derived(
     result?.findings.filter((f) => f.severity === 'red-flag' || f.severity === 'caution') ?? [],
   );
-  const advice = $derived(result?.advice.treatment.slice(0, 3) ?? []);
+  const advice = $derived(
+    visibleAdvice(result?.advice.treatment ?? [], project.constraints.treatmentReady).slice(0, 3),
+  );
   const date = $derived(
     new Intl.DateTimeFormat(i18n.locale, { dateStyle: 'long' }).format(new Date()),
   );

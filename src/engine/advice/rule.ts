@@ -3,6 +3,7 @@ import type {
   Advice,
   Concern,
   EffectSize,
+  Effort,
   EvidenceLevel,
   Finding,
   Placement,
@@ -28,6 +29,8 @@ export function makeAdvice(
   details: {
     priority: number;
     effect: EffectSize;
+    /** Defaults to 'free': settings and moves. Treatment says its own. */
+    effort?: Effort;
     params?: Record<string, number | string>;
     location?: Vec3;
     level?: EvidenceLevel;
@@ -42,6 +45,7 @@ export function makeAdvice(
     sources: rule.sources,
     priority: details.priority,
     effect: details.effect,
+    effort: details.effort ?? 'free',
     ...(details.location ? { location: details.location } : {}),
   };
 }

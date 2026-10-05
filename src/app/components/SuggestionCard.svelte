@@ -3,6 +3,7 @@
   import { formatFrequency, formatLength } from '../../units/format';
   import type { Advice } from '../../engine/types';
   import { adviceText, scoreWord } from '../findings/text';
+  import { visibleAdvice } from '../findings/visible';
   import { activeVariant, applyCandidate, cabinet } from '../plan/placement';
   import { analysis, showNotice, workspace, type StepId } from '../session.svelte';
   import { goalOf, type Goal } from '../state/goal';
@@ -66,10 +67,13 @@
    * treble, D02, D03, D07), so the widget answers "what else?" without becoming a list.
    */
   const TONE = new Set(['D02', 'D03', 'D07']);
-  const ideas = $derived(ok ? [...ok.advice.treatment, ...ok.advice.settings] : []);
+  const treatment = $derived(
+    visibleAdvice(ok?.advice.treatment ?? [], project.constraints.treatmentReady),
+  );
+  const ideas = $derived(ok ? [...treatment, ...ok.advice.settings] : []);
   const picks = $derived.by<Advice[]>(() => {
     if (!ok) return [];
-    const { treatment, settings } = ok.advice;
+    const { settings } = ok.advice;
     const other = treatment[0] ?? settings.find((a) => !TONE.has(a.ruleId));
     const tone = settings.find((a) => TONE.has(a.ruleId));
     return [other, tone].filter((a): a is Advice => a !== undefined);

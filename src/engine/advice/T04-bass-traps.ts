@@ -18,6 +18,13 @@ export const T04: AdviceRule = {
     if (peak?.severity !== 'caution' && !stacked) return [];
     const frequency =
       peak?.severity === 'caution' ? peak.params.frequency! : stacked!.params.frequencyA!;
-    return [makeAdvice(T04, 'corners', { priority: 0.35, effect: 'small', params: { frequency } })];
+    return [
+      makeAdvice(T04, 'corners', {
+        priority: 0.35,
+        effect: 'small',
+        effort: 'invest',
+        params: { frequency },
+      }),
+    ];
   },
 };
