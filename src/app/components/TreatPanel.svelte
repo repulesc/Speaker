@@ -4,6 +4,7 @@
   import { advicePlainText, adviceText } from '../findings/text';
   import { heldBack, visibleAdvice } from '../findings/visible';
   import { analysis, workspace } from '../session.svelte';
+  import { prefs } from '../prefs.svelte';
   import { ui } from '../ui.svelte';
 
   const result = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
@@ -31,11 +32,16 @@
         )}
       </span>
     </p>
-    <p class="text">{advicePlainText(a, system)}</p>
-    <details class="details">
-      <summary>{i18n.t('treat.details')}</summary>
-      <p>{adviceText(a, system)}</p>
-    </details>
+    {#if prefs.numbers}
+      <!-- "Show the numbers": the sentence with its numbers, nothing folded away. -->
+      <p class="text">{adviceText(a, system)}</p>
+    {:else}
+      <p class="text">{advicePlainText(a, system)}</p>
+      <details class="details">
+        <summary>{i18n.t('treat.details')}</summary>
+        <p>{adviceText(a, system)}</p>
+      </details>
+    {/if}
     {#if a.location}<p class="meta">{i18n.t('treat.onMap', { n: marker(a) })}</p>{/if}
   </article>
 {/snippet}
@@ -87,7 +93,7 @@
   }
   section {
     display: grid;
-    gap: 8px;
+    gap: 10px;
   }
   .muted {
     color: var(--ink-muted);
@@ -100,15 +106,12 @@
     font-weight: 600;
   }
   .card {
-    display: grid;
     gap: 6px;
-    padding: 12px 14px;
-    border: 1px solid var(--grid-strong);
-    border-radius: var(--radius-md);
-    background: var(--surface);
   }
   .card.first {
-    border-color: var(--accent);
+    box-shadow:
+      inset 3px 0 0 var(--accent-fill),
+      var(--card-shadow);
   }
   .meta {
     display: flex;

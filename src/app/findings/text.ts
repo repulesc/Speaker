@@ -139,6 +139,20 @@ export function scoreWord(score: number): 'poor' | 'fair' | 'good' | 'veryGood' 
   return 'veryGood';
 }
 
+/** A score as a number for "Show the numbers": two decimals, in the reader's locale. */
+export function scoreNumber(score: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.max(0, score));
+}
+
+/** The score's word, and with "Show the numbers" on, the number too ("Good · 0.74"). */
+export function scoreLabel(score: number, numbers: boolean): string {
+  const word = i18n.t(`results.score.${scoreWord(score)}`);
+  return numbers ? i18n.t('map.withScore', { word, score: scoreNumber(score, i18n.locale) }) : word;
+}
+
 /** The sentence for a piece of advice, with its numbers (docs/RULE_CATALOGUE.md, T and D rules). */
 export function adviceText(a: Advice, system: LengthSystem): string {
   return i18n.t(a.messageKey, findingValues(a.ruleId, a.params, system, i18n.locale));

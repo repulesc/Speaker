@@ -140,10 +140,10 @@
     display: grid;
     gap: 14px;
   }
+  /* One heading style for every group on the Why and Tips tabs (V7). */
   h3 {
-    color: var(--ink-muted);
-    font-size: var(--text-sm);
-    font-weight: 500;
+    font-size: var(--text-md);
+    font-weight: 600;
   }
   h4 {
     margin: 6px 0 0;

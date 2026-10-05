@@ -125,18 +125,21 @@
     gap: 12px;
     width: 100%;
     min-height: 64px;
-    padding: 10px 14px;
-    border: 1px solid var(--grid-strong);
-    border-radius: var(--radius-md);
+    padding: 10px 16px;
+    border: 0;
+    border-radius: var(--radius-lg);
     background: var(--surface);
     color: var(--ink);
     font: inherit;
     text-align: start;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.15s ease;
   }
   .room-button:hover {
-    border-color: var(--accent);
+    box-shadow:
+      0 0 0 1.5px var(--accent-fill),
+      var(--card-shadow);
   }
   .room-button svg {
     flex: none;
@@ -206,12 +209,16 @@
     border-radius: 10px;
     background: none;
     color: var(--accent);
-    font-size: var(--text-md);
+    font-size: var(--text-xl);
+    line-height: 1;
     cursor: pointer;
   }
+  .icon:hover:not(:disabled) {
+    background: var(--fill);
+  }
+  /* Disabled stays legible in both themes (owner: undo and redo were hard to see in dark mode). */
   .icon:disabled {
-    color: var(--ink-muted);
-    opacity: 0.4;
+    color: color-mix(in srgb, var(--ink-muted) 70%, var(--bg));
     cursor: default;
   }
   .body {

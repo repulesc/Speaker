@@ -10,6 +10,11 @@ export const en = {
     en: 'English',
     hu: 'Magyar',
   },
+  numbers: {
+    label: 'Show the numbers',
+    off: 'Off',
+    on: 'On',
+  },
   theme: {
     label: 'Theme',
     auto: 'Match device',
@@ -590,6 +595,11 @@ export const en = {
     },
     speakers: 'Speakers',
     bass: 'Bass at that seat',
+    bassPlain: {
+      even: 'Even',
+      fair: 'Fairly even',
+      uneven: 'Uneven',
+    },
     bassWord: {
       even: 'Even',
       fair: 'Fairly even, weakest near {frequency}',
@@ -633,6 +643,8 @@ export const en = {
       same: '{now} now. The placement below fine-tunes it.',
     },
     idea: 'Also worth trying',
+    moreTips: 'More in Tips',
+    scores: 'Score now {now}, at its best {best}, out of 1.00.',
     area: {
       even: {
         sofa: 'About the same for everyone on the sofa.',
@@ -657,6 +669,7 @@ export const en = {
   map: {
     dimmed: 'Advised against',
     bestHere: 'Best here: {word}',
+    withScore: '{word} · {score}',
     absolute: 'Absolute scale',
     hidePanel: 'Hide the side panel',
     best: 'Best',

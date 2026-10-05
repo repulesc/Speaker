@@ -2,7 +2,8 @@
   import type { LayerId, PointExplanation } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength, type LengthSystem } from '../../units/format';
-  import { findingText, scoreWord } from '../findings/text';
+  import { findingText, scoreLabel } from '../findings/text';
+  import { prefs } from '../prefs.svelte';
 
   interface Props {
     explanation: PointExplanation;
@@ -63,7 +64,7 @@
     <p>{i18n.t('probe.notAllowed')}</p>
   {:else}
     <p class="score">
-      {i18n.t('probe.score', { word: i18n.t(`results.score.${scoreWord(explanation.robust)}`) })}
+      {i18n.t('probe.score', { word: scoreLabel(explanation.robust, prefs.numbers) })}
     </p>
     {#if explanation.redFlag}<p class="flag">{i18n.t('probe.flagged')}</p>{/if}
     {#each reasons as f (f.messageKey + String(f.params.speaker))}

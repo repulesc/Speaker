@@ -1,6 +1,7 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
-  import { scoreWord } from '../findings/text';
+  import { scoreLabel } from '../findings/text';
+  import { prefs } from '../prefs.svelte';
   import { ui } from '../ui.svelte';
 
   /**
@@ -30,7 +31,9 @@
   </div>
   {#if best !== null}
     <p class="best" data-testid="best-here">
-      {i18n.t('map.bestHere', { word: i18n.t(`results.score.${scoreWord(best)}`) })}
+      {i18n.t('map.bestHere', {
+        word: scoreLabel(best, prefs.numbers),
+      })}
     </p>
   {/if}
   <div class="extra">

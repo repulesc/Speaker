@@ -12,6 +12,11 @@ export const hu: Messages = {
     en: 'English',
     hu: 'Magyar',
   },
+  numbers: {
+    label: 'Számok mutatása',
+    off: 'Ki',
+    on: 'Be',
+  },
   theme: {
     label: 'Megjelenés',
     auto: 'Az eszközöd szerint',
@@ -602,6 +607,11 @@ export const hu: Messages = {
     },
     speakers: 'Hangfalak',
     bass: 'Basszus azon a helyen',
+    bassPlain: {
+      even: 'Egyenletes',
+      fair: 'Nagyjából egyenletes',
+      uneven: 'Egyenetlen',
+    },
     bassWord: {
       even: 'Egyenletes',
       fair: 'Nagyjából egyenletes, {frequency} körül a leggyengébb',
@@ -645,6 +655,8 @@ export const hu: Messages = {
       same: 'Most: {now}. Az alábbi elhelyezés még finomít rajta.',
     },
     idea: 'Ezt is érdemes kipróbálni',
+    moreTips: 'További tippek',
+    scores: 'Pontszám most {now}, a legjobb helyen {best}, 1,00-ből.',
     area: {
       even: {
         sofa: 'A kanapén mindenkinek nagyjából ugyanilyen.',
@@ -669,6 +681,7 @@ export const hu: Messages = {
   map: {
     dimmed: 'Nem ajánlott',
     bestHere: 'A legjobb itt: {word}',
+    withScore: '{word} · {score}',
     absolute: 'Abszolút skála',
     hidePanel: 'Oldalsáv elrejtése',
     best: 'Legjobb',

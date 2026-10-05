@@ -25,6 +25,8 @@ const MODES = ['quick', 'detailed'] as const;
 
 let theme = $state<ThemePref>(read('spa:theme', THEMES, 'auto'));
 let mode = $state<Mode>(read('spa:mode', MODES, 'quick'));
+/** "Show the numbers" (owner decision, V7): everyday words by default, the numbers on request. */
+let numbers = $state(read('spa:numbers', ['on', 'off'], 'off') === 'on');
 let welcomed = $state(read('spa:welcomed', ['yes', 'no'], 'no') === 'yes');
 
 /** The system's light or dark setting, followed live (the map's colours are painted, not styled). */
@@ -57,6 +59,13 @@ export const prefs = {
   set mode(value: Mode) {
     mode = value;
     write('spa:mode', value);
+  },
+  get numbers() {
+    return numbers;
+  },
+  set numbers(value: boolean) {
+    numbers = value;
+    write('spa:numbers', value ? 'on' : 'off');
   },
   get welcomed() {
     return welcomed;

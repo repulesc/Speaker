@@ -255,3 +255,12 @@ describe('advice in plain words (docs/ROADMAP_V5.md, V6)', () => {
     }
   });
 });
+
+describe('"Show the numbers"', () => {
+  it('adds the score to the word only when asked, in the reader’s locale', async () => {
+    const { scoreLabel, scoreNumber } = await import('../../src/app/findings/text');
+    expect(scoreLabel(0.74, false)).toBe('Good');
+    expect(scoreLabel(0.74, true)).toBe('Good · 0.74');
+    expect(scoreNumber(0.5, 'hu')).toBe('0,50');
+  });
+});
