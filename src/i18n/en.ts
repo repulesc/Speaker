@@ -622,6 +622,7 @@ export const en = {
     before: 'Before',
     showPanel: 'Show the side panel',
     notListening: 'Not a listening position',
+    noSpeakers: 'The speakers can’t go here',
     label: 'Map',
     hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
     layerLabel: 'Map layer',

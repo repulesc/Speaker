@@ -329,10 +329,9 @@
         bind:this={speakerCanvas}
         class="heat"
         aria-hidden="true"
-        style="left:{px(0)}px; top:{py(0)}px; width:{speakerGrid.nx *
-          2 *
-          speakerGrid.step *
-          frame.scale}px; height:{speakerGrid.ny *
+        style="left:{px(0)}px; top:{py(0)}px; width:{project.constraints.keepSymmetric
+          ? W * frame.scale
+          : speakerGrid.nx * 2 * speakerGrid.step * frame.scale}px; height:{speakerGrid.ny *
           speakerGrid.step *
           frame.scale}px; clip-path: inset(0 {Math.max(
           0,
@@ -531,6 +530,16 @@
           {#if noteY < L - 0.3}
             <text class="zone-note" x={px(W / 2)} y={py(noteY)} text-anchor="middle"
               >{i18n.t('map.notListening')}</text
+            >
+          {/if}
+        {/if}
+
+        {#if speakerGrid && seat && !field}
+          <!-- Behind and beside the seat the speakers cannot stand: the map fades out there. -->
+          {@const noteY = seat.ears.y + 0.7}
+          {#if noteY < L - 0.3}
+            <text class="zone-note" x={px(W / 2)} y={py(noteY)} text-anchor="middle"
+              >{i18n.t('map.noSpeakers')}</text
             >
           {/if}
         {/if}
@@ -796,7 +805,7 @@
       <MapLegend
         values={shownValues}
         named={ui.layer === 'overall' || ui.layer === 'goals' || ui.layer === 'speakers'}
-        hatched={!speakerGrid}
+        hatched
       />
     {/if}
 

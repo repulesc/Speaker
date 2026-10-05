@@ -109,15 +109,22 @@ export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
   // The whole length of the room: spots the speakers cannot take (behind or beside the seat, in
   // furniture) have no score and fade out, so the map ends where the speakers' options end.
   const ys = steps(step / 2, ctx.room.L - step / 2, step);
+  // Furniture does not hide the map (owner: the heatmap is visible everywhere): a spot where a
+  // speaker would stand on furniture is scored and hatched as "advised against", like the seat map.
+  const bare = { ...ctx, objects: [] };
+  const redFlag: boolean[] = [];
   const values = ys.flatMap((y) =>
     xs.map((x) => {
       const clearance = y - ctx.speaker.depth / 2;
-      if (clearance < 0) return NaN;
       const speakers = speakerPair(ctx, centre, centre - x, clearance);
-      if (centre - x < ctx.speaker.width / 2) return NaN; // the two cabinets would overlap
       const placement = { speakers, listener };
-      return isValidPlacement(ctx, placement) ? scorer.score(placement).score : NaN;
+      const open =
+        clearance >= 0 &&
+        centre - x >= ctx.speaker.width / 2 && // else the two cabinets would overlap
+        isValidPlacement(bare, placement);
+      redFlag.push(open && !isValidPlacement(ctx, placement));
+      return open ? scorer.score(placement).score : NaN;
     }),
   );
-  return { x0: xs[0] ?? 0, y0: ys[0] ?? 0, step, nx: xs.length, ny: ys.length, values };
+  return { x0: xs[0] ?? 0, y0: ys[0] ?? 0, step, nx: xs.length, ny: ys.length, values, redFlag };
 }

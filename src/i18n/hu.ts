@@ -634,6 +634,7 @@ export const hu: Messages = {
     before: 'Előtte',
     showPanel: 'Oldalsáv megjelenítése',
     notListening: 'Nem hallgatási hely',
+    noSpeakers: 'Ide nem kerülhetnek a hangfalak',
     label: 'Térkép',
     hint: 'Húzz bármit. A térkép mozgatás közben újrarajzolódik. Kattints egy számra, és pontos értéket írhatsz be.',
     layerLabel: 'Térképréteg',

@@ -433,9 +433,16 @@ export function paintSpeakerMap(
 ): void {
   const { nx, ny, values } = grid;
   const mirrored: number[] = [];
+  const marks: boolean[] = [];
   for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) mirrored.push(values[j * nx + i]!);
-    for (let i = nx - 1; i >= 0; i--) mirrored.push(values[j * nx + i]!);
+    for (let i = 0; i < nx; i++) {
+      mirrored.push(values[j * nx + i]!);
+      marks.push(grid.redFlag?.[j * nx + i] ?? false);
+    }
+    for (let i = nx - 1; i >= 0; i--) {
+      mirrored.push(values[j * nx + i]!);
+      marks.push(grid.redFlag?.[j * nx + i] ?? false);
+    }
   }
   const { filled, dist } = fillGaps(nx * 2, ny, mirrored);
   // The grid stops halfway down the room (speakers never go further): fade out there too.
@@ -445,6 +452,6 @@ export function paintSpeakerMap(
     const edge = Math.min(1, (ny - 0.5 - j) / fadeRows);
     for (let i = 0; i < nx * 2; i++) visible[j * nx * 2 + i]! *= smoothstep(0, 1, edge);
   }
-  const field = smoothField(nx * 2, ny, filled, scale, undefined, visible);
+  const field = smoothField(nx * 2, ny, filled, scale, marks, visible);
   paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }
