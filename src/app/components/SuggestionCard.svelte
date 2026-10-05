@@ -4,6 +4,7 @@
   import { scoreWord } from '../findings/text';
   import { applyCandidate, cabinet } from '../plan/placement';
   import { analysis, showNotice, workspace } from '../session.svelte';
+  import { goalOf, setGoal, type Goal } from '../state/goal';
   import { ui } from '../ui.svelte';
 
   /**
@@ -21,20 +22,9 @@
   const depth = $derived(cabinet(project).d);
   const fmt = (m: number) => formatLength(m, system, 'position', i18n.locale);
 
-  type Moves = 'both' | 'speakers' | 'seat';
-  const moves = $derived<Moves>(
-    project.constraints.listenerFixed
-      ? 'speakers'
-      : project.constraints.speakersFixed
-        ? 'seat'
-        : 'both',
-  );
-  function setMoves(value: Moves) {
-    workspace.edit((p) => {
-      p.constraints.listenerFixed = value === 'speakers';
-      p.constraints.speakersFixed = value === 'seat';
-    });
-  }
+  type Moves = Goal;
+  const moves = $derived<Moves>(goalOf(project));
+  const setMoves = (value: Moves) => workspace.edit((p) => setGoal(p, value));
   const distance = $derived(project.constraints.listeningDistance ?? 'room');
   function setDistance(value: 'room' | 'near') {
     workspace.edit((p) => void (p.constraints.listeningDistance = value));
@@ -132,7 +122,7 @@
         <dt>{i18n.t('suggest.seat')}</dt>
         <dd>
           {moves === 'speakers'
-            ? i18n.t('suggest.stay')
+            ? i18n.t('suggest.seatStays')
             : i18n.t('suggest.seatLine', {
                 front: fmt(shown.listener.y),
                 distance: fmt(seatDistance(shown)),

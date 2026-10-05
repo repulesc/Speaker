@@ -24,6 +24,10 @@ let candidate = $state<number | null>(null);
 let sideOpen = $state(false);
 /** Colours stretched over this room's own range (default) or the same scale for every room. */
 let heatScale = $state<'room' | 'absolute'>('room');
+/** The first-run survey is open (a new project without a room). */
+let survey = $state(false);
+/** The room fades in once, right after the survey (the "reveal"). */
+let reveal = $state(false);
 /** The Speakers page's "More details" stays open once opened, for this visit. */
 let speakerDetails = $state(false);
 
@@ -79,6 +83,18 @@ export const ui = {
   },
   set sideOpen(value: boolean) {
     sideOpen = value;
+  },
+  get survey() {
+    return survey;
+  },
+  set survey(value: boolean) {
+    survey = value;
+  },
+  get reveal() {
+    return reveal;
+  },
+  set reveal(value: boolean) {
+    reveal = value;
   },
   get heatScale() {
     return heatScale;

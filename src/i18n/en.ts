@@ -504,6 +504,33 @@ export const en = {
     notSet: 'Not set',
     none: 'None',
   },
+  survey: {
+    step: '{n} of {total}',
+    skip: 'Skip',
+    back: 'Back',
+    next: 'Next',
+    done: 'Show me',
+    room: {
+      title: 'How big is your room?',
+      help: 'Rough numbers are fine. Leave the ceiling empty and we assume a typical {height}.',
+    },
+    goal: {
+      title: 'What do you want to work out?',
+      help: 'You can change this any time.',
+      speakers: { name: 'Where to put my speakers', help: 'My seat stays where it is.' },
+      seat: { name: 'Where to sit', help: 'My speakers stay where they are.' },
+      both: { name: 'Both', help: 'I can move the speakers and my seat.' },
+    },
+    speaker: {
+      title: 'Which speakers are closest to yours?',
+      help: 'Pick the nearest match. It fills in typical sizes.',
+    },
+    where: {
+      title: 'Where are things now?',
+      help: 'Rough is fine. You can drag everything on the map later.',
+      both: 'Nothing to measure: we look for the best spot for both.',
+    },
+  },
   suggest: {
     title: 'Best placement',
     move: {
@@ -529,6 +556,7 @@ export const en = {
     seat: 'Your seat',
     seatLine: '{front} from the front wall, {distance} from each speaker',
     stay: 'Stay where they are',
+    seatStays: 'Stays where it is',
     verdict: 'Your setup now: {now}. With this placement: {best}.',
     apply: 'Apply',
     applied: 'Placement applied. Undo brings your setup back.',

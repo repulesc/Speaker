@@ -3,13 +3,13 @@ import { readFileSync } from 'node:fs';
 import { encodeShare } from '../../src/app/state/share';
 import { messageKeys, MESSAGES, translate } from '../../src/i18n/translate';
 import { makeProject } from '../fixtures/projects';
-import { fillRoom, goHome, openMenu, openSection, savedProject } from './helpers';
+import { fillRoom, goHome, openApp, openMenu, openSection, savedProject } from './helpers';
 
 // Metric by default, English UI.
 test.use({ locale: 'en-GB' });
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
+  await openApp(page);
 });
 
 test('autosave: values survive a reload', async ({ page }) => {
@@ -91,6 +91,7 @@ test('journey 6 — share: a link opens an identical project for someone else', 
   const other = await friend.newPage();
   await other.goto(link);
   await expect(other.getByRole('status').filter({ hasText: 'Opened' })).toBeVisible();
+  await openSection(other, 'Room'); // an opened project shows its results first
   await expect(other.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
   await expect(other.getByLabel('Length', { exact: true })).toHaveValue('5.20\u00a0m');
   expect(other.url()).not.toContain('#p='); // the link is cleaned from the address bar
@@ -134,6 +135,7 @@ test('journey 7 — export and import round-trip; a corrupt file is rejected wit
   const other = await fresh.newPage();
   await other.goto('/');
   await other.locator('input[type=file]').setInputFiles(path);
+  await openSection(other, 'Room'); // an opened project shows its results first
   await expect(other.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
 
   // In memory: Playwright ignores file paths that contain characters like the em dash in test-results.
@@ -159,7 +161,7 @@ test('journey 8 — blocked storage: the app works and says nothing is saved', a
     });
   });
   const page = await context.newPage();
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
   await expect(page.getByText('Not saved: your browser blocks storage')).toBeVisible();
@@ -215,7 +217,10 @@ test('projects: new, switch, rename and delete', async ({ page }) => {
 
   await openMenu(page);
   await page.getByRole('button', { name: 'New project' }).click();
+  // A new project starts with the survey.
+  await expect(page.getByRole('dialog', { name: 'How big is your room?' })).toBeVisible();
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('');
+  await page.getByRole('button', { name: 'Skip' }).click();
 
   await openMenu(page);
   await page.getByRole('button', { name: 'Living room' }).click();
@@ -226,4 +231,36 @@ test('projects: new, switch, rename and delete', async ({ page }) => {
   await openMenu(page);
   await page.getByRole('button', { name: 'Delete' }).click();
   await expect(header).toContainText('Untitled room');
+});
+
+test('first run: the survey asks four questions, then shows the answer', async ({ page }) => {
+  await page.goto('/');
+  const survey = page.getByRole('dialog');
+  await expect(survey).toContainText('1 of 4');
+  await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled(); // a room size first
+  await fillRoom(page, '4.2', '5.5', '2.6', 'Where to put my speakers');
+  // fillRoom skips after the goal; start again to walk all four screens.
+  await openMenu(page);
+  await page.getByRole('button', { name: 'New project' }).click();
+  await page.getByLabel('Width', { exact: true }).fill('4.2');
+  await page.getByLabel('Length', { exact: true }).fill('5.5');
+  await page.getByLabel('Length', { exact: true }).blur();
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.getByRole('radio', { name: /^Where to put my speakers/ }).check({ force: true });
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.getByRole('radio', { name: /Coaxial active monitor/ }).check({ force: true });
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.getByLabel('Seat to the front wall').fill('3.2');
+  await page.getByLabel('Distance between the speakers').fill('1.8');
+  await page.getByLabel('Distance between the speakers').blur();
+  await page.getByRole('button', { name: 'Show me' }).click();
+  await expect(survey).toHaveCount(0);
+
+  const project = await savedProject(page);
+  expect(project.constraints.listenerFixed).toBe(true);
+  expect(project.constraints.speakersFixed).toBe(false);
+  expect(project.variants[0].listener.ears.y).toBeCloseTo(3.2, 6);
+  expect(project.speaker.driverLayout.value).toBe('coaxial');
+  await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
+  await expect(page.getByLabel('Map layer')).toHaveValue('speakers'); // the map follows the goal
 });

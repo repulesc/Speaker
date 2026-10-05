@@ -510,6 +510,33 @@ export const hu: Messages = {
     notSet: 'Nincs megadva',
     none: 'Nincs',
   },
+  survey: {
+    step: '{n} / {total}',
+    skip: 'Kihagyom',
+    back: 'Vissza',
+    next: 'Tovább',
+    done: 'Mutasd',
+    room: {
+      title: 'Mekkora a szobád?',
+      help: 'Elég a durva érték. Ha a belmagasságot üresen hagyod, szokásos {height}-rel számolunk.',
+    },
+    goal: {
+      title: 'Mire vagy kíváncsi?',
+      help: 'Ezt bármikor megváltoztathatod.',
+      speakers: { name: 'Hová tegyem a hangfalaimat', help: 'Az ülőhelyem marad, ahol van.' },
+      seat: { name: 'Hová üljek', help: 'A hangfalaim maradnak, ahol vannak.' },
+      both: { name: 'Mindkettő', help: 'A hangfalakat és az ülőhelyet is mozdíthatom.' },
+    },
+    speaker: {
+      title: 'Melyik hasonlít leginkább a hangfaladra?',
+      help: 'Válaszd a legközelebbit. Kitölti a tipikus méreteket.',
+    },
+    where: {
+      title: 'Hol vannak most a dolgok?',
+      help: 'Elég a durva érték. Később mindent húzhatsz a rajzon.',
+      both: 'Nincs mit lemérni: mindkettőnek a legjobb helyet keressük.',
+    },
+  },
   suggest: {
     title: 'A legjobb elhelyezés',
     move: {
@@ -535,6 +562,7 @@ export const hu: Messages = {
     seat: 'Az ülőhelyed',
     seatLine: '{front} az elülső faltól, {distance} mindkét hangfaltól',
     stay: 'Maradnak a helyükön',
+    seatStays: 'Marad a helyén',
     verdict: 'A mostani elrendezésed: {now}. Ezzel az elhelyezéssel: {best}.',
     apply: 'Alkalmaz',
     applied: 'Az elhelyezés kész. A visszavonás visszahozza az előzőt.',

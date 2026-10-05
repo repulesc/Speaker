@@ -104,6 +104,16 @@
   /** The bass-note explorer replaces the score map while it is on. */
   const field = $derived(ui.modeFrequency !== null ? modeExplorer.field : null);
   const suggested = $derived(field ? null : (candidates[shownIndex] ?? null));
+  /**
+   * Where the option's letter sits: on the suggested seat, or, when the seat stays put (speakers
+   * only), between the suggested speakers, so it never hides the seat.
+   */
+  const pinAt = $derived.by(() => {
+    if (!suggested) return null;
+    if (!project.constraints.listenerFixed) return suggested.listener;
+    const { left, right } = suggested.speakers;
+    return { x: (left.base.x + right.base.x) / 2, y: left.base.y };
+  });
   /** The speaker-placement layer replaces the seat map: the seat stays, the speakers move. */
   const speakerGrid = $derived(
     !field && ui.layer === 'speakers' && result ? result.heatmap.speakers : null,
@@ -542,21 +552,17 @@
           <g
             class="item speaker"
             class:selected={isSelected}
-            class:locked={project.constraints.speakersFixed}
             role="button"
             tabindex="0"
-            aria-disabled={project.constraints.speakersFixed || undefined}
             aria-label={speakerLabel(s.side)}
             onfocus={() => ui.select({ kind: 'speaker', side: s.side })}
             onpointerdown={(e) => {
               ui.select({ kind: 'speaker', side: s.side });
-              if (project.constraints.speakersFixed) return;
               drag(e, { x: s.p.base.x, y: s.p.base.y }, `speaker-${s.side}`, (x, y) =>
                 moveSpeaker(workspace.project, s.side, { x, y }),
               );
             }}
             onkeydown={(e) =>
-              !project.constraints.speakersFixed &&
               onKey(e, `speaker-${s.side}`, (dx, dy) =>
                 moveSpeaker(
                   workspace.project,
@@ -597,21 +603,17 @@
           <g
             class="item seat-item"
             class:selected={isSelected}
-            class:locked={project.constraints.listenerFixed}
             role="button"
             tabindex="0"
-            aria-disabled={project.constraints.listenerFixed || undefined}
             aria-label={seatLabel}
             onfocus={() => ui.select({ kind: 'seat' })}
             onpointerdown={(e) => {
               ui.select({ kind: 'seat' });
-              if (project.constraints.listenerFixed) return;
               drag(e, { x: seat.ears.x, y: seat.ears.y }, 'seat', (x, y) =>
                 moveSeat(workspace.project, { x, y }),
               );
             }}
             onkeydown={(e) =>
-              !project.constraints.listenerFixed &&
               onKey(e, 'seat', (dx, dy) =>
                 moveSeat(
                   workspace.project,
@@ -663,11 +665,9 @@
               }
             }}
           >
-            <circle cx={px(suggested.listener.x)} cy={py(suggested.listener.y)} r="13" />
-            <text
-              x={px(suggested.listener.x)}
-              y={py(suggested.listener.y) + 4.5}
-              text-anchor="middle">{LETTERS[shownIndex]}</text
+            <circle cx={px(pinAt!.x)} cy={py(pinAt!.y)} r="13" />
+            <text x={px(pinAt!.x)} y={py(pinAt!.y) + 4.5} text-anchor="middle"
+              >{LETTERS[shownIndex]}</text
             >
           </g>
         {/if}
@@ -968,9 +968,6 @@
     cursor: grab;
     touch-action: none;
     outline: none;
-  }
-  .item.locked {
-    cursor: default;
   }
   .item:active {
     cursor: grabbing;

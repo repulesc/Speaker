@@ -1,11 +1,20 @@
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, goHome, goStep, openMenu, openSection, openWhy, savedProject } from './helpers';
+import {
+  fillRoom,
+  goHome,
+  goStep,
+  openApp,
+  openMenu,
+  openSection,
+  openWhy,
+  savedProject,
+} from './helpers';
 
 test.use({ locale: 'en-GB' });
 
 /** A room with the default speakers, open on the home page with the best placement. */
 async function withResults(page: Page) {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
   await expect(page.getByTestId('suggestion')).toBeVisible();
@@ -52,8 +61,19 @@ test('best placement: shown first, other options, apply, and undo brings the set
   page,
 }) => {
   await withResults(page);
+  // Both move (the default is speakers only, with the seat fixed).
+  await page.getByRole('button', { name: /^Options/ }).click();
+  await page.getByRole('radio', { name: 'Both' }).check({ force: true });
   const before = (await savedProject(page)).variants[0].listener.ears.y;
   const answer = page.getByTestId('suggestion');
+  // Wait for the new answer: the suggested seat is no longer the current one.
+  await expect
+    .poll(async () => {
+      const text = await answer.innerText();
+      const m = /([\d.]+)\u00a0m from the front wall, [\d.]+\u00a0m from each/.exec(text);
+      return m ? Math.abs(Number(m[1]) - before) : 0;
+    })
+    .toBeGreaterThan(0.05);
   await expect(answer).toContainText(/from the front wall/);
   await expect(answer).toContainText(/apart/);
   await page.getByRole('radio', { name: /^Option B/ }).check({ force: true });
@@ -77,7 +97,7 @@ test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({
   await withResults(page);
   await page.getByRole('button', { name: /^Options/ }).click();
   await page.getByRole('radio', { name: 'Speakers' }).check({ force: true });
-  await expect(page.getByTestId('suggestion')).toContainText('Stay where they are');
+  await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
   const project = await savedProject(page);
   expect(project.constraints.listenerFixed).toBe(true);
   await page.getByRole('radio', { name: 'Desk' }).check({ force: true });
@@ -156,7 +176,7 @@ test('the Treat tab lists advice in order, with no raw keys', async ({ page }) =
 test('the bass-note explorer shows a pressure pattern and the resonances near the note', async ({
   page,
 }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
   await expect(page.getByTestId('suggestion')).toBeVisible();

@@ -438,6 +438,13 @@ export function paintSpeakerMap(
     for (let i = nx - 1; i >= 0; i--) mirrored.push(values[j * nx + i]!);
   }
   const { filled, dist } = fillGaps(nx * 2, ny, mirrored);
-  const field = smoothField(nx * 2, ny, filled, scale, undefined, fadeAlpha(dist, grid.step));
+  // The grid stops halfway down the room (speakers never go further): fade out there too.
+  const visible = fadeAlpha(dist, grid.step);
+  const fadeRows = Math.max(1, FADE_M / grid.step);
+  for (let j = 0; j < ny; j++) {
+    const edge = Math.min(1, (ny - 0.5 - j) / fadeRows);
+    for (let i = 0; i < nx * 2; i++) visible[j * nx * 2 + i]! *= smoothstep(0, 1, edge);
+  }
+  const field = smoothField(nx * 2, ny, filled, scale, undefined, visible);
   paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }

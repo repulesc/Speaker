@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import {
   fillRoom,
   goStep,
+  openApp,
   openSpeakerDetails,
   openWhy,
   savedProject,
@@ -12,7 +13,7 @@ import {
 test.use({ locale: 'en-GB' });
 
 test('journey 1 — first answer: room, speaker, then results within 3 seconds', async ({ page }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
@@ -29,7 +30,7 @@ test('journey 1 — first answer: room, speaker, then results within 3 seconds',
 test('journey 2 — edit without restart: change the ceiling, results follow, nothing is lost', async ({
   page,
 }) => {
-  await page.goto('/');
+  await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check();
@@ -52,7 +53,7 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
 
 test.describe('with a room', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await openApp(page);
     await fillRoom(page, '4', '5', '2.5');
   });
 
@@ -196,16 +197,22 @@ test.describe('with a room', () => {
     expect(project.variants[0].speakers.right.toeInDeg).toBe(12);
   });
 
-  test('speakers: constraints make things fixed', async ({ page }) => {
+  test('speakers: "fixed" limits the suggestions, not your own moves', async ({ page }) => {
     await goStep(page, 'Speakers');
     await page.getByRole('radio', { name: 'No, it is fixed' }).check();
     await page.getByLabel('My speakers can’t move (only suggest a better seat)').check();
+    const project = await savedProject(page);
+    expect(project.constraints.listenerFixed).toBe(true);
+    expect(project.constraints.speakersFixed).toBe(true);
+    // You can still put the seat where it really is.
     const seat = page.getByRole('button', { name: /^Seat\./ }).first();
-    await expect(seat).toHaveAttribute('aria-disabled', 'true');
     const before = await seatDistance(page);
     await seat.focus();
     await page.keyboard.press('Shift+ArrowDown');
-    expect(await seatDistance(page)).toBe(before);
+    expect(await seatDistance(page)).toBeCloseTo(before + 0.1, 2);
+    // With nothing allowed to move, the home page says so instead of suggesting anything.
+    await goStep(page, 'Results');
+    await expect(page.getByText(/both the seat and the speakers as fixed/)).toBeVisible();
   });
 
   test('speakers: how far they may move (the zone) is one choice', async ({ page }) => {

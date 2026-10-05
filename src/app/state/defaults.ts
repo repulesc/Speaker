@@ -128,7 +128,8 @@ export function createDefaultProject(options: {
     constraints: {
       speakerWall: 'front',
       maxSpeakerDistanceFromWall: estimated(DEFAULTS.maxSpeakerDistanceFromWall),
-      listenerFixed: false,
+      // Speakers only by default: most people have a fixed seat (owner, docs/DESIGN_BRIEF_V4.md).
+      listenerFixed: true,
       speakersFixed: false,
       keepSymmetric: true,
       // Suggestions stay within 50 cm of where the speakers stand (once placed): most people
