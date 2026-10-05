@@ -111,6 +111,13 @@ describe('moveSeat', () => {
     expect(e.z).toBeLessThanOrEqual(2);
     expect(activeVariant(p).listener.certainty).toBe('estimated');
   });
+
+  it('keeps the listening area (a sofa moves with its seat)', () => {
+    const p = project();
+    activeVariant(p).listener.area = 'sofa';
+    moveSeat(p, { x: 1.5, y: 3.0 });
+    expect(activeVariant(p).listener.area).toBe('sofa');
+  });
 });
 
 describe('objects', () => {

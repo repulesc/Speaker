@@ -16,7 +16,16 @@
   import { workspace } from '../session.svelte';
   import { GOALS, goalOf, setGoal } from '../state/goal';
   import { ROOM_LIMITS, USUAL_ROOM_RANGE } from '../state/limits';
-  import { applySpeakerType } from '../state/speaker';
+  import {
+    applySpeakerType,
+    DISPERSIONS,
+    dispersionOf,
+    PORT_CHOICES,
+    portChoice,
+    setDispersion,
+    setPort,
+    speakerTypeOf,
+  } from '../state/speaker';
   import { ui } from '../ui.svelte';
   import LengthField from './LengthField.svelte';
   import LengthInput from './LengthInput.svelte';
@@ -44,15 +53,9 @@
   const dims = ['width', 'length', 'height'] as const;
 
   /** The type whose typical values the speaker still has (as on the Speakers page). */
-  const chosenType = $derived(
-    SPEAKER_TYPES.find(
-      (t) =>
-        Math.abs((project.speaker.dimensions.w.value ?? -1) - t.w) < 1e-6 &&
-        Math.abs((project.speaker.dimensions.d.value ?? -1) - t.d) < 1e-6 &&
-        project.speaker.portLocation.value === t.portLocation &&
-        project.speaker.driverLayout.value === t.driverLayout,
-    )?.id ?? null,
-  );
+  const chosenType = $derived(speakerTypeOf(project.speaker)?.id ?? null);
+  const port = $derived(portChoice(project.speaker));
+  const dispersion = $derived(dispersionOf(project.speaker));
 
   /** A typical ceiling, assumed when it is left empty (the analysis needs one). */
   const TYPICAL_CEILING = 2.5;
@@ -175,6 +178,42 @@
           </label>
         {/each}
       </div>
+      <fieldset>
+        <legend>{i18n.t('speakers.quick.port.label')}</legend>
+        <div class="seg" role="radiogroup" aria-label={i18n.t('speakers.quick.port.label')}>
+          {#each PORT_CHOICES as c (c)}
+            <label>
+              <input
+                type="radio"
+                name="survey-port"
+                checked={port === c}
+                onchange={() => workspace.edit((p) => setPort(p, c))}
+              />
+              {i18n.t(`speakers.quick.port.${c}`)}
+            </label>
+          {/each}
+        </div>
+      </fieldset>
+      <details class="more">
+        <summary>{i18n.t('speakers.quick.more')}</summary>
+        <fieldset>
+          <legend>{i18n.t('speakers.quick.dispersion.label')}</legend>
+          <p class="note">{i18n.t('speakers.quick.dispersion.help')}</p>
+          <div class="seg" role="radiogroup" aria-label={i18n.t('speakers.quick.dispersion.label')}>
+            {#each DISPERSIONS as d (d)}
+              <label>
+                <input
+                  type="radio"
+                  name="survey-dispersion"
+                  checked={dispersion === d}
+                  onchange={() => workspace.edit((p) => setDispersion(p, d))}
+                />
+                {i18n.t(`speakers.quick.dispersion.${d}`)}
+              </label>
+            {/each}
+          </div>
+        </fieldset>
+      </details>
     {:else}
       <h2 id="survey-title" tabindex="-1">{i18n.t('survey.where.title')}</h2>
       {#if goal === 'both' || !room}
@@ -445,6 +484,24 @@
   legend {
     padding: 0;
     font-weight: 600;
+  }
+  fieldset .seg {
+    display: flex;
+  }
+  .more summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .more fieldset {
+    margin-top: 4px;
+  }
+  .note {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
   }
   .actions {
     display: flex;

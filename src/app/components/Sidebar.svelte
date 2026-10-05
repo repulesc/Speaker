@@ -14,9 +14,10 @@
   import BassChart from './BassChart.svelte';
   import ConfidenceMeter from './ConfidenceMeter.svelte';
   import ListenPanel from './ListenPanel.svelte';
+  import PlacementOptions from './PlacementOptions.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
   import { countDone, setupProgress } from '../state/progress';
-  import { SPEAKER_TYPES } from '../../engine/presets/speakerTypes';
+  import { speakerTypeOf } from '../state/speaker';
   import StepFurnishing from './StepFurnishing.svelte';
   import StepGoals from './StepGoals.svelte';
   import StepRoom from './StepRoom.svelte';
@@ -27,9 +28,9 @@
   import WhyPanel from './WhyPanel.svelte';
 
   /**
-   * The one place for input and answers (owner feedback after R5: settings were scattered over
-   * the top, left and right). Home: the recommendation, then a list of everything; each row
-   * opens its own page with a way back, as in the platform settings apps.
+   * The one place for input and answers. Home: the result first (what it is, what to try), then
+   * the settings, folded (owner decision, docs/ROADMAP_V5.md: the answer and the settings are
+   * kept strictly apart). Each row opens its own page with a way back, as in the settings apps.
    */
   interface Props {
     onshare: () => void;
@@ -56,7 +57,6 @@
   const progress = $derived(setupProgress(project));
   const variant = $derived(activeVariant(project));
   const room = $derived(roomSize(project));
-  const ok = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
   const home = $derived(ui.step === 'results');
 
   const roomValue = $derived(
@@ -67,20 +67,9 @@
       : i18n.t('nav.notSet'),
   );
   const goalCount = $derived(Object.values(project.goals.weights).filter((w) => w).length);
-  const problems = $derived(
-    ok?.findings.filter((f) => f.severity === 'red-flag' || f.severity === 'caution').length ?? 0,
-  );
-  const notes = $derived(project.notes.filter((n) => n.variantId === variant.id).length);
 
   /** The speaker type the speaker still matches, by its typical size (as on the Speakers page). */
-  const speakerType = $derived(
-    SPEAKER_TYPES.find(
-      (t) =>
-        Math.abs((project.speaker.dimensions.w.value ?? -1) - t.w) < 1e-6 &&
-        Math.abs((project.speaker.dimensions.d.value ?? -1) - t.d) < 1e-6 &&
-        project.speaker.driverLayout.value === t.driverLayout,
-    ) ?? null,
-  );
+  const speakerType = $derived(speakerTypeOf(project.speaker));
   const wallsValue = $derived.by(() => {
     const walls = ['front', 'back', 'left', 'right'] as const;
     const first = project.surfaces.base.front;
@@ -97,84 +86,53 @@
     furnishing: () =>
       variant.objects.length ? String(variant.objects.length) : i18n.t('nav.none'),
     goals: () => (goalCount ? String(goalCount) : i18n.t('nav.none')),
-    why: () => (ok ? String(problems) : ''),
-    treat: () => (ok ? String(ok.advice.treatment.length + ok.advice.settings.length) : ''),
-    listen: () => (notes ? String(notes) : ''),
   };
-  const label = (id: StepId) =>
-    i18n.t(
-      id === 'why' || id === 'treat' || id === 'listen' || id === 'bass'
-        ? `nav.${id}`
-        : `dock.${id}`,
-    );
+  const label = (id: StepId) => i18n.t(`dock.${id}`);
 </script>
 
 <!-- The "Your room" group as four-up cards: one of two looks for the owner to choose from
      (`?home=cards`, docs/DESIGN_BRIEF_V4.md); rows are the default. -->
-{#snippet cards(ids: readonly StepId[], title: string, titleId: string)}
-  <section aria-labelledby={titleId}>
-    <h3 class="group-title" id={titleId}>{title}</h3>
-    <ul class="cards">
-      {#each ids as id (id)}
-        <li>
-          <button type="button" class="card" onclick={() => (ui.step = id)}>
-            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-              <path d={ICONS[id] ?? ''} />
-            </svg>
-            <span class="card-title">{label(id)}</span>
-            <span class="value">{values[id]?.() || i18n.t('nav.notSet')}</span>
-          </button>
-        </li>
-      {/each}
-    </ul>
-  </section>
+{#snippet cards(ids: readonly StepId[])}
+  <ul class="cards">
+    {#each ids as id (id)}
+      <li>
+        <button type="button" class="card" onclick={() => (ui.step = id)}>
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+            <path d={ICONS[id] ?? ''} />
+          </svg>
+          <span class="card-title">{label(id)}</span>
+          <span class="value">{values[id]?.() || i18n.t('nav.notSet')}</span>
+        </button>
+      </li>
+    {/each}
+  </ul>
 {/snippet}
 
-{#snippet rows(ids: readonly StepId[], title: string, titleId: string)}
-  {@const tracked = ids === SECTIONS}
-  <section aria-labelledby={titleId}>
-    <h3 class="group-title" id={titleId}>
-      {title}
-      {#if tracked}
-        <span class="progress" data-testid="progress">
-          <span class="bar" aria-hidden="true"
-            ><span style="width:{(countDone(progress) / SECTIONS.length) * 100}%"></span></span
+{#snippet rows(ids: readonly StepId[])}
+  <ul class="list">
+    {#each ids as id (id)}
+      {@const status = progress[id as SectionId]}
+      <li>
+        <button type="button" class="row" onclick={() => (ui.step = id)}>
+          <svg
+            class="mark status-{status}"
+            viewBox="0 0 16 16"
+            width="16"
+            height="16"
+            aria-hidden="true"
           >
-          {i18n.t('nav.progress', { n: countDone(progress), total: SECTIONS.length })}
-        </span>
-      {/if}
-    </h3>
-    <ul class="list">
-      {#each ids as id (id)}
-        <li>
-          <button type="button" class="row" onclick={() => (ui.step = id)}>
-            {#if tracked}
-              {@const status = progress[id as SectionId]}
-              <svg
-                class="mark status-{status}"
-                viewBox="0 0 16 16"
-                width="16"
-                height="16"
-                aria-hidden="true"
-              >
-                <circle cx="8" cy="8" r="6.5" />
-                {#if status === 'done'}<path d="M5 8.4l2 2 4-4.4" />{/if}
-                {#if status === 'partial'}<path class="half" d="M8 1.5a6.5 6.5 0 0 1 0 13z" />{/if}
-              </svg>
-            {/if}
-            <span>{label(id)}</span>
-            <span class="value">{values[id]?.() ?? ''}</span>
-            <span class="chevron" aria-hidden="true">›</span>
-            {#if tracked}
-              <span class="visually-hidden"
-                >{i18n.t(`nav.status.${progress[id as SectionId]}`)}</span
-              >
-            {/if}
-          </button>
-        </li>
-      {/each}
-    </ul>
-  </section>
+            <circle cx="8" cy="8" r="6.5" />
+            {#if status === 'done'}<path d="M5 8.4l2 2 4-4.4" />{/if}
+            {#if status === 'partial'}<path class="half" d="M8 1.5a6.5 6.5 0 0 1 0 13z" />{/if}
+          </svg>
+          <span>{label(id)}</span>
+          <span class="value">{values[id]?.() ?? ''}</span>
+          <span class="chevron" aria-hidden="true">›</span>
+          <span class="visually-hidden">{i18n.t(`nav.status.${status}`)}</span>
+        </button>
+      </li>
+    {/each}
+  </ul>
 {/snippet}
 
 <div class="sidebar">
@@ -207,12 +165,38 @@
   <div class="body">
     {#if home}
       <SuggestionCard />
-      {#if HOME_CARDS}
-        {@render cards(SECTIONS, i18n.t('nav.room'), 'nav-room')}
-      {:else}
-        {@render rows(SECTIONS, i18n.t('nav.room'), 'nav-room')}
-      {/if}
-      {@render rows(['why', 'treat', 'bass', 'listen'], i18n.t('nav.results'), 'nav-results')}
+      <section class="settings" aria-labelledby="nav-room">
+        <h3 class="group-title">
+          <button
+            type="button"
+            class="fold"
+            id="nav-room"
+            aria-expanded={ui.settingsOpen}
+            aria-controls="settings-body"
+            onclick={() => (ui.settingsOpen = !ui.settingsOpen)}
+          >
+            <span class="chevron" class:open={ui.settingsOpen} aria-hidden="true">›</span>
+            {i18n.t('nav.room')}
+            <span class="progress" data-testid="progress">
+              <span class="bar" aria-hidden="true"
+                ><span style="width:{(countDone(progress) / SECTIONS.length) * 100}%"></span></span
+              >
+              {i18n.t('nav.progress', { n: countDone(progress), total: SECTIONS.length })}
+            </span>
+          </button>
+        </h3>
+        {#if ui.settingsOpen}
+          <div class="settings-body" id="settings-body">
+            {#if HOME_CARDS}
+              {@render cards(SECTIONS)}
+            {:else}
+              {@render rows(SECTIONS)}
+            {/if}
+            <h4 class="group-title">{i18n.t('nav.placement')}</h4>
+            <PlacementOptions />
+          </div>
+        {/if}
+      </section>
       <div class="foot">
         <ConfidenceMeter report={analysis.result?.confidence ?? null} />
       </div>
@@ -263,11 +247,38 @@
     min-height: 100%;
     background: var(--bg);
   }
+  .settings,
+  .settings-body {
+    display: grid;
+    gap: 10px;
+  }
+  .fold {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .fold .chevron {
+    display: inline-block;
+    width: 12px;
+    transition: transform 150ms ease;
+  }
+  .fold .chevron.open {
+    transform: rotate(90deg);
+  }
   .progress {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    float: right;
+    margin-left: auto;
     font-weight: 400;
   }
   .bar {

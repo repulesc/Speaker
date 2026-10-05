@@ -187,10 +187,17 @@ export interface SpeakerPlacement {
   certainty?: Certainty;
 }
 
+/** Where more than one head can be: a sofa, a desk, a bed (docs/ROADMAP_V5.md). */
+export type ListeningAreaKind = 'sofa' | 'desk' | 'bed';
+/** A spot an area is judged at. */
+export type AreaSpot = 'centre' | 'left' | 'right' | 'front' | 'back';
+
 export interface Listener {
-  /** Midpoint between the ears. */
+  /** Midpoint between the ears (the middle of the listening area, if there is one). */
   ears: Vec3;
   certainty: Certainty;
+  /** Absent: one seat. */
+  area?: ListeningAreaKind;
 }
 
 export interface Constraints {
@@ -472,6 +479,8 @@ export interface AnalysisOk extends AnalysisBase {
   folk: FolkComparison[];
   /** Seat map (goal score, speakers as now) and speaker map (seat as now). */
   heatmap: { listener: Grid; speakers: Grid };
+  /** With a listening area: the current setup's score at each spot of it (nominal). */
+  area?: { kind: ListeningAreaKind; spots: { where: AreaSpot; score: number }[] };
 }
 
 export type Analysis = AnalysisNeedsRoom | AnalysisOk;

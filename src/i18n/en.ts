@@ -285,6 +285,22 @@ export const en = {
     remove: 'Remove',
   },
   speakers: {
+    quick: {
+      port: {
+        label: 'Bass port',
+        sealed: 'None (sealed)',
+        front: 'At the front',
+        rear: 'At the back',
+      },
+      more: 'More (optional)',
+      dispersion: {
+        label: 'How widely they spread sound',
+        help: 'Not sure? Leave it on Typical. It is an estimate and only changes advice about listening distance, never the map.',
+        narrow: 'Narrow',
+        typical: 'Typical',
+        wide: 'Wide',
+      },
+    },
     title: 'Speakers',
     intro: 'Pick the closest type and say where they stand. Everything else is optional.',
     type: {
@@ -521,6 +537,7 @@ export const en = {
     treat: 'Improve the room',
     listen: 'Listening notes',
     bass: 'Bass at your seat',
+    placement: 'What to work out',
     back: 'Back',
     notSet: 'Not set',
     progress: '{n} of {total} set',
@@ -570,10 +587,12 @@ export const en = {
       speakers: 'Speakers',
       seat: 'Seat',
     },
-    distance: {
-      label: 'Listening distance',
-      room: 'Room',
-      near: 'Desk',
+    place: {
+      label: 'Where you listen',
+      chair: 'Chair',
+      sofa: 'Sofa',
+      desk: 'Desk',
+      bed: 'Bed',
     },
     speakers: 'Speakers',
     bass: 'Bass at that seat',
@@ -611,6 +630,31 @@ export const en = {
     nothing: 'No placement fits your limits. Let more things move.',
     zoneCost: 'Within {zone}: {inside}. With more room: {outside}.',
   },
+  result: {
+    title: 'Your result',
+    brief: {
+      fixed: '{now} as it is.',
+      top: '{now}. Moving things here would not make a real difference.',
+      better: '{now} now. The placement below makes it {best}.',
+      same: '{now} now. The placement below fine-tunes it.',
+    },
+    idea: 'Also worth trying',
+    area: {
+      even: {
+        sofa: 'About the same for everyone on the sofa.',
+        desk: 'About the same as you move at the desk.',
+        bed: 'About the same across the bed.',
+      },
+      uneven: 'In the middle: {centre}. {where}: {worst}.',
+      where: {
+        left: 'At the left end',
+        right: 'At the right end',
+        front: 'At the front',
+        back: 'At the back',
+        ends: 'At both ends',
+      },
+    },
+  },
   panel: {
     label: 'Settings and results',
     close: 'Back to the results',
@@ -621,6 +665,8 @@ export const en = {
     bestHere: 'Best here: {word}',
     absolute: 'Absolute scale',
     hidePanel: 'Hide the side panel',
+    best: 'Best',
+    now: 'Now: {word}',
     before: 'Before',
     showPanel: 'Show the side panel',
     notListening: 'Not a listening position',
@@ -628,6 +674,9 @@ export const en = {
     label: 'Map',
     hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
     layerLabel: 'Map layer',
+    pick: { speakers: 'Speakers', seat: 'Seat' },
+    why: 'Why?',
+    whyLabel: 'What makes a seat good or poor',
     poorer: 'Poorer',
     better: 'Better',
     flagged: 'Hatched: the guidelines advise against sitting here.',
@@ -1200,6 +1249,14 @@ export const en = {
     D06: {
       desk: 'Your speaker has a desk mode and the speakers stand on a desk: switch it on.',
       stand: 'Use the speaker’s stand mode: the speakers are not on a desk.',
+    },
+    D07: {
+      bassCut:
+        'The speakers stand close to walls, which boosts the bass (boundary gain: {gain}). If your speakers or amplifier have a bass control, try a small step down, then listen.',
+      trebleLift:
+        'The room soaks up high frequencies (reverberation {t60}). If your speakers or amplifier have a treble control, try a small lift ({suggestDb}), then listen.',
+      trebleCut:
+        'The room lets high frequencies ring (reverberation {t60}). If your speakers or amplifier have a treble control, try a small cut ({suggestDb}), then listen.',
     },
   },
   analysis: {

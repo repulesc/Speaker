@@ -92,6 +92,8 @@ Inputs are rarely exact. For a diverse pool of the best 30 search results (at le
 
 **(R0) Common random numbers:** the eight perturbed rooms and the position errors are drawn once per analysis and applied to every placement alike, the current setup included. Before R0 each placement drew its own position errors from a shared stream, so a placement's robust score depended on which other placements were in the pool and in what order (by up to 0.03), and the order of near-equal candidates changed with every seed.
 
+**(V5) Listening area** (`scoring/area.ts`, `presets/listeningArea.ts`): with a sofa, desk or bed instead of one chair, each robustness run scores the area's spots (the middle, both ends, and the front and back when the area is at least 0.2 m deep) with the same score as one seat, the middle counting twice: `areaScore = (2·middle + Σ others) / (2 + n)`. The robust score is taken over these area scores, so suggestions favour places that are good for everyone on the sofa, not only the middle seat. Area sizes are typical, not sourced (🟡): sofa 1.2 × 0.15 m, desk 0.4 × 0.3 m, bed 0.8 × 0.4 m (ears, width × depth). The analysis also reports the current setup's nominal score at each spot, so the result can say "In the middle: Good. At the left end: Fair." Without an area nothing changes.
+
 ## 5. From scores to what the user sees
 
 - **Top candidates:** up to 5, greedily picked by robust score with a minimum separation of 0.2 m (any speaker or the listener) so they are genuinely different options. Labelled A, B, C…

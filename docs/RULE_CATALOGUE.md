@@ -177,6 +177,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Sources:** [EVP], [KUT]. **(R0)** The constant is ✓ by derivation: the critical distance `r_c = sqrt(Q·A / (16π))` with Sabine's `A = 0.161·V / T60` gives `sqrt(0.161 / (16π)) = 0.0566`. (R5) Equation numbers are not needed: the derivation stands on its own.
 - **Limits:** diffuse-field assumption, rough in small rooms. Used only as context for goal "precise imaging" (G08 and scoring), never as a red flag on its own.
 - **Test case:** `V = 50`, `T60 = 0.4`, `Q = 2 → r_c = 0.90 m`. With `Q = 4 → 1.27 m`.
+- **(V5) Dispersion choice** (survey and Speakers page, 🟡 estimate): *Typical* keeps the speaker type's estimated `Q`; *Narrow* doubles it (+3 dB directivity index), *Wide* halves it (−3 dB), never below 1 (omnidirectional). So `Q` spans about 1–6. It reaches this rule only, never the score or the maps (`tests/engine/dispersion.test.ts`). The factor of two is a deliberately coarse step, not from a source: without measurements the app cannot tell a waveguide from a plain dome, and says so.
 
 ### P11 · Room proportion quality (information only)
 
@@ -346,6 +347,7 @@ What to change in the room or on the speaker, most useful first; the first item 
 | D04 | The base height that puts the tweeter at ear height, or tilt the speaker (heights are not searched in v1). When the axis is above the ears even with the speaker on the floor (base height under 5 cm), the `tilt` variant: tilt down or sit higher (R3 review) | 🟠 | [TOOLE], [ITU1116] ✓ | G08 caution or red flag |
 | D05 | Move a rear port out to the minimum; the manual says whether port plugs exist (the app does not know and says so) | 🟠 | manufacturer, [TOOLE] | G07 too close |
 | D06 | Desk mode when the speakers stand on a desk or table, otherwise stand mode | 🟠 | manufacturer | the profile lists those modes |
+| D07 | (V5) Tone, if you have the controls: the same bass cut as D02 and treble lift or cut as D03, worded "if your speakers or amplifier have a bass (treble) control", for profiles that list no such control. Same conditions: boundary gain high or very high (P05) and placed speakers; H06's treble thresholds in a described room. No new number: treble ±0.5 dB as in H06, bass "a small step" | 🟡 | [ALL74], [TOOLE], manufacturer | no bass (treble) control known, and the D02 (H06) condition holds |
 
 ## 🟣 Subjective rules (symptom → hypotheses → experiment)
 

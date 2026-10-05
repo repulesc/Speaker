@@ -3,7 +3,15 @@ import { readFileSync } from 'node:fs';
 import { encodeShare } from '../../src/app/state/share';
 import { messageKeys, MESSAGES, translate } from '../../src/i18n/translate';
 import { makeProject } from '../fixtures/projects';
-import { fillRoom, goHome, openApp, openMenu, openSection, savedProject } from './helpers';
+import {
+  fillRoom,
+  goHome,
+  mapChoice,
+  openApp,
+  openMenu,
+  openSection,
+  savedProject,
+} from './helpers';
 
 // Metric by default, English UI.
 test.use({ locale: 'en-GB' });
@@ -185,7 +193,7 @@ test('journey 10 — keyboard only: skip to the panel, type, and open the result
   const done = page.getByRole('button', { name: 'Done' });
   await done.focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Best placement' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your result' })).toBeVisible();
 });
 
 test('undo and redo with the keyboard', async ({ page }) => {
@@ -258,6 +266,11 @@ test('first run: the survey asks four questions, then shows the answer', async (
   await page.getByRole('radio', { name: /^Where to put my speakers/ }).check({ force: true });
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('radio', { name: /Coaxial active monitor/ }).check({ force: true });
+  // The port and, folded away, how widely they spread sound.
+  await page.getByRole('radio', { name: 'None (sealed)' }).check({ force: true });
+  await page.getByText('More (optional)').click();
+  await page.getByRole('radio', { name: 'Wide', exact: true }).check({ force: true });
+  await expect(page.getByRole('radio', { name: /Coaxial active monitor/ })).toBeChecked();
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByLabel('Seat to the front wall').fill('3.2');
   await page.getByLabel('Distance between the speakers').fill('1.8');
@@ -270,6 +283,8 @@ test('first run: the survey asks four questions, then shows the answer', async (
   expect(project.constraints.speakersFixed).toBe(false);
   expect(project.variants[0].listener.ears.y).toBeCloseTo(3.2, 6);
   expect(project.speaker.driverLayout.value).toBe('coaxial');
+  expect(project.speaker.enclosure.value).toBe('sealed');
+  expect(project.speaker.directivity.qMid.value).toBe(1);
   await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
-  await expect(page.getByLabel('Map layer')).toHaveValue('speakers'); // the map follows the goal
+  await expect(mapChoice(page, 'Speakers')).toBeChecked(); // the map follows the goal
 });

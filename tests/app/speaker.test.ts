@@ -9,6 +9,11 @@ import {
   setSeatMode,
   setSeatRange,
   speakerFileName,
+  dispersionOf,
+  portChoice,
+  setDispersion,
+  setPort,
+  speakerTypeOf,
 } from '../../src/app/state/speaker';
 import { genericSpeaker, makeProject } from '../fixtures/projects';
 
@@ -115,5 +120,44 @@ describe('speaker profile files', () => {
     const result = parseSpeakerJson(JSON.stringify(bad));
     expect(result).toMatchObject({ ok: false, reason: 'invalid' });
     expect(result.ok ? '' : result.detail).toContain('speaker.dimensions.w.value');
+  });
+});
+
+describe('the quick speaker questions (survey, docs/ROADMAP_V5.md)', () => {
+  it('the port changes the enclosure and port, and keeps the type', () => {
+    const p = makeProject();
+    applySpeakerType(p, 'small-bookshelf-rear-port');
+    setPort(p, 'sealed');
+    expect(p.speaker.enclosure.value).toBe('sealed');
+    expect(p.speaker.portLocation.value).toBe('none');
+    expect(portChoice(p.speaker)).toBe('sealed');
+    expect(speakerTypeOf(p.speaker)?.id).toBe('small-bookshelf-rear-port');
+    setPort(p, 'front');
+    expect(p.speaker.enclosure.value).toBe('ported');
+    expect(portChoice(p.speaker)).toBe('front');
+    expect(p.speaker.portLocation.certainty).toBe('estimated');
+  });
+
+  it('two floorstanders that differ only in their port are told apart by it', () => {
+    const p = makeProject();
+    applySpeakerType(p, 'floorstander-rear-port');
+    expect(speakerTypeOf(p.speaker)?.id).toBe('floorstander-rear-port');
+    setPort(p, 'front');
+    expect(speakerTypeOf(p.speaker)?.id).toBe('floorstander-front-port');
+  });
+
+  it("dispersion doubles or halves the type's estimated Q, never below 1", () => {
+    const p = makeProject();
+    applySpeakerType(p, 'floorstander-front-port');
+    const q = SPEAKER_TYPES.find((t) => t.id === 'floorstander-front-port')!.qMid;
+    expect(dispersionOf(p.speaker)).toBe('typical');
+    setDispersion(p, 'narrow');
+    expect(p.speaker.directivity.qMid.value).toBe(2 * q);
+    expect(dispersionOf(p.speaker)).toBe('narrow');
+    setDispersion(p, 'wide');
+    expect(p.speaker.directivity.qMid.value).toBe(Math.max(1, q / 2));
+    expect(dispersionOf(p.speaker)).toBe('wide');
+    setDispersion(p, 'typical');
+    expect(p.speaker.directivity.qMid.value).toBe(q);
   });
 });

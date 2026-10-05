@@ -1,17 +1,18 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
   import { formatFrequency, formatLength } from '../../units/format';
-  import { scoreWord } from '../findings/text';
-  import { applyCandidate, cabinet } from '../plan/placement';
-  import { analysis, showNotice, workspace } from '../session.svelte';
-  import { goalOf, setGoal, type Goal } from '../state/goal';
+  import type { Advice } from '../../engine/types';
+  import { adviceText, scoreWord } from '../findings/text';
+  import { activeVariant, applyCandidate, cabinet } from '../plan/placement';
+  import { analysis, showNotice, workspace, type StepId } from '../session.svelte';
+  import { goalOf, type Goal } from '../state/goal';
   import MoodFace from './MoodFace.svelte';
   import { ui } from '../ui.svelte';
 
   /**
-   * The app's answer, first: where the speakers and the seat should go. One title, two lines of
-   * numbers, a word on the bass, one button (docs/DESIGN_BRIEF_V3.md, items 2 and 7). The two
-   * choices that shape the answer sit behind "Options".
+   * The result, first and on its own (owner decision, docs/ROADMAP_V5.md): how the setup does now
+   * in one line, then at most two things to try, the placement (with Apply) and up to two other
+   * ideas (the room, the tone), then the ways to learn more. It only proposes; nothing here is a setting.
    */
   const LETTERS = ['A', 'B', 'C'];
   const project = $derived(workspace.project);
@@ -23,14 +24,71 @@
   const depth = $derived(cabinet(project).d);
   const fmt = (m: number) => formatLength(m, system, 'position', i18n.locale);
 
-  type Moves = Goal;
-  const moves = $derived<Moves>(goalOf(project));
-  const setMoves = (value: Moves) => workspace.edit((p) => setGoal(p, value));
-  const distance = $derived(project.constraints.listeningDistance ?? 'room');
-  function setDistance(value: 'room' | 'near') {
-    workspace.edit((p) => void (p.constraints.listeningDistance = value));
-  }
-  let optionsOpen = $state(false);
+  const moves = $derived<Goal>(goalOf(project));
+  const allFixed = $derived(project.constraints.listenerFixed && project.constraints.speakersFixed);
+
+  /** The brief: how the setup does now, and what the placement would make of it. */
+  const brief = $derived.by(() => {
+    if (!ok) return '';
+    const now = i18n.t(`results.score.${scoreWord(ok.current.score)}`);
+    if (allFixed) return i18n.t('result.brief.fixed', { now });
+    const best = spots[0];
+    if (!best || !move) return i18n.t('result.brief.top', { now });
+    const bestWord = i18n.t(`results.score.${scoreWord(best.score)}`);
+    return bestWord === now
+      ? i18n.t('result.brief.same', { now })
+      : i18n.t('result.brief.better', { now, best: bestWord });
+  });
+
+  /** With a sofa, desk or bed: whether the whole area does as well as its middle. */
+  const areaLine = $derived.by(() => {
+    const area = ok?.area;
+    if (!area) return '';
+    const word = (score: number) => i18n.t(`results.score.${scoreWord(score)}`);
+    const centre = area.spots.find((s) => s.where === 'centre')!;
+    const worst = area.spots.reduce((w, s) => (s.score < w.score ? s : w), centre);
+    if (word(worst.score) === word(centre.score)) return i18n.t(`result.area.even.${area.kind}`);
+    // A sofa in the middle of the room is the same at both ends: say so, not "the left end".
+    const ends = area.spots.filter((s) => s.where === 'left' || s.where === 'right');
+    const both =
+      (worst.where === 'left' || worst.where === 'right') &&
+      ends.length === 2 &&
+      ends.every((s) => word(s.score) === word(worst.score));
+    return i18n.t('result.area.uneven', {
+      centre: word(centre.score),
+      where: i18n.t(`result.area.where.${both ? 'ends' : worst.where}`),
+      worst: word(worst.score),
+    });
+  });
+
+  /**
+   * At most two other ideas: the most useful change to the room, and one about tone (bass or
+   * treble, D02, D03, D07), so the widget answers "what else?" without becoming a list.
+   */
+  const TONE = new Set(['D02', 'D03', 'D07']);
+  const ideas = $derived(ok ? [...ok.advice.treatment, ...ok.advice.settings] : []);
+  const picks = $derived.by<Advice[]>(() => {
+    if (!ok) return [];
+    const { treatment, settings } = ok.advice;
+    const other = treatment[0] ?? settings.find((a) => !TONE.has(a.ruleId));
+    const tone = settings.find((a) => TONE.has(a.ruleId));
+    return [other, tone].filter((a): a is Advice => a !== undefined);
+  });
+  const LEVEL_ICON = { physics: '●', guideline: '◆', heuristic: '▲', subjective: '◇' } as const;
+
+  /** Ways to learn more, each its own page. */
+  const problems = $derived(
+    ok?.findings.filter((f) => f.severity === 'red-flag' || f.severity === 'caution').length ?? 0,
+  );
+  const notes = $derived(
+    project.notes.filter((n) => n.variantId === activeVariant(project).id).length,
+  );
+  const links = $derived<{ id: StepId; value: string }[]>([
+    { id: 'treat', value: ideas.length ? String(ideas.length) : '' },
+    { id: 'why', value: ok ? String(problems) : '' },
+    { id: 'bass', value: '' },
+    { id: 'listen', value: notes ? String(notes) : '' },
+  ]);
 
   /**
    * The answer as one plain sentence: what to change, relative to the setup now (owner decision,
@@ -142,10 +200,10 @@
   });
 </script>
 
-<section class="suggest" aria-labelledby="suggest-title">
-  <h2 id="suggest-title">
-    {i18n.t('suggest.title')}
-    {#if ok && !(project.constraints.listenerFixed && project.constraints.speakersFixed)}
+<section class="suggest" aria-labelledby="result-title">
+  <h2 id="result-title">
+    {i18n.t('result.title')}
+    {#if ok}
       <MoodFace
         word={scoreWord(ok.current.score)}
         label={i18n.t('suggest.mood', {
@@ -161,165 +219,142 @@
     <p class="caption" role="status">{i18n.t('results.calculating')}</p>
   {:else if !ok}
     <p class="caption">{i18n.t('results.needRoom')}</p>
-  {:else if project.constraints.listenerFixed && project.constraints.speakersFixed}
-    <p class="caption">{i18n.t('why.allFixed')}</p>
-  {:else if !shown}
-    <p class="caption">{i18n.t('suggest.nothing')}</p>
   {:else}
-    <p class="say" data-testid="say">{sentence.join(' ')}</p>
-    <dl class="answer" data-testid="suggestion">
-      <div>
-        <dt>{i18n.t('suggest.speakers')}</dt>
-        <dd>
-          {moves === 'seat'
-            ? i18n.t('suggest.stay')
-            : i18n.t('suggest.speakersLine', {
-                front: fmt(shown.speakers.left.base.y - depth / 2),
-                spacing: fmt(shown.speakers.right.base.x - shown.speakers.left.base.x),
-              })}
-        </dd>
-      </div>
-      <div>
-        <dt>{i18n.t('suggest.seat')}</dt>
-        <dd>
-          {moves === 'speakers'
-            ? i18n.t('suggest.seatStays')
-            : i18n.t('suggest.seatLine', {
-                front: fmt(shown.listener.y),
-                distance: fmt(seatDistance(shown)),
-              })}
-        </dd>
-      </div>
-      {#if bass}
-        <div class="bass-row">
-          <dt>{i18n.t('suggest.bass')}</dt>
-          <dd class="bass">
-            <button type="button" class="spark" onclick={() => (ui.step = 'bass')}>
-              <span>
-                {i18n.t(`suggest.bassWord.${bass.word}`, {
-                  frequency: formatFrequency(bass.worst.f, i18n.locale, true),
-                })}
-              </span>
-              <svg width={SPARK_W} height={SPARK_H} aria-hidden="true">
-                <line x1="0" x2={SPARK_W} y1={SPARK_H / 2} y2={SPARK_H / 2} class="mid" />
-                <path d={sparkPath} />
-              </svg>
-            </button>
-          </dd>
-        </div>
-      {/if}
-    </dl>
-
-    <p class="caption">
-      <span data-share="verdict"
-        >{i18n.t('suggest.verdict', {
-          now: i18n.t(`results.score.${scoreWord(ok.current.score)}`),
-          best: i18n.t(`results.score.${scoreWord(shown.score)}`),
-        })}</span
-      >
-      <span class="visually-hidden" data-testid="score-current"
-        >{i18n.t(`results.score.${scoreWord(ok.current.score)}`)}</span
-      >
+    <p class="brief" data-share="verdict" data-testid="brief">{brief}</p>
+    {#if areaLine}<p class="caption area" data-testid="area">{areaLine}</p>{/if}
+    <span class="visually-hidden" data-testid="score-current"
+      >{i18n.t(`results.score.${scoreWord(ok.current.score)}`)}</span
+    >
+    {#if spots[0]}
       <span class="visually-hidden" data-testid="score-best"
-        >{i18n.t(`results.score.${scoreWord(spots[0]!.score)}`)}</span
+        >{i18n.t(`results.score.${scoreWord(spots[0].score)}`)}</span
       >
-    </p>
-    {#if shown.closer}<p class="note">{i18n.t('suggest.closer')}</p>{/if}
-    {#if shown.compromise}<p class="note">{i18n.t('why.compromise')}</p>{/if}
-    {#if shown.zoneCost && workspace.project.constraints.speakerZone !== undefined && scoreWord(shown.zoneCost.inside) !== scoreWord(shown.zoneCost.outside)}
-      <!-- What the user's speaker zone costs (owner decision, docs/DESIGN_BRIEF_V4.md). -->
-      <p class="note" data-testid="zone-cost">
-        {i18n.t('suggest.zoneCost', {
-          zone: fmt(workspace.project.constraints.speakerZone),
-          inside: i18n.t(`results.score.${scoreWord(shown.zoneCost.inside)}`),
-          outside: i18n.t(`results.score.${scoreWord(shown.zoneCost.outside)}`),
-        })}
-      </p>
     {/if}
 
-    <div class="actions">
-      <button type="button" class="btn primary" onclick={apply}>{i18n.t('suggest.apply')}</button>
-      {#if spots.length > 1}
-        <div class="seg alts" role="radiogroup" aria-label={i18n.t('suggest.others')}>
-          {#each spots as c, i (i)}
-            <label>
-              <input
-                type="radio"
-                name="option"
-                checked={(ui.candidate ?? 0) === i}
-                aria-label={i18n.t('suggest.option', {
-                  letter: LETTERS[i]!,
-                  score: i18n.t(`results.score.${scoreWord(c.score)}`),
-                })}
-                onchange={() => (ui.candidate = i)}
-              />
-              <span aria-hidden="true">{LETTERS[i]}</span>
-            </label>
-          {/each}
-        </div>
-      {/if}
-    </div>
+    {#if allFixed}
+      <p class="caption">{i18n.t('why.allFixed')}</p>
+    {:else}
+      <section class="try" aria-labelledby="suggest-title">
+        <h3 id="suggest-title">{i18n.t('suggest.title')}</h3>
+        {#if !shown}
+          <p class="caption">{i18n.t('suggest.nothing')}</p>
+        {:else}
+          {#if move}<p class="say" data-testid="say">{sentence.join(' ')}</p>{/if}
+          <dl class="answer" data-testid="suggestion">
+            <div>
+              <dt>{i18n.t('suggest.speakers')}</dt>
+              <dd>
+                {moves === 'seat'
+                  ? i18n.t('suggest.stay')
+                  : i18n.t('suggest.speakersLine', {
+                      front: fmt(shown.speakers.left.base.y - depth / 2),
+                      spacing: fmt(shown.speakers.right.base.x - shown.speakers.left.base.x),
+                    })}
+              </dd>
+            </div>
+            <div>
+              <dt>{i18n.t('suggest.seat')}</dt>
+              <dd>
+                {moves === 'speakers'
+                  ? i18n.t('suggest.seatStays')
+                  : i18n.t('suggest.seatLine', {
+                      front: fmt(shown.listener.y),
+                      distance: fmt(seatDistance(shown)),
+                    })}
+              </dd>
+            </div>
+            {#if bass}
+              <div class="bass-row">
+                <dt>{i18n.t('suggest.bass')}</dt>
+                <dd class="bass">
+                  <button type="button" class="spark" onclick={() => (ui.step = 'bass')}>
+                    <span>
+                      {i18n.t(`suggest.bassWord.${bass.word}`, {
+                        frequency: formatFrequency(bass.worst.f, i18n.locale, true),
+                      })}
+                    </span>
+                    <svg width={SPARK_W} height={SPARK_H} aria-hidden="true">
+                      <line x1="0" x2={SPARK_W} y1={SPARK_H / 2} y2={SPARK_H / 2} class="mid" />
+                      <path d={sparkPath} />
+                    </svg>
+                  </button>
+                </dd>
+              </div>
+            {/if}
+          </dl>
+
+          {#if shown.closer}<p class="note">{i18n.t('suggest.closer')}</p>{/if}
+          {#if shown.compromise}<p class="note">{i18n.t('why.compromise')}</p>{/if}
+          {#if shown.zoneCost && workspace.project.constraints.speakerZone !== undefined && scoreWord(shown.zoneCost.inside) !== scoreWord(shown.zoneCost.outside)}
+            <!-- What the user's speaker zone costs (owner decision, docs/DESIGN_BRIEF_V4.md). -->
+            <p class="note" data-testid="zone-cost">
+              {i18n.t('suggest.zoneCost', {
+                zone: fmt(workspace.project.constraints.speakerZone),
+                inside: i18n.t(`results.score.${scoreWord(shown.zoneCost.inside)}`),
+                outside: i18n.t(`results.score.${scoreWord(shown.zoneCost.outside)}`),
+              })}
+            </p>
+          {/if}
+
+          <div class="actions">
+            <button type="button" class="btn primary" onclick={apply}
+              >{i18n.t('suggest.apply')}</button
+            >
+            {#if spots.length > 1}
+              <div class="seg alts" role="radiogroup" aria-label={i18n.t('suggest.others')}>
+                {#each spots as c, i (i)}
+                  <label>
+                    <input
+                      type="radio"
+                      name="option"
+                      checked={(ui.candidate ?? 0) === i}
+                      aria-label={i18n.t('suggest.option', {
+                        letter: LETTERS[i]!,
+                        score: i18n.t(`results.score.${scoreWord(c.score)}`),
+                      })}
+                      onchange={() => (ui.candidate = i)}
+                    />
+                    <span aria-hidden="true">{LETTERS[i]}</span>
+                  </label>
+                {/each}
+              </div>
+            {/if}
+          </div>
+        {/if}
+      </section>
+    {/if}
+
+    {#if picks.length}
+      <section class="try" aria-labelledby="idea-title" data-testid="idea">
+        <h3 id="idea-title">{i18n.t('result.idea')}</h3>
+        {#each picks as idea (idea.messageKey)}
+          <div class="idea-item">
+            <p class="idea">{adviceText(idea, system)}</p>
+            <p class="caption">{LEVEL_ICON[idea.level]} {i18n.t(`evidence.${idea.level}`)}</p>
+          </div>
+        {/each}
+      </section>
+    {/if}
   {/if}
 
-  <div class="options">
-    <button
-      type="button"
-      class="options-toggle"
-      aria-expanded={optionsOpen}
-      onclick={() => (optionsOpen = !optionsOpen)}
-    >
-      <span>{i18n.t('suggest.optionsTitle')}</span>
-      <span class="value">
-        {i18n.t(`suggest.move.${moves}`)} · {i18n.t(`suggest.distance.${distance}`)}
-      </span>
-      <span class="chevron" class:open={optionsOpen} aria-hidden="true">›</span>
-    </button>
-    {#if optionsOpen}
-      <div class="option-rows">
-        <div class="option">
-          <span class="caption" id="opt-move">{i18n.t('suggest.move.label')}</span>
-          <div class="seg" role="radiogroup" aria-labelledby="opt-move">
-            {#each ['both', 'speakers', 'seat'] as const as m (m)}
-              <label>
-                <input
-                  type="radio"
-                  name="moves"
-                  value={m}
-                  checked={moves === m}
-                  onchange={() => setMoves(m)}
-                />
-                <span>{i18n.t(`suggest.move.${m}`)}</span>
-              </label>
-            {/each}
-          </div>
-        </div>
-        <div class="option">
-          <span class="caption" id="opt-distance">{i18n.t('suggest.distance.label')}</span>
-          <div class="seg" role="radiogroup" aria-labelledby="opt-distance">
-            {#each ['room', 'near'] as const as d (d)}
-              <label>
-                <input
-                  type="radio"
-                  name="distance"
-                  value={d}
-                  checked={distance === d}
-                  onchange={() => setDistance(d)}
-                />
-                <span>{i18n.t(`suggest.distance.${d}`)}</span>
-              </label>
-            {/each}
-          </div>
-        </div>
-      </div>
-    {/if}
-  </div>
+  <ul class="list links">
+    {#each links as link (link.id)}
+      <li>
+        <button type="button" class="row" onclick={() => (ui.step = link.id)}>
+          <span>{i18n.t(`nav.${link.id}`)}</span>
+          <span class="value">{link.value}</span>
+          <span class="chevron" aria-hidden="true">›</span>
+        </button>
+      </li>
+    {/each}
+  </ul>
 </section>
 
 <style>
   .suggest {
     display: grid;
     gap: 16px;
-    padding: 20px 16px 8px;
+    padding: 20px 16px 0;
     border-radius: var(--radius-md);
     background: var(--surface);
   }
@@ -428,45 +463,42 @@
     min-width: 40px;
     padding: 0 10px;
   }
-  .options {
-    margin: 0 -16px;
-    border-top: 1px solid var(--grid);
+  .area {
+    margin: -8px 0 0;
   }
-  .options-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 44px;
-    padding: 0 16px;
-    border: 0;
-    background: none;
-    color: var(--ink);
-    font: inherit;
-    font-size: var(--text-sm);
-    cursor: pointer;
+  .brief {
+    margin: -6px 0 0;
+    font-size: var(--text-md);
+    line-height: 1.45;
   }
-  .options-toggle .value {
-    margin-inline-start: auto;
-    color: var(--ink-muted);
-  }
-  .chevron {
-    color: var(--ink-muted);
-    transition: transform 150ms ease;
-  }
-  .chevron.open {
-    transform: rotate(90deg);
-  }
-  .option-rows {
+  /* Each thing to try is its own block, with a quiet rule above it. */
+  .try {
     display: grid;
     gap: 12px;
-    padding: 4px 16px 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--grid);
   }
-  .option {
+  h3 {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .idea {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: 1.45;
+  }
+  .idea-item {
     display: grid;
-    gap: 6px;
+    gap: 4px;
   }
-  .option .seg {
-    display: flex;
+  .idea-item .caption {
+    margin: 0;
+  }
+  .links {
+    margin: 0 -16px;
+    border-top: 1px solid var(--grid);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
   }
 </style>

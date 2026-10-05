@@ -128,6 +128,9 @@ const ADVICE_SAMPLE: Record<string, Record<string, number | string>> = {
   'D04.height': { baseHeight: 0.9, angle: 12 },
   'D04.tilt': { angle: 14 },
   'D05.*': { clearance: 0.1, minimum: 0.2 },
+  'D07.bassCut': { gain: 'high' },
+  'D07.trebleLift': { t60: 0.2, suggestDb: 0.5 },
+  'D07.trebleCut': { t60: 0.8, suggestDb: -0.5 },
 };
 
 describe('advice texts', () => {

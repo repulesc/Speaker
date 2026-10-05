@@ -296,6 +296,22 @@ export const hu: Messages = {
     remove: 'Eltávolítás',
   },
   speakers: {
+    quick: {
+      port: {
+        label: 'Basszusreflex nyílás',
+        sealed: 'Nincs (zárt)',
+        front: 'Elöl',
+        rear: 'Hátul',
+      },
+      more: 'Továbbiak (nem kötelező)',
+      dispersion: {
+        label: 'Milyen szélesen sugároznak',
+        help: 'Nem tudod? Hagyd a Szokásoson. Ez becslés, és csak a hallgatási távolságról szóló tanácsot változtatja meg, a térképet soha.',
+        narrow: 'Keskeny',
+        typical: 'Szokásos',
+        wide: 'Széles',
+      },
+    },
     title: 'Hangfalak',
     intro: 'Válaszd ki a legközelebbi típust, és add meg, hol állnak. A többi nem kötelező.',
     type: {
@@ -533,6 +549,7 @@ export const hu: Messages = {
     treat: 'A szoba javítása',
     listen: 'Hallgatási jegyzetek',
     bass: 'Basszus az ülőhelyeden',
+    placement: 'Mit keressünk',
     back: 'Vissza',
     notSet: 'Nincs megadva',
     progress: '{n} / {total} kész',
@@ -582,10 +599,12 @@ export const hu: Messages = {
       speakers: 'Hangfalakat',
       seat: 'Ülőhelyet',
     },
-    distance: {
-      label: 'Hallgatási távolság',
-      room: 'Szoba',
-      near: 'Asztal',
+    place: {
+      label: 'Honnan hallgatod',
+      chair: 'Fotel',
+      sofa: 'Kanapé',
+      desk: 'Asztal',
+      bed: 'Ágy',
     },
     speakers: 'Hangfalak',
     bass: 'Basszus azon a helyen',
@@ -623,6 +642,31 @@ export const hu: Messages = {
     nothing: 'Egyetlen elhelyezés sem fér bele a korlátaidba. Engedj több mindent mozdulni.',
     zoneCost: 'Ha legfeljebb {zone}-t mozdulnak: {inside}. Több hellyel: {outside}.',
   },
+  result: {
+    title: 'Az eredményed',
+    brief: {
+      fixed: '{now}, így ahogy van.',
+      top: '{now}. Áthelyezéssel itt nem lehetne érdemben javítani.',
+      better: 'Most: {now}. Az alábbi elhelyezéssel: {best}.',
+      same: 'Most: {now}. Az alábbi elhelyezés még finomít rajta.',
+    },
+    idea: 'Ezt is érdemes kipróbálni',
+    area: {
+      even: {
+        sofa: 'A kanapén mindenkinek nagyjából ugyanilyen.',
+        desk: 'Az asztalnál mozogva is nagyjából ugyanilyen.',
+        bed: 'Az ágy egészén nagyjából ugyanilyen.',
+      },
+      uneven: 'Középen: {centre}. {where}: {worst}.',
+      where: {
+        left: 'A bal szélén',
+        right: 'A jobb szélén',
+        front: 'Elöl',
+        back: 'Hátul',
+        ends: 'A két szélén',
+      },
+    },
+  },
   panel: {
     label: 'Beállítások és eredmények',
     close: 'Vissza az eredményekhez',
@@ -633,6 +677,8 @@ export const hu: Messages = {
     bestHere: 'A legjobb itt: {word}',
     absolute: 'Abszolút skála',
     hidePanel: 'Oldalsáv elrejtése',
+    best: 'Legjobb',
+    now: 'Most: {word}',
     before: 'Előtte',
     showPanel: 'Oldalsáv megjelenítése',
     notListening: 'Nem hallgatási hely',
@@ -640,6 +686,9 @@ export const hu: Messages = {
     label: 'Térkép',
     hint: 'Húzz bármit. A térkép mozgatás közben újrarajzolódik. Kattints egy számra, és pontos értéket írhatsz be.',
     layerLabel: 'Térképréteg',
+    pick: { speakers: 'Hangfalak', seat: 'Ülőhely' },
+    why: 'Miért?',
+    whyLabel: 'Mitől jó vagy gyenge egy hely',
     poorer: 'Gyengébb',
     better: 'Jobb',
     flagged: 'Satírozva: az irányelvek szerint ide nem érdemes leülni.',
@@ -1217,6 +1266,14 @@ export const hu: Messages = {
     D06: {
       desk: 'A hangfalad rendelkezik asztali móddal, és a hangfalak asztalon állnak: kapcsold be.',
       stand: 'Használd a hangfal állvány módját: a hangfalak nem asztalon állnak.',
+    },
+    D07: {
+      bassCut:
+        'A hangfalak közel állnak a falakhoz, ez megemeli a basszust (falhatás: {gain}). Ha a hangfaladon vagy az erősítődön van mélyszabályzó, próbálj egy kis lépést lefelé, aztán hallgasd meg.',
+      trebleLift:
+        'A szoba elnyeli a magas hangokat (utózengés {t60}). Ha a hangfaladon vagy az erősítődön van magasszabályzó, próbálj egy kis emelést ({suggestDb}), aztán hallgasd meg.',
+      trebleCut:
+        'A szobában a magas hangok sokáig csengenek (utózengés {t60}). Ha a hangfaladon vagy az erősítődön van magasszabályzó, próbálj egy kis vágást ({suggestDb}), aztán hallgasd meg.',
     },
   },
   analysis: {

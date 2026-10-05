@@ -75,7 +75,7 @@ export function applyDefaultPlacement(project: Project): void {
     variant.speakers.right = placed.right;
   }
   if (variant.listener.certainty === 'unknown') {
-    variant.listener = { ears: placed.ears, certainty: 'unknown' };
+    variant.listener = { ...variant.listener, ears: placed.ears, certainty: 'unknown' };
   }
 }
 

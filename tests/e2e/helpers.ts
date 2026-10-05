@@ -73,6 +73,7 @@ export async function openSection(page: Page, name: string) {
   )
     return;
   await goHome(page);
+  if (SECTION_TITLES[name]) await openSettings(page);
   await page
     .locator('#panel .list')
     .getByRole('button', { name: new RegExp(`^${name}(\\s|$)`) })
@@ -120,4 +121,27 @@ export async function seatDistance(page: Page): Promise<number> {
   const match = /Seat\. ([\d.]+)\u00a0m from the front wall/.exec(label ?? '');
   if (!match) throw new Error(`Unexpected seat label: ${label}`);
   return Number(match[1]);
+}
+
+/** One of the map's two big choices ("Speakers" or "Seat"). */
+export function mapChoice(page: Page, name: 'Speakers' | 'Seat') {
+  return page
+    .getByRole('radiogroup', { name: 'Map layer' })
+    .getByRole('radio', { name, exact: true });
+}
+
+/** The settings sit folded under the result (docs/ROADMAP_V5.md); opens them on the home page. */
+export async function openSettings(page: Page) {
+  await goHome(page);
+  const fold = page.getByRole('button', { name: /^Your room/ });
+  if ((await fold.getAttribute('aria-expanded')) === 'false') await fold.click();
+}
+
+/** What the answer may move: "Both", "Speakers" or "Seat" (a setting, under "Your room"). */
+export async function setMoves(page: Page, value: 'Both' | 'Speakers' | 'Seat') {
+  await openSettings(page);
+  await page
+    .getByRole('radiogroup', { name: 'Find the best place for' })
+    .getByRole('radio', { name: value, exact: true })
+    .check({ force: true });
 }

@@ -7,6 +7,7 @@ import { advice } from './advice';
 import { folkComparison } from './folk';
 import { fragility, resizedRooms } from './scoring/fragility';
 import { seatLayers, speakerHeatmap } from './scoring/heatmaps';
+import { areaPoints } from './scoring/area';
 import { findCandidates, makeScorer, robustScores, toCandidate } from './scoring/search';
 import type { Analysis, Candidate, EvidenceLevel, Finding, Severity } from './types';
 import { ENGINE_VERSION } from './version';
@@ -61,6 +62,17 @@ export function analyze(
   const candidates = findCandidates(scorer, seed).map(withFragility);
   const best = candidates[0];
 
+  const areaKind = ctx.variant.listener.area;
+  const area = areaKind
+    ? {
+        kind: areaKind,
+        spots: areaPoints(placement.listener, areaKind, ctx.room).map(({ where, at }) => ({
+          where,
+          score: scorer.score({ speakers: placement.speakers, listener: at }).score,
+        })),
+      }
+    : undefined;
+
   const curve = bassCurve(ctx, placement);
   // The maps keep the speakers (seat map) or the seat (speaker map) where they are now, so the
   // map, the probe (explainPoint) and the rules of thumb all describe the same situation.
@@ -93,6 +105,7 @@ export function analyze(
       listener: { x0, y0, step, nx, ny, values: layers.values.goals },
       speakers: speakerHeatmap(scorer, placement.listener),
     },
+    ...(area ? { area } : {}),
     confidence: confidence(project, ctx),
   };
 }

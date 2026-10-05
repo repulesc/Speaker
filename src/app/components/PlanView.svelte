@@ -28,6 +28,7 @@
   import { arrowDelta, startDrag } from '../plan/interaction';
   import { viewport } from '../viewport.svelte';
   import { ROOM_LIMITS } from '../state/limits';
+  import { LISTENING_AREAS } from '../../engine/presets/listeningArea';
   import DimLabel from './DimLabel.svelte';
   import MapLegend from './MapLegend.svelte';
   import ProbeCard from './ProbeCard.svelte';
@@ -125,6 +126,30 @@
   const range = $derived(
     ui.heatScale === 'absolute' || !shownValues ? ABSOLUTE : roomRange(shownValues),
   );
+  /** The current setup's score word, shown on the map where it stands. */
+  const seatNow = $derived.by(() => {
+    if (!layers || !seat || ui.layer === 'speakers') return result?.current.score ?? 0;
+    const i = Math.min(layers.nx - 1, Math.max(0, Math.floor(seat.ears.x / layers.step)));
+    const j = Math.min(layers.ny - 1, Math.max(0, Math.floor(seat.ears.y / layers.step)));
+    const v = layers.values[ui.layer as LayerId][j * layers.nx + i];
+    return v !== undefined && Number.isFinite(v) ? v : (result?.current.score ?? 0);
+  });
+  const nowWord = $derived(
+    result && variant && seat ? scoreWord(speakerGrid ? result.current.score : seatNow) : null,
+  );
+  /** Only a placement that really helps is tagged "Best" (else the brief and the map disagree). */
+  const worthMoving = $derived(result?.topActions.some((a) => a.kind === 'move') ?? false);
+  const nowAt = $derived.by(() => {
+    if (speakerGrid && variant) {
+      const { left, right } = variant.speakers;
+      return {
+        x: px((left.base.x + right.base.x) / 2),
+        y: py(Math.min(left.base.y, right.base.y)) - (cab.d * frame.scale) / 2 - 8,
+      };
+    }
+    return seat ? { x: px(seat.ears.x), y: py(seat.ears.y) + 28 } : { x: 0, y: 0 };
+  });
+
   let heat = $state<HTMLCanvasElement>();
   $effect(() => {
     if (heat && layers && !field && ui.layer !== 'speakers') {
@@ -623,6 +648,20 @@
           </g>
         {/each}
 
+        {#if seat?.area}
+          <!-- The listening area: where the heads can be on the sofa, at the desk or in the bed. -->
+          {@const size = LISTENING_AREAS[seat.area]}
+          <rect
+            class="listening-area"
+            data-testid="listening-area"
+            x={px(seat.ears.x - size.width / 2)}
+            y={py(seat.ears.y - size.depth / 2)}
+            width={size.width * frame.scale}
+            height={size.depth * frame.scale}
+            rx="6"
+          />
+        {/if}
+
         {#if seat}
           {@const isSelected = selected.kind === 'seat'}
           {@const sx = px(seat.ears.x)}
@@ -684,13 +723,30 @@
           </g>
         {/if}
 
+        {#if nowWord && !field}
+          <!-- "You are here": where the current setup sits on this map, with its score word. -->
+          <text class="tag" x={nowAt.x} y={nowAt.y} text-anchor="middle" data-testid="map-now"
+            >{i18n.t('map.now', { word: i18n.t(`results.score.${nowWord}`) })}</text
+          >
+        {/if}
+
         {#if suggested}
           {#each [suggested.speakers.left, suggested.speakers.right] as ghost, i (i)}
             {@const own = variant?.speakers[i === 0 ? 'left' : 'right'].base}
-            <!-- Already there (e.g. just applied): no dashed copy on top of the speaker. -->
+            <!-- Already there (e.g. just applied): no copy on top of the speaker. -->
+            {@const there =
+              own !== undefined && Math.hypot(own.x - ghost.base.x, own.y - ghost.base.y) < 0.01}
             <rect
-              class:hidden={own !== undefined &&
-                Math.hypot(own.x - ghost.base.x, own.y - ghost.base.y) < 0.01}
+              class:hidden={there}
+              class="ghost-halo"
+              x={px(ghost.base.x) - (cab.w * frame.scale) / 2}
+              y={py(ghost.base.y) - (cab.d * frame.scale) / 2}
+              width={cab.w * frame.scale}
+              height={cab.d * frame.scale}
+              rx="3"
+            />
+            <rect
+              class:hidden={there}
               class="ghost"
               x={px(ghost.base.x) - (cab.w * frame.scale) / 2}
               y={py(ghost.base.y) - (cab.d * frame.scale) / 2}
@@ -720,6 +776,12 @@
               >{LETTERS[shownIndex]}</text
             >
           </g>
+          {#if shownIndex === 0 && worthMoving && !(nowWord && Math.abs(nowAt.x - px(pinAt!.x)) < 80 && Math.abs(nowAt.y - (py(pinAt!.y) - 20)) < 18)}
+            <!-- Left out where it would cover the "Now" label (small maps): the pin still marks it. -->
+            <text class="tag" x={px(pinAt!.x)} y={py(pinAt!.y) - 20} text-anchor="middle"
+              >{i18n.t('map.best')}</text
+            >
+          {/if}
         {/if}
       {/if}
     </svg>
@@ -909,11 +971,35 @@
     filter: none;
     box-shadow: none;
   }
-  .ghost {
-    fill: color-mix(in srgb, var(--accent-fill) 14%, transparent);
-    stroke: var(--accent-fill);
+  .listening-area {
+    fill: color-mix(in srgb, #fff 18%, transparent);
+    stroke: #fff;
     stroke-width: 1.5;
-    stroke-dasharray: 4 3;
+    stroke-dasharray: 5 3;
+    pointer-events: none;
+  }
+  /* The recommended spot must read on every heat colour: a white ring under a solid accent edge. */
+  .ghost-halo {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 6;
+    pointer-events: none;
+  }
+  .ghost {
+    fill: color-mix(in srgb, var(--accent-fill) 30%, transparent);
+    stroke: var(--accent-fill);
+    stroke-width: 2.5;
+    pointer-events: none;
+  }
+  /* Quiet labels on the map: dark text with a light halo, readable on any colour. */
+  .tag {
+    fill: #1d1d1f;
+    stroke: #fff;
+    stroke-width: 4;
+    paint-order: stroke;
+    stroke-linejoin: round;
+    font-size: var(--text-xs);
+    font-weight: 600;
     pointer-events: none;
   }
   .advice-ring {

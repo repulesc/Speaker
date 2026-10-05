@@ -34,6 +34,8 @@ let panelHidden = $state(false);
 let survey = $state(false);
 /** The room fades in once, right after the survey (the "reveal"). */
 let reveal = $state(false);
+/** The settings under the result are folded until opened, and stay open for this visit. */
+let settingsOpen = $state(false);
 /** The Speakers page's "More details" stays open once opened, for this visit. */
 let speakerDetails = $state(false);
 
@@ -127,6 +129,12 @@ export const ui = {
   },
   set heatScale(value: 'room' | 'absolute') {
     heatScale = value;
+  },
+  get settingsOpen() {
+    return settingsOpen;
+  },
+  set settingsOpen(value: boolean) {
+    settingsOpen = value;
   },
   get speakerDetails() {
     return speakerDetails;
