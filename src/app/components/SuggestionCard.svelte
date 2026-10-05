@@ -47,13 +47,18 @@
     const word = (score: number) => i18n.t(`results.score.${scoreWord(score)}`);
     const centre = area.spots.find((s) => s.where === 'centre')!;
     const worst = area.spots.reduce((w, s) => (s.score < w.score ? s : w), centre);
-    return word(worst.score) === word(centre.score)
-      ? i18n.t(`result.area.even.${area.kind}`)
-      : i18n.t('result.area.uneven', {
-          centre: word(centre.score),
-          where: i18n.t(`result.area.where.${worst.where}`),
-          worst: word(worst.score),
-        });
+    if (word(worst.score) === word(centre.score)) return i18n.t(`result.area.even.${area.kind}`);
+    // A sofa in the middle of the room is the same at both ends: say so, not "the left end".
+    const ends = area.spots.filter((s) => s.where === 'left' || s.where === 'right');
+    const both =
+      (worst.where === 'left' || worst.where === 'right') &&
+      ends.length === 2 &&
+      ends.every((s) => word(s.score) === word(worst.score));
+    return i18n.t('result.area.uneven', {
+      centre: word(centre.score),
+      where: i18n.t(`result.area.where.${both ? 'ends' : worst.where}`),
+      worst: word(worst.score),
+    });
   });
 
   /**

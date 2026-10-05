@@ -651,6 +651,7 @@ export const en = {
         right: 'At the right end',
         front: 'At the front',
         back: 'At the back',
+        ends: 'At both ends',
       },
     },
   },

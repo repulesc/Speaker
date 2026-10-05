@@ -120,7 +120,7 @@ test('where you listen: a sofa is drawn on the map and judged at both ends', asy
     .check({ force: true });
   await expect(page.getByTestId('listening-area')).toBeVisible();
   await expect(page.getByTestId('area')).toHaveText(
-    /^(About the same for everyone on the sofa\.|In the middle: .+\. At the (left|right) end: .+\.)$/,
+    /^(About the same for everyone on the sofa\.|In the middle: .+\. At (the (left|right) end|both ends): .+\.)$/,
   );
   const project = await savedProject(page);
   expect(project.variants[0].listener.area).toBe('sofa');

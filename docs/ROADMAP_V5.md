@@ -104,7 +104,7 @@ is marked 🟡/🟣 when subjective. No claim without a formula or a citation; m
 The owner's example (small speakers in a big, busy room → high-frequency lift) is not yet
 verified: no source has been checked. Find and cite one before shipping it; otherwise drop it.
 
-### F. Hungarian pass and visual references
+### F. Hungarian pass and visual references — DONE (checked by screenshots: desktop light and dark, Hungarian, phone; the type-scale and overflow tests cover every page in both languages)
 Re-check all new HU strings for fit and tone; refresh the reference screenshots.
 
 ## 4. Order for the implementing session

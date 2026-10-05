@@ -663,6 +663,7 @@ export const hu: Messages = {
         right: 'A jobb szélén',
         front: 'Elöl',
         back: 'Hátul',
+        ends: 'A két szélén',
       },
     },
   },
