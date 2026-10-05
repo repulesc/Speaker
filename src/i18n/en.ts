@@ -45,13 +45,14 @@ export const en = {
   menu: {
     image: 'Share as image',
     label: 'Menu',
-    support: 'Support this project',
+    support: 'Support this project ☕',
     undo: 'Undo',
     redo: 'Redo',
     share: 'Share link',
     export: 'Export file',
     import: 'Import file',
     print: 'Print sheet',
+    listen: 'Listening notes',
     about: 'About and sources',
   },
   share: {
@@ -141,7 +142,7 @@ export const en = {
     },
   },
   room: {
-    title: 'Your room',
+    title: 'Room size',
     intro: 'Rough numbers are fine. Say how sure you are, and refine them later.',
     width: 'Width',
     length: 'Length',
@@ -679,6 +680,8 @@ export const en = {
     label: 'Map',
     hint: 'Drag anything. The map redraws as you move. Click a number to type an exact value.',
     layerLabel: 'Map layer',
+    showing: 'Showing',
+    backToMain: 'Back to the main map',
     pick: { speakers: 'Speakers', seat: 'Seat' },
     why: 'Why?',
     whyLabel: 'What makes a seat good or poor',
@@ -1055,12 +1058,6 @@ export const en = {
       cut: 'The room’s high frequencies ring on ({t60}). A small treble cut ({suggestDb}) may help: try it and listen.',
     },
   },
-  tabs: {
-    label: 'Panel',
-    why: 'Why',
-    treat: 'Treat',
-    listen: 'Listen',
-  },
   listen: {
     title: 'Listen and note',
     intro:
@@ -1160,9 +1157,10 @@ export const en = {
       'These are predictions, not measurements. Move one thing at a time and trust your ears.',
   },
   treat: {
-    title: 'Treat the room',
+    title: 'More to try',
     intro:
       'What would help most, in order. Sizes are rough guides, not promises: change one thing, then listen.',
+    details: 'Details',
     first: 'If you can only do one thing',
     roomTitle: 'Room treatment',
     settingsTitle: 'Speaker settings',
@@ -1268,6 +1266,74 @@ export const en = {
         'The room lets high frequencies ring (reverberation {t60}). If your speakers or amplifier have a treble control, try a small cut ({suggestDb}), then listen.',
     },
   },
+  advicePlain: {
+    T01: {
+      absorb:
+        '{speaker}: its sound bounces off a hard surface at the marked spot ({boundary}). A soft panel or a diffuser there makes the stereo image sharper.',
+      experiment:
+        '{speaker}: its sound bounces off a hard surface at the marked spot ({boundary}). Opinions differ on treating it: try something soft there, listen, and keep what you like.',
+    },
+    T02: {
+      rug: 'A thick rug on the floor between you and the speakers, at the marked spot, softens the sound bouncing off the floor. It is cheap: try it.',
+      ceilingPanel:
+        'A panel on the ceiling at the marked spot would soften its reflection. The side walls matter more, so do those first.',
+    },
+    T03: {
+      moveFirst:
+        'The wall behind the speakers cancels part of the bass at your seat. Moving the speakers helps far more than anything you could put on the wall: see the best spots.',
+      thickPanel:
+        'The wall behind the speakers cancels part of the bass at your seat. A thick absorber behind them softens this a little, but cannot remove it.',
+    },
+    T04: {
+      corners:
+        'Bass traps in the corners calm a boomy bass. They have to be big and deep to work: small foam pieces do very little.',
+    },
+    T05: {
+      soften:
+        'The room sounds lively and echoey. A large rug and heavy curtains would calm it down.',
+      liven: 'The room sounds quite dead. Fewer rugs or curtains would bring back some life.',
+    },
+    T06: {
+      moveFirst:
+        'Your head is {distance} from the back wall. Move the seat forward if you can: it helps more than anything else.',
+      absorber:
+        'Your head is {distance} from the back wall and the seat cannot move. Something thick and soft behind your head helps.',
+    },
+    D01: {
+      match:
+        'Set the speaker’s wall-distance setting for the {clearance} between its back and the wall. {zone}',
+    },
+    D02: {
+      cut: 'The speakers are close to walls, which makes the bass stronger. Try turning the bass on the speaker down one step, then listen.',
+    },
+    D03: {
+      lift: 'The room swallows high notes. Try turning the treble on the speaker up one step, then listen.',
+      cut: 'The room makes high notes ring. Try turning the treble on the speaker down one step, then listen.',
+    },
+    D04: {
+      height:
+        'The tweeters are not at ear height. Put the speakers about {baseHeight} above the floor (a stand or desk), or tilt them towards you.',
+      tilt: 'The tweeters point above your ears even with the speakers on the floor. Tilt them slightly down towards you, or sit a little higher.',
+    },
+    D05: {
+      moveOut:
+        'The port on the back is only {clearance} from the wall; it needs {minimum}. Move the speakers out a little.',
+      fixed:
+        'The port on the back is only {clearance} from the wall; it needs {minimum}. The manual may offer port plugs or a near-wall setting.',
+    },
+    D06: {
+      desk: 'Your speaker has a desk mode and the speakers stand on a desk: switch it on.',
+      stand: 'Use the speaker’s stand mode: the speakers are not on a desk.',
+    },
+    D07: {
+      bassCut:
+        'The speakers are close to walls, which makes the bass stronger. If your speakers or amplifier have a bass control, try turning it down a little, then listen.',
+      trebleLift:
+        'The room swallows high notes. If your speakers or amplifier have a treble control, try turning it up a little, then listen.',
+      trebleCut:
+        'The room makes high notes ring. If your speakers or amplifier have a treble control, try turning it down a little, then listen.',
+    },
+  },
   analysis: {
     updating: 'Updating…',
     updatingLarge: 'Updating… a room this large takes a few seconds.',
@@ -1284,11 +1350,26 @@ export const en = {
   sheet: {
     expand: 'Show more',
     collapse: 'Show less',
+    index: 'Jump to',
+    place: 'Where you listen',
+    treatment: 'Room treatment',
+  },
+  tabs: {
+    label: 'Result',
+    result: 'Result',
+    why: 'Why',
+    tips: 'Tips',
+  },
+  whyTab: {
+    onMap: 'See it on the map',
+    onMapHelp:
+      'Each reason has its own map: brighter is better, darker is where that reason hurts.',
+    closer: 'Look closer',
   },
   about: {
     title: 'About',
     body: 'This app uses established room acoustics to suggest speaker and seat positions, and tells you how sure it is. It is guidance, not a guarantee.',
     sources: 'Every rule and its sources are documented in the project’s rule catalogue.',
-    support: 'Support this project (opens in a new tab)',
+    support: 'Support this project ☕ (opens in a new tab)',
   },
 } as const;

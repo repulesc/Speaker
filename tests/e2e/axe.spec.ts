@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, goStep, openApp, openMenu, openSection, openWhy } from './helpers';
+import { fillRoom, goStep, openApp, openMenu, openSection, openWhy, openTab } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -108,6 +108,7 @@ test('home, Why, Treat, Listen and the bass-note explorer', async ({ page }) => 
   await expectAccessible(page);
   await openSection(page, 'Listening notes');
   await expectAccessible(page);
+  await openTab(page, 'Why');
   await page.getByRole('button', { name: 'Bass note' }).click();
   await expectAccessible(page);
 });

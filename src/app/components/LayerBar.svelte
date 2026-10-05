@@ -7,11 +7,13 @@
   import VariantTabs from './VariantTabs.svelte';
   import { viewport } from '../viewport.svelte';
   import { workspace } from '../session.svelte';
+  import { goalOf, setGoal } from '../state/goal';
 
   /**
-   * One quiet toolbar over the room: setups, what the map shows, bass note, side view. The map is
-   * one of two big choices, where the speakers go or where to sit; the layers that explain a seat
-   * sit behind "Why?" (owner decision, docs/ROADMAP_V5.md).
+   * One quiet toolbar over the room: setups and which map you see. The map and "Find the best
+   * place for" are one thing (owner decision, docs/ROADMAP_V5.md, V6): picking Speakers or Seat
+   * here also changes what the app looks for, unless both may move, when it only changes the view.
+   * The layers that explain a seat, the bass notes and the side view live in the Why tab.
    */
   const level = (id: LayerId | 'speakers') =>
     id === 'speakers' ? 'combined' : LAYERS.find((l) => l.id === id)!.level;
@@ -19,19 +21,15 @@
     l === 'physics' ? '●' : l === 'guideline' ? '◆' : l === 'heuristic' ? '▲' : '◇';
   const active = $derived(ui.layer);
   const modeOn = $derived(ui.modeFrequency !== null);
-  /** The seat map: weighted by the user's goals once there are any. */
-  const seatMain = $derived<LayerId>(
-    Object.values(workspace.project.goals.weights).some((w) => w) ? 'goals' : 'overall',
-  );
+  const goal = $derived(goalOf(workspace.project));
   const map = $derived(active === 'speakers' ? 'speakers' : 'seat');
-  /** The seat layers that explain one concern each. */
   const REASONS = LAYERS.filter((l) => l.level !== 'combined').map((l) => l.id);
   const reason = $derived(REASONS.includes(active as LayerId));
-  let whyOpen = $state(false);
-  const showWhy = $derived(map === 'seat' && (whyOpen || reason));
+
   function pick(value: 'speakers' | 'seat') {
-    ui.layer = value === 'speakers' ? 'speakers' : seatMain;
-    if (value === 'speakers') whyOpen = false;
+    ui.modeFrequency = null;
+    ui.layer = value === 'speakers' ? 'speakers' : 'overall';
+    if (goal !== 'both' && goal !== value) workspace.edit((p) => setGoal(p, value));
   }
 </script>
 
@@ -61,11 +59,12 @@
   {/if}
   <VariantTabs />
   <div class="tools">
+    {#if goal === 'both'}<span class="showing" id="map-showing">{i18n.t('map.showing')}</span>{/if}
     <div
       class="seg pick"
       role="radiogroup"
       aria-label={i18n.t('map.layerLabel')}
-      class:disabled={modeOn}
+      aria-describedby={goal === 'both' ? 'map-showing' : undefined}
     >
       {#each ['speakers', 'seat'] as const as m (m)}
         <label>
@@ -73,55 +72,15 @@
             type="radio"
             name="map-pick"
             value={m}
-            checked={map === m}
-            disabled={modeOn}
+            checked={map === m && !modeOn}
             onchange={() => pick(m)}
           />
           <span>{i18n.t(`map.pick.${m}`)}</span>
         </label>
       {/each}
     </div>
-    {#if map === 'seat'}
-      <button
-        type="button"
-        class="toggle"
-        aria-expanded={showWhy}
-        aria-controls="map-reasons"
-        disabled={modeOn}
-        onclick={() => {
-          whyOpen = !showWhy;
-          if (!whyOpen && reason) ui.layer = seatMain;
-        }}>{i18n.t('map.why')}</button
-      >
-    {/if}
-    <button
-      type="button"
-      class="toggle"
-      aria-pressed={modeOn}
-      onclick={() => (ui.modeFrequency = modeOn ? null : 60)}>{i18n.t('mode.chip')}</button
-    >
-    <button
-      type="button"
-      class="toggle"
-      aria-pressed={ui.sideOpen}
-      onclick={() => (ui.sideOpen = !ui.sideOpen)}>{i18n.t('dock.side')}</button
-    >
   </div>
 </div>
-{#if showWhy && !modeOn}
-  <div class="reasons" id="map-reasons" role="group" aria-label={i18n.t('map.whyLabel')}>
-    {#each REASONS as id (id)}
-      <button
-        type="button"
-        class="chip"
-        aria-pressed={active === id}
-        onclick={() => (ui.layer = active === id ? seatMain : id)}
-      >
-        {i18n.t(`layer.${id}.name`)}
-      </button>
-    {/each}
-  </div>
-{/if}
 {#if modeOn}
   <ModeBar />
 {:else}
@@ -131,6 +90,11 @@
         <span class="tag">{shape(level(active))} {i18n.t(`evidence.${level(active)}`)}</span>
       {/if}
       {i18n.t(`layer.${active}.what`)}
+      {#if reason}
+        <button type="button" class="back" onclick={() => (ui.layer = 'overall')}
+          >{i18n.t('map.backToMain')}</button
+        >
+      {/if}
     </p>
   </div>
 {/if}
@@ -169,52 +133,18 @@
     padding: 0 14px;
     font-weight: 600;
   }
-  .pick.disabled {
-    opacity: 0.5;
-  }
-  .toggle:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-  .reasons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 6px;
-    padding: 8px 16px 0;
-  }
-  .chip {
-    min-height: 32px;
-    padding: 0 12px;
-    border: 1px solid var(--grid-strong);
-    border-radius: 999px;
-    background: var(--surface);
-    color: var(--ink);
-    font: inherit;
+  .showing {
+    color: var(--ink-muted);
     font-size: var(--text-sm);
-    cursor: pointer;
   }
-  .chip[aria-pressed='true'] {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--surface);
-  }
-  .toggle {
-    min-height: 40px;
-    padding: 0 12px;
+  .back {
+    margin-left: 6px;
+    padding: 0;
     border: 0;
-    border-radius: 9px;
-    background: var(--fill);
-    color: var(--ink);
+    background: none;
+    color: var(--accent);
     font: inherit;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    white-space: nowrap;
     cursor: pointer;
-  }
-  .toggle[aria-pressed='true'] {
-    background: var(--ink);
-    color: var(--surface);
   }
   .info {
     display: flex;
@@ -232,12 +162,6 @@
   .tag {
     margin-right: 6px;
     color: var(--ink);
-  }
-  @media (pointer: coarse), (max-width: 1023px) {
-    .chip,
-    .toggle {
-      min-height: 44px;
-    }
   }
   @media (max-width: 1023px) {
     .bar {

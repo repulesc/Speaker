@@ -2,7 +2,7 @@
   import type { Placement } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
-  import { adviceText, findingText } from '../findings/text';
+  import { advicePlainText, findingText } from '../findings/text';
   import { visibleAdvice } from '../findings/visible';
   import { activeVariant, cabinet, roomSize } from '../plan/placement';
   import { tapeMeasure } from '../print/tape';
@@ -118,7 +118,7 @@
         <h2>{i18n.t('treat.roomTitle')}</h2>
         <ol>
           {#each advice as a (a.messageKey + String(a.params.speaker) + String(a.params.boundary))}
-            <li>{adviceText(a, system)}</li>
+            <li>{advicePlainText(a, system)}</li>
           {/each}
         </ol>
       </section>

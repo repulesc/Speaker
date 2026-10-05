@@ -2,12 +2,14 @@ import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import {
   fillRoom,
+  group,
   goStep,
   openApp,
   openSpeakerDetails,
   openWhy,
   savedProject,
   seatDistance,
+  openTab,
 } from './helpers';
 
 test.use({ locale: 'en-GB' });
@@ -48,7 +50,10 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
   await expect(page.getByLabel('Ceiling height')).toHaveValue('3.20\u00a0m');
   await goStep(page, 'Speakers');
-  await expect(page.getByLabel('Width', { exact: true })).toHaveValue('16\u00a0cm'); // the coaxial type's size
+  await openSpeakerDetails(page);
+  await expect(group(page, 'speakers').getByLabel('Width', { exact: true })).toHaveValue(
+    '16\u00a0cm',
+  ); // the coaxial type's size
 });
 
 test.describe('with a room', () => {
@@ -128,7 +133,9 @@ test.describe('with a room', () => {
     await expect(bed).toBeVisible();
     await bed.focus();
     await page.keyboard.press('Shift+ArrowUp');
-    await expect(page.getByRole('textbox', { name: 'From the front wall' })).not.toHaveValue('');
+    await expect(
+      group(page, 'furnishing').getByRole('textbox', { name: 'From the front wall' }),
+    ).not.toHaveValue('');
 
     const project = await savedProject(page);
     expect(project.variants[0].objects).toHaveLength(1);
@@ -155,8 +162,9 @@ test.describe('with a room', () => {
     await page.getByText('Add something on a wall').click();
     await page.getByRole('radio', { name: /^Left wall/ }).check({ force: true });
     await page.getByRole('button', { name: '+ Shelf or CD wall' }).click();
-    await page.getByLabel('Width', { exact: true }).fill('1.5');
-    await page.getByLabel('Width', { exact: true }).blur();
+    const patchWidth = group(page, 'surfaces').getByLabel('Width', { exact: true });
+    await patchWidth.fill('1.5');
+    await patchWidth.blur();
 
     // Drag the patch along the wall.
     const patch = page.getByRole('button', { name: /Bookshelf or CD wall, .* along/ });
@@ -276,6 +284,7 @@ test.describe('with a room', () => {
   });
 
   test('the side view shows heights and can be used with the keyboard', async ({ page }) => {
+    await openTab(page, 'Why');
     await page.getByRole('button', { name: 'Side view' }).click(); // hidden until asked for
     const ears = page.getByRole('button', { name: /^Seat\. .* above the floor\. Left and right/ });
     await ears.focus();

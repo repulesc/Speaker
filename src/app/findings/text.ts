@@ -139,7 +139,16 @@ export function scoreWord(score: number): 'poor' | 'fair' | 'good' | 'veryGood' 
   return 'veryGood';
 }
 
-/** The sentence for a piece of advice (docs/RULE_CATALOGUE.md, T and D rules). */
+/** The sentence for a piece of advice, with its numbers (docs/RULE_CATALOGUE.md, T and D rules). */
 export function adviceText(a: Advice, system: LengthSystem): string {
   return i18n.t(a.messageKey, findingValues(a.ruleId, a.params, system, i18n.locale));
+}
+
+/**
+ * The same advice in plain words (owner feedback after V5.1: "not a phone book"): only distances
+ * you act on, no hertz, seconds or decibels. The numbers stay one tap away (adviceText).
+ */
+export function advicePlainText(a: Advice, system: LengthSystem): string {
+  const key = a.messageKey.replace(/^advice\./, 'advicePlain.');
+  return i18n.t(key, findingValues(a.ruleId, a.params, system, i18n.locale));
 }

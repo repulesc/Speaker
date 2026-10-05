@@ -29,7 +29,8 @@
   import { arrowDelta, startDrag } from '../plan/interaction';
   import { viewport } from '../viewport.svelte';
   import { ROOM_LIMITS } from '../state/limits';
-  import { LISTENING_AREAS } from '../../engine/presets/listeningArea';
+  import { areaPoints } from '../../engine/scoring/area';
+  import { seatFurniture, type SeatKind } from '../plan/seatFurniture';
   import DimLabel from './DimLabel.svelte';
   import MapLegend from './MapLegend.svelte';
   import ProbeCard from './ProbeCard.svelte';
@@ -76,6 +77,12 @@
   );
   const seat = $derived(variant && known ? variant.listener : null);
   const objects = $derived(variant && known ? variant.objects : []);
+  /** What the listener sits on: a chair unless the room sheet says sofa, desk or bed. */
+  const seatKind = $derived<SeatKind | null>(
+    seat
+      ? (seat.area ?? (project.constraints.listeningDistance === 'near' ? 'desk' : 'chair'))
+      : null,
+  );
   const reflectionRings = $derived(
     ui.step === 'surfaces' && analysis.result?.status === 'ok'
       ? analysis.result.findings.filter((f) => f.ruleId === 'P06' && f.location)
@@ -649,18 +656,25 @@
           </g>
         {/each}
 
-        {#if seat?.area}
-          <!-- The listening area: where the heads can be on the sofa, at the desk or in the bed. -->
-          {@const size = LISTENING_AREAS[seat.area]}
+        {#if seat && seatKind}
+          <!-- What you listen from, at its typical size; the dots are where the heads are. -->
+          {@const f = seatFurniture(seatKind, seat.ears)}
           <rect
-            class="listening-area"
-            data-testid="listening-area"
-            x={px(seat.ears.x - size.width / 2)}
-            y={py(seat.ears.y - size.depth / 2)}
-            width={size.width * frame.scale}
-            height={size.depth * frame.scale}
-            rx="6"
+            class="seat-furniture"
+            class:area={seatKind !== 'chair'}
+            data-testid={seatKind !== 'chair' ? 'listening-area' : undefined}
+            data-kind={seatKind}
+            x={px(f.x)}
+            y={py(f.y)}
+            width={f.width * frame.scale}
+            height={f.depth * frame.scale}
+            rx="8"
           />
+          {#if seat.area}
+            {#each areaPoints( seat.ears, seat.area, { W, L } ).filter((p) => p.where !== 'centre') as spot (spot.where)}
+              <circle class="head-spot" cx={px(spot.at.x)} cy={py(spot.at.y)} r="4" />
+            {/each}
+          {/if}
         {/if}
 
         {#if seat}
@@ -972,11 +986,22 @@
     filter: none;
     box-shadow: none;
   }
-  .listening-area {
-    fill: color-mix(in srgb, #fff 18%, transparent);
+  .seat-furniture {
+    fill: color-mix(in srgb, #fff 10%, transparent);
+    stroke: color-mix(in srgb, #fff 70%, transparent);
+    stroke-width: 1.25;
+    stroke-dasharray: 5 3;
+    pointer-events: none;
+  }
+  .seat-furniture.area {
+    fill: color-mix(in srgb, #fff 16%, transparent);
     stroke: #fff;
     stroke-width: 1.5;
-    stroke-dasharray: 5 3;
+  }
+  .head-spot {
+    fill: #fff;
+    stroke: #1d1d1f;
+    stroke-width: 1;
     pointer-events: none;
   }
   /* The recommended spot must read on every heat colour: a white ring under a solid accent edge. */

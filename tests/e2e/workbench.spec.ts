@@ -11,6 +11,7 @@ import {
   openWhy,
   savedProject,
   setMoves,
+  openTab,
 } from './helpers';
 
 test.use({ locale: 'en-GB' });
@@ -26,10 +27,10 @@ async function withResults(page: Page) {
 test('the map shows a heatmap, layers that say what they mean, and a legend', async ({ page }) => {
   await withResults(page);
   await expect(page.locator('canvas.heat')).toBeVisible();
-  // Two big choices; the layers that explain a seat sit behind "Why?" (docs/ROADMAP_V5.md).
+  // Two big choices on the map; the layers that explain a seat live in the Why tab (V6).
   await mapChoice(page, 'Seat').check({ force: true });
   await expect(page.getByRole('button', { name: 'Bass holes' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Why?' }).click();
+  await openTab(page, 'Why');
   const reasons = page.getByRole('group', { name: 'What makes a seat good or poor' });
   await expect(reasons.getByRole('button')).toHaveCount(6);
   await reasons.getByRole('button', { name: 'Bass holes' }).click();
@@ -44,8 +45,10 @@ test('the side view stays hidden until asked for', async ({ page }) => {
   await withResults(page);
   const side = page.getByRole('region', { name: 'Side view of the room' });
   await expect(side).toHaveCount(0);
+  await openTab(page, 'Why');
   await page.getByRole('button', { name: 'Side view' }).click();
   await expect(side).toBeVisible();
+  await openTab(page, 'Why');
   await page.getByRole('button', { name: 'Side view' }).click();
   await expect(side).toHaveCount(0);
 });
@@ -105,6 +108,7 @@ test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({
   await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
   const project = await savedProject(page);
   expect(project.constraints.listenerFixed).toBe(true);
+  await openSettings(page);
   await page.getByRole('radio', { name: 'Desk' }).check({ force: true });
   await expect
     .poll(async () => (await savedProject(page)).constraints.listeningDistance)
@@ -119,12 +123,21 @@ test('where you listen: a sofa is drawn on the map and judged at both ends', asy
     .getByRole('radio', { name: 'Sofa' })
     .check({ force: true });
   await expect(page.getByTestId('listening-area')).toBeVisible();
+  await openTab(page, 'Result');
   await expect(page.getByTestId('area')).toHaveText(
     /^(About the same for everyone on the sofa\.|In the middle: .+\. At (the (left|right) end|both ends): .+\.)$/,
   );
   const project = await savedProject(page);
   expect(project.variants[0].listener.area).toBe('sofa');
   expect(project.constraints.listeningDistance).toBe('room');
+  // A bed is drawn at bed size: 1.6 m wide, 2 m long.
+  await openSettings(page);
+  await page.getByRole('radio', { name: 'Bed' }).check({ force: true });
+  const bed = page.locator('[data-kind="bed"]');
+  const ratio = await bed.evaluate(
+    (el) => Number(el.getAttribute('width')) / Number(el.getAttribute('height')),
+  );
+  expect(ratio).toBeCloseTo(0.8, 2);
   // Back to one chair: no area.
   await page.getByRole('radio', { name: 'Chair' }).check({ force: true });
   await expect(page.getByTestId('listening-area')).toHaveCount(0);
@@ -195,7 +208,7 @@ test('Hungarian: findings and the map speak Hungarian, with no keys leaking', as
   await openMenu(page);
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
   await page.keyboard.press('Escape');
-  await openSection(page, 'Miért ez az eredmény');
+  await page.getByRole('tab', { name: 'Miért' }).click();
   await expect(page.getByRole('heading', { name: 'Miért' })).toBeVisible();
   await expect(page.getByLabel('Térképréteg')).toBeVisible();
   await expect(page.locator('article').first()).toContainText(/Piros zászló|Figyelem/);
@@ -233,11 +246,11 @@ test('panels and bass traps stay out of sight until you say you are ready to inv
 test('the Treat tab lists advice in order, with no raw keys', async ({ page }) => {
   await withResults(page);
   await openSection(page, 'Improve the room');
-  await expect(page.getByRole('heading', { name: 'Treat the room' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'More to try' })).toBeVisible();
   await expect(page.getByText('If you can only do one thing')).toBeVisible();
   const text = await page.locator('#panel').innerText();
   expect(text).not.toMatch(/\b(advice|treat|finding)\.[A-Za-z0-9]+/);
-  await goHome(page);
+  await openTab(page, 'Result');
   await expect(page.getByTestId('suggestion')).toBeVisible();
 });
 
@@ -248,6 +261,7 @@ test('the bass-note explorer shows a pressure pattern and the resonances near th
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
   await expect(page.getByTestId('suggestion')).toBeVisible();
+  await openTab(page, 'Why');
   const chip = page.getByRole('button', { name: 'Bass note' });
   await expect(chip).toHaveAttribute('aria-pressed', 'false');
   await chip.click();

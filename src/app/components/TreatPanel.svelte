@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Advice } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
-  import { adviceText } from '../findings/text';
+  import { advicePlainText, adviceText } from '../findings/text';
   import { heldBack, visibleAdvice } from '../findings/visible';
   import { analysis, workspace } from '../session.svelte';
   import { ui } from '../ui.svelte';
@@ -31,7 +31,11 @@
         )}
       </span>
     </p>
-    <p class="text">{adviceText(a, system)}</p>
+    <p class="text">{advicePlainText(a, system)}</p>
+    <details class="details">
+      <summary>{i18n.t('treat.details')}</summary>
+      <p>{adviceText(a, system)}</p>
+    </details>
     {#if a.location}<p class="meta">{i18n.t('treat.onMap', { n: marker(a) })}</p>{/if}
   </article>
 {/snippet}
@@ -58,8 +62,7 @@
             type="button"
             class="link"
             onclick={() => {
-              ui.settingsOpen = true;
-              ui.step = 'results';
+              ui.openRoom('ready');
             }}>{i18n.t('treat.openSettings')}</button
           >
         </p>
@@ -129,6 +132,25 @@
     color: var(--accent);
     font: inherit;
     cursor: pointer;
+  }
+  .details summary {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    color: var(--accent);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+  .details p {
+    margin: 4px 0 0;
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+  @media (pointer: coarse), (max-width: 1023px) {
+    .details summary {
+      min-height: 44px;
+    }
   }
   .text {
     margin: 0;

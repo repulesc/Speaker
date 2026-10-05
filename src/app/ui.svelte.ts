@@ -34,8 +34,14 @@ let panelHidden = $state(false);
 let survey = $state(false);
 /** The room fades in once, right after the survey (the "reveal"). */
 let reveal = $state(false);
-/** The settings under the result are folded until opened, and stay open for this visit. */
-let settingsOpen = $state(false);
+/** The result panel's tab (docs/ROADMAP_V5.md, V6): the answer, the reasons, the tips. */
+export type ResultTab = 'result' | 'why' | 'tips';
+let tab = $state<ResultTab>('result');
+/** The "Your room" sheet: every setting on one page, opened from the header. */
+let roomOpen = $state(false);
+/** The group of the sheet to scroll to when it opens (a section id), or null. */
+let roomTarget = $state<string | null>(null);
+const SECTION_IDS = ['room', 'surfaces', 'furnishing', 'speakers', 'goals'];
 /** The Speakers page's "More details" stays open once opened, for this visit. */
 let speakerDetails = $state(false);
 
@@ -43,11 +49,52 @@ export const ui = {
   get step() {
     return step;
   },
+  /**
+   * Where to go. Since V6 the sections are groups of the one "Your room" sheet, and Why, Bass and
+   * the tips are tabs of the result panel; only Listening notes is still a page of its own. Callers
+   * keep naming the place they want; this works out how to show it.
+   */
   set step(value: StepId) {
+    if (SECTION_IDS.includes(value)) {
+      roomOpen = true;
+      roomTarget = value;
+      step = 'results';
+      candidate = null;
+      return;
+    }
+    roomOpen = false;
+    if (value === 'why' || value === 'bass' || value === 'treat') {
+      tab = value === 'treat' ? 'tips' : 'why';
+      step = 'results';
+      return;
+    }
     step = value;
-    // A preview belongs to the home page; leaving it ends the preview. A comparison chosen on the
-    // Why page stays on, because it is drawn on the separate Bass page.
+    // A preview belongs to the result; leaving it ends the preview.
     if (value !== 'results') candidate = null;
+  },
+  get tab() {
+    return tab;
+  },
+  set tab(value: ResultTab) {
+    tab = value;
+  },
+  get roomOpen() {
+    return roomOpen;
+  },
+  /** Opens or closes the "Your room" sheet (closing returns to the result). */
+  set roomOpen(value: boolean) {
+    roomOpen = value;
+    if (!value) roomTarget = null;
+    else candidate = null;
+  },
+  /** Opens the sheet at one group ("ready" is the treatment box). */
+  openRoom(target: string | null = null) {
+    roomOpen = true;
+    roomTarget = target;
+    candidate = null;
+  },
+  get roomTarget() {
+    return roomTarget;
   },
   get selection() {
     return selection;
@@ -129,12 +176,6 @@ export const ui = {
   },
   set heatScale(value: 'room' | 'absolute') {
     heatScale = value;
-  },
-  get settingsOpen() {
-    return settingsOpen;
-  },
-  set settingsOpen(value: boolean) {
-    settingsOpen = value;
   },
   get speakerDetails() {
     return speakerDetails;

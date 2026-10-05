@@ -58,34 +58,50 @@ export async function openMenu(page: Page) {
   await page.getByRole('button', { name: 'Settings' }).click();
 }
 
-/** The sidebar's home page: the best placement and the list of everything. */
+/** The sidebar's home: the result tabs (closes the "Your room" sheet or a page). */
 export async function goHome(page: Page) {
+  const done = page.locator('#panel').getByRole('button', { name: 'Done', exact: true });
+  if (await done.count()) await done.first().click();
   const back = page.getByRole('button', { name: 'Back', exact: true });
   if (await back.count()) await back.click();
 }
 
-/** Opens a row of the sidebar's home list (Room, Surfaces, Furniture, …, Why this result). */
-export async function openSection(page: Page, name: string) {
-  const heading = SECTION_TITLES[name];
-  if (
-    heading &&
-    (await page.getByRole('heading', { name: heading, exact: true, level: 2 }).count())
-  )
-    return;
+/** One of the result tabs (docs/ROADMAP_V5.md, V6). */
+export async function openTab(page: Page, name: 'Result' | 'Why' | 'Tips') {
   await goHome(page);
-  if (SECTION_TITLES[name]) await openSettings(page);
-  await page
-    .locator('#panel .list')
-    .getByRole('button', { name: new RegExp(`^${name}(\\s|$)`) })
-    .click();
+  await page.getByRole('tab', { name, exact: true }).click();
+}
+
+/** Where a name from the old home list lives now: a group of the sheet, a tab, or the menu. */
+const TABS: Record<string, 'Why' | 'Tips'> = {
+  'Why this result': 'Why',
+  'Bass at your seat': 'Why',
+  'Improve the room': 'Tips',
+};
+
+/** Opens a section: a group of the "Your room" sheet, a result tab, or Listening notes. */
+export async function openSection(page: Page, name: string) {
+  if (TABS[name]) return openTab(page, TABS[name]);
+  if (name === 'Listening notes') {
+    await goHome(page);
+    await openMenu(page);
+    await page.getByRole('button', { name: 'Listening notes' }).click();
+    return;
+  }
+  await openSettings(page);
+  const heading = SECTION_TITLES[name];
+  if (heading)
+    await page
+      .getByRole('heading', { name: heading, exact: true, level: 2 })
+      .scrollIntoViewIfNeeded();
 }
 
 const SECTION_TITLES: Record<string, string> = {
-  Room: 'Your room',
+  Room: 'Room size',
   Surfaces: 'Surfaces',
   Furniture: 'Furniture',
   Speakers: 'Speakers',
-  Goals: 'What matters to you',
+  Goals: 'What do you want from the sound?',
 };
 
 /** Step names from the old wizard, kept so the journeys read the same: "Results" is the home page. */
@@ -96,7 +112,7 @@ export async function goStep(page: Page, name: string) {
 
 /** The Speakers page keeps size, port, seat, toe-in and the speaker file under "More details". */
 export async function openSpeakerDetails(page: Page) {
-  const more = page.locator('details.more');
+  const more = page.locator('#sheet-speakers details.more');
   if (!(await more.evaluate((d) => (d as HTMLDetailsElement).open))) {
     await more.locator('summary').click();
   }
@@ -130,18 +146,32 @@ export function mapChoice(page: Page, name: 'Speakers' | 'Seat') {
     .getByRole('radio', { name, exact: true });
 }
 
-/** The settings sit folded under the result (docs/ROADMAP_V5.md); opens them on the home page. */
+/** Opens the "Your room" sheet (every setting on one page). */
 export async function openSettings(page: Page) {
+  if (
+    await page
+      .locator('#panel')
+      .getByRole('heading', { name: /^(Your room|A szobád)$/, level: 2 })
+      .count()
+  )
+    return;
   await goHome(page);
-  const fold = page.getByRole('button', { name: /^Your room/ });
-  if ((await fold.getAttribute('aria-expanded')) === 'false') await fold.click();
+  await page.getByRole('button', { name: /^(Your room|A szobád)/ }).click();
 }
 
-/** What the answer may move: "Both", "Speakers" or "Seat" (a setting, under "Your room"). */
+/** What the answer may move: "Both", "Speakers" or "Seat" (on the Result tab, with the map). */
 export async function setMoves(page: Page, value: 'Both' | 'Speakers' | 'Seat') {
-  await openSettings(page);
+  await openTab(page, 'Result');
   await page
     .getByRole('radiogroup', { name: 'Find the best place for' })
     .getByRole('radio', { name: value, exact: true })
     .check({ force: true });
+}
+
+/** One group of the "Your room" sheet, so fields with the same name in other groups stay apart. */
+export function group(
+  page: Page,
+  name: 'room' | 'surfaces' | 'furnishing' | 'speakers' | 'goals' | 'place' | 'ready',
+) {
+  return page.locator(`#sheet-${name}`);
 }

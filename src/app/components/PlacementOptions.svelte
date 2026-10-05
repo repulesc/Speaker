@@ -9,6 +9,11 @@
    * sofa, a desk or a bed; a desk also means sitting close). They are settings, so they live with
    * the other settings, apart from the answer (owner decision, docs/ROADMAP_V5.md).
    */
+  type Part = 'moves' | 'place' | 'ready';
+  let {
+    parts = ['moves', 'place', 'ready'],
+    plain = false,
+  }: { parts?: readonly Part[]; plain?: boolean } = $props();
   const project = $derived(workspace.project);
   const moves = $derived<Goal>(goalOf(project));
   const setMoves = (value: Goal) => workspace.edit((p) => setGoal(p, value));
@@ -37,52 +42,58 @@
   }
 </script>
 
-<div class="options">
-  <div class="option">
-    <span class="caption" id="opt-move">{i18n.t('suggest.move.label')}</span>
-    <div class="seg" role="radiogroup" aria-labelledby="opt-move">
-      {#each ['both', 'speakers', 'seat'] as const as m (m)}
-        <label>
-          <input
-            type="radio"
-            name="moves"
-            value={m}
-            checked={moves === m}
-            onchange={() => setMoves(m)}
-          />
-          <span>{i18n.t(`suggest.move.${m}`)}</span>
-        </label>
-      {/each}
+<div class="options" class:plain>
+  {#if parts.includes('moves')}
+    <div class="option">
+      <span class="caption" id="opt-move">{i18n.t('suggest.move.label')}</span>
+      <div class="seg" role="radiogroup" aria-labelledby="opt-move">
+        {#each ['both', 'speakers', 'seat'] as const as m (m)}
+          <label>
+            <input
+              type="radio"
+              name="moves"
+              value={m}
+              checked={moves === m}
+              onchange={() => setMoves(m)}
+            />
+            <span>{i18n.t(`suggest.move.${m}`)}</span>
+          </label>
+        {/each}
+      </div>
     </div>
-  </div>
-  <div class="option">
-    <span class="caption" id="opt-place">{i18n.t('suggest.place.label')}</span>
-    <div class="seg" role="radiogroup" aria-labelledby="opt-place">
-      {#each PLACES as d (d)}
-        <label>
-          <input
-            type="radio"
-            name="place"
-            value={d}
-            checked={place === d}
-            onchange={() => setPlace(d)}
-          />
-          <span>{i18n.t(`suggest.place.${d}`)}</span>
-        </label>
-      {/each}
+  {/if}
+  {#if parts.includes('place')}
+    <div class="option">
+      <span class="caption" id="opt-place">{i18n.t('suggest.place.label')}</span>
+      <div class="seg" role="radiogroup" aria-labelledby="opt-place">
+        {#each PLACES as d (d)}
+          <label>
+            <input
+              type="radio"
+              name="place"
+              value={d}
+              checked={place === d}
+              onchange={() => setPlace(d)}
+            />
+            <span>{i18n.t(`suggest.place.${d}`)}</span>
+          </label>
+        {/each}
+      </div>
     </div>
-  </div>
-  <div class="option">
-    <label class="check">
-      <input
-        type="checkbox"
-        checked={project.constraints.treatmentReady === true}
-        onchange={(e) => setReady(e.currentTarget.checked)}
-      />
-      <span>{i18n.t('suggest.ready.label')}</span>
-    </label>
-    <span class="caption">{i18n.t('suggest.ready.help')}</span>
-  </div>
+  {/if}
+  {#if parts.includes('ready')}
+    <div class="option">
+      <label class="check">
+        <input
+          type="checkbox"
+          checked={project.constraints.treatmentReady === true}
+          onchange={(e) => setReady(e.currentTarget.checked)}
+        />
+        <span>{i18n.t('suggest.ready.label')}</span>
+      </label>
+      <span class="caption">{i18n.t('suggest.ready.help')}</span>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -92,6 +103,10 @@
     padding: 14px 16px 16px;
     border-radius: var(--radius-md);
     background: var(--surface);
+  }
+  .options.plain {
+    padding: 0;
+    background: none;
   }
   .option {
     display: grid;
