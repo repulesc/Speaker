@@ -131,3 +131,35 @@ Done on the branch, all checks green (340 unit, 61 browser tests):
 **Owner's choices (5 October):** the **zones** look (the most visible); the other two were removed. The bass-note pattern keeps a continuous gradient, because it is a physical level, not a score. **Working name: Nodo** (Italian "node", the quiet points of a room's sound), set in `src/app/config.ts`; the copyright line in the README keeps the old wording until the owner decides.
 
 Next: the goal-first survey (stage 2).
+
+## Status (5 October, stages 2 and 3, first pass)
+
+Done on the branch, all checks green:
+
+- **Goal-first survey** (`Survey.svelte`): a centred card, four screens (room size; what to work out; speaker type; where things are now, with the movement zone for speakers only), "2 of 4" progress, Skip keeps the answers so far, then the room and the answer fade in. An empty ceiling becomes a typical 2.5 m (the analysis needs one) and the text says so.
+- **Speakers only by default** for new projects (seat fixed). The map opens on "where the speakers go" when the seat is fixed, on the seat map otherwise. "Fixed" now only limits the suggestions: the seat and the speakers can always be dragged to where they really are.
+- **Best placement** answers in one plain sentence relative to now ("Move the speakers 20 cm further from the front wall and 40 cm closer together."), the exact numbers below in small type; "Your setup is already about as good as it gets" when nothing worthwhile is left. A small spinner beside the title while it recalculates.
+- **Apply**: the speakers and the seat glide to their new spots; the old spots are outlined ("Before") for a few seconds; a small floating message with **Undo**.
+- **Map**: hover shows a small tooltip; click pins it. On the speaker map the tooltip says how good the speakers would be there, and a click offers "Move the speakers here". The option letter sits between the suggested speakers when the seat stays, so it never hides the seat.
+- **Side panel** can be hidden (toolbar button, wide screens).
+- **Surfaces**: three drop-downs (walls, floor, ceiling), most common first; "Each wall separately" and "Add something on a wall" are folded away.
+- **Share as image** in the menu: room, map and answer as one picture (shared directly on phones).
+- **Mood face** on the Best placement card, from the real score word, with a soft glow at Good or better.
+- Home list rows now show the walls' finish and the speaker type.
+
+### Still to choose (look at the screenshots, or add the switch to the address)
+
+1. **Face style:** drawn (default) or emoji: `?face=emoji`.
+2. **Home list:** rows (default) or four-up cards: `?home=cards`.
+3. **Wording tone** — the site now uses A. Examples:
+   - **A. Friendly and short:** "Move the speakers 20 cm further from the front wall and 40 cm closer together." Survey: "What do you want to work out?"
+   - **B. Neutral and precise:** "Recommended: rear panels 50 cm from the front wall, 1.60 m apart (now 30 cm and 2.00 m)." Survey: "Choose what to optimise."
+   - **C. Warm and conversational:** "Nearly there. Bring your speakers about 20 cm out from the wall and a little closer together, around 40 cm." Survey: "So, what are we figuring out today?"
+
+### Not built yet
+
+- **Desktop layout option** with floating cards over a full-screen map (the panel toggle gives a first taste). Worth a mock-up before building: it changes every page.
+- **Bass layers across the whole room** (beside and behind the speakers): needs an engine change, physics-only layers.
+- **Dispersion modelling** (needs the owner's sign-off, formulas and sources first).
+- **Reference screenshots** in the e2e suite and the shared component set (from V3).
+- **Guided listening tests** (later release, confirm first).

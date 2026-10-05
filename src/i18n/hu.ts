@@ -303,15 +303,29 @@ export const hu: Messages = {
       help: 'Ez kitölti a tipikus méreteket. A További részleteknél átírhatod őket.',
       'small-bookshelf-rear-port': {
         name: 'Kis polchangfal',
+        short: 'Polchangfal',
         help: 'Kétutas, a basszusnyílás hátul',
       },
       'coaxial-active-monitor': {
         name: 'Koaxiális aktív monitor',
+        short: 'Koaxiális monitor',
         help: 'A magassugárzó a mélysugárzó közepén',
       },
-      'sealed-bookshelf': { name: 'Zárt dobozos polchangfal', help: 'Nincs basszusnyílás' },
-      'floorstander-front-port': { name: 'Álló hangfal, elöl nyílással', help: 'Magas, háromutas' },
-      'floorstander-rear-port': { name: 'Álló hangfal, hátul nyílással', help: 'Magas, háromutas' },
+      'sealed-bookshelf': {
+        name: 'Zárt dobozos polchangfal',
+        short: 'Zárt polchangfal',
+        help: 'Nincs basszusnyílás',
+      },
+      'floorstander-front-port': {
+        name: 'Álló hangfal, elöl nyílással',
+        short: 'Álló hangfal',
+        help: 'Magas, háromutas',
+      },
+      'floorstander-rear-port': {
+        name: 'Álló hangfal, hátul nyílással',
+        short: 'Álló hangfal',
+        help: 'Magas, háromutas',
+      },
     },
     describe: { title: 'A te hangfalad' },
     more: {

@@ -292,19 +292,27 @@ export const en = {
       help: 'This fills in typical sizes. You can change them under More details.',
       'small-bookshelf-rear-port': {
         name: 'Small bookshelf speaker',
+        short: 'Bookshelf',
         help: 'Two-way, port at the back',
       },
       'coaxial-active-monitor': {
         name: 'Coaxial active monitor',
+        short: 'Coaxial monitor',
         help: 'Tweeter in the middle of the woofer',
       },
-      'sealed-bookshelf': { name: 'Sealed bookshelf speaker', help: 'No port' },
+      'sealed-bookshelf': {
+        name: 'Sealed bookshelf speaker',
+        short: 'Sealed bookshelf',
+        help: 'No port',
+      },
       'floorstander-front-port': {
         name: 'Floor-standing, port at the front',
+        short: 'Floor-standing',
         help: 'Tall, three-way',
       },
       'floorstander-rear-port': {
         name: 'Floor-standing, port at the back',
+        short: 'Floor-standing',
         help: 'Tall, three-way',
       },
     },
