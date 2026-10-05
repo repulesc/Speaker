@@ -86,7 +86,9 @@ note (section E). Map three generic categories to coarse directivity classes (an
 touches the score (see `MODEL_CREDIBILITY.md`). Without measurements, "general best spots" is the
 honest answer; dispersion only refines wording.
 
-### E. Tone advice (bass / treble / basic EQ)
+### E. Tone advice (bass / treble / basic EQ) — DONE
+
+As built: one new rule, D07, says what D02 (bass cut near walls) and D03/H06 (treble for a dead or live room) already said, for the many people who never tell the app about their tone controls: "if your speakers or amplifier have a bass/treble control…". Same conditions and sources, no new numbers. The result widget shows the most useful room idea and one tone hint. Not built: "small speakers in a big, busy room → treble lift". No source supports the small-speaker part; the busy-room part is H06 (a busy room is a dead room, and a dead room gets the treble-lift hint). The plan below was the starting point.
 **Default:** advice sentences in the widget, never filter numbers presented as exact:
 - Small speakers in a large or very reflective room → "may sound thin; a small bass lift or a
   subwoofer could help" (physics 🔴 for bass reach; the lift wording 🟠).

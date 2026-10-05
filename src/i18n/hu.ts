@@ -1266,6 +1266,14 @@ export const hu: Messages = {
       desk: 'A hangfalad rendelkezik asztali móddal, és a hangfalak asztalon állnak: kapcsold be.',
       stand: 'Használd a hangfal állvány módját: a hangfalak nem asztalon állnak.',
     },
+    D07: {
+      bassCut:
+        'A hangfalak közel állnak a falakhoz, ez megemeli a basszust (falhatás: {gain}). Ha a hangfaladon vagy az erősítődön van mélyszabályzó, próbálj egy kis lépést lefelé, aztán hallgasd meg.',
+      trebleLift:
+        'A szoba elnyeli a magas hangokat (utózengés {t60}). Ha a hangfaladon vagy az erősítődön van magasszabályzó, próbálj egy kis emelést ({suggestDb}), aztán hallgasd meg.',
+      trebleCut:
+        'A szobában a magas hangok sokáig csengenek (utózengés {t60}). Ha a hangfaladon vagy az erősítődön van magasszabályzó, próbálj egy kis vágást ({suggestDb}), aztán hallgasd meg.',
+    },
   },
   analysis: {
     updating: 'Frissítés…',

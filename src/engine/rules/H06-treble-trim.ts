@@ -1,4 +1,22 @@
+import type { AnalysisContext } from '../context';
 import { makeFinding, type RuleDef } from './rule';
+
+/**
+ * The room's treble character (🟡): 'lift' when the high band dies away fast (T60 below 0.3 s),
+ * 'cut' when it rings on (above 0.6 s), else null. Never from the defaults alone: some of the room
+ * must be described (R0 audit, M11). Shared with D07, which says the same without a known control.
+ */
+export function trebleCharacter(ctx: AnalysisContext): 'lift' | 'cut' | null {
+  const { surfaces } = ctx.project;
+  const described =
+    Object.values(surfaces.baseCertainty).some((c) => c !== 'unknown') ||
+    surfaces.patches.length > 0 ||
+    ctx.variant.objects.length > 0 ||
+    (ctx.variant.busyness !== undefined && ctx.variant.busyness.certainty !== 'unknown');
+  if (!described) return null;
+  const t = ctx.t60.treble;
+  return t < 0.3 ? 'lift' : t > 0.6 ? 'cut' : null;
+}
 
 /**
  * H06 · Treble trim versus room character (🟡). Sources: manufacturer EQ guidance, [TOOLE] (⚠ verify).
@@ -15,17 +33,10 @@ export const H06: RuleDef = {
   variants: ['lift', 'cut'],
   evaluate(ctx) {
     if (!ctx.speaker.hasTrebleControl) return [];
-    // Advice needs some of the room described: never from the defaults alone (R0 audit, M11).
-    const { surfaces } = ctx.project;
-    const described =
-      Object.values(surfaces.baseCertainty).some((c) => c !== 'unknown') ||
-      surfaces.patches.length > 0 ||
-      ctx.variant.objects.length > 0 ||
-      (ctx.variant.busyness !== undefined && ctx.variant.busyness.certainty !== 'unknown');
-    if (!described) return [];
     const t = ctx.t60.treble;
-    if (t < 0.3) return [makeFinding(H06, 'lift', 'info', { t60: t, suggestDb: 0.5 })];
-    if (t > 0.6) return [makeFinding(H06, 'cut', 'info', { t60: t, suggestDb: -0.5 })];
+    const character = trebleCharacter(ctx);
+    if (character === 'lift') return [makeFinding(H06, 'lift', 'info', { t60: t, suggestDb: 0.5 })];
+    if (character === 'cut') return [makeFinding(H06, 'cut', 'info', { t60: t, suggestDb: -0.5 })];
     return [];
   },
 };

@@ -130,6 +130,43 @@ describe('speaker settings', () => {
   });
 });
 
+describe('D07: tone, if you have the controls (docs/ROADMAP_V5.md)', () => {
+  it('a bass cut when the speakers stand close to walls and no bass control is known', () => {
+    const p = makeProject({ clearance: 0.05, halfSpacing: 1.75, standZ: 0 });
+    const k = keys(adviceFor(p).settings);
+    expect(k).toContain('D07.bassCut');
+    expect(k).not.toContain('D02.cut');
+    // With a known control, D02 says it with the step, and D07 stays quiet.
+    p.speaker.dsp.bass = { minDb: -6, maxDb: 6, stepDb: 0.5 };
+    const known = keys(adviceFor(p).settings);
+    expect(known).toContain('D02.cut');
+    expect(known).not.toContain('D07.bassCut');
+  });
+
+  it('nothing about bass from placeholder speakers (not placed yet)', () => {
+    const p = makeProject({ clearance: 0.05, halfSpacing: 1.75, standZ: 0 });
+    for (const side of ['left', 'right'] as const)
+      p.variants[0]!.speakers[side].certainty = 'unknown';
+    expect(keys(adviceFor(p).settings)).not.toContain('D07.bassCut');
+  });
+
+  it('a treble lift in a dead room, the same thresholds as H06, when no treble control is known', () => {
+    const p = busyRoom();
+    delete p.speaker.dsp.treble;
+    const lift = adviceFor(p).settings.find((a) => a.messageKey === 'advice.D07.trebleLift');
+    expect(lift).toBeDefined();
+    expect(lift!.params.suggestDb).toBe(0.5);
+    expect(lift!.params.t60 as number).toBeLessThan(0.3);
+    expect(keys(adviceFor(busyRoom()).settings)).not.toContain('D07.trebleLift');
+  });
+
+  it('nothing about treble from an undescribed room', () => {
+    const k = keys(adviceFor(makeProject()).settings);
+    expect(k).not.toContain('D07.trebleLift');
+    expect(k).not.toContain('D07.trebleCut');
+  });
+});
+
 describe('analyze() carries the advice', () => {
   it('the same advice as the rules give for the current setup', () => {
     const a = analyze(busyRoom()) as AnalysisOk;

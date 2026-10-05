@@ -347,6 +347,7 @@ What to change in the room or on the speaker, most useful first; the first item 
 | D04 | The base height that puts the tweeter at ear height, or tilt the speaker (heights are not searched in v1). When the axis is above the ears even with the speaker on the floor (base height under 5 cm), the `tilt` variant: tilt down or sit higher (R3 review) | 🟠 | [TOOLE], [ITU1116] ✓ | G08 caution or red flag |
 | D05 | Move a rear port out to the minimum; the manual says whether port plugs exist (the app does not know and says so) | 🟠 | manufacturer, [TOOLE] | G07 too close |
 | D06 | Desk mode when the speakers stand on a desk or table, otherwise stand mode | 🟠 | manufacturer | the profile lists those modes |
+| D07 | (V5) Tone, if you have the controls: the same bass cut as D02 and treble lift or cut as D03, worded "if your speakers or amplifier have a bass (treble) control", for profiles that list no such control. Same conditions: boundary gain high or very high (P05) and placed speakers; H06's treble thresholds in a described room. No new number: treble ±0.5 dB as in H06, bass "a small step" | 🟡 | [ALL74], [TOOLE], manufacturer | no bass (treble) control known, and the D02 (H06) condition holds |
 
 ## 🟣 Subjective rules (symptom → hypotheses → experiment)
 

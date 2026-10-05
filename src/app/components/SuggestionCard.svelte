@@ -11,8 +11,8 @@
 
   /**
    * The result, first and on its own (owner decision, docs/ROADMAP_V5.md): how the setup does now
-   * in one line, then at most two things to try, the placement (with Apply) and the most useful
-   * other idea, then the ways to learn more. It only proposes; nothing here is a setting.
+   * in one line, then at most two things to try, the placement (with Apply) and up to two other
+   * ideas (the room, the tone), then the ways to learn more. It only proposes; nothing here is a setting.
    */
   const LETTERS = ['A', 'B', 'C'];
   const project = $derived(workspace.project);
@@ -56,11 +56,19 @@
         });
   });
 
-  /** The one other idea worth trying: the most useful room or speaker-settings advice. */
+  /**
+   * At most two other ideas: the most useful change to the room, and one about tone (bass or
+   * treble, D02, D03, D07), so the widget answers "what else?" without becoming a list.
+   */
+  const TONE = new Set(['D02', 'D03', 'D07']);
   const ideas = $derived(ok ? [...ok.advice.treatment, ...ok.advice.settings] : []);
-  const idea = $derived<Advice | null>(
-    ok ? (ok.advice.treatment[0] ?? ok.advice.settings[0] ?? null) : null,
-  );
+  const picks = $derived.by<Advice[]>(() => {
+    if (!ok) return [];
+    const { treatment, settings } = ok.advice;
+    const other = treatment[0] ?? settings.find((a) => !TONE.has(a.ruleId));
+    const tone = settings.find((a) => TONE.has(a.ruleId));
+    return [other, tone].filter((a): a is Advice => a !== undefined);
+  });
   const LEVEL_ICON = { physics: '●', guideline: '◆', heuristic: '▲', subjective: '◇' } as const;
 
   /** Ways to learn more, each its own page. */
@@ -311,11 +319,15 @@
       </section>
     {/if}
 
-    {#if idea}
+    {#if picks.length}
       <section class="try" aria-labelledby="idea-title" data-testid="idea">
         <h3 id="idea-title">{i18n.t('result.idea')}</h3>
-        <p class="idea">{adviceText(idea, system)}</p>
-        <p class="caption">{LEVEL_ICON[idea.level]} {i18n.t(`evidence.${idea.level}`)}</p>
+        {#each picks as idea (idea.messageKey)}
+          <div class="idea-item">
+            <p class="idea">{adviceText(idea, system)}</p>
+            <p class="caption">{LEVEL_ICON[idea.level]} {i18n.t(`evidence.${idea.level}`)}</p>
+          </div>
+        {/each}
       </section>
     {/if}
   {/if}
@@ -472,8 +484,12 @@
     font-size: var(--text-md);
     line-height: 1.45;
   }
-  .try .caption {
-    margin: -6px 0 0;
+  .idea-item {
+    display: grid;
+    gap: 4px;
+  }
+  .idea-item .caption {
+    margin: 0;
   }
   .links {
     margin: 0 -16px;

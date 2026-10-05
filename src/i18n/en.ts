@@ -1249,6 +1249,14 @@ export const en = {
       desk: 'Your speaker has a desk mode and the speakers stand on a desk: switch it on.',
       stand: 'Use the speaker’s stand mode: the speakers are not on a desk.',
     },
+    D07: {
+      bassCut:
+        'The speakers stand close to walls, which boosts the bass (boundary gain: {gain}). If your speakers or amplifier have a bass control, try a small step down, then listen.',
+      trebleLift:
+        'The room soaks up high frequencies (reverberation {t60}). If your speakers or amplifier have a treble control, try a small lift ({suggestDb}), then listen.',
+      trebleCut:
+        'The room lets high frequencies ring (reverberation {t60}). If your speakers or amplifier have a treble control, try a small cut ({suggestDb}), then listen.',
+    },
   },
   analysis: {
     updating: 'Updating…',
