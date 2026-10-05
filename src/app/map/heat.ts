@@ -264,13 +264,11 @@ function smoothstep(a: number, b: number, x: number): number {
 // ── Painting ─────────────────────────────────────────────────────────────────
 
 /**
- * How the map is drawn. Three looks for the owner to choose from (docs/DESIGN_BRIEF_V4.md):
- * - gradient: a continuous colour field with faint contour lines;
- * - zones: four calm bands (poor, fair, good, best) with soft edges;
- * - glow: a quiet room where only the better areas glow.
+ * How a field is drawn. Score maps use calm zones: four bands (poor, fair, good, best) with soft
+ * edges, the owner's choice of three looks (docs/DESIGN_BRIEF_V4.md). The bass-note pattern is a
+ * physical level, so it keeps a continuous gradient with faint contours.
  */
-export type HeatStyle = 'gradient' | 'zones' | 'glow';
-export const HEAT_STYLES: readonly HeatStyle[] = ['gradient', 'zones', 'glow'];
+type HeatStyle = 'zones' | 'gradient';
 
 /** Ramp positions (0..1) where a faint contour line is drawn in the gradient style. */
 const CONTOURS = [0.25, 0.5, 0.75];
@@ -281,8 +279,6 @@ const CONTOUR_HALF_WIDTH = 0.9;
 /** Zones style: number of bands and the width of the soft blend between two bands. */
 const ZONES = 4;
 const ZONE_EDGE = 0.18;
-/** Glow style: visibility of the poorest areas (the best glow at full strength). */
-const GLOW_FLOOR = 0.1;
 /** The fade where the map runs out of scored seats, in metres. */
 const FADE_M = 0.45;
 /** "Advised against": light diagonal hatch (period in CSS pixels, strength 0..1). */
@@ -328,7 +324,7 @@ function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOpti
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const k = y * width + x;
-      let a = alpha[k]!;
+      const a = alpha[k]!;
       if (a <= 0) continue;
       const t = toRamp(value[k]!);
       let shown = t;
@@ -343,7 +339,6 @@ function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOpti
         shown = (level + 0.5) / ZONES;
       }
       let [r, g, b] = rampColor(shown);
-      if (style === 'glow') a *= GLOW_FLOOR + (1 - GLOW_FLOOR) * smoothstep(0.35, 1, t);
       if (style === 'gradient') {
         // Contours, anti-aliased: distance to the level in pixels, from the local slope.
         const gx = (rampAt(x + 1, y, t) - rampAt(x - 1, y, t)) / 2;
@@ -397,13 +392,12 @@ function fadeAlpha(dist: Float32Array, step: number): Float32Array {
   return dist.map((d) => (d === 0 ? 1 : Math.max(0, 1 - d / fade) ** 1.5));
 }
 
-/** One seat layer: smooth, in the chosen style, its own colour range; "advised against" hatched. */
+/** One seat layer: calm zones over its own colour range; "advised against" outlined and hatched. */
 export function paintHeat(
   canvas: HTMLCanvasElement,
   layers: SeatLayers,
   values: readonly number[],
   scale = 8,
-  style: HeatStyle = 'gradient',
   range: ColourRange = roomRange(values),
 ): void {
   const { filled, dist } = fillGaps(layers.nx, layers.ny, values);
@@ -415,7 +409,7 @@ export function paintHeat(
     layers.redFlag,
     fadeAlpha(dist, layers.step),
   );
-  paint(canvas, field, { style, toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
+  paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }
 
 /** Pressure pattern of one bass note: loud is bright, −40 dB or quieter is the darkest. */
@@ -435,7 +429,6 @@ export function paintSpeakerMap(
   canvas: HTMLCanvasElement,
   grid: Grid,
   scale = 8,
-  style: HeatStyle = 'gradient',
   range: ColourRange = roomRange(grid.values),
 ): void {
   const { nx, ny, values } = grid;
@@ -446,5 +439,5 @@ export function paintSpeakerMap(
   }
   const { filled, dist } = fillGaps(nx * 2, ny, mirrored);
   const field = smoothField(nx * 2, ny, filled, scale, undefined, fadeAlpha(dist, grid.step));
-  paint(canvas, field, { style, toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
+  paint(canvas, field, { style: 'zones', toRamp: (v) => (v - range.lo) / (range.hi - range.lo) });
 }

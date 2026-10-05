@@ -1,5 +1,4 @@
 import type { BoundaryId, LayerId } from '../engine/types';
-import { HEAT_STYLES, type HeatStyle } from './map/heat';
 import type { StepId } from './session.svelte';
 
 /** What the user is currently looking at or has selected. Not saved with the project. */
@@ -23,15 +22,6 @@ let compareId = $state<string | null>(null);
 let candidate = $state<number | null>(null);
 /** The side view is hidden until asked for (docs/REVAMP_PLAN.md). */
 let sideOpen = $state(false);
-/**
- * How the heatmap is drawn. The owner chooses between three looks (docs/DESIGN_BRIEF_V4.md); until
- * then `?heat=zones` or `?heat=glow` in the address switches, for comparing them on a real room.
- */
-const urlStyle =
-  typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('heat');
-let heatStyle = $state<HeatStyle>(
-  HEAT_STYLES.includes(urlStyle as HeatStyle) ? (urlStyle as HeatStyle) : 'gradient',
-);
 /** Colours stretched over this room's own range (default) or the same scale for every room. */
 let heatScale = $state<'room' | 'absolute'>('room');
 /** The Speakers page's "More details" stays open once opened, for this visit. */
@@ -89,12 +79,6 @@ export const ui = {
   },
   set sideOpen(value: boolean) {
     sideOpen = value;
-  },
-  get heatStyle() {
-    return heatStyle;
-  },
-  set heatStyle(value: HeatStyle) {
-    heatStyle = value;
   },
   get heatScale() {
     return heatScale;

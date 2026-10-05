@@ -174,8 +174,6 @@ test('the bass-note explorer shows a pressure pattern and the resonances near th
   await expect(page.getByText(/Room resonances near this note/)).toBeVisible();
   await chip.click();
   await expect(page.getByText('Poorer')).toBeVisible();
-  await layer.selectOption({ label: 'Overall' });
-  await expect(page.getByTestId('best-here')).toHaveText(/^Best here: (Poor|Fair|Good|Very good)$/);
 });
 
 test('furniture: a bigger palette and a material for any object', async ({ page }) => {

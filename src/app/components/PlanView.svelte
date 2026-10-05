@@ -119,14 +119,14 @@
   $effect(() => {
     if (heat && layers && !field && ui.layer !== 'speakers') {
       const scale = renderScale(layers.step * frame.scale);
-      paintHeat(heat, layers, layers.values[ui.layer], scale, ui.heatStyle, range);
+      paintHeat(heat, layers, layers.values[ui.layer], scale, range);
     }
   });
   let speakerCanvas = $state<HTMLCanvasElement>();
   $effect(() => {
     if (speakerCanvas && speakerGrid) {
       const scale = renderScale(speakerGrid.step * frame.scale);
-      paintSpeakerMap(speakerCanvas, speakerGrid, scale, ui.heatStyle, range);
+      paintSpeakerMap(speakerCanvas, speakerGrid, scale, range);
     }
   });
   let fieldCanvas = $state<HTMLCanvasElement>();

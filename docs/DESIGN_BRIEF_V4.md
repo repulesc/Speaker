@@ -128,4 +128,6 @@ Done on the branch, all checks green (340 unit, 61 browser tests):
 - **Settings icon:** three lines instead of the cog.
 - **Speaker zone:** "How far can the speakers move from where they are now?" 25 cm / 50 cm (default for new projects) / 1 m / Anywhere. The search keeps each speaker within that circle; the zone only applies once the user has placed the speakers (placeholders are not a place anyone is tied to). The Best placement card says what the zone costs when the score word differs ("Within 50 cm: Fair. With more room: Good."). The zone is drawn as a dashed circle around each speaker, clipped to the room. Tests: `tests/engine/zone.test.ts`, e2e for the choice.
 
-Next: the owner picks a heatmap look; then the goal-first survey (stage 2).
+**Owner's choices (5 October):** the **zones** look (the most visible); the other two were removed. The bass-note pattern keeps a continuous gradient, because it is a physical level, not a score. **Working name: Nodo** (Italian "node", the quiet points of a room's sound), set in `src/app/config.ts`; the copyright line in the README keeps the old wording until the owner decides.
+
+Next: the goal-first survey (stage 2).
