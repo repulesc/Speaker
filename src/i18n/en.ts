@@ -202,11 +202,17 @@ export const en = {
   surfaces: {
     title: 'Surfaces',
     intro:
-      'What the walls, floor and ceiling are made of changes how the room sounds. Guesses are fine; this step is optional.',
+      'What the room is made of changes how it sounds. Guesses are fine; this step is optional.',
     pick: 'Which surface?',
     base: 'What is the {name} made of?',
     dontKnow: 'I don’t know',
     dontKnowHelp: 'We’ll assume {material}.',
+    dontKnowShort: 'I don’t know ({material})',
+    row: { walls: 'Walls', floor: 'Floor', ceiling: 'Ceiling' },
+    mixed: 'Different on each wall',
+    eachWall: 'Each wall separately',
+    addThings: 'Add something on a wall',
+    addThingsHint: 'Windows, shelves, curtains, paintings',
     needRoom: 'Enter the room size first, then you can describe the surfaces.',
     elevation: 'View of the {name} from inside the room',
     patchLabel: '{name}, {left} along, {top} up. {hint}',

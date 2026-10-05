@@ -149,8 +149,11 @@ test.describe('with a room', () => {
     page,
   }) => {
     await goStep(page, 'Surfaces');
-    await page.getByRole('radio', { name: /^Left wall/ }).check();
-    await page.getByRole('radio', { name: /Bookshelf or CD wall/ }).check();
+    // One choice for all four walls, most common finishes first.
+    await page.getByLabel('Walls', { exact: true }).selectOption({ label: 'Plasterboard' });
+    // Shelves, windows and curtains go on a wall as "something on it".
+    await page.getByText('Add something on a wall').click();
+    await page.getByRole('radio', { name: /^Left wall/ }).check({ force: true });
     await page.getByRole('button', { name: '+ Shelf or CD wall' }).click();
     await page.getByLabel('Width', { exact: true }).fill('1.5');
     await page.getByLabel('Width', { exact: true }).blur();
@@ -166,8 +169,11 @@ test.describe('with a room', () => {
     await page.mouse.up();
 
     const project = await savedProject(page);
-    expect(project.surfaces.base.left).toBe('shelf-diffusive');
-    expect(project.surfaces.baseCertainty.left).toBe('estimated');
+    for (const wall of ['front', 'back', 'left', 'right']) {
+      expect(project.surfaces.base[wall]).toBe('gypsum-stud');
+      expect(project.surfaces.baseCertainty[wall]).toBe('estimated');
+    }
+    expect(project.surfaces.patches[0].boundary).toBe('left');
     expect(project.surfaces.patches).toHaveLength(1);
     expect(project.surfaces.patches[0].width).toBeCloseTo(1.5, 6);
     expect(project.surfaces.patches[0].u).not.toBeCloseTo(u0, 2);
@@ -175,9 +181,10 @@ test.describe('with a room', () => {
 
   test('surfaces: "I don\'t know" goes back to the typical default', async ({ page }) => {
     await goStep(page, 'Surfaces');
-    await page.getByRole('radio', { name: /^Floor/ }).check();
-    await page.getByRole('radio', { name: /Thick carpet/ }).check();
-    await page.getByRole('radio', { name: /I don’t know/ }).check();
+    const floor = page.getByLabel('Floor', { exact: true });
+    await floor.selectOption({ label: 'Thick carpet' });
+    expect((await savedProject(page)).surfaces.base.floor).toBe('carpet-heavy');
+    await floor.selectOption('unknown');
     const project = await savedProject(page);
     expect(project.surfaces.base.floor).toBe('wood-floor');
     expect(project.surfaces.baseCertainty.floor).toBe('unknown');

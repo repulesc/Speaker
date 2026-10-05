@@ -70,7 +70,8 @@ for (const scheme of ['light', 'dark'] as const) {
 
       // Give the later steps something to show: a patch, an object, a second setup.
       await goStep(page, 'Surfaces');
-      await page.getByRole('radio', { name: /^Left wall/ }).check();
+      await page.getByText('Add something on a wall').click();
+      await page.getByRole('radio', { name: /^Left wall/ }).check({ force: true });
       await page.getByRole('button', { name: '+ Shelf or CD wall' }).click();
       await goStep(page, 'Furnishing');
       await page.getByRole('button', { name: '+ Bed' }).click();
