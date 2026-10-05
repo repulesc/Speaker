@@ -523,6 +523,8 @@ export const en = {
     bass: 'Bass at your seat',
     back: 'Back',
     notSet: 'Not set',
+    progress: '{n} of {total} set',
+    status: { done: 'set', partial: 'partly set', todo: 'not set yet' },
     none: 'None',
   },
   survey: {
@@ -781,6 +783,8 @@ export const en = {
     speakersTitle: 'Speakers here',
     speakersHere: 'Speakers here: {word}',
     speakersNot: 'The speakers cannot stand here.',
+    speakersFlagged:
+      'Advised against: not a good stereo setup, or on furniture. The score is the bass only where the seat is not in front of the speakers.',
     moveSpeakers: 'Move the speakers here',
     close: 'Close',
     notAllowed: 'The seat cannot go here: too close to a speaker, or something is in the way.',

@@ -57,3 +57,47 @@ test('the sidebar keeps to one type scale on every page', async ({ page }) => {
     expect(off, `off-scale text: ${JSON.stringify(off)}`).toEqual([]);
   }
 });
+
+test('no sidebar page runs out of its panel, in English or Hungarian', async ({ page }) => {
+  await openApp(page);
+  await fillRoom(page, '4', '5', '2.5');
+  const overflow = () =>
+    page.locator('#panel').evaluate((panel) => {
+      const wide: string[] = [];
+      for (const el of panel.querySelectorAll('*')) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.right > panel.getBoundingClientRect().right + 1) {
+          wide.push(`${el.tagName.toLowerCase()}.${el.className}`);
+        }
+      }
+      return { scroll: panel.scrollWidth - panel.clientWidth, wide: wide.slice(0, 5) };
+    });
+  const sections = [
+    'Room',
+    'Surfaces',
+    'Furniture',
+    'Speakers',
+    'Goals',
+    'Why this result',
+    'Improve the room',
+    'Listening notes',
+  ];
+  for (const lang of ['EN', 'HU']) {
+    for (const section of sections) {
+      await goHome(page);
+      await openSection(page, section);
+      if (lang === 'HU') {
+        await page.getByRole('button', { name: 'Settings' }).click();
+        await page.getByRole('radio', { name: 'HU', exact: true }).check({ force: true });
+        await page.keyboard.press('Escape');
+      }
+      const result = await overflow();
+      expect(result, `${lang}: ${section}`).toEqual({ scroll: 0, wide: [] });
+      if (lang === 'HU') {
+        await page.getByRole('button', { name: 'Beállítások' }).click();
+        await page.getByRole('radio', { name: 'EN', exact: true }).check({ force: true });
+        await page.keyboard.press('Escape');
+      }
+    }
+  }
+});

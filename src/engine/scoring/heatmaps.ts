@@ -9,6 +9,7 @@ import type {
   Vec3,
 } from '../types';
 import type { Scorer } from './scorer';
+import { cabinetBox } from '../rules/G10-objects';
 import { avoidsRedFlags, isValidPlacement, seatScorable, speakerPair, steps } from './search';
 
 /**
@@ -72,6 +73,22 @@ export function seatLayers(
   return { x0: xs[0]!, y0: ys[0]!, step, nx: xs.length, ny: ys.length, values, redFlag };
 }
 
+/** Whether both cabinets lie inside the room. */
+function insideRoom(ctx: AnalysisContext, speakers: Placement['speakers']): boolean {
+  return (['left', 'right'] as const).every((side) => {
+    const box = cabinetBox(speakers[side], ctx);
+    return box.min.x >= 0 && box.max.x <= ctx.room.W && box.min.y >= 0 && box.max.y <= ctx.room.L;
+  });
+}
+
+/** The bass part of the score (C1 and C2 with their goal weights, 🔴 physics), or null. */
+function physicsOnly(scorer: Scorer, placement: Placement): number | null {
+  const { C1, C2 } = scorer.weights;
+  if (C1 + C2 <= 0 || !insideRoom(scorer.ctx, placement.speakers)) return null;
+  const { c1, c2 } = scorer.bass(scorer.coupling(placement.speakers), placement.listener);
+  return (C1 * c1 + C2 * c2) / (C1 + C2);
+}
+
 function layerValue(id: LayerId, result: ReturnType<Scorer['score']>, scorer: Scorer): number {
   if (id === 'goals') return result.score;
   if (id === 'overall') {
@@ -118,12 +135,22 @@ export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
       const clearance = y - ctx.speaker.depth / 2;
       const speakers = speakerPair(ctx, centre, centre - x, clearance);
       const placement = { speakers, listener };
-      const open =
-        clearance >= 0 &&
-        centre - x >= ctx.speaker.width / 2 && // else the two cabinets would overlap
-        isValidPlacement(bare, placement);
-      redFlag.push(open && !isValidPlacement(ctx, placement));
-      return open ? scorer.score(placement).score : NaN;
+      const apart = clearance >= 0 && centre - x >= ctx.speaker.width / 2; // cabinets do not overlap
+      if (!apart) {
+        redFlag.push(false);
+        return NaN;
+      }
+      if (isValidPlacement(bare, placement)) {
+        redFlag.push(!isValidPlacement(ctx, placement));
+        return scorer.score(placement).score;
+      }
+      // Not a stereo setup (the speakers would stand beside or behind the seat, or too close to
+      // it). The map still shows what the room itself does there (owner: see the whole room):
+      // only the bass, which the room decides wherever the speakers stand. Hatched like every
+      // spot the app advises against; the stereo rules do not apply and are left out.
+      const physics = physicsOnly(scorer, placement);
+      redFlag.push(physics !== null);
+      return physics ?? NaN;
     }),
   );
   return { x0: xs[0] ?? 0, y0: ys[0] ?? 0, step, nx: xs.length, ny: ys.length, values, redFlag };

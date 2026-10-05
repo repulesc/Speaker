@@ -279,6 +279,8 @@ const CONTOUR_HALF_WIDTH = 0.9;
 /** Zones style: number of bands and the width of the soft blend between two bands. */
 const ZONES = 4;
 const ZONE_EDGE = 0.18;
+/** Gaps up to this wide (metres) inside the field are filled, not faded. */
+const GAP_FILLED_M = 0.22;
 /** The fade where the map runs out of scored seats, in metres. */
 const FADE_M = 0.45;
 /** "Advised against": light diagonal hatch (period in CSS pixels, strength 0..1). */
@@ -389,7 +391,10 @@ function paint(canvas: HTMLCanvasElement, field: SmoothField, options: PaintOpti
 /** Visibility per cell after fillGaps: scored cells full, the rest fading out over FADE_M. */
 function fadeAlpha(dist: Float32Array, step: number): Float32Array {
   const fade = Math.max(1, FADE_M / step);
-  return dist.map((d) => (d === 0 ? 1 : Math.max(0, 1 - d / fade) ** 1.5));
+  // A narrow gap inside the field (two cabinets cannot overlap along the centre line) is filled
+  // from its neighbours at full strength; only a real edge fades.
+  const grace = GAP_FILLED_M / step;
+  return dist.map((d) => (d <= grace ? 1 : Math.max(0, 1 - (d - grace) / fade) ** 1.5));
 }
 
 /** One seat layer: calm zones over its own colour range; "advised against" outlined and hatched. */

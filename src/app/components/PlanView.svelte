@@ -202,9 +202,12 @@
     const x = at.x <= centre ? at.x : 2 * centre - at.x;
     const i = Math.round((x - x0) / step);
     const j = Math.round((at.y - y0) / step);
-    if (i < 0 || j < 0 || i >= nx || j >= ny) return { value: null };
+    if (i < 0 || j < 0 || i >= nx || j >= ny) return { value: null, flagged: false };
     const v = values[j * nx + i]!;
-    return { value: Number.isFinite(v) ? v : null };
+    return {
+      value: Number.isFinite(v) ? v : null,
+      flagged: speakerGrid.redFlag?.[j * nx + i] ?? false,
+    };
   });
 
   function moveSpeakersToProbe() {
@@ -534,16 +537,6 @@
           {/if}
         {/if}
 
-        {#if speakerGrid && seat && !field}
-          <!-- Behind and beside the seat the speakers cannot stand: the map fades out there. -->
-          {@const noteY = seat.ears.y + 0.7}
-          {#if noteY < L - 0.3}
-            <text class="zone-note" x={px(W / 2)} y={py(noteY)} text-anchor="middle"
-              >{i18n.t('map.noSpeakers')}</text
-            >
-          {/if}
-        {/if}
-
         {#if seat && speakers.length === 2}
           {@const [a, b] = speakers}
           <polyline
@@ -835,6 +828,7 @@
                 word: i18n.t(`results.score.${scoreWord(speakerProbe.value)}`),
               })}
         </p>
+        {#if speakerProbe.flagged}<p class="spot-flag">{i18n.t('probe.speakersFlagged')}</p>{/if}
         {#if probe.pinned}
           <div class="spot-actions">
             {#if speakerProbe.value !== null}
@@ -1079,6 +1073,10 @@
   }
   .spot:has(.spot-actions) {
     pointer-events: auto;
+  }
+  .spot-flag {
+    margin: 0;
+    color: var(--caution);
   }
   .spot-score {
     margin: 0;

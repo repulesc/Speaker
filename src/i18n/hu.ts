@@ -535,6 +535,8 @@ export const hu: Messages = {
     bass: 'Basszus az ülőhelyeden',
     back: 'Vissza',
     notSet: 'Nincs megadva',
+    progress: '{n} / {total} kész',
+    status: { done: 'megadva', partial: 'részben megadva', todo: 'még nincs megadva' },
     none: 'Nincs',
   },
   survey: {
@@ -794,6 +796,8 @@ export const hu: Messages = {
     speakersTitle: 'Hangfalak itt',
     speakersHere: 'Hangfalak itt: {word}',
     speakersNot: 'Ide nem kerülhetnek a hangfalak.',
+    speakersFlagged:
+      'Nem ajánlott: nem jó sztereó elrendezés, vagy bútoron van. Ahol az ülőhely nincs a hangfalak előtt, a pontszám csak a basszusra vonatkozik.',
     moveSpeakers: 'Hangfalak ide',
     close: 'Bezárás',
     notAllowed: 'Ide nem kerülhet ülőhely: túl közel van egy hangfalhoz, vagy valami útban van.',

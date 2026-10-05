@@ -307,10 +307,15 @@
     border-top: 1px solid var(--grid);
   }
   .row-item label {
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: var(--text-md);
+    overflow-wrap: anywhere;
   }
   .select {
-    max-width: 60%;
+    flex: 0 1 62%;
+    min-width: 0;
+    max-width: 62%;
     min-height: 40px;
     padding: 0 28px 0 10px;
     border: 0;
@@ -354,6 +359,9 @@
   }
   .more[open] > :not(summary) {
     margin-bottom: 16px;
+  }
+  .step > * {
+    min-width: 0;
   }
   .step {
     display: grid;
