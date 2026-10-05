@@ -538,6 +538,14 @@ export const hu: Messages = {
     none: 'Nincs',
   },
   survey: {
+    start: 'Kezdjük',
+    welcome: {
+      title: 'Hová kerüljenek a hangfalaid?',
+      body: 'Válaszolj néhány gyors kérdésre a szobádról, és megmutatjuk, hová tedd a hangfalaidat és hová ülj, mielőtt bármi mást kérnénk.',
+      free: 'Ingyenes, regisztráció és e-mail-cím nélkül.',
+      private: 'A szobád adatai ezen az eszközön maradnak.',
+      short: 'Négy rövid kérdés, nagyjából egy perc.',
+    },
     step: '{n} / {total}',
     skip: 'Kihagyom',
     back: 'Vissza',

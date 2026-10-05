@@ -101,15 +101,20 @@ export function listenerHeatmap(
  */
 export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
   const ctx = scorer.ctx;
-  const centre = listener.x;
+  // The same centre line the search uses: the room's middle when the pair stays symmetric (the
+  // default), else the seat. The map must match where suggestions can actually go.
+  const centre = ctx.project.constraints.keepSymmetric ? ctx.room.W / 2 : listener.x;
   const step = heatmapStep(ctx);
   const xs = steps(step / 2, centre - step / 2, step);
-  const ys = steps(step / 2, ctx.room.L / 2, step);
+  // The whole length of the room: spots the speakers cannot take (behind or beside the seat, in
+  // furniture) have no score and fade out, so the map ends where the speakers' options end.
+  const ys = steps(step / 2, ctx.room.L - step / 2, step);
   const values = ys.flatMap((y) =>
     xs.map((x) => {
       const clearance = y - ctx.speaker.depth / 2;
       if (clearance < 0) return NaN;
       const speakers = speakerPair(ctx, centre, centre - x, clearance);
+      if (centre - x < ctx.speaker.width / 2) return NaN; // the two cabinets would overlap
       const placement = { speakers, listener };
       return isValidPlacement(ctx, placement) ? scorer.score(placement).score : NaN;
     }),

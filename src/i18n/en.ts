@@ -526,6 +526,14 @@ export const en = {
     none: 'None',
   },
   survey: {
+    start: 'Start',
+    welcome: {
+      title: 'Where should your speakers go?',
+      body: 'Answer a few quick questions about your room, and we show you where to put your speakers and where to sit, before anything else.',
+      free: 'Free, with no sign-up and no email.',
+      private: 'Your room stays on this device.',
+      short: 'Four short questions, about a minute.',
+    },
     step: '{n} of {total}',
     skip: 'Skip',
     back: 'Back',
