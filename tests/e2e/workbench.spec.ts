@@ -108,6 +108,7 @@ test('"speakers only": the seat stays, and room listening keeps 1.5 m', async ({
 
 test('the probe: click the map to see why, then move the seat there', async ({ page }) => {
   await withResults(page);
+  await page.getByLabel('Map layer').selectOption({ label: 'Overall' }); // the seat map
   const plan = page.getByRole('group', { name: 'Top view of the room' });
   const box = (await plan.boundingBox())!;
   const before = (await savedProject(page)).variants[0].listener.ears;
@@ -121,6 +122,22 @@ test('the probe: click the map to see why, then move the seat there', async ({ p
   const after = (await savedProject(page)).variants[0].listener;
   expect(after.ears.y).not.toBeCloseTo(before.y, 1);
   expect(after.certainty).toBe('estimated');
+});
+
+test('on the speaker map, a click offers to move the speakers there', async ({ page }) => {
+  await withResults(page);
+  await expect(page.getByLabel('Map layer')).toHaveValue('speakers'); // speakers only: the default
+  const plan = page.getByRole('group', { name: 'Top view of the room' });
+  const box = (await plan.boundingBox())!;
+  const before = (await savedProject(page)).variants[0].speakers.left.base;
+  // Upper left of the room, where the left speaker could stand.
+  await page.mouse.click(box.x + box.width * 0.33, box.y + box.height * 0.3);
+  const card = page.getByRole('region', { name: 'Speakers here' });
+  await expect(card).toContainText(/Speakers here: (Poor|Fair|Good|Very good)/);
+  await card.getByRole('button', { name: 'Move the speakers here' }).click();
+  await expect(card).toHaveCount(0);
+  const after = (await savedProject(page)).variants[0].speakers.left.base;
+  expect(Math.hypot(after.x - before.x, after.y - before.y)).toBeGreaterThan(0.05);
 });
 
 test('click a number on the map to type an exact value', async ({ page }) => {

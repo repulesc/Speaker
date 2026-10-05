@@ -5,6 +5,7 @@
   import { ui } from '../ui.svelte';
   import ModeBar from './ModeBar.svelte';
   import VariantTabs from './VariantTabs.svelte';
+  import { viewport } from '../viewport.svelte';
 
   /** One quiet toolbar over the room: setups, what the map shows, bass note, side view. */
   const level = (id: LayerId | 'speakers') =>
@@ -16,6 +17,29 @@
 </script>
 
 <div class="bar">
+  {#if viewport.wide}
+    <button
+      type="button"
+      class="panel-toggle"
+      aria-pressed={ui.panelHidden}
+      aria-label={i18n.t(ui.panelHidden ? 'map.showPanel' : 'map.hidePanel')}
+      title={i18n.t(ui.panelHidden ? 'map.showPanel' : 'map.hidePanel')}
+      onclick={() => (ui.panelHidden = !ui.panelHidden)}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect
+          x="3.5"
+          y="5"
+          width="17"
+          height="14"
+          rx="3"
+          stroke="currentColor"
+          stroke-width="1.6"
+        />
+        <path d="M9.5 5v14" stroke="currentColor" stroke-width="1.6" />
+      </svg>
+    </button>
+  {/if}
   <VariantTabs />
   <div class="tools">
     <label class="visually-hidden" for="map-layer">{i18n.t('map.layerLabel')}</label>
@@ -62,13 +86,28 @@
   .bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
     padding: 10px 16px 0;
+  }
+  .panel-toggle {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 9px;
+    background: none;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .panel-toggle:hover {
+    background: var(--fill);
   }
   .tools {
     display: flex;
     flex: none;
+    margin-left: auto;
     align-items: center;
     gap: 6px;
   }

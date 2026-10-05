@@ -31,15 +31,62 @@
   }
   let optionsOpen = $state(false);
 
+  /**
+   * The answer as one plain sentence: what to change, relative to the setup now (owner decision,
+   * docs/DESIGN_BRIEF_V4.md). Moves under 2 cm are left out; the numbers below stay exact.
+   */
+  const SAY_MIN = 0.02;
+  const sentence = $derived.by(() => {
+    if (!shown) return [];
+    const now = project.variants.find((v) => v.id === project.activeVariantId)!;
+    const lines: string[] = [];
+    const parts: string[] = [];
+    if (moves !== 'seat') {
+      const front = shown.speakers.left.base.y - now.speakers.left.base.y;
+      const spread =
+        shown.speakers.right.base.x -
+        shown.speakers.left.base.x -
+        (now.speakers.right.base.x - now.speakers.left.base.x);
+      if (Math.abs(front) >= SAY_MIN)
+        parts.push(
+          i18n.t(front > 0 ? 'suggest.say.away' : 'suggest.say.toward', {
+            d: fmt(Math.abs(front)),
+          }),
+        );
+      if (Math.abs(spread) >= SAY_MIN)
+        parts.push(
+          i18n.t(spread > 0 ? 'suggest.say.apart' : 'suggest.say.together', {
+            d: fmt(Math.abs(spread)),
+          }),
+        );
+      if (parts.length)
+        lines.push(
+          i18n.t('suggest.say.speakers', { parts: parts.join(i18n.t('suggest.say.and')) }),
+        );
+    }
+    if (moves !== 'speakers') {
+      const back = shown.listener.y - now.listener.ears.y;
+      if (Math.abs(back) >= SAY_MIN)
+        lines.push(
+          i18n.t(back > 0 ? 'suggest.say.seatBack' : 'suggest.say.seatForward', {
+            d: fmt(Math.abs(back)),
+          }),
+        );
+    }
+    return lines.length && move ? lines : [i18n.t('suggest.already')];
+  });
+
   const seatDistance = (c: NonNullable<typeof shown>) =>
     Math.hypot(c.speakers.left.base.x - c.listener.x, c.speakers.left.base.y - c.listener.y);
 
   function apply() {
     if (!shown) return;
     const placement = $state.snapshot(shown);
+    const now = $state.snapshot(project.variants.find((v) => v.id === project.activeVariantId)!);
+    ui.showChange({ speakers: now.speakers, listener: now.listener.ears });
     workspace.edit((p) => void applyCandidate(p, placement));
     ui.candidate = null;
-    showNotice('success', i18n.t('suggest.applied'));
+    showNotice('success', i18n.t('suggest.applied'), { undo: true });
   }
 
   // ── Bass at the suggested spot: a word and a small curve ────────────────────
@@ -95,7 +142,11 @@
 </script>
 
 <section class="suggest" aria-labelledby="suggest-title">
-  <h2 id="suggest-title">{i18n.t('suggest.title')}</h2>
+  <h2 id="suggest-title">
+    {i18n.t('suggest.title')}
+    {#if analysis.busy}<span class="spinner" role="status" aria-label={i18n.t('analysis.updating')}
+      ></span>{/if}
+  </h2>
 
   {#if !analysis.result}
     <p class="caption" role="status">{i18n.t('results.calculating')}</p>
@@ -106,6 +157,7 @@
   {:else if !shown}
     <p class="caption">{i18n.t('suggest.nothing')}</p>
   {:else}
+    <p class="say" data-testid="say">{sentence.join(' ')}</p>
     <dl class="answer" data-testid="suggestion">
       <div>
         <dt>{i18n.t('suggest.speakers')}</dt>
@@ -130,7 +182,7 @@
         </dd>
       </div>
       {#if bass}
-        <div>
+        <div class="bass-row">
           <dt>{i18n.t('suggest.bass')}</dt>
           <dd class="bass">
             <button type="button" class="spark" onclick={() => (ui.step = 'bass')}>
@@ -173,7 +225,6 @@
         })}
       </p>
     {/if}
-    {#if !move && ui.candidate === null}<p class="caption">{i18n.t('suggest.already')}</p>{/if}
 
     <div class="actions">
       <button type="button" class="btn primary" onclick={apply}>{i18n.t('suggest.apply')}</button>
@@ -263,7 +314,7 @@
   }
   .answer {
     display: grid;
-    gap: 12px;
+    gap: 6px;
     margin: 0;
   }
   .answer div {
@@ -275,11 +326,45 @@
     color: var(--ink-muted);
     font-size: var(--text-sm);
   }
-  dd {
-    margin: 0;
+  /* The sentence is the answer; the exact numbers sit below it, small (owner decision). */
+  .say {
+    margin: -4px 0 0;
     font-size: var(--text-md);
     font-weight: 600;
+    line-height: 1.45;
+  }
+  dd {
+    margin: 0;
+    font-size: var(--text-sm);
     line-height: 1.4;
+  }
+  .answer div:not(.bass-row) {
+    grid-template-columns: 6.5rem 1fr;
+    align-items: baseline;
+    gap: 8px;
+  }
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--grid-strong);
+    border-top-color: var(--accent-fill);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation-duration: 2.4s;
+    }
   }
   .spark {
     display: flex;

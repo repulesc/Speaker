@@ -157,7 +157,13 @@
 
 <!-- A rendering error must never leave a blank page (R0 audit): offer a way out instead. -->
 <svelte:boundary onerror={(error) => console.error(error)}>
-  <div class="app" data-sheet={sheet} inert={ui.survey} class:reveal={ui.reveal}>
+  <div
+    class="app"
+    data-sheet={sheet}
+    inert={ui.survey}
+    class:reveal={ui.reveal}
+    class:panel-hidden={ui.panelHidden && viewport.wide}
+  >
     <a class="skip visually-hidden" href="#panel">{i18n.t('app.skipToContent')}</a>
     <h1 class="visually-hidden">{APP_NAME}</h1>
 
@@ -200,7 +206,7 @@
             <section class="side" aria-label={i18n.t('plan.sideLabel')}><SideView /></section>
           {/if}
         {/if}
-        {#if analysis.busy}
+        {#if analysis.busy && largeRoom}
           <p class="busy" role="status">
             {i18n.t(largeRoom ? 'analysis.updatingLarge' : 'analysis.updating')}
           </p>
@@ -400,6 +406,10 @@
     }
     .canvas {
       flex: 1 1 0;
+    }
+    /* The panel can be hidden for a full-width room (owner decision, docs/DESIGN_BRIEF_V4.md). */
+    .app.panel-hidden .panel {
+      display: none;
     }
   }
 </style>

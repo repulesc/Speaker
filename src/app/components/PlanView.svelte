@@ -193,6 +193,31 @@
     ui.candidate = next;
   }
 
+  /** The speaker map's value under the pointer (the grid covers the left half; mirrored). */
+  const speakerProbe = $derived.by(() => {
+    const at = probe.point;
+    if (!at || !speakerGrid || !seat) return null;
+    const { x0, y0, step, nx, ny, values } = speakerGrid;
+    const centre = project.constraints.keepSymmetric ? W / 2 : seat.ears.x;
+    const x = at.x <= centre ? at.x : 2 * centre - at.x;
+    const i = Math.round((x - x0) / step);
+    const j = Math.round((at.y - y0) / step);
+    if (i < 0 || j < 0 || i >= nx || j >= ny) return { value: null };
+    const v = values[j * nx + i]!;
+    return { value: Number.isFinite(v) ? v : null };
+  });
+
+  function moveSpeakersToProbe() {
+    const at = probe.point;
+    if (!at || !seat) return;
+    const side =
+      at.x <= (project.constraints.keepSymmetric ? W / 2 : seat.ears.x) ? 'left' : 'right';
+    const now = $state.snapshot(variant!);
+    ui.showChange({ speakers: now.speakers, listener: now.listener.ears });
+    workspace.edit((p) => void moveSpeaker(p, side, at, { grid: false }));
+    probe.clear();
+  }
+
   function moveSeatToProbe() {
     const at = probe.point;
     if (!at) return;
@@ -552,6 +577,8 @@
           <g
             class="item speaker"
             class:selected={isSelected}
+            class:glide={ui.glide}
+            style="transform: translate({cx}px, {cy}px)"
             role="button"
             tabindex="0"
             aria-label={speakerLabel(s.side)}
@@ -573,25 +600,18 @@
               )}
           >
             <!-- Top-down cabinet; the light bar is the front (baffle), the dashed line its aim. -->
-            <g transform="rotate({angle} {cx} {cy})">
-              <line class="axis" x1={cx} y1={cy + d / 2} x2={cx} y2={cy + d / 2 + 26} />
+            <g transform="rotate({angle})">
+              <line class="axis" x1="0" y1={d / 2} x2="0" y2={d / 2 + 26} />
               <rect
                 class="body cabinet"
                 class:default={s.isDefault}
-                x={cx - w / 2}
-                y={cy - d / 2}
+                x={-w / 2}
+                y={-d / 2}
                 width={w}
                 height={d}
                 rx="3"
               />
-              <rect
-                class="baffle"
-                x={cx - w / 2 + 2.5}
-                y={cy + d / 2 - 4}
-                width={w - 5}
-                height="2"
-                rx="1"
-              />
+              <rect class="baffle" x={-w / 2 + 2.5} y={d / 2 - 4} width={w - 5} height="2" rx="1" />
             </g>
           </g>
         {/each}
@@ -603,6 +623,8 @@
           <g
             class="item seat-item"
             class:selected={isSelected}
+            class:glide={ui.glide}
+            style="transform: translate({sx}px, {sy}px)"
             role="button"
             tabindex="0"
             aria-label={seatLabel}
@@ -625,12 +647,33 @@
             <circle
               class="seat"
               class:default={seat.certainty === 'unknown'}
-              cx={sx}
-              cy={sy}
+              cx="0"
+              cy="0"
               r="11"
             />
             <!-- The listener faces the front wall (the speakers). -->
-            <path class="facing" d="M {sx - 4.5} {sy + 2} L {sx} {sy - 3} L {sx + 4.5} {sy + 2}" />
+            <path class="facing" d="M -4.5 2 L 0 -3 L 4.5 2" />
+          </g>
+        {/if}
+
+        {#if ui.before && !field}
+          <!-- Just applied: where things were, for a moment (owner decision: before/after). -->
+          <g class="before" aria-hidden="true">
+            {#each [ui.before.speakers.left, ui.before.speakers.right] as b, i (i)}
+              <rect
+                x={px(b.base.x) - (cab.w * frame.scale) / 2}
+                y={py(b.base.y) - (cab.d * frame.scale) / 2}
+                width={cab.w * frame.scale}
+                height={cab.d * frame.scale}
+                rx="3"
+              />
+            {/each}
+            <circle cx={px(ui.before.listener.x)} cy={py(ui.before.listener.y)} r="11" />
+            <text
+              x={px((ui.before.speakers.left.base.x + ui.before.speakers.right.base.x) / 2)}
+              y={py(ui.before.speakers.left.base.y) + 4}
+              text-anchor="middle">{i18n.t('map.before')}</text
+            >
           </g>
         {/if}
 
@@ -758,7 +801,40 @@
       </p>
     {/if}
 
-    {#if probeAt && !field}
+    {#if probe.point && speakerGrid && speakerProbe}
+      <!-- On the speaker map, pointing says how good the speakers would be there. -->
+      {@const at = { x: px(probe.point.x), y: py(probe.point.y) }}
+      <div
+        class="spot"
+        role="region"
+        aria-label={i18n.t('probe.speakersTitle')}
+        aria-live={probe.pinned ? 'polite' : 'off'}
+        style="left:{Math.max(8, Math.min(width - 228, at.x + 18))}px; top:{Math.max(
+          8,
+          Math.min(height - 120, at.y + 18),
+        )}px"
+      >
+        <p class="spot-score">
+          {speakerProbe.value === null
+            ? i18n.t('probe.speakersNot')
+            : i18n.t('probe.speakersHere', {
+                word: i18n.t(`results.score.${scoreWord(speakerProbe.value)}`),
+              })}
+        </p>
+        {#if probe.pinned}
+          <div class="spot-actions">
+            {#if speakerProbe.value !== null}
+              <button type="button" class="btn small primary" onclick={moveSpeakersToProbe}
+                >{i18n.t('probe.moveSpeakers')}</button
+              >
+            {/if}
+            <button type="button" class="btn small" onclick={() => probe.clear()}
+              >{i18n.t('probe.close')}</button
+            >
+          </div>
+        {/if}
+      </div>
+    {:else if probeAt && !field && !speakerGrid}
       <ProbeCard
         explanation={probeAt.explanation}
         {system}
@@ -938,6 +1014,75 @@
   @media (prefers-reduced-motion: reduce) {
     .plan :global([data-group]) {
       transition: none !important;
+    }
+  }
+  /* Applying a placement: the speakers and the seat glide, the old spots fade away. */
+  .glide {
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .before {
+    animation: before 3.5s ease forwards;
+    pointer-events: none;
+  }
+  .before rect,
+  .before circle {
+    fill: none;
+    stroke: var(--ink-muted);
+    stroke-width: 1.25;
+    stroke-dasharray: 3 3;
+  }
+  .before text {
+    fill: var(--ink-muted);
+    font-size: var(--text-xs);
+  }
+  @keyframes before {
+    0%,
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glide {
+      transition: none;
+    }
+  }
+  .spot {
+    position: absolute;
+    z-index: 3;
+    display: grid;
+    gap: 8px;
+    width: 220px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow);
+    font-size: var(--text-sm);
+    pointer-events: none;
+  }
+  .spot:has(.spot-actions) {
+    pointer-events: auto;
+  }
+  .spot-score {
+    margin: 0;
+    font-weight: 600;
+  }
+  .spot-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .spot .small {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: var(--text-sm);
+  }
+  @media (pointer: coarse) {
+    .spot .small {
+      min-height: 44px;
     }
   }
   .zone {
