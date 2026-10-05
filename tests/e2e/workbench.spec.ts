@@ -130,8 +130,15 @@ test('where you listen: a sofa is drawn on the map and judged at both ends', asy
   const project = await savedProject(page);
   expect(project.variants[0].listener.area).toBe('sofa');
   expect(project.constraints.listeningDistance).toBe('room');
-  // Back to one chair: no area.
+  // A bed is drawn at bed size: 1.6 m wide, 2 m long.
   await openSettings(page);
+  await page.getByRole('radio', { name: 'Bed' }).check({ force: true });
+  const bed = page.locator('[data-kind="bed"]');
+  const ratio = await bed.evaluate(
+    (el) => Number(el.getAttribute('width')) / Number(el.getAttribute('height')),
+  );
+  expect(ratio).toBeCloseTo(0.8, 2);
+  // Back to one chair: no area.
   await page.getByRole('radio', { name: 'Chair' }).check({ force: true });
   await expect(page.getByTestId('listening-area')).toHaveCount(0);
 });
