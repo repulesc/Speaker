@@ -33,6 +33,10 @@
     setSeatRange,
     speakerFileName,
     type SeatMode,
+    speakerTypeOf,
+    DISPERSIONS,
+    dispersionOf,
+    setDispersion,
   } from '../state/speaker';
   import { ui } from '../ui.svelte';
   import CertaintyChips from './CertaintyChips.svelte';
@@ -176,17 +180,7 @@
   const range = $derived<[number, number]>(constraints.listenerYRange ?? [0.5, 4.7]);
 
   /** The type whose typical values the speaker still has; none once the user changes them. */
-  const chosenType = $derived(
-    SPEAKER_TYPES.find(
-      (t) =>
-        Math.abs((speaker.dimensions.w.value ?? -1) - t.w) < 1e-6 &&
-        Math.abs((speaker.dimensions.h.value ?? -1) - t.h) < 1e-6 &&
-        Math.abs((speaker.dimensions.d.value ?? -1) - t.d) < 1e-6 &&
-        speaker.enclosure.value === t.enclosure &&
-        speaker.portLocation.value === t.portLocation &&
-        speaker.driverLayout.value === t.driverLayout,
-    )?.id ?? null,
-  );
+  const chosenType = $derived(speakerTypeOf(speaker)?.id ?? null);
 </script>
 
 <div class="step">
@@ -522,6 +516,28 @@
           </select>
           <p class="help">{i18n.t('speakers.layout.help')}</p>
         </div>
+
+        <fieldset>
+          <legend>{i18n.t('speakers.quick.dispersion.label')}</legend>
+          <p class="help">{i18n.t('speakers.quick.dispersion.help')}</p>
+          <div
+            class="seg dispersion"
+            role="radiogroup"
+            aria-label={i18n.t('speakers.quick.dispersion.label')}
+          >
+            {#each DISPERSIONS as d (d)}
+              <label>
+                <input
+                  type="radio"
+                  name="speaker-dispersion"
+                  checked={dispersionOf(speaker) === d}
+                  onchange={() => workspace.edit((p) => setDispersion(p, d))}
+                />
+                {i18n.t(`speakers.quick.dispersion.${d}`)}
+              </label>
+            {/each}
+          </div>
+        </fieldset>
 
         <fieldset>
           <legend>{i18n.t('speakers.controls.legend')}</legend>

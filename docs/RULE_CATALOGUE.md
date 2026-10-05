@@ -177,6 +177,7 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Sources:** [EVP], [KUT]. **(R0)** The constant is ✓ by derivation: the critical distance `r_c = sqrt(Q·A / (16π))` with Sabine's `A = 0.161·V / T60` gives `sqrt(0.161 / (16π)) = 0.0566`. (R5) Equation numbers are not needed: the derivation stands on its own.
 - **Limits:** diffuse-field assumption, rough in small rooms. Used only as context for goal "precise imaging" (G08 and scoring), never as a red flag on its own.
 - **Test case:** `V = 50`, `T60 = 0.4`, `Q = 2 → r_c = 0.90 m`. With `Q = 4 → 1.27 m`.
+- **(V5) Dispersion choice** (survey and Speakers page, 🟡 estimate): *Typical* keeps the speaker type's estimated `Q`; *Narrow* doubles it (+3 dB directivity index), *Wide* halves it (−3 dB), never below 1 (omnidirectional). So `Q` spans about 1–6. It reaches this rule only, never the score or the maps (`tests/engine/dispersion.test.ts`). The factor of two is a deliberately coarse step, not from a source: without measurements the app cannot tell a waveguide from a plain dome, and says so.
 
 ### P11 · Room proportion quality (information only)
 

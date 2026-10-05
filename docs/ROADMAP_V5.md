@@ -68,7 +68,9 @@ As built: presets only (Chair, Sofa, Desk, Bed), no dragging or resizing, so it 
 - Evidence: bass response varies over metres, so area-average/worst-case is physics 🔴 for bass; the
   stereo-angle part for off-centre seats is geometry 🔴. Do not claim a "sweet spot" size without a source.
 
-### D. Speaker choice in the survey (optional)
+### D. Speaker choice in the survey (optional) — DONE
+
+As built: the survey's speaker screen keeps the drawn type cards (they already carry size and cabinet: bookshelf, monitor, floorstander), and adds the bass port (sealed / front / back) and, folded under "More", dispersion (narrow / typical / wide). No separate size question: the type sets typical sizes, and exact sizes stay on the Speakers page. Dispersion only changes the critical-distance advice (docs/RULE_CATALOGUE.md P10). The plan below was the starting point.
 **Default:** an optional fifth survey screen "Your speakers" that can be skipped ("I don't know yet"):
 - Type: studio monitor / hi-fi / bookshelf / floorstander.
 - Size: small / medium / large (cabinet size, bass reach).

@@ -17,7 +17,7 @@
   import PlacementOptions from './PlacementOptions.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
   import { countDone, setupProgress } from '../state/progress';
-  import { SPEAKER_TYPES } from '../../engine/presets/speakerTypes';
+  import { speakerTypeOf } from '../state/speaker';
   import StepFurnishing from './StepFurnishing.svelte';
   import StepGoals from './StepGoals.svelte';
   import StepRoom from './StepRoom.svelte';
@@ -69,14 +69,7 @@
   const goalCount = $derived(Object.values(project.goals.weights).filter((w) => w).length);
 
   /** The speaker type the speaker still matches, by its typical size (as on the Speakers page). */
-  const speakerType = $derived(
-    SPEAKER_TYPES.find(
-      (t) =>
-        Math.abs((project.speaker.dimensions.w.value ?? -1) - t.w) < 1e-6 &&
-        Math.abs((project.speaker.dimensions.d.value ?? -1) - t.d) < 1e-6 &&
-        project.speaker.driverLayout.value === t.driverLayout,
-    ) ?? null,
-  );
+  const speakerType = $derived(speakerTypeOf(project.speaker));
   const wallsValue = $derived.by(() => {
     const walls = ['front', 'back', 'left', 'right'] as const;
     const first = project.surfaces.base.front;

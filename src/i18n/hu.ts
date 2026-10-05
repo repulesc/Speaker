@@ -296,6 +296,22 @@ export const hu: Messages = {
     remove: 'Eltávolítás',
   },
   speakers: {
+    quick: {
+      port: {
+        label: 'Basszusreflex nyílás',
+        sealed: 'Nincs (zárt)',
+        front: 'Elöl',
+        rear: 'Hátul',
+      },
+      more: 'Továbbiak (nem kötelező)',
+      dispersion: {
+        label: 'Milyen szélesen sugároznak',
+        help: 'Nem tudod? Hagyd a Szokásoson. Ez becslés, és csak a hallgatási távolságról szóló tanácsot változtatja meg, a térképet soha.',
+        narrow: 'Keskeny',
+        typical: 'Szokásos',
+        wide: 'Széles',
+      },
+    },
     title: 'Hangfalak',
     intro: 'Válaszd ki a legközelebbi típust, és add meg, hol állnak. A többi nem kötelező.',
     type: {

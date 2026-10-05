@@ -285,6 +285,22 @@ export const en = {
     remove: 'Remove',
   },
   speakers: {
+    quick: {
+      port: {
+        label: 'Bass port',
+        sealed: 'None (sealed)',
+        front: 'At the front',
+        rear: 'At the back',
+      },
+      more: 'More (optional)',
+      dispersion: {
+        label: 'How widely they spread sound',
+        help: 'Not sure? Leave it on Typical. It is an estimate and only changes advice about listening distance, never the map.',
+        narrow: 'Narrow',
+        typical: 'Typical',
+        wide: 'Wide',
+      },
+    },
     title: 'Speakers',
     intro: 'Pick the closest type and say where they stand. Everything else is optional.',
     type: {
