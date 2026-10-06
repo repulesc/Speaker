@@ -7,6 +7,7 @@ import {
   SPEAKER_SIZES,
   SPREADS,
 } from '../../engine/presets/speakerKinds';
+import { ASPECT_ANSWERS } from '../../engine/listening/check';
 import { SURFACE_PRESETS } from '../../engine/presets/surfaces';
 import { ROOM_LIMITS, SIZE_LIMITS } from './limits';
 import {
@@ -224,5 +225,33 @@ export const projectSchema: Check = obj({
       }),
       SIZE_LIMITS.notes,
     ),
+  ),
+  listening: optional(
+    obj({
+      answers: obj({
+        bass: optional(oneOf(ASPECT_ANSWERS.bass)),
+        evenness: optional(oneOf(ASPECT_ANSWERS.evenness)),
+        centre: optional(oneOf(ASPECT_ANSWERS.centre)),
+        width: optional(oneOf(ASPECT_ANSWERS.width)),
+        treble: optional(oneOf(ASPECT_ANSWERS.treble)),
+        clarity: optional(oneOf(ASPECT_ANSWERS.clarity)),
+      }),
+      overall: optional(oneOf([1, 2, 3, 4, 5])),
+      at: str(40),
+      setupKey: optional(str(SIZE_LIMITS.name)),
+      note: optional(text),
+      tries: arr(
+        obj({
+          id: str(SIZE_LIMITS.name),
+          experiment: str(SIZE_LIMITS.name),
+          at: str(40),
+          before: optional(
+            obj({ speakers: obj({ left: placement, right: placement }), listener: vec3 }),
+          ),
+          result: optional(oneOf(['better', 'same', 'worse'])),
+        }),
+        SIZE_LIMITS.notes,
+      ),
+    }),
   ),
 });

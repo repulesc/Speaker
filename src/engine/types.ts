@@ -5,6 +5,7 @@
  * y along the length (L) away from the front (speaker) wall, z up (H).
  */
 
+import type { Experiment, ListeningAnswers } from './listening/check';
 import type { SpeakerChoices } from './presets/speakerKinds';
 
 export type Certainty = 'measured' | 'estimated' | 'unknown';
@@ -287,6 +288,30 @@ export interface Project {
   variants: SetupVariant[];
   activeVariantId: string;
   notes: ListeningNote[];
+  /** The listening check and what was tried (V8, docs/ROADMAP_V8.md §4). Kept on the device. */
+  listening?: ListeningState;
+}
+
+/** One listening check: the answers, given for the setup as it stood (its fingerprint). */
+export interface ListeningState {
+  answers: ListeningAnswers;
+  /** Overall, against what you expect from these speakers: 1 (far below) to 5 (better). */
+  overall?: 1 | 2 | 3 | 4 | 5;
+  at: string;
+  /** The setup the answers were given for; after a change, the check asks again. */
+  setupKey?: string;
+  note?: string;
+  tries: ListeningTry[];
+}
+
+/** A change from the check that was tried, what it moved, and how it sounded. */
+export interface ListeningTry {
+  id: string;
+  experiment: string;
+  at: string;
+  /** Where things stood before, so "worse" can put them back. */
+  before?: { speakers: { left: SpeakerPlacement; right: SpeakerPlacement }; listener: Vec3 };
+  result?: 'better' | 'same' | 'worse';
 }
 
 // ── Engine output ─────────────────────────────────────────────────────────
@@ -511,6 +536,8 @@ export interface AnalysisOk extends AnalysisBase {
   advice: { treatment: Advice[]; settings: Advice[] };
   /** The 38 % rule and the rule of thirds against the seat map. */
   folk: FolkComparison[];
+  /** What to try for the latest listening check (V8), most likely to help first. */
+  listening: Experiment[];
   /** Seat map (goal score, speakers as now) and speaker map (seat as now). */
   heatmap: { listener: Grid; speakers: Grid };
   /** With a listening area: the current setup's score at each spot of it (nominal). */

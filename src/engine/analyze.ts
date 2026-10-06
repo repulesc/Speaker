@@ -5,6 +5,7 @@ import { RULES } from './rules';
 import { bassCurve } from './rules/P09-bass-response';
 import { advice } from './advice';
 import { folkComparison } from './folk';
+import { listeningExperiments } from './listening';
 import { fragility, resizedRooms } from './scoring/fragility';
 import { seatLayers, speakerHeatmap } from './scoring/heatmaps';
 import { areaPoints } from './scoring/area';
@@ -107,6 +108,9 @@ export function analyze(
     layers,
     advice: advice(ctx, placement, findings),
     folk: folkComparison(layers, ctx.room.L, placement.listener.x),
+    listening: project.listening
+      ? listeningExperiments(ctx, placement, findings, project.listening.answers)
+      : [],
     heatmap: {
       listener: { x0, y0, step, nx, ny, values: layers.values.goals },
       speakers: speakerHeatmap(scorer, placement.listener),
