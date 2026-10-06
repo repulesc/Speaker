@@ -50,7 +50,7 @@ export const en = {
     failed: 'Could not save: storage may be full. Use Export to keep your work.',
   },
   menu: {
-    legacy: 'Previous version (V7)',
+    legacy: 'Previous versions',
     image: 'Share as image',
     label: 'Menu',
     support: 'Support this project ☕',

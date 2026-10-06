@@ -54,7 +54,7 @@ export const hu: Messages = {
       'A mentés nem sikerült, lehet, hogy betelt a tárhely. Használd az exportálást, hogy ne vesszen el a munkád.',
   },
   menu: {
-    legacy: 'Előző változat (V7)',
+    legacy: 'Korábbi változatok',
     image: 'Megosztás képként',
     label: 'Menü',
     support: 'A projekt támogatása ☕',
