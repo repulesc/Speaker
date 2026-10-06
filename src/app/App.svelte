@@ -12,18 +12,12 @@
   import Survey from './components/Survey.svelte';
   import { goalOf } from './state/goal';
   import { APP_NAME } from './config';
-  import { downloadText } from './download';
   import { analysis, projectLabel, showNotice, workspace } from './session.svelte';
   import { ui } from './ui.svelte';
   import { roomSize } from './plan/placement';
   import { viewport } from './viewport.svelte';
   import { SIZE_LIMITS } from './state/limits';
-  import {
-    exportFileName,
-    parseProjectJson,
-    serializeProject,
-    type ReadResult,
-  } from './state/projectFile';
+  import type { ReadResult } from './state/projectFile';
   import { decodeShare, hasShare } from './state/share';
   import { makeShareImage, shareOrSave } from './shareImage';
   import { formatLength } from '../units/format';
@@ -31,7 +25,6 @@
   let sheet = $state<'peek' | 'half' | 'full'>('half');
   let shareDialog = $state<ReturnType<typeof ShareDialog>>();
   let aboutDialog = $state<ReturnType<typeof AboutDialog>>();
-  let fileInput = $state<HTMLInputElement>();
 
   // Recompute the analysis (in a worker, debounced) whenever anything in the project changes.
   $effect(() => {
@@ -109,15 +102,6 @@
     handleImport(result);
   }
 
-  async function onFile(event: Event) {
-    const input = event.currentTarget as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = '';
-    if (!file) return;
-    if (file.size > SIZE_LIMITS.fileBytes) return handleImport({ ok: false, reason: 'tooBig' });
-    handleImport(parseProjectJson(await file.text()));
-  }
-
   /** A clean picture of the room, its map and the answer, to post or send. */
   async function shareImage() {
     const plan = document.querySelector<HTMLElement>('section.plan');
@@ -134,11 +118,6 @@
     });
     if (!blob) return showNotice('error', i18n.t('image.failed'));
     await shareOrSave(blob, `${projectLabel(workspace.project.name)}.png`);
-  }
-
-  function exportFile() {
-    const project = $state.snapshot(workspace.project);
-    downloadText(exportFileName(project, i18n.t('project.untitled')), serializeProject(project));
   }
 
   // ── Lifecycle and shortcuts ──────────────────────────────────────────────
@@ -204,8 +183,6 @@
       <Sidebar
         onshare={() => shareDialog?.show()}
         onimage={shareImage}
-        onexport={exportFile}
-        onimport={() => fileInput?.click()}
         onprint={() => window.print()}
         onabout={() => aboutDialog?.show()}
       />
@@ -241,7 +218,6 @@
         <pre>{error instanceof Error ? error.message : String(error)}</pre>
       </details>
       <div class="actions">
-        <button type="button" class="btn" onclick={exportFile}>{i18n.t('crash.export')}</button>
         <button
           type="button"
           class="btn primary"
@@ -255,15 +231,6 @@
   {/snippet}
 </svelte:boundary>
 
-<input
-  bind:this={fileInput}
-  class="visually-hidden"
-  type="file"
-  accept=".json,application/json"
-  tabindex="-1"
-  aria-hidden="true"
-  onchange={onFile}
-/>
 {#if ui.survey}<Survey />{/if}
 <ShareDialog bind:this={shareDialog} />
 <AboutDialog bind:this={aboutDialog} />

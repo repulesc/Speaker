@@ -10,7 +10,6 @@ import {
 import { distance } from '../../src/engine/math/geometry';
 import { RULES } from '../../src/engine/rules';
 import { G04 } from '../../src/engine/rules/G04-stereo-angle';
-import { G10 } from '../../src/engine/rules/G10-objects';
 import { frontWallNullAtSeat, P04 } from '../../src/engine/rules/P04-boundary-interference';
 import { roomCharacter } from '../../src/engine/rules/P08-reverberation';
 import { bassBand } from '../../src/engine/rules/P09-bass-response';
@@ -23,14 +22,7 @@ import {
   speakerPair,
 } from '../../src/engine/scoring/search';
 import { scoringSettings } from '../../src/engine/scoring/settings';
-import type {
-  AnalysisOk,
-  Busyness,
-  Finding,
-  ObjectKind,
-  Placement,
-  Project,
-} from '../../src/engine/types';
+import type { AnalysisOk, Busyness, Finding, Placement, Project } from '../../src/engine/types';
 import { busyRoom } from '../fixtures/busy-room';
 import { estimated, genericSpeaker, makeProject } from '../fixtures/projects';
 
@@ -220,69 +212,6 @@ describe('H1 · cautions carry information', () => {
     expect(Number(above.params.frequency)).toBeGreaterThan(bassBand(ctx).range[1]);
     expect(above.severity).toBe('caution');
   });
-
-  it('G10: one finding per object, for the nearer speaker', () => {
-    const p = makeProject(); // cabinets span x 0.9–1.1 and 2.9–3.1
-    p.variants[0]!.objects = [
-      {
-        id: 'sideboard',
-        kind: 'cabinet',
-        position: { x: 1.15, y: 0.4, z: 0 },
-        size: { x: 1.7, y: 0.4, z: 0.5 },
-        hard: true,
-      },
-    ];
-    const ctx = buildContext(p)!;
-    const keys = G10.evaluate(ctx, currentPlacement(ctx)).map((f) => f.messageKey);
-    expect(keys).toEqual(['finding.G10.nearbyHard']);
-  });
-});
-
-describe('H2 · placing furniture never makes the room more reverberant', () => {
-  const kinds: ObjectKind[] = [
-    'bed',
-    'sofa',
-    'armchair',
-    'table',
-    'shelf',
-    'wardrobe',
-    'bookcase',
-    'plant',
-    'custom',
-  ];
-  const levels: Busyness[] = ['bare', 'some', 'busy', 'very-busy'];
-
-  it('the bed example: Room R with some furniture, then a bed is placed', () => {
-    const p = makeProject();
-    const before = buildContext(p)!.t60.mid;
-    p.variants[0]!.objects.push({
-      id: 'bed',
-      kind: 'bed',
-      position: { x: 1, y: 3, z: 0 },
-      size: { x: 1.6, y: 2, z: 0.5 },
-      hard: false,
-    });
-    expect(buildContext(p)!.t60.mid).toBeLessThanOrEqual(before);
-  });
-
-  it('property: adding any object never raises the estimate', () => {
-    fc.assert(
-      fc.property(fc.constantFrom(...kinds), fc.constantFrom(...levels), (kind, level) => {
-        const p = makeProject();
-        p.variants[0]!.busyness = estimated(level);
-        const before = buildContext(p)!.t60;
-        p.variants[0]!.objects.push({
-          id: 'o',
-          kind,
-          position: { x: 0.2, y: 3.5, z: 0 },
-          size: { x: 1, y: 1, z: 0.5 },
-          hard: false,
-        });
-        const after = buildContext(p)!.t60;
-        return after.mid <= before.mid && after.bass <= before.bass;
-      }),
-    );
-  });
 });
 
 describe('H3 · typical rooms read as typical rooms', () => {
@@ -424,38 +353,5 @@ describe('owner feedback after R5: listening distance', () => {
         ctx.speaker.minRearClearance - 1e-9,
       );
     }
-  });
-
-  it('the seat map has no holes behind or under furniture', () => {
-    const p = makeProject({ W: 3.6, L: 4.4, H: 2.6, standZ: 0 });
-    p.variants[0]!.objects = [
-      {
-        id: 'bed',
-        kind: 'bed',
-        position: { x: 0, y: 2.4, z: 0 },
-        size: { x: 1.6, y: 2, z: 0.5 },
-        hard: false,
-      },
-      {
-        id: 't',
-        kind: 'table',
-        position: { x: 1.8, y: 2.0, z: 0 },
-        size: { x: 1.2, y: 0.7, z: 0.75 },
-        hard: true,
-      },
-    ];
-    const a = analyze(p) as AnalysisOk;
-    const { values, nx, ny, x0, y0, step, redFlag } = a.layers;
-    const speakerY = buildContext(p)!.variant.speakers.left.base.y;
-    for (let j = 0; j < ny; j++) {
-      for (let i = 0; i < nx; i++) {
-        const y = y0 + j * step;
-        // Well in front of the speakers, every cell has a score.
-        if (y > speakerY + 1) expect(Number.isNaN(values.overall[j * nx + i]!)).toBe(false);
-      }
-    }
-    // Behind the table the seat is blocked: scored, but hatched.
-    const cell = Math.round((2.9 - y0) / step) * nx + Math.round((2.4 - x0) / step);
-    expect(redFlag[cell]).toBe(true);
   });
 });

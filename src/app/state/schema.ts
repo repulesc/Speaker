@@ -1,11 +1,9 @@
 import {
   DRIVER_CHOICES,
-  MADE_FOR,
   PLACED_ON,
   PORT_CHOICES,
   SPEAKER_KINDS,
   SPEAKER_SIZES,
-  SPREADS,
 } from '../../engine/presets/speakerKinds';
 import { ASPECT_ANSWERS } from '../../engine/listening/check';
 import { SURFACE_PRESETS } from '../../engine/presets/surfaces';
@@ -22,12 +20,15 @@ import {
   range,
   record,
   str,
-  tuple,
   vec3,
   type Check,
 } from './validate';
 
-/** Validator for `Project` schema version 1 (src/engine/types.ts, docs/DATA_MODEL.md). */
+/**
+ * Validator for `Project` schema version 1 (src/engine/types.ts, docs/DATA_MODEL.md). Fields that
+ * older versions wrote and V9 no longer uses (furniture, wall patches, notes…) are unknown keys:
+ * ignored here and removed by `tidy` (tidy.ts).
+ */
 
 const BOUNDARIES = ['front', 'back', 'left', 'right', 'floor', 'ceiling'] as const;
 const PRESETS = [...Object.keys(SURFACE_PRESETS), 'custom'] as const;
@@ -39,46 +40,12 @@ const GOALS = [
   'deep-bass',
   'low-volume-listening',
 ];
-const OBJECT_KINDS = [
-  'bed',
-  'sofa',
-  'armchair',
-  'table',
-  'cabinet',
-  'shelf',
-  'radiator',
-  'other-speaker',
-  'tv',
-  'desk',
-  'wardrobe',
-  'bookcase',
-  'piano',
-  'rack',
-  'plant',
-  'fireplace',
-  'lamp',
-  'subwoofer',
-  'custom',
-] as const;
-
 const text = str(SIZE_LIMITS.text);
-const bands: Check = tuple(num(0, 1), 6);
 
 const placement = obj({
   base: vec3,
   toeInDeg: num(-90, 90),
   certainty: optional(oneOf(CERTAINTY)),
-});
-
-const object = obj({
-  id: str(SIZE_LIMITS.name),
-  kind: oneOf(OBJECT_KINDS),
-  position: vec3,
-  size: obj({ x: num(0, 50), y: num(0, 50), z: num(0, 50) }),
-  absorptionRange: optional(range(num(0, 100))),
-  material: optional(oneOf(['hard', 'soft', 'absorbent'])),
-  hard: bool,
-  label: optional(str(SIZE_LIMITS.name)),
 });
 
 const variant = obj({
@@ -90,28 +57,7 @@ const variant = obj({
     certainty: oneOf(CERTAINTY),
     area: optional(oneOf(['sofa', 'desk', 'bed'])),
   }),
-  objects: distinctIds(arr(object, SIZE_LIMITS.objects)),
   busyness: optional(known(oneOf(['bare', 'some', 'busy', 'very-busy']))),
-  previous: optional(
-    obj({
-      key: str(SIZE_LIMITS.name),
-      score: num(0, 1),
-      at: str(40),
-      hidden: optional(bool),
-    }),
-  ),
-});
-
-const patch = obj({
-  id: str(SIZE_LIMITS.name),
-  boundary: oneOf(BOUNDARIES),
-  u: num(-100, 100),
-  v: num(-100, 100),
-  width: num(0, 100),
-  height: num(0, 100),
-  preset: oneOf(PRESETS),
-  customAbsorption: optional(bands),
-  label: optional(str(SIZE_LIMITS.name)),
 });
 
 /** A tone control's range, e.g. −3…+3 dB in 0.5 dB steps. */
@@ -150,8 +96,6 @@ export const speakerSchema: Check = obj({
       size: optional(oneOf(SPEAKER_SIZES)),
       drivers: optional(oneOf(DRIVER_CHOICES)),
       port: optional(oneOf(PORT_CHOICES)),
-      madeFor: optional(oneOf(MADE_FOR)),
-      spread: optional(oneOf(SPREADS)),
       placedOn: optional(oneOf(PLACED_ON)),
     }),
   ),
@@ -176,7 +120,6 @@ export const projectSchema: Check = obj({
     width: known(num(ROOM_LIMITS.width.min, ROOM_LIMITS.width.max)),
     length: known(num(ROOM_LIMITS.length.min, ROOM_LIMITS.length.max)),
     height: known(num(ROOM_LIMITS.height.min, ROOM_LIMITS.height.max)),
-    construction: oneOf(['solid', 'lightweight', 'unknown']),
     temperatureC: known(num(-20, 50)),
     outOfModel: arr(
       oneOf([
@@ -192,7 +135,6 @@ export const projectSchema: Check = obj({
   surfaces: obj({
     base: record(oneOf(PRESETS), BOUNDARIES, { complete: true }),
     baseCertainty: record(oneOf(CERTAINTY), BOUNDARIES, { complete: true }),
-    patches: distinctIds(arr(patch, SIZE_LIMITS.patches)),
   }),
   speaker: speakerSchema,
   constraints: obj({
@@ -209,23 +151,6 @@ export const projectSchema: Check = obj({
   goals: obj({ weights: record(oneOf([0, 1, 2]), GOALS) }),
   variants: distinctIds(arr(variant, SIZE_LIMITS.variants, 1)),
   activeVariantId: str(SIZE_LIMITS.name),
-  notes: distinctIds(
-    arr(
-      obj({
-        id: str(SIZE_LIMITS.name),
-        createdAt: str(40),
-        variantId: str(SIZE_LIMITS.name),
-        symptoms: arr(oneOf(['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07']), 7),
-        rating: optional(oneOf([1, 2, 3, 4, 5])),
-        listenedHours: optional(num(0, 10_000)),
-        text: optional(text),
-        experimentId: optional(str(SIZE_LIMITS.name)),
-        setupKey: optional(str(SIZE_LIMITS.name)),
-        about: optional(oneOf(['position', 'before', 'speakers'])),
-      }),
-      SIZE_LIMITS.notes,
-    ),
-  ),
   listening: optional(
     obj({
       answers: obj({
@@ -236,10 +161,7 @@ export const projectSchema: Check = obj({
         treble: optional(oneOf(ASPECT_ANSWERS.treble)),
         clarity: optional(oneOf(ASPECT_ANSWERS.clarity)),
       }),
-      overall: optional(oneOf([1, 2, 3, 4, 5])),
       at: str(40),
-      setupKey: optional(str(SIZE_LIMITS.name)),
-      note: optional(text),
       tries: arr(
         obj({
           id: str(SIZE_LIMITS.name),
@@ -252,7 +174,7 @@ export const projectSchema: Check = obj({
           ),
           result: optional(oneOf(['better', 'same', 'worse'])),
         }),
-        SIZE_LIMITS.notes,
+        SIZE_LIMITS.tries,
       ),
     }),
   ),

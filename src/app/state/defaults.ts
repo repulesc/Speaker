@@ -8,7 +8,7 @@ import type {
   SetupVariant,
   SpeakerProfile,
 } from '../../engine/types';
-import { DEFAULT_BASE } from '../plan/patches';
+import { DEFAULT_BASE } from './surfaces';
 import { newId } from './ids';
 
 /** How far suggested speaker moves may go, by default (metres around each speaker). */
@@ -92,7 +92,6 @@ function emptyVariant(speaker: SpeakerProfile): SetupVariant {
     name: '',
     speakers: { left: placed.left, right: placed.right },
     listener: { ears: placed.ears, certainty: 'unknown' },
-    objects: [],
     busyness: unknownValue(),
   };
 }
@@ -117,7 +116,6 @@ export function createDefaultProject(options: {
       width: unknownValue(),
       length: unknownValue(),
       height: unknownValue(),
-      construction: 'unknown',
       temperatureC: unknownValue(),
       outOfModel: [],
     },
@@ -127,7 +125,6 @@ export function createDefaultProject(options: {
         BoundaryId,
         Certainty
       >,
-      patches: [],
     },
     speaker,
     constraints: {
@@ -144,6 +141,5 @@ export function createDefaultProject(options: {
     goals: { weights: {} },
     variants: [variant],
     activeVariantId: variant.id,
-    notes: [],
   };
 }

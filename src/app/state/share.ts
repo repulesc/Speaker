@@ -30,10 +30,9 @@ function fromBase64Url(text: string): Uint8Array {
 }
 
 /** The fragment (including `#p=`) for a project. */
-export async function encodeShare(project: Project, options: { includeNotes?: boolean } = {}) {
-  const shared = options.includeNotes ? project : { ...project, notes: [] };
+export async function encodeShare(project: Project) {
   const bytes = await pump(
-    new TextEncoder().encode(JSON.stringify(shared)),
+    new TextEncoder().encode(JSON.stringify(project)),
     new CompressionStream('deflate-raw'),
   );
   return PREFIX + toBase64Url(bytes);

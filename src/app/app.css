@@ -278,6 +278,112 @@ p {
   }
 }
 
+/*
+ * The form system (V9, docs/ROADMAP_V9.md §2): a group is a titled section; selects are ruled
+ * rows (.rows of SelectRow), short exclusive choices are segments, on/off is a checkbox (.check),
+ * independent preferences are chips (.chip). Optional detail sits in one fold (.fold), never nested.
+ */
+.form-group {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.field-label {
+  font-size: var(--text-md);
+}
+.rows {
+  display: grid;
+  min-width: 0;
+  border-top: 1px solid var(--grid);
+}
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 32px;
+  padding-top: 6px;
+  color: var(--ink);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+.check input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--accent-fill);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--grid-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.chip[aria-pressed='true'] {
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+.fold {
+  border-top: 1px solid var(--grid);
+}
+.fold > summary {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  padding: 12px 0 0;
+  cursor: pointer;
+  list-style: none;
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold-title {
+  color: var(--accent);
+  font-weight: 600;
+}
+.fold-title::after {
+  content: '›';
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform 0.15s ease;
+}
+.fold[open] .fold-title::after {
+  transform: rotate(90deg);
+}
+.fold-hint {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.fold-body {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding-top: 16px;
+}
+.help {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+@media (pointer: coarse), (max-width: 1023px) {
+  .check,
+  .chip {
+    min-height: 44px;
+  }
+}
+
 /* Grouped list rows, as in the platform settings apps. */
 .list {
   display: grid;

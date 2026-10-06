@@ -66,7 +66,7 @@ export function seatLayers(
       const placement = { speakers, listener: { x, y, z: earZ } };
       placements.push(placement);
       const scorable = seatScorable(ctx, placement);
-      // Hatched: a seat the app advises against (blocked, inside furniture, red-flagged), still
+      // Hatched: a seat the app advises against (red-flagged), still
       // scored so the map has no holes. Distance is a preference, so it is not hatched.
       redFlag.push(
         scorable &&
@@ -127,7 +127,8 @@ export function listenerHeatmap(
  * Score for the left speaker at every grid cell of the left half (right speaker mirrored about
  * the room's middle or the seat), listener fixed. The UI mirrors the grid for the right half.
  *
- * Every spot is either a real candidate (scored, hatched if furniture is in the way) or "not a
+ * Every spot is either a real candidate (scored, hatched where the search would never put a
+ * speaker: a corner, a stereo angle outside 35–90°) or "not a
  * stereo spot" (`inert`, no score): beside, behind or too close to the seat, or not fitting in the
  * room. Before V7 those spots showed the bass part of the score, which read as "good here" (owner
  * feedback, docs/ROADMAP_V7.md); now the map draws them in one neutral tone.
@@ -140,9 +141,6 @@ export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
   const step = heatmapStep(ctx);
   const xs = steps(step / 2, centre - step / 2, step);
   const ys = steps(step / 2, ctx.room.L - step / 2, step);
-  // Furniture does not hide the map: a spot where a speaker would stand on furniture is scored
-  // and hatched as "advised against", like the seat map.
-  const bare = { ...ctx, objects: [] };
   const redFlag: boolean[] = [];
   const inert: boolean[] = [];
   const placements: Placement[] = [];
@@ -152,12 +150,12 @@ export function speakerHeatmap(scorer: Scorer, listener: Vec3): Grid {
       const placement = { speakers: speakerPair(ctx, centre, centre - x, clearance), listener };
       placements.push(placement);
       const apart = clearance >= 0 && centre - x >= ctx.speaker.width / 2; // cabinets do not overlap
-      if (!apart || !isValidPlacement(bare, placement)) {
+      if (!apart || !isValidPlacement(ctx, placement)) {
         redFlag.push(false);
         inert.push(true);
         return NaN;
       }
-      redFlag.push(!isValidPlacement(ctx, placement));
+      redFlag.push(!avoidsRedFlags(ctx, placement, { seat: false, speakers: true }));
       inert.push(false);
       return scorer.score(placement).score;
     }),

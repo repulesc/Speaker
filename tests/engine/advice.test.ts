@@ -150,15 +150,8 @@ describe('speaker settings', () => {
   it('D06: desk mode when the speakers stand on a desk, if the speaker offers it', () => {
     const p = makeProject();
     p.speaker.dsp.placementModes = ['stand', 'desk'];
-    p.variants[0]!.objects = [
-      {
-        id: 'desk',
-        kind: 'desk',
-        position: { x: 0.5, y: 0.3, z: 0 },
-        size: { x: 3, y: 0.7, z: 0.7 },
-        hard: true,
-      },
-    ];
+    expect(keys(adviceFor(p).settings)).toContain('D06.stand');
+    p.speaker.choices = { placedOn: 'desk' };
     expect(keys(adviceFor(p).settings)).toContain('D06.desk');
   });
 });

@@ -15,10 +15,6 @@ export type SpeakerKind = 'bookshelf' | 'floorstander' | 'monitor' | 'desktop' |
 export type SpeakerSize = 'small' | 'medium' | 'large';
 export type DriverChoice = 'two-way' | 'three-way' | 'coaxial';
 export type PortChoice = 'sealed' | 'front' | 'rear' | 'down' | 'side';
-/** Only a starting suggestion for where you listen, never physics (no source says otherwise). */
-export type MadeFor = 'hifi' | 'studio';
-/** How widely the speaker spreads sound: changes only the listening-distance advice (P10). */
-export type Spread = 'narrow' | 'typical' | 'wide';
 export type PlacedOn = 'floor' | 'stand' | 'desk';
 
 export interface SpeakerChoices {
@@ -26,8 +22,6 @@ export interface SpeakerChoices {
   size?: SpeakerSize;
   drivers?: DriverChoice;
   port?: PortChoice;
-  madeFor?: MadeFor;
-  spread?: Spread;
   placedOn?: PlacedOn;
 }
 
@@ -41,8 +35,6 @@ export const SPEAKER_KINDS: readonly SpeakerKind[] = [
 export const SPEAKER_SIZES: readonly SpeakerSize[] = ['small', 'medium', 'large'];
 export const DRIVER_CHOICES: readonly DriverChoice[] = ['two-way', 'three-way', 'coaxial'];
 export const PORT_CHOICES: readonly PortChoice[] = ['sealed', 'front', 'rear', 'down', 'side'];
-export const MADE_FOR: readonly MadeFor[] = ['hifi', 'studio'];
-export const SPREADS: readonly Spread[] = ['narrow', 'typical', 'wide'];
 export const PLACED_ON: readonly PlacedOn[] = ['floor', 'stand', 'desk'];
 
 /** Cabinet width, height, depth (m) and the −6 dB bass point (Hz), per kind and size. */
@@ -129,8 +121,6 @@ const GENERIC_SIZE: SpeakerSize = 'medium';
 
 /** A desk top, typical height (m, 🟡). */
 export const DESK_HEIGHT = 0.75;
-/** Directivity factor relative to the kind's typical one: ±3 dB directivity index (🟡). */
-const SPREAD_FACTOR: Record<Spread, number> = { narrow: 2, typical: 1, wide: 0.5 };
 
 export interface SpeakerValues {
   w: number;
@@ -183,13 +173,8 @@ export function speakerValues(choices: SpeakerChoices): SpeakerValues {
     // A sealed box rolls off more gently but starts higher; the category value is kept (🟡).
     lowFrequencyMinus6dB: box.f6,
     omniBelowHz: preset.omniBelowHz,
-    qMid: preset.qMid * SPREAD_FACTOR[choices.spread ?? 'typical'],
+    qMid: preset.qMid,
   };
-}
-
-/** The kind's typical directivity factor, the reference for "narrow", "typical" and "wide". */
-export function typicalQ(choices: SpeakerChoices): number {
-  return KIND_PRESETS[choices.kind ?? GENERIC_KIND].qMid;
 }
 
 /** Where the speakers stand when the answer is not given: the kind's usual place. */

@@ -1,5 +1,5 @@
 import type { AnalysisContext } from './context';
-import { surfaceDataConfidence } from './presets/surfaces';
+import { constructionOf, surfaceDataConfidence } from './presets/surfaces';
 import { firstReflections, isNearSide } from './rules/P06-reflections';
 import type { Certainty, ConfidenceReport, OutputId, Project } from './types';
 
@@ -39,10 +39,7 @@ function inputs(project: Project): InputSpec[] {
     boundaries.reduce((sum, c) => sum + (c === 'unknown' ? FACTOR.unknown : FACTOR.estimated), 0) /
     Math.max(1, boundaries.length);
   const busyness = variant?.busyness?.certainty ?? 'unknown';
-  const furnishingFactor =
-    variant && (variant.objects.length > 0 || busyness !== 'unknown')
-      ? FACTOR.estimated
-      : FACTOR.unknown;
+  const furnishingFactor = busyness !== 'unknown' ? FACTOR.estimated : FACTOR.unknown;
 
   return [
     {
@@ -62,7 +59,7 @@ function inputs(project: Project): InputSpec[] {
     },
     {
       path: 'room.construction',
-      factor: categorical(room.construction !== 'unknown'),
+      factor: categorical(constructionOf(surfaces) !== 'unknown'),
       uses: { bass: 2 },
     },
     {
@@ -153,7 +150,7 @@ function capsFor(project: Project, ctx: AnalysisContext | null): Cap[] {
   } else if (project.room.outOfModel.length > 0) {
     caps.push({ reason: 'outOfModel', output: 'bass', cap: 0.5 });
   }
-  if (project.room.construction === 'lightweight') {
+  if (constructionOf(project.surfaces) === 'lightweight') {
     caps.push({ reason: 'lightweightWalls', output: 'bass', cap: 0.6 });
   }
   if (ctx) {

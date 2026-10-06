@@ -1,4 +1,10 @@
-import type { BandValues, SurfaceClass, SurfacePresetId } from '../types';
+import type {
+  BandValues,
+  ConstructionType,
+  SurfaceClass,
+  SurfacePresetId,
+  Surfaces,
+} from '../types';
 
 export interface SurfacePreset {
   absorption: BandValues;
@@ -100,4 +106,23 @@ export function surfaceClass(preset: SurfacePresetId, custom?: BandValues): Surf
 
 export function surfaceDataConfidence(preset: SurfacePresetId): 'medium' | 'low' {
   return preset === 'custom' ? 'medium' : SURFACE_PRESETS[preset].dataConfidence;
+}
+
+const WALLS = ['front', 'back', 'left', 'right'] as const;
+const LIGHTWEIGHT: readonly SurfacePresetId[] = ['gypsum-stud', 'plaster-lath'];
+const SOLID: readonly SurfacePresetId[] = ['plaster-concrete', 'plaster-brick'];
+
+/**
+ * Solid or lightweight walls, read from the wall material the user chose (V9: no longer asked as a
+ * separate question). Lightweight walls let bass through, so the bass predictions are less sure.
+ * Unknown until the walls are described; otherwise what most of them are.
+ */
+export function constructionOf(surfaces: Surfaces): ConstructionType {
+  const walls = WALLS.filter((w) => surfaces.baseCertainty[w] !== 'unknown');
+  if (walls.length === 0) return 'unknown';
+  const count = (kinds: readonly SurfacePresetId[]) =>
+    walls.filter((w) => kinds.includes(surfaces.base[w])).length;
+  if (count(LIGHTWEIGHT) > walls.length / 2) return 'lightweight';
+  if (count(SOLID) > walls.length / 2) return 'solid';
+  return 'unknown';
 }

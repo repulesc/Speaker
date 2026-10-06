@@ -77,7 +77,6 @@ export function makeProject(o: ProjectOptions = {}): Project {
       width: measured(W),
       length: measured(L),
       height: measured(H),
-      construction: 'solid',
       temperatureC: unknown(),
       outOfModel: [],
     },
@@ -87,7 +86,6 @@ export function makeProject(o: ProjectOptions = {}): Project {
         BoundaryId,
         'estimated'
       >,
-      patches: [],
     },
     speaker,
     constraints: {
@@ -110,11 +108,9 @@ export function makeProject(o: ProjectOptions = {}): Project {
           ears: { x: W / 2, y: o.listenerY ?? 3.2, z: o.earZ ?? 1.1 },
           certainty: 'estimated',
         },
-        objects: [],
         busyness: estimated('some'),
       },
     ],
     activeVariantId: 'v1',
-    notes: [],
   };
 }

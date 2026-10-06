@@ -39,7 +39,6 @@
     variant && known ? (mirrored ? (['left'] as const) : (['left', 'right'] as const)) : [],
   );
   const seat = $derived(variant && known ? variant.listener : null);
-  const objects = $derived(variant && known ? variant.objects : []);
   const selected = $derived(ui.selection);
 
   const world = (clientX: number, clientY: number) => {
@@ -84,17 +83,6 @@
 <div class="side" bind:clientWidth={width} bind:clientHeight={height}>
   {#if width > 0 && height > 0}
     <svg bind:this={svg} {width} {height} role="group" aria-label={i18n.t('plan.sideLabel')}>
-      <defs>
-        <pattern
-          id="hatch-side"
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)"
-        >
-          <line x1="0" y1="0" x2="0" y2="6" class="hatch" />
-        </pattern>
-      </defs>
       <rect
         class="room"
         class:placeholder={!known}
@@ -103,22 +91,8 @@
         width={L * frame.scale}
         height={H * frame.scale}
       />
-      <line
-        class="floor"
-        class:active={ui.step === 'surfaces' && ui.boundary === 'floor'}
-        x1={px(0)}
-        y1={py(0)}
-        x2={px(L)}
-        y2={py(0)}
-      />
-      <line
-        class="ceiling"
-        class:active={ui.step === 'surfaces' && ui.boundary === 'ceiling'}
-        x1={px(0)}
-        y1={py(H)}
-        x2={px(L)}
-        y2={py(H)}
-      />
+      <line class="floor" x1={px(0)} y1={py(0)} x2={px(L)} y2={py(0)} />
+      <line class="ceiling" x1={px(0)} y1={py(H)} x2={px(L)} y2={py(H)} />
       <line class="front" x1={px(0)} y1={py(0)} x2={px(0)} y2={py(H)} />
       <text class="label" x={px(0)} y={py(H) - 10}>{i18n.t('plan.frontWall')}</text>
 
@@ -140,26 +114,6 @@
             >
           {/if}
         </g>
-
-        {#each objects as o (o.id)}
-          <rect
-            class="object"
-            x={px(o.position.y)}
-            y={py(o.position.z + o.size.z)}
-            width={o.size.y * frame.scale}
-            height={o.size.z * frame.scale}
-          />
-          {#if o.hard}
-            <rect
-              x={px(o.position.y)}
-              y={py(o.position.z + o.size.z)}
-              width={o.size.y * frame.scale}
-              height={o.size.z * frame.scale}
-              fill="url(#hatch-side)"
-              class="no-pointer"
-            />
-          {/if}
-        {/each}
 
         {#if seat && variant}
           <line
@@ -289,11 +243,6 @@
     stroke-width: 4;
     stroke-linecap: square;
   }
-  .floor.active,
-  .ceiling.active {
-    stroke: var(--accent);
-    stroke-width: 5;
-  }
   .label,
   .dim text {
     fill: var(--ink-muted);
@@ -303,19 +252,6 @@
   .dim line {
     stroke: var(--ink-muted);
     stroke-width: 0.75;
-  }
-  .object {
-    fill: var(--surface);
-    stroke: var(--ink-muted);
-    stroke-width: 1;
-  }
-  .hatch {
-    stroke: var(--ink-muted);
-    stroke-width: 1;
-    opacity: 0.45;
-  }
-  .no-pointer {
-    pointer-events: none;
   }
   .sight {
     stroke: var(--line);

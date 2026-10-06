@@ -9,11 +9,10 @@ import type { ListeningState, ListeningTry, Project } from '../../engine/types';
 import { activeVariant } from '../plan/placement';
 import { newId, nowIso } from '../state/ids';
 import { SIZE_LIMITS } from '../state/limits';
-import { setupKey } from './notes';
 
 /**
- * The listening check in the project (docs/ROADMAP_V8.md §4): the answers, an overall face, a
- * note, and the changes tried with how they sounded. Every edit goes through the workspace, so
+ * The listening check in the project (docs/ROADMAP_V8.md §4, V9 §5): the answers, and the changes
+ * tried with how they sounded. Every edit goes through the workspace, so
  * Undo works as everywhere else; "Put it back" restores the exact positions from before a try.
  */
 function state(project: Project): ListeningState {
@@ -21,9 +20,8 @@ function state(project: Project): ListeningState {
   return project.listening;
 }
 
-function touch(project: Project, s: ListeningState) {
+function touch(s: ListeningState) {
   s.at = nowIso();
-  s.setupKey = setupKey(activeVariant(project));
 }
 
 /** One answer; the same answer again (or undefined) clears it. */
@@ -35,21 +33,7 @@ export function setAnswer<A extends Aspect>(
   const s = state(project);
   if (value === undefined || s.answers[aspect] === value) delete s.answers[aspect];
   else s.answers[aspect] = value;
-  touch(project, s);
-}
-
-export function setOverall(project: Project, value: ListeningState['overall']): void {
-  const s = state(project);
-  if (value === undefined || s.overall === value) delete s.overall;
-  else s.overall = value;
-  touch(project, s);
-}
-
-export function setNote(project: Project, text: string): void {
-  const s = state(project);
-  const t = text.trim().slice(0, SIZE_LIMITS.text);
-  if (t) s.note = t;
-  else delete s.note;
+  touch(s);
 }
 
 /**
@@ -78,7 +62,7 @@ export function tryExperiment(project: Project, experiment: Experiment): boolean
     variant.listener.ears = { ...moved.listener };
   }
   s.tries.push(entry);
-  if (s.tries.length > SIZE_LIMITS.notes) s.tries.shift();
+  if (s.tries.length > SIZE_LIMITS.tries) s.tries.shift();
   return true;
 }
 

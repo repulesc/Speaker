@@ -1,4 +1,5 @@
-import { BUSYNESS_ABSORPTION_PER_M2, objectAbsorption } from './presets/objects';
+import { BUSYNESS_ABSORPTION_PER_M2 } from './presets/furnishing';
+import type { Box } from './math/geometry';
 import { DEFAULTS } from './presets/defaults';
 import { roomModes } from './rules/P02-room-modes';
 import { speedOfSound } from './rules/P01-speed-of-sound';
@@ -13,7 +14,6 @@ import type {
   Placement,
   PortLocation,
   Project,
-  RoomObject,
   SetupVariant,
   SpeakerPlacement,
   Vec3,
@@ -53,7 +53,6 @@ export interface AnalysisContext {
   c: number;
   speaker: ResolvedSpeaker;
   variant: SetupVariant;
-  objects: RoomObject[];
   t60: ReverbResult;
   schroeder: { value: number; low: number; high: number };
   /** Modes up to `modeLimitHz`, sorted by frequency (excludes the 0 Hz term). */
@@ -95,21 +94,12 @@ export function resolveSpeaker(project: Project): ResolvedSpeaker {
 }
 
 /**
- * Furnishing absorption range (m² sabins, mid bands). The busy-ness estimate ("some" when not
- * given) scales with the floor area. Placed furniture is usually only part of what is in the
- * room, so it can raise the estimate but never lower it: adding a sofa must not make the room
- * sound more reverberant.
+ * Furnishing absorption range (m² sabins, mid bands): the "how full" estimate ("some" when not
+ * given), scaled with the floor area.
  */
 export function furnishingAbsorption(variant: SetupVariant, floorArea: number): [number, number] {
   const [lo, hi] = BUSYNESS_ABSORPTION_PER_M2[variant.busyness?.value ?? 'some'];
-  const placed = variant.objects.reduce<[number, number]>(
-    (sum, o) => {
-      const [a, b] = objectAbsorption(o);
-      return [sum[0] + a, sum[1] + b];
-    },
-    [0, 0],
-  );
-  return [Math.max(lo * floorArea, placed[0]), Math.max(hi * floorArea, placed[1])];
+  return [lo * floorArea, hi * floorArea];
 }
 
 export function activeVariant(project: Project): SetupVariant {
@@ -140,7 +130,7 @@ export function buildContext(
       : speedOfSound(temperature.value);
 
   const variant = activeVariant(project);
-  // Furniture does not change when the room-size perturbations (robustness runs) do.
+  // The furnishing does not change when the room-size perturbations (robustness runs) do.
   const t60 = reverberation(
     room,
     project.surfaces,
@@ -161,7 +151,6 @@ export function buildContext(
     c,
     speaker: resolveSpeaker(project),
     variant,
-    objects: variant.objects,
     t60,
     schroeder,
     modes: roomModes(room, c, modeLimitHz),
@@ -181,6 +170,15 @@ export function acousticCentre(p: SpeakerPlacement, s: ResolvedSpeaker): Vec3 {
 /** Low-frequency acoustic centre: woofer centre, on the front baffle. */
 export function wooferCentre(p: SpeakerPlacement, s: ResolvedSpeaker): Vec3 {
   return { x: p.base.x, y: p.base.y + s.depth / 2, z: p.base.z + s.wooferHeight };
+}
+
+/** The cabinet as a box in the room (it faces +y). */
+export function cabinetBox(p: SpeakerPlacement, ctx: AnalysisContext): Box {
+  const { width, depth, height } = ctx.speaker;
+  return {
+    min: { x: p.base.x - width / 2, y: p.base.y - depth / 2, z: p.base.z },
+    max: { x: p.base.x + width / 2, y: p.base.y + depth / 2, z: p.base.z + height },
+  };
 }
 
 /** Distance from the rear panel to the front wall. */

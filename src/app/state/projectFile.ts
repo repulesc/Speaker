@@ -1,6 +1,7 @@
 import type { Project } from '../../engine/types';
 import { SIZE_LIMITS } from './limits';
 import { projectSchema } from './schema';
+import { tidy } from './tidy';
 import { isRecord } from './validate';
 
 /** Current persisted schema. Each older version needs a migration to the next (see MIGRATIONS). */
@@ -52,7 +53,7 @@ export function readProject(raw: unknown): ReadResult {
       detail: 'project.variants: at least one setup is required',
     };
   }
-  return { ok: true, project };
+  return { ok: true, project: tidy(project) };
 }
 
 export function parseProjectJson(text: string): ReadResult {
@@ -66,17 +67,6 @@ export function parseProjectJson(text: string): ReadResult {
   return readProject(raw);
 }
 
-export function serializeProject(
-  project: Project,
-  options: { includeNotes?: boolean } = {},
-): string {
-  const out = options.includeNotes === false ? { ...project, notes: [] } : project;
-  return JSON.stringify(out, null, 2);
-}
-
-/** `<name>.speaker.json`, with characters that file systems dislike replaced. */
-export function exportFileName(project: Project, untitled = 'project'): string {
-  // eslint-disable-next-line no-control-regex -- control characters are stripped on purpose
-  const base = (project.name.trim() || untitled).replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-');
-  return `${base}.speaker.json`;
+export function serializeProject(project: Project): string {
+  return JSON.stringify(project, null, 2);
 }

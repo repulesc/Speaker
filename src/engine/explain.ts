@@ -68,18 +68,17 @@ export function explainSpeakerSpot(
   const clearance = at.y - ctx.speaker.depth / 2;
   const speakers = speakerPair(ctx, centre, half, clearance);
   const placement = { speakers, listener };
-  const bare = { ...ctx, objects: [] };
   const stereo =
     clearance >= 0 &&
     half >= ctx.speaker.width / 2 &&
     speakersInFront(ctx, placement) &&
-    isValidPlacement(bare, placement);
+    isValidPlacement(ctx, placement);
   const scorer = makeScorer(ctx);
   const [robust] = robustScores(scorer, [placement], ANALYSIS_SEED);
   return {
     stereo,
     robust: robust!.robust,
-    flagged: stereo && !isValidPlacement(ctx, placement),
+    flagged: stereo && !avoidsRedFlags(ctx, placement, { seat: false, speakers: true }),
     speakers,
   };
 }

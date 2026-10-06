@@ -35,7 +35,7 @@ export function eyring(volume: number, surface: number, meanAlpha: number): numb
  * Furniture absorbs less at low frequencies than its mid-band value. Assumed factors per band
  * (calibration choice, 🟡): ×0.5 at 125 Hz, ×0.8 at 250 Hz, ×1 above.
  */
-const OBJECT_BAND_FACTOR: BandValues = [0.5, 0.8, 1, 1, 1, 1];
+const FURNISHING_BAND_FACTOR: BandValues = [0.5, 0.8, 1, 1, 1, 1];
 
 function boundaryArea(b: BoundaryId, room: RoomGeometry): number {
   if (b === 'front' || b === 'back') return room.W * room.H;
@@ -43,16 +43,12 @@ function boundaryArea(b: BoundaryId, room: RoomGeometry): number {
   return room.W * room.L;
 }
 
-/** Total surface absorption area per band (m² sabins), patches replacing the base material. */
+/** Total surface absorption area per band (m² sabins): each boundary's material times its area. */
 export function surfaceAbsorptionArea(room: RoomGeometry, surfaces: Surfaces): BandValues {
   const area = [0, 0, 0, 0, 0, 0];
-  const add = (alphas: BandValues, m2: number) => alphas.forEach((a, i) => (area[i]! += a * m2));
   for (const b of Object.keys(surfaces.base) as BoundaryId[]) {
-    const patches = surfaces.patches.filter((p) => p.boundary === b);
-    const patchArea = patches.reduce((sum, p) => sum + p.width * p.height, 0);
-    add(surfaceAbsorption(surfaces.base[b]), Math.max(0, boundaryArea(b, room) - patchArea));
-    for (const p of patches)
-      add(surfaceAbsorption(p.preset, p.customAbsorption), p.width * p.height);
+    const alphas = surfaceAbsorption(surfaces.base[b]);
+    alphas.forEach((a, i) => (area[i]! += a * boundaryArea(b, room)));
   }
   return area as BandValues;
 }
@@ -62,7 +58,7 @@ const MIN_MEAN_ALPHA = 0.01;
 
 function t60Bands(room: RoomGeometry, surfaceArea: BandValues, furnishing: number) {
   const totals = surfaceArea.map((a, i) =>
-    Math.max(a + furnishing * OBJECT_BAND_FACTOR[i]!, MIN_MEAN_ALPHA * room.S),
+    Math.max(a + furnishing * FURNISHING_BAND_FACTOR[i]!, MIN_MEAN_ALPHA * room.S),
   );
   const midAlpha = (totals[2]! + totals[3]!) / 2 / room.S;
   const method: ReverbResult['method'] = midAlpha > 0.2 ? 'eyring' : 'sabine';

@@ -51,28 +51,10 @@ export function reflectionPoint(source: Vec3, receiver: Vec3, plane: Plane): Vec
   };
 }
 
-/** (u, v) coordinates of a point on a boundary, as defined in DATA_MODEL (SurfacePatch). */
-export function boundaryUV(boundary: BoundaryId, p: Vec3): [number, number] {
-  if (boundary === 'front' || boundary === 'back') return [p.x, p.z];
-  if (boundary === 'left' || boundary === 'right') return [p.y, p.z];
-  return [p.x, p.y];
-}
-
-/** Surface at a point: the last patch containing it wins, otherwise the boundary's base material. */
-export function surfaceAt(boundary: BoundaryId, p: Vec3, ctx: AnalysisContext) {
-  const [u, v] = boundaryUV(boundary, p);
-  const patch = [...ctx.project.surfaces.patches]
-    .reverse()
-    .find(
-      (s) =>
-        s.boundary === boundary &&
-        u >= s.u &&
-        u <= s.u + s.width &&
-        v >= s.v &&
-        v <= s.v + s.height,
-    );
-  const preset = patch?.preset ?? ctx.project.surfaces.base[boundary];
-  return { preset, class: surfaceClass(preset, patch?.customAbsorption) };
+/** The material of a boundary (V9: one material per wall, floor and ceiling). */
+export function surfaceAt(boundary: BoundaryId, ctx: AnalysisContext) {
+  const preset = ctx.project.surfaces.base[boundary];
+  return { preset, class: surfaceClass(preset) };
 }
 
 const BOUNDARIES: readonly BoundaryId[] = ['left', 'right', 'front', 'back', 'floor', 'ceiling'];
@@ -90,7 +72,7 @@ export function firstReflections(
       const plane = boundaryPlane(boundary, ctx);
       const point = reflectionPoint(source, ears, plane);
       const reflected = distance(source, point) + distance(point, ears);
-      const surface = surfaceAt(boundary, point, ctx);
+      const surface = surfaceAt(boundary, ctx);
       result.push({
         speaker: side,
         boundary,

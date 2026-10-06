@@ -1,14 +1,12 @@
-import { acousticCentre, buildContext, type AnalysisContext } from '../context';
-import { boxesOverlap2D, distance, pointInBox2D } from '../math/geometry';
+import { acousticCentre, buildContext, cabinetBox, type AnalysisContext } from '../context';
+import { distance } from '../math/geometry';
 import { seededRandom, symmetric } from '../math/random';
 import { DEFAULTS } from '../presets/defaults';
-import { SEAT_KINDS } from '../presets/objects';
 import { areaPoints, areaScore } from './area';
 import { MIDPOINT_RED_FLAG, midpointOffsetFraction } from '../rules/G01-room-midpoint';
 import { BACK_WALL_RED_FLAG } from '../rules/G02-back-wall';
 import { angleRedFlag, stereoAngleDeg } from '../rules/G04-stereo-angle';
 import { speakerCorner } from '../rules/G06-corners';
-import { cabinetBox, isObstructed, objectBox } from '../rules/G10-objects';
 import type { Candidate, Placement, SpeakerPlacement, Vec2, Vec3 } from '../types';
 import { Scorer } from './scorer';
 import { scoringSettings } from './settings';
@@ -22,17 +20,12 @@ export function isValidPlacement(ctx: AnalysisContext, placement: Placement): bo
   for (const side of ['left', 'right'] as const) {
     const cab = cabinetBox(placement.speakers[side], ctx);
     if (cab.min.x < 0 || cab.max.x > W || cab.min.y < 0 || cab.max.y > L) return false;
-    if (ctx.objects.some((o) => boxesOverlap2D(cab, objectBox(o)))) return false;
     const ac = acousticCentre(placement.speakers[side], ctx.speaker);
     if (distance(ac, listener) < T.minListeningDistance) return false;
     // The listener sits in front of the speakers (they face +y).
     if (listener.y - ac.y < T.minListenerAhead) return false;
   }
-  const insideObject = ctx.objects.some(
-    (o) => !SEAT_KINDS.includes(o.kind) && pointInBox2D(listener, objectBox(o)),
-  );
-  if (insideObject) return false;
-  return isObstructed(ctx, placement.speakers, listener) === null;
+  return true;
 }
 
 /** The distance the user asked for: room listening (1.5 m or more) unless they chose "close". */
@@ -53,8 +46,7 @@ export function farEnough(ctx: AnalysisContext, placement: Placement): boolean {
 
 /**
  * Whether a seat can be scored at all: inside the room, in front of both speakers and not on top
- * of one. Furniture and a blocked line of sight do not count here: the seat map shows a score
- * there too, hatched as "advised against" (owner feedback: the map had holes behind furniture).
+ * of one.
  */
 export function seatScorable(ctx: AnalysisContext, placement: Placement): boolean {
   const { W, L } = ctx.room;

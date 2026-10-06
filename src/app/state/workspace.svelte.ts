@@ -1,4 +1,4 @@
-import type { Project, SetupVariant } from '../../engine/types';
+import type { Project } from '../../engine/types';
 import { applyDefaultPlacement, createDefaultProject } from './defaults';
 import { newId, nowIso } from './ids';
 import { SIZE_LIMITS } from './limits';
@@ -157,6 +157,14 @@ export class Workspace {
     this.#open(this.#fresh());
   }
 
+  /** Starts again with an empty room; the one that was open is deleted (V9: one room, no project list). */
+  startOver(): void {
+    const old = this.project.id;
+    this.newProject();
+    if (this.storage) deleteProject(this.storage, old);
+    this.index = this.storage ? loadIndex(this.storage) : [];
+  }
+
   /** Switches to a saved project. Returns false if it cannot be read. */
   switchTo(id: string): boolean {
     if (!this.storage || id === this.project.id) return true;
@@ -164,12 +172,6 @@ export class Workspace {
     if (!project) return false;
     this.#open(project);
     return true;
-  }
-
-  /** Copies the open project under a new id and name, and opens the copy. */
-  duplicate(name: string): void {
-    const copy = JSON.parse(this.#snapshot()) as Project;
-    this.#open({ ...copy, id: newId(), name, createdAt: nowIso() });
   }
 
   /** Opens an imported or shared project as a new project (never overwrites an existing one). */
@@ -182,63 +184,5 @@ export class Workspace {
   rename(name: string): void {
     const trimmed = name.trim().slice(0, SIZE_LIMITS.name);
     this.edit((p) => void (p.name = trimmed));
-  }
-
-  /** Deletes a saved project; if it is the open one, the next saved project (or a new one) opens. */
-  remove(id: string): void {
-    if (this.storage) deleteProject(this.storage, id);
-    this.index = this.storage ? loadIndex(this.storage) : [];
-    if (id !== this.project.id) return;
-    const next = this.index[0];
-    const project = next && this.storage ? loadProject(this.storage, next.id) : null;
-    this.project = project ?? this.#fresh();
-    this.#undo = [];
-    this.#redo = [];
-    this.#historyVersion++;
-    this.#changed();
-    this.flush();
-  }
-
-  // ── Setup variants ("Current", "Bed moved", …) ──────────────────────────
-
-  /** Copies the active setup under a new name and shows the copy. */
-  addVariant(name: string): void {
-    this.edit((p) => {
-      const source = p.variants.find((v) => v.id === p.activeVariantId) ?? p.variants[0]!;
-      const copy = JSON.parse(JSON.stringify(source)) as SetupVariant;
-      copy.id = newId();
-      copy.name = name;
-      if (p.variants.length < SIZE_LIMITS.variants) {
-        p.variants.push(copy);
-        p.activeVariantId = copy.id;
-      }
-    });
-  }
-
-  /** Shows another setup. Not an undo step; it is saved with the project. */
-  switchVariant(id: string): void {
-    if (id === this.project.activeVariantId || !this.project.variants.some((v) => v.id === id))
-      return;
-    this.project.activeVariantId = id;
-    this.#lastCoalesce = null;
-    this.#changed();
-  }
-
-  renameVariant(id: string, name: string): void {
-    const trimmed = name.trim().slice(0, SIZE_LIMITS.name);
-    if (!trimmed) return;
-    this.edit((p) => {
-      const variant = p.variants.find((v) => v.id === id);
-      if (variant) variant.name = trimmed;
-    });
-  }
-
-  /** Removes a setup (the last one cannot be removed). */
-  deleteVariant(id: string): void {
-    if (this.project.variants.length <= 1) return;
-    this.edit((p) => {
-      p.variants = p.variants.filter((v) => v.id !== id);
-      if (p.activeVariantId === id) p.activeVariantId = p.variants[0]!.id;
-    });
   }
 }

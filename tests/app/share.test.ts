@@ -18,19 +18,6 @@ describe('share links', () => {
     expect((await encodeShare(busyRoom())).length).toBeLessThan(5000);
   });
 
-  it('leaves listening notes out unless asked', async () => {
-    const project = {
-      ...busyRoom(),
-      notes: [
-        { id: 'n', createdAt: 'x', variantId: 'v1', symptoms: ['S01' as const], text: 'private' },
-      ],
-    };
-    const without = await decodeShare(await encodeShare(project));
-    expect(without.ok && without.project.notes).toEqual([]);
-    const withNotes = await decodeShare(await encodeShare(project, { includeNotes: true }));
-    expect(withNotes.ok && withNotes.project.notes).toHaveLength(1);
-  });
-
   it('refuses a link whose setups share an id (it used to blank the app for good)', async () => {
     const project = busyRoom();
     project.variants.push({ ...structuredClone(project.variants[0]!), name: 'Copy' });

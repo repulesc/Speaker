@@ -8,7 +8,6 @@ import { G05 } from '../../src/engine/rules/G05-equal-distance';
 import { G06 } from '../../src/engine/rules/G06-corners';
 import { G07 } from '../../src/engine/rules/G07-port-clearance';
 import { G08 } from '../../src/engine/rules/G08-ear-height';
-import { G10 } from '../../src/engine/rules/G10-objects';
 import { H01 } from '../../src/engine/rules/H01-38-percent';
 import { H04, frontWallZone } from '../../src/engine/rules/H04-near-or-far';
 import { H06 } from '../../src/engine/rules/H06-treble-trim';
@@ -154,37 +153,6 @@ describe('G08 ear height', () => {
     expect(severities(G08, makeProject({ standZ: 0, earZ: 1.6, listenerY: 1.5 }))[0]).toBe(
       'red-flag',
     );
-  });
-});
-
-describe('G10 objects', () => {
-  it('an object between speaker and listener → red flag', () => {
-    const p = makeProject();
-    p.variants[0]!.objects = [
-      {
-        id: 'cab',
-        kind: 'cabinet',
-        position: { x: 0.8, y: 1.6, z: 0 },
-        size: { x: 0.6, y: 0.4, z: 1.5 },
-        hard: true,
-      },
-    ];
-    expect(severities(G10, p)).toContain('red-flag');
-  });
-  it('another speaker right next to a main speaker → caution', () => {
-    const p = makeProject();
-    p.variants[0]!.objects = [
-      {
-        id: 's',
-        kind: 'other-speaker',
-        position: { x: 0.5, y: 0.4, z: 0 },
-        size: { x: 0.2, y: 0.3, z: 0.9 },
-        hard: true,
-      },
-    ];
-    expect(
-      G10.evaluate(buildContext(p)!, currentPlacement(buildContext(p)!)).map((f) => f.messageKey),
-    ).toContain('finding.G10.passiveSpeaker');
   });
 });
 

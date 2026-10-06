@@ -51,11 +51,6 @@ function plain(value: number, locale: string, decimals = 0): string {
   }).format(value);
 }
 
-function word(key: string, value: string | number): string {
-  const text = i18n.t(key, {});
-  return text === key ? String(value) : text;
-}
-
 /** One value as display text, by its name (and the rule it belongs to, where names are reused). */
 function display(
   rule: string,
@@ -75,7 +70,6 @@ function display(
     if (name === 'minimumSource') return i18n.t(`words.source.${value}`);
     if (name === 'gain') return i18n.t(`words.gain.${value}`);
     if (name === 'zone') return i18n.t(`words.zone.${value}`);
-    if (name === 'object') return word(`object.${value}`, value);
     if (WALLS.has(name)) return i18n.t(`words.wall.${value}`);
     return value;
   }

@@ -90,9 +90,9 @@ describe('golden scenarios', () => {
     }
   });
 
-  it('lightweight walls: bass confidence is capped at 0.6', () => {
+  it('lightweight (plasterboard) walls: bass confidence is capped at 0.6', () => {
     const p = makeProject();
-    p.room.construction = 'lightweight';
+    for (const w of ['front', 'back', 'left', 'right'] as const) p.surfaces.base[w] = 'gypsum-stud';
     expect(ok(p).confidence.perOutput.bass).toBeLessThanOrEqual(0.6);
   });
 
@@ -126,12 +126,11 @@ describe('golden scenarios', () => {
     }
   });
 
-  it('the busy room: wall-setting reminder, passive speaker, dead room → treble lift to try', () => {
+  it('the busy room: wall-setting reminder, dead room → treble lift to try', () => {
     const a = ok(busyRoom());
     expect(summary(a)).toMatchSnapshot();
     const keys = a.findings.map((f) => f.messageKey);
     expect(keys).toContain('finding.G07.matchSetting');
-    expect(keys).toContain('finding.G10.passiveSpeaker');
     expect(keys).toContain('finding.P08.dead');
     expect(keys).toContain('finding.H06.lift');
   });

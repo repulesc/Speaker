@@ -5,7 +5,6 @@
   import { heldBack, visibleAdvice } from '../findings/visible';
   import { analysis, workspace } from '../session.svelte';
   import { prefs } from '../prefs.svelte';
-  import { ui } from '../ui.svelte';
 
   const result = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
   const system = $derived(workspace.project.units);
@@ -67,9 +66,8 @@
           <button
             type="button"
             class="link"
-            onclick={() => {
-              ui.openRoom('ready');
-            }}>{i18n.t('treat.openSettings')}</button
+            onclick={() => workspace.edit((p) => void (p.constraints.treatmentReady = true))}
+            >{i18n.t('treat.openSettings')}</button
           >
         </p>
       {/if}

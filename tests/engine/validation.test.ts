@@ -110,34 +110,6 @@ const BAD_SETUPS: [string, string, (p: Project) => void][] = [
       seat(p).y = 2.2;
     },
   ],
-  [
-    'a cabinet between speaker and seat',
-    'finding.G10.obstruction',
-    (p) =>
-      (p.variants[0]!.objects = [
-        {
-          id: 'cabinet',
-          kind: 'cabinet',
-          position: { x: 1.1, y: 1.5, z: 0 },
-          size: { x: 0.6, y: 0.4, z: 1.6 },
-          hard: true,
-        },
-      ]),
-  ],
-  [
-    'a passive speaker beside a main one',
-    'finding.G10.passiveSpeaker',
-    (p) =>
-      (p.variants[0]!.objects = [
-        {
-          id: 'spare',
-          kind: 'other-speaker',
-          position: { x: 0.3, y: 0.5, z: 0 },
-          size: { x: 0.25, y: 0.3, z: 0.9 },
-          hard: true,
-        },
-      ]),
-  ],
 ];
 
 function seat(p: Project) {

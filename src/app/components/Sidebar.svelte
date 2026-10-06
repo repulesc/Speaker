@@ -18,8 +18,6 @@
   interface Props {
     onshare: () => void;
     onimage: () => void;
-    onexport: () => void;
-    onimport: () => void;
     onprint: () => void;
     onabout: () => void;
   }
