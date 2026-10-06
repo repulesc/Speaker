@@ -3,7 +3,7 @@
   import { ui, type PanelStep } from '../ui.svelte';
 
   /**
-   * The three steps (docs/ROADMAP_V8.md §2): Set up, Place, Listen. Named after what you do, numbered
+   * The three steps (docs/ROADMAP_V9.md): Room & speakers, Placement, Listening check. Numbered
    * because they follow each other, but every one is open at any time. A sideways swipe on a touch
    * screen moves between them (ResultTabs did the same in V6).
    */
@@ -36,7 +36,7 @@
       onclick={() => (ui.tab = s)}
       onkeydown={(e) => onKey(e, s)}
     >
-      <span class="num" aria-hidden="true">{i + 1}</span>
+      <span class="num" aria-hidden="true">0{i + 1}</span>
       <span class="label">{i18n.t(`steps.${s}`)}</span>
     </button>
   {/each}
@@ -51,11 +51,15 @@
   button {
     position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 48px;
-    padding: 0 6px;
+    justify-content: flex-start;
+    gap: 1px;
+    min-width: 0;
+    min-height: 56px;
+    padding: 6px 4px 9px;
+    line-height: 1.2;
+    text-align: center;
     border: 0;
     background: none;
     color: var(--ink-muted);
@@ -91,21 +95,15 @@
     border-radius: 8px;
   }
   .num {
-    display: inline-grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    border: 1px solid currentColor;
-    border-radius: 50%;
     font-family: var(--font-display);
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
   }
   [aria-selected='true'] .num {
-    border-color: var(--accent-fill);
-    background: var(--accent-fill);
-    color: var(--on-accent);
+    color: var(--accent);
+    opacity: 1;
   }
   @media (prefers-reduced-motion: reduce) {
     button::after {

@@ -27,7 +27,8 @@
 <style>
   .select-row {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    /* The label takes what it needs; the value keeps at least 55 % so its text is not cut. */
+    grid-template-columns: minmax(0, max-content) minmax(55%, 1fr);
     align-items: center;
     gap: 12px;
     min-height: 44px;

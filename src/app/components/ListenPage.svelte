@@ -92,7 +92,12 @@
 
     <div class="matrix">
       {#each ASPECTS as aspect (aspect)}
-        <div class="row" role="group" aria-labelledby="aspect-{aspect}">
+        <div
+          class="row"
+          class:wide={ORDER[aspect].length > 3}
+          role="group"
+          aria-labelledby="aspect-{aspect}"
+        >
           <span class="label" id="aspect-{aspect}">{i18n.t(`listen.aspect.${aspect}.label`)}</span>
           <div class="scale">
             {#each ORDER[aspect] as value (value)}
@@ -205,6 +210,11 @@
     padding: 8px 0;
     border-bottom: 1px solid var(--grid);
   }
+  /* Four answers need the full width: the scale goes under its label. */
+  .row.wide {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
   .label {
     font-size: var(--text-sm);
     font-weight: 600;
@@ -221,7 +231,8 @@
     flex: 1 1 0;
     min-width: 0;
     min-height: 30px;
-    padding: 2px 4px;
+    padding: 2px;
+    overflow-wrap: normal;
     border: 0;
     border-radius: 7px;
     background: transparent;
@@ -294,7 +305,8 @@
   .try {
     margin-left: auto;
     min-height: 32px;
-    padding: 0 10px;
+    padding: 0 12px;
+    border: 1px solid var(--grid-strong);
   }
   .nothing {
     padding: 8px 0 10px 16px;

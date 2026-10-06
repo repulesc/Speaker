@@ -74,18 +74,19 @@
 {/if}
 
 <style>
+  /* One centred header over the room (V9): the switch, then what the map shows, on the room's axis. */
   .bar {
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px 0;
+    padding: 14px 16px 0;
   }
   .tools {
     display: flex;
     flex: none;
-    margin-left: auto;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
   .pick label {
     min-width: 5.5rem;
@@ -107,13 +108,13 @@
   }
   .info {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    justify-content: center;
     padding: 8px 16px 0;
   }
   .what {
+    max-width: 44rem;
     margin: 0;
+    text-align: center;
     color: var(--ink-muted);
     font-size: var(--text-sm);
     line-height: 1.4;

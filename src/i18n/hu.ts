@@ -57,7 +57,7 @@ export const hu: Messages = {
     legacy: 'Korábbi változatok',
     image: 'Megosztás képként',
     label: 'Menü',
-    support: 'A projekt támogatása ☕',
+    support: 'A Nodo támogatása ☕',
     undo: 'Visszavonás',
     redo: 'Újra',
     share: 'Megosztási link',
@@ -996,6 +996,12 @@ export const hu: Messages = {
       notInFront:
         'A hangfalak melletted vagy mögötted vannak, így ez nem sztereó elrendezés. Tedd őket magad elé, feléd fordítva.',
     },
+    G12: {
+      onDesk:
+        'Az asztallapról visszaverődő hang {delayMs} késéssel ér a füledhez a direkt hanghoz képest, és {frequency} körül (meg feljebb ismét) gyengíti a hangot. Hogy mennyire, az attól függ, mennyi hangot sugároznak a hangfalaid lefelé. A térkép nem számol az asztallal.',
+      clear:
+        'A füledhez tartó visszaverődés nem az asztallapra esik, így az asztal alig színezi a hangot.',
+    },
     H01: {
       overlay:
         'Egy népszerű ökölszabály szerint az ülőhely a helyiség 38%-ánál van: itt ez {listenerY}. Hogy honnan ered, nem világos.',
@@ -1110,7 +1116,7 @@ export const hu: Messages = {
         'A fejed {distance} távolságra van a hátsó faltól, és az ülőhely nem mozdítható. Tegyél egy vastag elnyelőt (legalább {thickness}) a fejed mögé.',
     },
     C01: {
-      desk: 'Asztalnál az asztallap a hangfalak hangját közvetlenül a direkt hang után a füledhez veri vissza, és ez színezi a hangot. Ha kis állványokkal megemeled a hangfalakat és a füled felé fordítod őket, vagy az asztal hátsó szélére teszed, ez a visszaverődés gyengül.',
+      desk: 'Asztalnál az asztallap a hangfalak hangját közvetlenül a direkt hang után a füledhez veri vissza, és ez színezi a hangot. Ha kis állványokkal megemeled a hangfalakat, és lefelé, a füled felé fordítod őket, kevesebb hang jut az asztalra, így ez a visszaverődés gyengül.',
     },
     C02: {
       quiet:
@@ -1187,7 +1193,7 @@ export const hu: Messages = {
         'A fejed {distance} távolságra van a hátsó faltól, és az ülőhely nem mozdulhat. Valami vastag, puha a fejed mögött segít.',
     },
     C01: {
-      desk: 'Asztalnál az asztallap a füledhez veri vissza a hangot. Emeld meg kicsit a hangfalakat és fordítsd őket a füled felé, vagy tedd őket az asztal hátsó szélére.',
+      desk: 'Asztalnál az asztallap a füledhez veri vissza a hangot. Emeld meg kicsit a hangfalakat, és fordítsd őket a füled felé.',
     },
     C02: {
       quiet:
@@ -1249,11 +1255,19 @@ export const hu: Messages = {
       'Minden oknak saját térképe van: minél erősebb a szín, annál jobb; a halvány ott van, ahol az az ok ront.',
     closer: 'Közelebbről',
   },
+  model: {
+    note: 'Egy üres doboz fizikai modellje: kiindulópont, nem mérés.',
+    more: 'Mit tud',
+  },
   about: {
     title: 'Névjegy',
-    body: 'Az alkalmazás bevett teremakusztikai ismeretekkel javasol hangfal- és ülőhelyet, és megmondja, mennyire biztos a dolgában. Iránymutatás, nem garancia.',
-    sources:
-      'Minden szabály és a hozzá tartozó források a projekt szabálykatalógusában találhatók.',
+    body: 'Az alkalmazás bevált teremakusztikai ismeretek alapján javasol hangfal- és ülőhely-elrendezést, és megmondja, mennyire biztos benne. Útmutatás, nem garancia.',
+    knowsTitle: 'Mit tud a modell, és mit nem',
+    knows:
+      'A szobát zárt, téglatest alakú doboznak tekinti a választott anyagokkal és a megadott berendezettséggel. Ebből számolja a szoba rezonanciáit, a hangfalak melletti falakról visszaverődő hangot, az ülőhelyedhez érkező visszaverődéseket és a sztereó geometriát.',
+    cannot:
+      'Nem látja, milyen szélesen sugároznak a hangfalaid, a tényleges bútoraidat, az asztalodat, az ajtókat és nyílásokat, sem azt, amit egy mikrofon mérne a helyeden. A számai becslések tartománnyal, nem mérések. Arra való, hogy jó kiindulópontot találj; az utolsó néhány centiméter a füledé.',
+    sources: 'Minden szabály és forrása dokumentálva van a projekt szabálykatalógusában.',
     support: 'A projekt támogatása ☕ (új lapon nyílik meg)',
   },
 };

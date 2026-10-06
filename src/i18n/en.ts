@@ -53,7 +53,7 @@ export const en = {
     legacy: 'Previous versions',
     image: 'Share as image',
     label: 'Menu',
-    support: 'Support this project ☕',
+    support: 'Support Nodo ☕',
     undo: 'Undo',
     redo: 'Redo',
     share: 'Share link',
@@ -447,7 +447,7 @@ export const en = {
     short: {
       bass: { thin: 'Thin', right: 'OK', boomy: 'Boomy' },
       evenness: { even: 'Even', uneven: 'Uneven' },
-      centre: { vague: 'Vague', focused: 'Focused', left: '◂ Left', right: 'Right ▸' },
+      centre: { vague: 'Vague', focused: 'Firm', left: '◂ Left', right: 'Right ▸' },
       width: { narrow: 'Narrow', right: 'OK', wide: 'Hole' },
       treble: { dull: 'Dull', right: 'OK', bright: 'Harsh' },
       clarity: { clear: 'Clear', some: 'Some echo', echoey: 'Echoey' },
@@ -970,6 +970,12 @@ export const en = {
       notInFront:
         'The speakers are beside or behind you, so this is not a stereo setup. Put them in front of you, facing you.',
     },
+    G12: {
+      onDesk:
+        'Sound bouncing off the desk top reaches your ears {delayMs} after the direct sound and cuts a dip near {frequency} (and again higher up). How deep depends on how much sound your speakers send downward. The map does not include the desk.',
+      clear:
+        'The reflection towards your ears lands off the desk top, so the desk adds little colour.',
+    },
     H01: {
       overlay:
         'A popular rule of thumb puts the seat 38% into the room: {listenerY} here. Where it comes from is unclear.',
@@ -1083,7 +1089,7 @@ export const en = {
         'Your head is {distance} from the back wall and the seat cannot move. Put a thick absorber (at least {thickness}) behind your head.',
     },
     C01: {
-      desk: 'At a desk, the desk top reflects sound from the speakers to your ears just after the direct sound, which colours it. Raising the speakers on small stands and aiming them at your ears, or setting them at the back edge of the desk, makes that reflection weaker.',
+      desk: 'At a desk, the desk top reflects sound from the speakers to your ears just after the direct sound, which colours it. Raising the speakers on small stands and aiming them down at your ears sends less sound towards the desk, so that reflection gets weaker.',
     },
     C02: {
       quiet:
@@ -1161,7 +1167,7 @@ export const en = {
         'Your head is {distance} from the back wall and the seat cannot move. Something thick and soft behind your head helps.',
     },
     C01: {
-      desk: 'At a desk, the desk top bounces sound to your ears. Raise the speakers a little and point them at your ears, or set them at the back edge of the desk.',
+      desk: 'At a desk, the desk top bounces sound to your ears. Raise the speakers a little and point them at your ears.',
     },
     C02: {
       quiet:
@@ -1223,9 +1229,18 @@ export const en = {
       'Each reason has its own map: the stronger the colour, the better; pale is where that reason hurts.',
     closer: 'Look closer',
   },
+  model: {
+    note: 'A physics model of an empty box: a starting point, not a measurement.',
+    more: 'What it knows',
+  },
   about: {
     title: 'About',
     body: 'This app uses established room acoustics to suggest speaker and seat positions, and tells you how sure it is. It is guidance, not a guarantee.',
+    knowsTitle: 'What the model knows, and what it cannot',
+    knows:
+      'It treats your room as a closed rectangular box with the materials you chose and the furnishing you described. From that it computes the room’s resonances, the sound bouncing off the walls next to the speakers, the reflections reaching your seat and the stereo geometry.',
+    cannot:
+      'It cannot see how widely your speakers spread sound, your actual furniture, your desk, doors and openings, or what a microphone at your seat would show. Its numbers are estimates with ranges, not a measurement. Use it to find a good starting point; the last few centimetres are for your ears.',
     sources: 'Every rule and its sources are documented in the project’s rule catalogue.',
     support: 'Support this project ☕ (opens in a new tab)',
   },

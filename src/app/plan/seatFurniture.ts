@@ -1,3 +1,4 @@
+import { DESK } from '../../engine/presets/listeningArea';
 import type { ListeningAreaKind, Vec3 } from '../../engine/types';
 
 /**
@@ -12,13 +13,13 @@ const SIZE = {
   chair: { x: 0.8, y: 0.8 },
   sofa: { x: 2.0, y: 0.9 },
   bed: { x: 1.6, y: 2.0 },
-  desk: { x: 1.4, y: 0.7 },
+  desk: { x: DESK.width, y: DESK.depth },
 } as const;
 
 /** How far behind the ears the furniture's back edge is, in metres (head against the backrest). */
 const BEHIND = { chair: 0.25, sofa: 0.25, bed: 0.3 } as const;
 /** A desk stands in front of the listener: the gap between the ears and its back edge. */
-const DESK_GAP = 0.35;
+const DESK_GAP = DESK.gap;
 
 export interface Footprint {
   x: number;

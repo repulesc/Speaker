@@ -8,6 +8,7 @@
   import PlanView from './components/PlanView.svelte';
   import ShareDialog from './components/ShareDialog.svelte';
   import SideView from './components/SideView.svelte';
+  import Colophon from './components/Colophon.svelte';
   import Sidebar from './components/Sidebar.svelte';
   import Survey from './components/Survey.svelte';
   import { goalOf } from './state/goal';
@@ -206,6 +207,7 @@
           </p>
         {/if}
       </div>
+      <Colophon place="canvas" onabout={() => aboutDialog?.show()} />
     </main>
   </div>
 
