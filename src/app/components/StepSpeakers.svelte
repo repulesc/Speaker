@@ -31,6 +31,8 @@
   import LengthInput from './LengthInput.svelte';
   import SpeakerQuestions from './SpeakerQuestions.svelte';
 
+  /** Inside a "More detail" group of Set up (V8): no title, and the questions are asked above. */
+  let { embedded = false }: { embedded?: boolean } = $props();
   const project = $derived(workspace.project);
   const speaker = $derived(project.speaker);
   const variant = $derived(activeVariant(project));
@@ -156,12 +158,14 @@
 </script>
 
 <div class="step">
-  <div>
-    <h2>{i18n.t('speakers.title')}</h2>
-    <p class="intro">{i18n.t('speakers.intro')}</p>
-  </div>
+  {#if !embedded}
+    <div>
+      <h2>{i18n.t('speakers.title')}</h2>
+      <p class="intro">{i18n.t('speakers.intro')}</p>
+    </div>
+  {/if}
 
-  <SpeakerQuestions />
+  {#if !embedded}<SpeakerQuestions />{/if}
 
   {#if !room}
     <section class="group">

@@ -45,7 +45,7 @@
   const MARGINS = $derived(
     viewport.compact
       ? { left: 16, right: 16, top: 28, bottom: 12 }
-      : { left: 76, right: 84, top: 44, bottom: 104 }, // bottom: room size and the legend
+      : { left: 76, right: 84, top: 44, bottom: 124 }, // bottom: room size and the legend
   );
   const locale = $derived(i18n.locale);
   const system = $derived(project.units);
@@ -58,6 +58,8 @@
   const W = $derived(known && roomW !== null ? roomW : 4);
   const L = $derived(known && roomL !== null ? roomL : 5);
   const frame = $derived(fitFrame(width, height, W, L, MARGINS));
+  /** The wall band's thickness on screen (px): a drawing convention, not the real wall. */
+  const WALL = 6;
   const px = (x: number) => toPx(frame, x, 0).x;
   const py = (y: number) => toPx(frame, 0, y).y;
   const fmtRoom = (m: number) => formatLength(m, system, 'room', locale);
@@ -412,7 +414,15 @@
         y={py(0)}
         width={W * frame.scale}
         height={L * frame.scale}
-        rx="4"
+      />
+      <!-- The walls, drawn as on an architect's plan: one solid band around the room (V8). -->
+      <rect
+        class="walls"
+        class:placeholder={!known}
+        x={px(0) - WALL / 2}
+        y={py(0) - WALL / 2}
+        width={W * frame.scale + WALL}
+        height={L * frame.scale + WALL}
       />
       {#if !showHeat}
         {#each gridX as g (g)}
@@ -463,12 +473,13 @@
       {#if known}
         <!-- Room size: the numbers are typed over these lines (hidden on a phone: no room). -->
         <g class="dim muted" class:hidden={!showDims}>
-          <line x1={px(0)} y1={py(L) + 22} x2={px(W)} y2={py(L) + 22} />
-          <line x1={px(0)} y1={py(L) + 16} x2={px(0)} y2={py(L) + 28} />
-          <line x1={px(W)} y1={py(L) + 16} x2={px(W)} y2={py(L) + 28} />
-          <line x1={px(W) + 22} y1={py(0)} x2={px(W) + 22} y2={py(L)} />
-          <line x1={px(W) + 16} y1={py(0)} x2={px(W) + 28} y2={py(0)} />
-          <line x1={px(W) + 16} y1={py(L)} x2={px(W) + 28} y2={py(L)} />
+          <!-- Architectural ticks: a short slash at each end of a dimension line. -->
+          <line x1={px(0) - 6} y1={py(L) + 22} x2={px(W) + 6} y2={py(L) + 22} />
+          <line class="tick" x1={px(0) - 4} y1={py(L) + 26} x2={px(0) + 4} y2={py(L) + 18} />
+          <line class="tick" x1={px(W) - 4} y1={py(L) + 26} x2={px(W) + 4} y2={py(L) + 18} />
+          <line x1={px(W) + 22} y1={py(0) - 6} x2={px(W) + 22} y2={py(L) + 6} />
+          <line class="tick" x1={px(W) + 18} y1={py(0) + 4} x2={px(W) + 26} y2={py(0) - 4} />
+          <line class="tick" x1={px(W) + 18} y1={py(L) + 4} x2={px(W) + 26} y2={py(L) - 4} />
         </g>
         {#if showDims && dimSpeaker && seat}
           {@const rear = dimSpeaker.y - cab.d / 2}
@@ -882,15 +893,22 @@
     {/if}
 
     {#if shownValues && known && !field}
-      <MapLegend
-        best={speakerGrid
-          ? (speakerGrid.best ?? null)
-          : ui.layer === 'goals'
-            ? (layers?.best ?? null)
-            : null}
-        none={speakerGrid ? 'notStereo' : 'notSeat'}
-        hatched
-      />
+      <!-- The legend belongs to the drawing: under the room, as wide as the room (V8). -->
+      <div
+        class="legend-slot"
+        style="left:{px(0)}px; top:{py(L) + 58}px; width:{W * frame.scale}px"
+      >
+        <MapLegend
+          metre={frame.scale}
+          best={speakerGrid
+            ? (speakerGrid.best ?? null)
+            : ui.layer === 'goals'
+              ? (layers?.best ?? null)
+              : null}
+          none={speakerGrid ? 'notStereo' : 'notSeat'}
+          hatched
+        />
+      </div>
     {/if}
 
     {#if field}
@@ -989,9 +1007,30 @@
   }
   .room {
     fill: var(--surface);
-    stroke: color-mix(in srgb, var(--ink) 30%, transparent);
-    stroke-width: 1;
-    filter: drop-shadow(var(--plan-shadow));
+    stroke: none;
+  }
+  .walls {
+    fill: none;
+    stroke: var(--wall);
+    stroke-width: 6;
+    pointer-events: none;
+  }
+  .walls.placeholder {
+    stroke: var(--grid-strong);
+    stroke-dasharray: 10 6;
+  }
+  .legend-slot {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .legend-slot :global(*) {
+    pointer-events: auto;
+  }
+  .dim .tick {
+    stroke-width: 1.4;
   }
   .room.heat {
     position: static;
@@ -1090,10 +1129,10 @@
     stroke: transparent;
     stroke-width: 1;
   }
+  /* The front wall is part of the band; it is only drawn on its own when selected. */
   .front {
-    stroke: var(--ink-muted);
-    stroke-width: 3;
-    stroke-linecap: round;
+    stroke: transparent;
+    stroke-width: 1;
   }
   .wall.active,
   .front.active {
@@ -1103,7 +1142,10 @@
   }
   .label {
     fill: var(--ink-muted);
-    font-size: var(--text-xs);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
   .zone-note {
     fill: var(--ink-muted);

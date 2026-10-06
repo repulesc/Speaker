@@ -28,8 +28,8 @@ const STOPS: Record<Theme, [number, number, number][]> = {
  * hatch, off the good-to-poor scale (docs/ROADMAP_V7.md). Tokens `--heat-none`, `--heat-none-line`.
  */
 export const NOT_A_SPOT: Record<Theme, { fill: string; line: string }> = {
-  light: { fill: '#f4f2ee', line: '#d9d4ca' },
-  dark: { fill: '#26241f', line: '#3d3a33' },
+  light: { fill: '#f6f3ec', line: '#d8d1c3' },
+  dark: { fill: '#1d211e', line: '#343b36' },
 };
 
 /** Scores below this are rare; the absolute scale starts here (stronger = better). */

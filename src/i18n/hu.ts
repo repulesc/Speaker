@@ -42,6 +42,8 @@ export const hu: Messages = {
     duplicate: 'Másolat készítése',
     rename: 'Átnevezés',
     renameLabel: 'A projekt neve',
+    renameHint: 'Kattints az átnevezéshez',
+    renameButton: '„{name}” átnevezése',
     delete: 'Törlés',
     deleteConfirm: 'Törlöd ezt: „{name}”? Ez nem vonható vissza.',
     saved: 'Elmentve ezen az eszközön',
@@ -52,6 +54,7 @@ export const hu: Messages = {
       'A mentés nem sikerült, lehet, hogy betelt a tárhely. Használd az exportálást, hogy ne vesszen el a munkád.',
   },
   menu: {
+    legacy: 'Előző változat (V7)',
     image: 'Megosztás képként',
     label: 'Menü',
     support: 'A projekt támogatása ☕',
@@ -140,7 +143,39 @@ export const hu: Messages = {
       driverLayout: 'a hangszórók elrendezése',
     },
   },
-  steps: { room: 'Helyiség' },
+  steps: {
+    room: 'Helyiség',
+    label: 'Lépések',
+    setup: 'Beállítás',
+    place: 'Elhelyezés',
+    listen: 'Hallgatás',
+  },
+  setup: {
+    room: {
+      title: 'A szoba',
+      measured: 'Ezeket lemértem',
+      busy: 'Mennyire van berendezve?',
+      more: 'Még a szobáról',
+      moreHint: 'Falak és padló, bútorok, a szerkezete',
+      build: 'A szerkezete',
+    },
+    speakers: {
+      title: 'A hangfalaid',
+      more: 'Még a hangfalaidról',
+      moreHint: 'Hangszórók, állvány, pontos méretek, hol állnak most, mi mozdítható',
+    },
+    listen: {
+      title: 'Ahol hallgatod',
+      more: 'Továbbiak',
+      moreHint: 'Mi fontos neked, akusztikai kezelés',
+    },
+    next: 'Hová kerüljenek?',
+  },
+  place: {
+    details: 'A részletek',
+    detailsHint: 'Miért, az okok a térképen, a basszus az ülőhelyeden',
+  },
+
   field: {
     unusual: 'Biztos, hogy jó? A helyiségek általában {min} és {max} között vannak.',
     outOfRange: '{label}: {min} és {max} közötti értéket adj meg.',
@@ -747,7 +782,7 @@ export const hu: Messages = {
   layer: {
     speakers: {
       name: 'Hová kerüljenek a hangfalak',
-      what: 'Hol szólnának a legjobban a hangfalak, ha az ülőhelyed ott marad, ahol van. Minden pont azt mutatja, hová állna a hangfalpár, tükrözve az ülőhelyed körül. Minél erősebb a szín, annál jobb.',
+      what: 'Hol szólnának a legjobban a hangfalak, ha az ülőhelyed marad. Az erősebb szín jobb.',
     },
     overall: {
       name: 'Összesített',
@@ -755,7 +790,7 @@ export const hu: Messages = {
     },
     goals: {
       name: 'A céljaid',
-      what: 'Mennyire jó itt az ülőhely, a hangfalakkal ott, ahol most vannak. Minél erősebb a szín, annál jobb.',
+      what: 'Mennyire jó az ülőhely itt, ha a hangfalak maradnak. Az erősebb szín jobb.',
     },
     bass: {
       name: 'Basszus egyenletessége',

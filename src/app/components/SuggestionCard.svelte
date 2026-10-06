@@ -355,7 +355,7 @@
             {prefs.numbers ? adviceText(idea, system) : advicePlainText(idea, system)}
           </p>
         {/each}
-        <button type="button" class="card-link" onclick={() => (ui.tab = 'tips')}
+        <button type="button" class="card-link" onclick={() => (ui.tab = 'listen')}
           >{i18n.t('result.moreTips')} ›</button
         >
       </section>

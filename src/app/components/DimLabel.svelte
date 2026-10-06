@@ -120,15 +120,21 @@
     min-height: 22px;
     padding: 1px 8px;
     border: 0;
-    border-radius: 999px;
+    border-radius: 4px;
     background: var(--surface);
-    box-shadow: 0 0 0 1px var(--grid-strong);
     color: var(--ink);
-    font-size: var(--text-xs);
+    /* Figures on the drawing are set in the serif, like an architect's dimensions (V8). */
+    font-family: var(--font-display);
+    font-size: 14px;
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
     line-height: 1.6;
     white-space: nowrap;
     cursor: text;
+  }
+  .value:hover,
+  .edit {
+    box-shadow: 0 0 0 1px var(--grid-strong);
   }
   .edit {
     width: 84px;

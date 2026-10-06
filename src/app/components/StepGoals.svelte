@@ -10,6 +10,8 @@
     'deep-bass',
     'low-volume-listening',
   ];
+  /** Inside a "More detail" group of Set up (V8): no title of its own. */
+  let { embedded = false }: { embedded?: boolean } = $props();
   const levels: GoalWeight[] = [0, 1, 2];
   const levelKey = ['dontCare', 'nice', 'important'] as const;
 
@@ -22,10 +24,12 @@
 </script>
 
 <div class="step">
-  <div>
-    <h2>{i18n.t('goals.title')}</h2>
-    <p class="intro">{i18n.t('goals.intro')}</p>
-  </div>
+  {#if !embedded}
+    <div>
+      <h2>{i18n.t('goals.title')}</h2>
+      <p class="intro">{i18n.t('goals.intro')}</p>
+    </div>
+  {/if}
 
   {#each goals as id (id)}
     <fieldset>

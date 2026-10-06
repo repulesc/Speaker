@@ -40,6 +40,8 @@ export const en = {
     duplicate: 'Duplicate',
     rename: 'Rename',
     renameLabel: 'Project name',
+    renameHint: 'Click to rename',
+    renameButton: 'Rename “{name}”',
     delete: 'Delete',
     deleteConfirm: 'Delete “{name}”? This cannot be undone.',
     saved: 'Saved on this device',
@@ -48,6 +50,7 @@ export const en = {
     failed: 'Could not save: storage may be full. Use Export to keep your work.',
   },
   menu: {
+    legacy: 'Previous version (V7)',
     image: 'Share as image',
     label: 'Menu',
     support: 'Support this project ☕',
@@ -134,7 +137,39 @@ export const en = {
       driverLayout: 'driver layout',
     },
   },
-  steps: { room: 'Room' },
+  steps: {
+    room: 'Room',
+    label: 'Steps',
+    setup: 'Set up',
+    place: 'Place',
+    listen: 'Listen',
+  },
+  setup: {
+    room: {
+      title: 'The room',
+      measured: 'I measured these',
+      busy: 'How full is it?',
+      more: 'More about the room',
+      moreHint: 'Walls and floor, furniture, how it is built',
+      build: 'How it is built',
+    },
+    speakers: {
+      title: 'Your speakers',
+      more: 'More about your speakers',
+      moreHint: 'Drivers, stands, exact sizes, where they stand now, what can move',
+    },
+    listen: {
+      title: 'Where you listen',
+      more: 'More',
+      moreHint: 'What matters to you, room treatment',
+    },
+    next: 'See where they go',
+  },
+  place: {
+    details: 'The details',
+    detailsHint: 'Why, the reasons on the map, the bass at your seat',
+  },
+
   field: {
     unusual: 'Is that right? Rooms are usually between {min} and {max}.',
     outOfRange: '{label} must be between {min} and {max}.',
@@ -735,7 +770,7 @@ export const en = {
   layer: {
     speakers: {
       name: 'Where the speakers go',
-      what: 'Where the speakers would sound best, with your seat staying where it is. Each spot is where the speaker pair would stand, mirrored about your seat. The stronger the colour, the better.',
+      what: 'Where the speakers would sound best, your seat staying where it is. Stronger colour is better.',
     },
     overall: {
       name: 'Overall',
@@ -743,7 +778,7 @@ export const en = {
     },
     goals: {
       name: 'My goals',
-      what: 'How good a seat is here, with your speakers where they are. The stronger the colour, the better.',
+      what: 'How good each seat is, your speakers staying where they are. Stronger colour is better.',
     },
     bass: {
       name: 'Bass evenness',

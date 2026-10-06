@@ -26,7 +26,8 @@
   let {
     questions = ['kind', 'size', 'drivers', 'port', 'madeFor', 'spread', 'placedOn'],
     idPrefix = 'speaker',
-  }: { questions?: readonly Question[]; idPrefix?: string } = $props();
+    note = true,
+  }: { questions?: readonly Question[]; idPrefix?: string; note?: boolean } = $props();
 
   const project = $derived(workspace.project);
   const choices = $derived<SpeakerChoices>(project.speaker.choices ?? {});
@@ -86,7 +87,7 @@
       {/if}
     </div>
   {/each}
-  <p class="help">{i18n.t('speakers.ask.note')}</p>
+  {#if note}<p class="help">{i18n.t('speakers.ask.note')}</p>{/if}
 </div>
 
 <style>

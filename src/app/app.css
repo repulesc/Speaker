@@ -4,17 +4,47 @@
  */
 @import './tokens.css';
 
+/*
+ * Newsreader (Production Type, SIL Open Font License 1.1, fonts/OFL-Newsreader.txt), served with
+ * the app: no third-party font request. Latin, plus latin-ext only when a page needs it (ő, ű).
+ */
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('./fonts/newsreader-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('./fonts/newsreader-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
 :root {
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* The voice of the app: the name, step titles, the verdict, the figures on the drawing (V8). */
+  --font-display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
   /* Type scale: caption, footnote, body, headline, title. Nothing else. */
   --text-xs: 12px;
   --text-sm: 13px;
   --text-md: 15px;
   --text-lg: 17px;
   --text-xl: 22px;
+  /* The serif title and the verdict: one size up from the panel's text scale. */
+  --text-display: 26px;
   --radius-sm: 8px;
   --radius-md: 12px;
   /* Cards: one radius for every card in the panel (V7). */
@@ -53,12 +83,13 @@ h4 {
   font-weight: 600;
 }
 
-/* Three sizes in the panel: title 22, body 15, caption 13 (docs/DESIGN_BRIEF_V3.md). */
+/* Titles speak in the serif (V8 identity); body 15, caption 13 in the system face. */
 h1,
 h2 {
+  font-family: var(--font-display);
   font-size: var(--text-xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  letter-spacing: -0.005em;
 }
 h3,
 h4,
@@ -97,7 +128,7 @@ p {
   min-height: 44px;
   padding: 0 16px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--fill);
   color: var(--accent);
   font: inherit;

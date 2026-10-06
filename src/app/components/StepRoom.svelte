@@ -6,6 +6,11 @@
   import { workspace } from '../session.svelte';
   import LengthField from './LengthField.svelte';
 
+  /**
+   * Inside a "More detail" group of Set up (V8): no title and no sizes (Set up asks them in one row);
+   * what is left is how the room is built and what the model cannot see.
+   */
+  let { embedded = false }: { embedded?: boolean } = $props();
   const room = $derived(workspace.project.room);
   const system = $derived(workspace.project.units);
 
@@ -50,25 +55,27 @@
 </script>
 
 <div class="step">
-  <div>
-    <h2>{i18n.t('room.title')}</h2>
-    <p class="intro">{i18n.t('room.intro')}</p>
-  </div>
+  {#if !embedded}
+    <div>
+      <h2>{i18n.t('room.title')}</h2>
+      <p class="intro">{i18n.t('room.intro')}</p>
+    </div>
 
-  {#each dims as dim (dim)}
-    <LengthField
-      id="room-{dim}"
-      label={i18n.t(`room.${dim}`)}
-      help={i18n.t(`room.${dim}Help`)}
-      kind="room"
-      value={room[dim]}
-      {system}
-      limits={ROOM_LIMITS[dim]}
-      usual={USUAL_ROOM_RANGE[dim]}
-      unknownNote={i18n.t('field.neededToStart')}
-      onchange={(next) => workspace.edit((p) => void (p.room[dim] = next))}
-    />
-  {/each}
+    {#each dims as dim (dim)}
+      <LengthField
+        id="room-{dim}"
+        label={i18n.t(`room.${dim}`)}
+        help={i18n.t(`room.${dim}Help`)}
+        kind="room"
+        value={room[dim]}
+        {system}
+        limits={ROOM_LIMITS[dim]}
+        usual={USUAL_ROOM_RANGE[dim]}
+        unknownNote={i18n.t('field.neededToStart')}
+        onchange={(next) => workspace.edit((p) => void (p.room[dim] = next))}
+      />
+    {/each}
+  {/if}
 
   <fieldset>
     <legend>{i18n.t('room.construction.legend')}</legend>
