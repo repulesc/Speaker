@@ -68,7 +68,7 @@ test('journey 5 — language: Hungarian shows no English UI text', async ({ page
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
   await page.keyboard.press('Escape');
   await expect(page.locator('html')).toHaveAttribute('lang', 'hu');
-  await expect(page.getByRole('heading', { name: 'A szoba mérete' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A szoba', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Beállítások' }).click();
   const text = await page.locator('body').innerText();
@@ -191,7 +191,7 @@ test('journey 10 — keyboard only: skip to the panel, type, and open the result
   await page.keyboard.press('Enter');
   await expect(width).toHaveValue('4.00\u00a0m');
 
-  const done = page.getByRole('button', { name: 'Done' }).first();
+  const done = page.getByRole('button', { name: 'See where they go' });
   await done.focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Your result' })).toBeVisible();
@@ -217,12 +217,11 @@ test('confidence meter explains what would improve things', async ({ page }) => 
 test('projects: new, switch, rename and delete', async ({ page }) => {
   const header = page.locator('#panel header');
   await fillRoom(page, '4', '5', '2.5');
-  await openMenu(page);
-  await page.getByRole('button', { name: 'Rename', exact: true }).click();
+  // The name is renamed where it is shown (V8): click it, type, Enter.
+  await page.getByRole('button', { name: /^Rename “/ }).click();
   await page.getByLabel('Project name').fill('Living room');
   await page.getByLabel('Project name').press('Enter');
   await expect(header).toContainText('Living room');
-  await page.keyboard.press('Escape');
 
   await openMenu(page);
   await page.getByRole('button', { name: 'New project' }).click();

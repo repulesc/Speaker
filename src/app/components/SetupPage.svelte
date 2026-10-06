@@ -260,9 +260,6 @@
   }
   .more-body h3 {
     margin-top: 8px;
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    font-weight: 500;
   }
   .next {
     width: 100%;

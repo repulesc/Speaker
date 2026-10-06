@@ -366,10 +366,9 @@
   .overline {
     margin: 0;
     color: var(--ink-muted);
-    font-size: 11px;
+    font-size: var(--text-sm);
     font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
   .verdict {
     display: grid;
@@ -410,7 +409,7 @@
   }
   .say {
     margin: 0;
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     font-weight: 600;
     line-height: 1.4;
   }
@@ -468,7 +467,7 @@
     flex: 1;
   }
   .alts label {
-    min-width: 40px;
+    min-width: 44px;
     padding: 0 10px;
   }
   .found {

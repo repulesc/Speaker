@@ -175,7 +175,7 @@
   .save {
     margin-left: auto;
     color: var(--ink-muted);
-    font-size: var(--text-xs);
+    font-size: var(--text-sm);
   }
   .save[data-state='unavailable'],
   .save[data-state='failed'] {
@@ -228,9 +228,6 @@
   }
   /* The steps stay in reach while the page scrolls. */
   .steps-bar {
-    position: sticky;
-    top: var(--sheet-handle, 0px);
-    z-index: 3;
     padding: 0 20px;
     background: var(--bg);
   }

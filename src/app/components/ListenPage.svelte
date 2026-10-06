@@ -269,7 +269,7 @@
     background: var(--surface);
     color: var(--ink);
     font-family: var(--font-display);
-    font-size: 16px;
+    font-size: var(--text-md);
     cursor: pointer;
   }
   .dot[aria-pressed='true'] {
@@ -303,8 +303,7 @@
       var(--card-shadow);
   }
   .pending-title {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
+    font-weight: 600;
     line-height: 1.35;
   }
   .results {
@@ -443,11 +442,12 @@
   .room-ideas .body {
     padding-top: 16px;
   }
-  @media (pointer: coarse) {
+  @media (pointer: coarse), (max-width: 1023px) {
     .option,
     .dot,
     .exp .btn {
       min-height: 44px;
+      min-width: 44px;
     }
   }
 </style>

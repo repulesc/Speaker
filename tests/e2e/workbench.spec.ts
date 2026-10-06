@@ -208,8 +208,7 @@ test('Hungarian: findings and the map speak Hungarian, with no keys leaking', as
   await openMenu(page);
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
   await page.keyboard.press('Escape');
-  await page.getByRole('tab', { name: 'Miért' }).click();
-  await expect(page.getByRole('heading', { name: 'Miért' })).toBeVisible();
+  await openTab(page, 'Why');
   await expect(page.getByLabel('Térképréteg')).toBeVisible();
   await expect(page.locator('article').first()).toContainText(/Piros zászló|Figyelem/);
   const body = await page.locator('body').innerText();
@@ -233,12 +232,13 @@ test('panels and bass traps stay out of sight until you say you are ready to inv
   await expect(page.getByTestId('held-back')).toContainText('bigger options');
   // The hint opens the settings, where the box is.
   await page.getByRole('button', { name: 'Turn it on' }).click();
+  await expect(page.locator('#setup-listen-more')).toHaveAttribute('open', '');
   await page.getByRole('checkbox', { name: /ready to invest/ }).check();
   expect((await savedProject(page)).constraints.treatmentReady).toBe(true);
   await openSection(page, 'Improve the room');
   await expect(page.getByTestId('held-back')).toHaveCount(0);
   await expect(page.getByText('Bigger investment').first()).toBeVisible();
-  await openSettings(page);
+  await openSection(page, 'Goals');
   await page.getByRole('checkbox', { name: /ready to invest/ }).uncheck();
   expect((await savedProject(page)).constraints.treatmentReady).toBeUndefined();
 });
@@ -291,39 +291,38 @@ test('furniture: a bigger palette and a material for any object', async ({ page 
   await expect(page.getByLabel('Material')).toHaveValue('soft');
 });
 
-test('the Listen tab saves a rated note, shows the tip and the agreement text', async ({
+test('the listening check turns what you hear into one change to try, and can put it back', async ({
   page,
 }) => {
   await withResults(page);
   await openSection(page, 'Listening notes');
-  await expect(page.getByRole('heading', { name: 'Listen and note' })).toBeVisible();
-  await expect(page.getByTestId('agreement')).toContainText('Rate at least two');
-  await page.getByRole('radio', { name: '4 of 5' }).check({ force: true });
-  await page.getByLabel('Boomy, heavy bass').check();
-  await page.getByLabel('Your note (optional)').fill('after an evening');
-  await page.getByRole('button', { name: 'Save note' }).click();
-  await expect(page.getByText('after an evening')).toBeVisible();
-  await expect(page.getByText(/Move your seat about 20 cm forward/)).toBeVisible();
-  const text = await page.locator('#panel').innerText();
-  expect(text).not.toMatch(/\blisten\.[A-Za-z]/);
-  await page.getByRole('button', { name: 'Delete note' }).click();
-  await expect(page.getByText('No notes for this setup yet.')).toBeVisible();
-});
+  await expect(page.getByRole('heading', { name: 'How does it sound?' })).toBeVisible();
+  await expect(page.getByTestId('experiment')).toHaveCount(0);
 
-test('compare: a second setup appears as a dashed line and a verdict', async ({ page }) => {
-  await withResults(page);
-  await expect(page.getByRole('heading', { name: 'Compare setups' })).toHaveCount(0);
-  await page.getByRole('button', { name: '+ New setup' }).click();
-  await openWhy(page);
-  await page.getByLabel('Compare with').selectOption({ index: 1 });
-  await expect(page.getByTestId('compare-scores')).toBeVisible();
-  // The bass chart has its own page; the comparison stays on while it is open.
-  await openSection(page, 'Bass at your seat');
-  await expect(page.locator('path.line.other')).toHaveCount(1);
-  await openWhy(page);
-  await page.getByLabel('Compare with').selectOption('');
-  await openSection(page, 'Bass at your seat');
-  await expect(page.locator('path.line.other')).toHaveCount(0);
+  const bass = page.getByRole('group', { name: 'Bass', exact: true });
+  await bass.getByRole('button', { name: 'Boomy' }).click();
+  await expect(bass.getByRole('button', { name: 'Boomy' })).toHaveAttribute('aria-pressed', 'true');
+  const first = page.getByTestId('experiment').first();
+  await expect(first).toBeVisible();
+  const text = await page.locator('#panel').innerText();
+  expect(text).not.toMatch(/\blisten\.[A-Za-z]|\{\w+\}/);
+
+  // Moving things is one change, and the app remembers where they were.
+  const before = await savedProject(page);
+  const tryIt = first.getByRole('button', { name: 'Try it' });
+  if (await tryIt.count()) {
+    await tryIt.click();
+    await expect(page.getByTestId('listen-pending')).toContainText('How was it?');
+    await page.getByTestId('listen-pending').getByRole('button', { name: 'Worse' }).click();
+    await expect(page.getByTestId('listen-pending')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Put it back' }).first().click();
+    const after = await savedProject(page);
+    expect(after.variants[0].speakers).toEqual(before.variants[0].speakers);
+    expect(after.variants[0].listener).toEqual(before.variants[0].listener);
+  }
+  await page.getByLabel('A note for yourself (optional)').fill('after an evening');
+  await page.getByLabel('A note for yourself (optional)').blur();
+  expect((await savedProject(page)).listening.note).toBe('after an evening');
 });
 
 test('the print sheet has the tape-measure numbers', async ({ page }) => {

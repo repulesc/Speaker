@@ -65,19 +65,18 @@ for (const scheme of ['light', 'dark'] as const) {
       await page.addInitScript((theme) => localStorage.setItem('spa:theme', theme), scheme);
     });
 
-    test('with a filled room, a patch, an object and a second setup', async ({ page }) => {
+    test('with a filled room, a patch and an object', async ({ page }) => {
       test.setTimeout(90_000); // seven full accessibility scans
       await openApp(page);
       await fillRoom(page, '4', '5', '2.5');
 
-      // Give the later steps something to show: a patch, an object, a second setup.
+      // Give the later steps something to show: a patch and an object.
       await goStep(page, 'Surfaces');
       await page.getByText('Add something on a wall').click();
       await page.getByRole('radio', { name: /^Left wall/ }).check({ force: true });
       await page.getByRole('button', { name: '+ Shelf or CD wall' }).click();
       await goStep(page, 'Furnishing');
       await page.getByRole('button', { name: '+ Bed' }).click();
-      await page.getByRole('button', { name: '+ New setup' }).click();
 
       for (const step of STEPS) {
         await goStep(page, step);
@@ -97,17 +96,27 @@ for (const scheme of ['light', 'dark'] as const) {
   });
 }
 
-test('home, Why, Treat, Listen and the bass-note explorer', async ({ page }) => {
+test('Place, its details, Listen with experiments, and the bass-note explorer', async ({
+  page,
+}) => {
   await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
-  await expectAccessible(page); // home: the best placement and the list
+  await expectAccessible(page); // Place: the best placement
   await openWhy(page);
   await expectAccessible(page);
   await openSection(page, 'Improve the room');
   await expectAccessible(page);
   await openSection(page, 'Listening notes');
-  await expectAccessible(page);
+  const bass = page.getByRole('group', { name: 'Bass', exact: true });
+  await bass.getByRole('button', { name: 'Boomy' }).click();
+  await page.getByTestId('experiment').first().waitFor();
+  await expectAccessible(page); // answers and the experiments
+  const tryIt = page.getByTestId('experiment').getByRole('button', { name: 'Try it' }).first();
+  if (await tryIt.count()) {
+    await tryIt.click();
+    await expectAccessible(page); // "How was it?"
+  }
   await openTab(page, 'Why');
   await page.getByRole('button', { name: 'Bass note' }).click();
   await expectAccessible(page);

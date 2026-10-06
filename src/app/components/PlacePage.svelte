@@ -1,11 +1,14 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
+  import { analysis } from '../session.svelte';
+  import ConfidenceMeter from './ConfidenceMeter.svelte';
   import SuggestionCard from './SuggestionCard.svelte';
   import WhyTab from './WhyTab.svelte';
 
   /**
    * Place (docs/ROADMAP_V8.md §2): the answer first; the reasons, the per-reason maps and the bass
-   * fold under "The details" for whoever asks why (owner: "Why what? It's not obvious").
+   * fold under "The details" for whoever asks why (owner: "Why what? It's not obvious"). How sure
+   * the answer is closes the page.
    */
   let open = $state(false);
 </script>
@@ -19,6 +22,7 @@
     </summary>
     {#if open}<div class="body"><WhyTab /></div>{/if}
   </details>
+  <ConfidenceMeter report={analysis.result?.confidence ?? null} />
 </div>
 
 <style>

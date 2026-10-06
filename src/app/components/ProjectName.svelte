@@ -61,7 +61,7 @@
     align-items: baseline;
     gap: 8px;
     width: 100%;
-    min-height: 40px;
+    min-height: 44px;
     margin: 0;
     padding: 0;
     border: 0;
