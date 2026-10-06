@@ -49,7 +49,7 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
 
   await expect(page.locator('#plan-desc')).toContainText('4.00');
   await goStep(page, 'Room');
-  await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
+  await expect(group(page, 'room').getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
   await expect(page.getByLabel('Ceiling height')).toHaveValue('3.20\u00a0m');
   await goStep(page, 'Speakers');
   await openSpeakerDetails(page);
@@ -64,7 +64,7 @@ test.describe('with a room', () => {
     await fillRoom(page, '4', '5', '2.5');
   });
 
-  test('journey 3 — variants are independent, and undo restores a move', async ({ page }) => {
+  test('journey 3 — a move made in two key presses is one undo step', async ({ page }) => {
     const original = await seatDistance(page);
     const seat = page.getByRole('button', { name: /^Seat\./ }).first();
     await seat.focus();
@@ -72,25 +72,11 @@ test.describe('with a room', () => {
     await page.keyboard.press('Shift+ArrowDown');
     expect(await seatDistance(page)).toBeCloseTo(original + 0.2, 2);
 
-    await page.getByRole('button', { name: '+ New setup' }).click();
-    await expect(page.getByRole('tab')).toHaveCount(2);
-    expect(await seatDistance(page)).toBeCloseTo(original + 0.2, 2); // a copy of the first
-
-    await page
-      .getByRole('button', { name: /^Seat\./ })
-      .first()
-      .focus();
-    await page.keyboard.press('Shift+ArrowDown');
-    await page.keyboard.press('Shift+ArrowDown');
-    expect(await seatDistance(page)).toBeCloseTo(original + 0.4, 2);
-
-    await page.getByRole('tab').first().click();
-    expect(await seatDistance(page)).toBeCloseTo(original + 0.2, 2); // the first setup is untouched
-
-    await page.getByRole('tab').nth(1).click();
     await page.locator('h2').first().click(); // leave the drawing so the shortcut acts on the project
     await page.keyboard.press('Control+z');
-    expect(await seatDistance(page)).toBeCloseTo(original + 0.2, 2); // both moves were one undo step
+    expect(await seatDistance(page)).toBeCloseTo(original, 2); // both moves were one undo step
+    await page.keyboard.press('Control+Shift+z');
+    expect(await seatDistance(page)).toBeCloseTo(original + 0.2, 2);
   });
 
   test('dragging the seat with the mouse moves it, and is one undo step', async ({ page }) => {

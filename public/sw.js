@@ -1,7 +1,7 @@
 /* Minimal offline support: cache the app shell and same-origin assets as they are used.
    Hashed build assets never change, so they are served cache-first. The page itself
    (index.html, manifest) is network-first so updates arrive, with the cache as fallback. */
-const CACHE = 'spa-shell-v1';
+const CACHE = 'spa-shell-v2';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -18,6 +18,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  // The frozen previous version under legacy/ is served as is, never cached as this app's page.
+  if (url.pathname.includes('/legacy/')) return;
 
   const isPage = request.mode === 'navigate' || url.pathname.endsWith('manifest.webmanifest');
   event.respondWith(isPage ? networkFirst(request) : cacheFirst(request));

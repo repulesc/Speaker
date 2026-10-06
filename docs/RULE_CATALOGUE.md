@@ -372,6 +372,8 @@ What to change in the room or on the speaker, most useful first; the first item 
 
 ## 🟣 Subjective rules (symptom → hypotheses → experiment)
 
+> **V8:** the app now uses the listening check (L01–L07, at the end of this section). The S table below is the design it grew from, kept for the record.
+
 Subjective input never changes the computed positions. It produces a **ranked list of likely causes**, using the user's room data, and one experiment for each. Ranking: hypotheses whose physical precondition is present in the room data rank first (for example "boomy" ranks "back wall too close" first only if G02 fired).
 
 | ID | Symptom (user picks) | Hypotheses (checked against data) | Experiment |
@@ -388,6 +390,27 @@ Rules for S-rules:
 
 - Each experiment changes **one** thing, by a stated amount, with the same three reference tracks, and asks for a rating. Results are logged per setup variant.
 - If the user's rating after a physics-backed change contradicts the physics (for example they prefer a position at a predicted null), the app records it and says so honestly. It doesn't argue, it doesn't change the model, and it notes that preference is valid.
+
+### Listening check L01–L07 (V8, replaces S01–S07 in the app)
+
+Code: `src/engine/listening/`, tests `tests/engine/listening.test.ts`. The user answers on two-sided scales (bass thin / just right / boomy, and so on, `ASPECT_ANSWERS` in `check.ts`); each rule proposes **one change at a time**. Ears are the judge: the app offers to make a move and to put it back, and it records "better / the same / worse". It never changes the computed scores.
+
+- **Feasibility.** A move is offered only if it fits the room and the user's limits (`applyChange`: fixed speakers or seat, the seat range, how far the speakers may come into the room, minimum spacing, toe-in 0–35°, and `isValidPlacement`). Otherwise it is dropped.
+- **The model's second opinion.** For moves other than toe-in, the room model's score before and after is shown as "expects it to help / about the same / to be worse" (threshold 0.02 on the 0–1 score). Toe-in has no model view, because the model does not score it.
+- **Ordering.** Priority is a 🟡 ordering only: physics-backed moves first, then guidelines, then by-ear tries. At most two per aspect and five in all.
+- **Tuning is optional.** Tone controls, port plugs and similar are always worded "if your speakers or amplifier have …". Many speakers have none and need none (owner, V8).
+
+| ID | Answer | Experiments (condition) | Evidence | Sources |
+|---|---|---|---|---|
+| L01 | Bass boomy | Speakers 20 cm out (rear clearance < 0.6 m) · seat 20 cm forward (seat < 1 m from back wall) · speakers 10 cm inward each (side wall < 0.4 m) · port plugs (ported, rear or front port) · bass control down one step | 🔴 🔴 🔴 🟡 🟠 | [ALL74], [KUT], [manufacturer] |
+| L02 | Bass thin | Speakers up to 20 cm closer to the front wall, never nearer than 15 cm or the rear-port minimum (G07) · seat off the room's middle (within 0.3 m of it, or G01 fired) · small speakers stop early (f6 ≥ 60 Hz): says so · bass control up one step | 🔴 🔴 🔴 🟠 | [ALL74], [KUT], [manufacturer] |
+| L03 | Some notes boom or vanish | Seat 15 cm further from the room's middle · speakers 10 cm out | 🔴 | [KUT] |
+| L04 | Centre vague, or pulled left or right | Seat to the centre line (unequal distances, G05) · more toe-in (vague, toe-in < 25°) · tweeters at ear height (G08) · swap test (pulled with equal distances) | 🔴 🟣 🟠 🟣 | [WALL49], [TOOLE], [ITU1116] |
+| L05 | Width narrow, or a hole in the middle | Wider or narrower pair (angle < 58° or > 62°) · sit closer or further back · less or more toe-in | 🟠 🟠 🟣 | [ITU775], [TOOLE] |
+| L06 | Treble bright or dull | Less or more toe-in · tweeters at ear height · soften a hard surface (bright, mid T60 > 0.45 s) · treble control one step | 🟣 🟠 🟠 🟠 | [TOOLE], [ITU1116], [EVP], [manufacturer] |
+| L07 | Clarity: a little echo, or echoey | Sit closer (nearer speaker > 1.4 m, P10) · soft things on hard surfaces (P08) | 🔴 🟠 | [KUT], [SAB], [EVP] |
+
+The distances (20 cm, 10 cm, one control step) are typical first steps, 🟡: small enough to hear as one change and large enough to hear at all.
 
 ---
 
@@ -453,4 +476,5 @@ Object values are ranges. The engine uses the midpoint and propagates the range 
 | [PRA] | pyroomacoustics 0.10.1, `materials.json` (absorption database), MIT licence, from PyPI. A compilation of published tables. | ✓ used to cross-check Appendix A (R5) |
 | [DWELL] | Surveys of furnished dwellings, as summarised in the introduction of *Applied Sciences* 11(6), 2709 (2021): Bradley (602 Canadian homes, about 0.4 s, 100–4000 Hz), Burgess et al. (47 living rooms, 0.33 s at 500 Hz), Jackson et al. (50 living rooms, 0.51 s at 1 kHz), Parkin et al. (about 0.5 s). | ✓ secondary summary (R5); originals not checked |
 | [WELTI06] | Welti, T. & Devantier, A. "Low-Frequency Optimization Using Multiple Subwoofers." *J. Audio Eng. Soc.* 54(5), 2006. | not used in v1 |
+| [manufacturer] | The speaker's or amplifier's own manual: port plugs, bass and treble controls. Used only as "if yours has one". | generic; nothing is claimed about a specific product |
 | [CARDAS] | Cardas Audio, speaker placement guide (web page). | not used: H03 is not implemented (its numbers stay unverified) |

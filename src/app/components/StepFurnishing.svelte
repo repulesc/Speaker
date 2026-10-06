@@ -67,6 +67,11 @@
     custom: ['room', 'reflections', 'view'],
   };
 
+  /**
+   * Inside a "More detail" group of Set up (V8): no title, and no "how full is the room", which
+   * Set up asks on its own page.
+   */
+  let { embedded = false }: { embedded?: boolean } = $props();
   const selectedId = $derived(ui.selection.kind === 'object' ? ui.selection.id : null);
   const selected = $derived(variant.objects.find((o) => o.id === selectedId) ?? null);
   const busyValue = $derived(variant.busyness?.value ?? null);
@@ -93,39 +98,43 @@
 </script>
 
 <div class="step">
-  <div>
-    <h2>{i18n.t('furnishing.title')}</h2>
-    <p class="intro">{i18n.t('furnishing.intro')}</p>
-  </div>
-
-  <fieldset>
-    <legend>{i18n.t('furnishing.busy.legend')}</legend>
-    <p class="help">
-      {variant.objects.length > 0
-        ? i18n.t('furnishing.busy.combined')
-        : i18n.t('furnishing.busy.help')}
-    </p>
-    <div class="seg" role="radiogroup" aria-label={i18n.t('furnishing.busy.legend')}>
-      {#each busyLevels as level (level)}
-        <label>
-          <input
-            type="radio"
-            name="busyness"
-            value={level}
-            checked={busyValue === level}
-            onchange={() => setBusy(level)}
-          />
-          <span>{i18n.t(`furnishing.busy.${busyKey[level]}`)}</span>
-        </label>
-      {/each}
+  {#if !embedded}
+    <div>
+      <h2>{i18n.t('furnishing.title')}</h2>
+      <p class="intro">{i18n.t('furnishing.intro')}</p>
     </div>
-    <button
-      type="button"
-      class="btn quiet link"
-      onclick={() => setBusy(null)}
-      disabled={busyValue === null}>{i18n.t('field.certainty.unknown')}</button
-    >
-  </fieldset>
+  {/if}
+
+  {#if !embedded}
+    <fieldset>
+      <legend>{i18n.t('furnishing.busy.legend')}</legend>
+      <p class="help">
+        {variant.objects.length > 0
+          ? i18n.t('furnishing.busy.combined')
+          : i18n.t('furnishing.busy.help')}
+      </p>
+      <div class="seg" role="radiogroup" aria-label={i18n.t('furnishing.busy.legend')}>
+        {#each busyLevels as level (level)}
+          <label>
+            <input
+              type="radio"
+              name="busyness"
+              value={level}
+              checked={busyValue === level}
+              onchange={() => setBusy(level)}
+            />
+            <span>{i18n.t(`furnishing.busy.${busyKey[level]}`)}</span>
+          </label>
+        {/each}
+      </div>
+      <button
+        type="button"
+        class="btn quiet link"
+        onclick={() => setBusy(null)}
+        disabled={busyValue === null}>{i18n.t('field.certainty.unknown')}</button
+      >
+    </fieldset>
+  {/if}
 
   <section aria-labelledby="objects-title">
     <h3 id="objects-title">{i18n.t('furnishing.objects.title')}</h3>

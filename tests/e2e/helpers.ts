@@ -58,51 +58,63 @@ export async function openMenu(page: Page) {
   await page.getByRole('button', { name: 'Settings' }).click();
 }
 
-/** The sidebar's home: the result tabs (closes the "Your room" sheet or a page). */
+/** One of the panel's three steps (docs/ROADMAP_V8.md): Set up, Place, Listen. */
+export async function openStep(page: Page, step: 'setup' | 'place' | 'listen') {
+  await page.locator(`#step-${step}`).click();
+}
+
+/** The panel's home since V8: the Place step (the answer). */
 export async function goHome(page: Page) {
-  const done = page.locator('#panel').getByRole('button', { name: 'Done', exact: true });
-  if (await done.count()) await done.first().click();
-  const back = page.getByRole('button', { name: 'Back', exact: true });
-  if (await back.count()) await back.click();
+  await openStep(page, 'place');
 }
 
-/** One of the result tabs (docs/ROADMAP_V5.md, V6). */
+/** Opens a fold (a <details>) unless it is open already. */
+async function unfold(page: Page, selector: string) {
+  const details = page.locator(selector).first();
+  if (!(await details.evaluate((d) => (d as HTMLDetailsElement).open))) {
+    await details.locator('summary').first().click();
+  }
+}
+
+/**
+ * The V6 tab names, kept so the journeys read the same: the result is Place, the reasons are
+ * Place's "The details", the tips are Listen's "Ideas for the room".
+ */
 export async function openTab(page: Page, name: 'Result' | 'Why' | 'Tips') {
-  await goHome(page);
-  await page.getByRole('tab', { name, exact: true }).click();
+  if (name === 'Tips') {
+    await openStep(page, 'listen');
+    await unfold(page, 'details.room-ideas');
+    return;
+  }
+  await openStep(page, 'place');
+  if (name === 'Why') await unfold(page, 'details.details');
 }
 
-/** Where a name from the old home list lives now: a group of the sheet, a tab, or the menu. */
 const TABS: Record<string, 'Why' | 'Tips'> = {
   'Why this result': 'Why',
   'Bass at your seat': 'Why',
   'Improve the room': 'Tips',
 };
 
-/** Opens a section: a group of the "Your room" sheet, a result tab, or Listening notes. */
+/** Where a section of the old settings lives in Set up: a group, or a fold inside one. */
+const SECTION_FOLD: Record<string, string | null> = {
+  Room: null,
+  Surfaces: '#setup-room-more',
+  Furniture: '#setup-room-more',
+  Speakers: null,
+  Goals: '#setup-listen-more',
+};
+
+/** Opens a section: a group of Set up, a part of Place or Listen, or the listening check. */
 export async function openSection(page: Page, name: string) {
   if (TABS[name]) return openTab(page, TABS[name]);
-  if (name === 'Listening notes') {
-    await goHome(page);
-    await openMenu(page);
-    await page.getByRole('button', { name: 'Listening notes' }).click();
-    return;
-  }
+  if (name === 'Listening notes') return openStep(page, 'listen');
   await openSettings(page);
-  const heading = SECTION_TITLES[name];
-  if (heading)
-    await page
-      .getByRole('heading', { name: heading, exact: true, level: 2 })
-      .scrollIntoViewIfNeeded();
+  const fold = SECTION_FOLD[name];
+  if (fold) await unfold(page, fold);
+  // The old Speakers page had every speaker field: open the fold that holds the rest.
+  if (name === 'Speakers') await unfold(page, '#setup-speakers details.more');
 }
-
-const SECTION_TITLES: Record<string, string> = {
-  Room: 'Room size',
-  Surfaces: 'Surfaces',
-  Furniture: 'Furniture',
-  Speakers: 'Speakers',
-  Goals: 'What do you want from the sound?',
-};
 
 /** Step names from the old wizard, kept so the journeys read the same: "Results" is the home page. */
 export async function goStep(page: Page, name: string) {
@@ -110,12 +122,10 @@ export async function goStep(page: Page, name: string) {
   await openSection(page, name === 'Furnishing' ? 'Furniture' : name);
 }
 
-/** The Speakers page keeps size, port, seat, toe-in and the speaker file under "More details". */
+/** Set up keeps drivers, stands, exact sizes and the speaker file under "More about your speakers". */
 export async function openSpeakerDetails(page: Page) {
-  const more = page.locator('#sheet-speakers details.more');
-  if (!(await more.evaluate((d) => (d as HTMLDetailsElement).open))) {
-    await more.locator('summary').click();
-  }
+  await openSettings(page);
+  await unfold(page, '#setup-speakers details.more');
 }
 
 /** Back to the home page from a section. */
@@ -123,9 +133,9 @@ export async function showResults(page: Page) {
   await goHome(page);
 }
 
-/** The findings page ("Why this result"). */
+/** The findings ("Why this result"): Place's details. */
 export async function openWhy(page: Page) {
-  await openSection(page, 'Why this result');
+  await openTab(page, 'Why');
 }
 
 /** Metres from the front wall in a seat's accessible label, e.g. "Seat. 2.34 m from the front wall". */
@@ -146,32 +156,33 @@ export function mapChoice(page: Page, name: 'Speakers' | 'Seat') {
     .getByRole('radio', { name, exact: true });
 }
 
-/** Opens the "Your room" sheet (every setting on one page). */
+/** Opens Set up (every setting, in three groups). */
 export async function openSettings(page: Page) {
-  if (
-    await page
-      .locator('#panel')
-      .getByRole('heading', { name: /^(Your room|A szobád)$/, level: 2 })
-      .count()
-  )
-    return;
-  await goHome(page);
-  await page.getByRole('button', { name: /^(Your room|A szobád)/ }).click();
+  await openStep(page, 'setup');
 }
 
-/** What the answer may move: "Both", "Speakers" or "Seat" (on the Result tab, with the map). */
+/** What the answer may move: "Both", "Speakers" or "Seat" (on Place, with the map). */
 export async function setMoves(page: Page, value: 'Both' | 'Speakers' | 'Seat') {
-  await openTab(page, 'Result');
+  await openStep(page, 'place');
   await page
     .getByRole('radiogroup', { name: 'Find the best place for' })
     .getByRole('radio', { name: value, exact: true })
     .check({ force: true });
 }
 
-/** One group of the "Your room" sheet, so fields with the same name in other groups stay apart. */
+/** A group of Set up (or the fold that holds an old section), so same-named fields stay apart. */
 export function group(
   page: Page,
   name: 'room' | 'surfaces' | 'furnishing' | 'speakers' | 'goals' | 'place' | 'ready',
 ) {
-  return page.locator(`#sheet-${name}`);
+  const at: Record<typeof name, string> = {
+    room: '#setup-room',
+    surfaces: '#setup-room-more',
+    furnishing: '#setup-room-more',
+    speakers: '#setup-speakers',
+    goals: '#setup-listen-more',
+    place: '#setup-listen',
+    ready: '#setup-listen-more',
+  };
+  return page.locator(at[name]);
 }

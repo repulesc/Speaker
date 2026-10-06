@@ -3,8 +3,11 @@ import { fillRoom, goHome, openApp, openSection, openSpeakerDetails } from './he
 
 test.use({ locale: 'en-GB' });
 
-/** The sidebar uses three text sizes only (docs/DESIGN_BRIEF_V3.md, item 6): 13, 15 and 22 px. */
-const SCALE = [13, 15, 22];
+/**
+ * The sidebar uses three text sizes (docs/DESIGN_BRIEF_V3.md, item 6): 13, 15 and 22 px, plus the
+ * serif display size for the project name and the verdict (docs/ROADMAP_V8.md, identity).
+ */
+const SCALE = [13, 15, 22, 26];
 
 /** Font sizes of the visible text in the sidebar, drawings and hidden helper text left out. */
 async function panelSizes(page: Page): Promise<Record<string, string>> {

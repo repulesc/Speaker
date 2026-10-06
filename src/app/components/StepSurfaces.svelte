@@ -77,15 +77,19 @@
     workspace.edit((p) => void (id = addPatch(p, boundary, kind)));
     selectedId = id;
   }
+  /** Inside a "More detail" group of Set up (V8): no title of its own. */
+  let { embedded = false }: { embedded?: boolean } = $props();
   const uKey = $derived(boundary === 'left' || boundary === 'right' ? 'fromFront' : 'fromLeft');
   const vKey = $derived(isWall(boundary) ? 'height' : 'fromFront');
 </script>
 
 <div class="step">
-  <div>
-    <h2>{i18n.t('surfaces.title')}</h2>
-    <p class="intro">{i18n.t('surfaces.intro')}</p>
-  </div>
+  {#if !embedded}
+    <div>
+      <h2>{i18n.t('surfaces.title')}</h2>
+      <p class="intro">{i18n.t('surfaces.intro')}</p>
+    </div>
+  {/if}
 
   <!-- What the room is made of: three short choices, most common first (owner feedback V4). -->
   <div class="rows">

@@ -3,7 +3,6 @@
   import { LOCALES } from '../../i18n/translate';
   import type { Locale } from '../../i18n/types';
   import { SUPPORT_URL } from '../config';
-  import { ui } from '../ui.svelte';
   import { prefs, type ThemePref } from '../prefs.svelte';
   import { projectLabel, workspace } from '../session.svelte';
   import Dropdown from './Dropdown.svelte';
@@ -21,8 +20,6 @@
 
   const themes: ThemePref[] = ['auto', 'light', 'dark'];
   const project = $derived(workspace.project);
-  let renaming = $state(false);
-  let nameDraft = $state('');
 
   function remove(close: () => void) {
     if (confirm(i18n.t('project.deleteConfirm', { name: projectLabel(project.name) }))) {
@@ -84,14 +81,18 @@
         (o) => (o === 'metric' ? 'm' : 'ft'),
         (o) => workspace.edit((p) => void (p.units = o as 'metric' | 'imperial')),
       )}
-      {@render segment(
-        i18n.t('theme.label'),
-        'theme',
-        themes,
-        prefs.theme,
-        (o) => i18n.t(`theme.${o}`),
-        (o) => (prefs.theme = o as ThemePref),
-      )}
+      <!-- A select, not a segment: "Match device" (and the Hungarian) did not fit a segment. -->
+      <div class="pref">
+        <label class="pref-label" for="pref-theme">{i18n.t('theme.label')}</label>
+        <select
+          id="pref-theme"
+          class="input"
+          value={prefs.theme}
+          onchange={(e) => (prefs.theme = e.currentTarget.value as ThemePref)}
+        >
+          {#each themes as o (o)}<option value={o}>{i18n.t(`theme.${o}`)}</option>{/each}
+        </select>
+      </div>
       {@render segment(
         i18n.t('numbers.label'),
         'numbers',
@@ -102,20 +103,6 @@
       )}
 
       <p class="group-title">{i18n.t('project.switcher')}</p>
-      {#if renaming}
-        <form
-          class="rename"
-          onsubmit={(e) => {
-            e.preventDefault();
-            workspace.rename(nameDraft);
-            renaming = false;
-          }}
-        >
-          <label for="project-name" class="visually-hidden">{i18n.t('project.renameLabel')}</label>
-          <input id="project-name" class="input" bind:value={nameDraft} maxlength="200" />
-          <button class="btn primary" type="submit">{i18n.t('project.rename')}</button>
-        </form>
-      {/if}
       <ul class="list">
         {#each workspace.index as entry (entry.id)}
           <li>
@@ -165,16 +152,6 @@
           >
         </li>
         <li>
-          <button
-            type="button"
-            class="row"
-            onclick={() => {
-              nameDraft = project.name;
-              renaming = true;
-            }}>{i18n.t('project.rename')}</button
-          >
-        </li>
-        <li>
           <button type="button" class="row danger" onclick={() => remove(close)}
             >{i18n.t('project.delete')}</button
           >
@@ -182,7 +159,7 @@
       </ul>
 
       <ul class="list">
-        {#each [['menu.share', onshare], ['menu.image', onimage], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.listen', () => (ui.step = 'listen')], ['menu.about', onabout]] as const as [key, action] (key)}
+        {#each [['menu.share', onshare], ['menu.image', onimage], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.about', onabout]] as const as [key, action] (key)}
           <li>
             <button
               type="button"
@@ -195,6 +172,8 @@
           </li>
         {/each}
       </ul>
+      <!-- V7 stays reachable, frozen (owner decision, docs/ROADMAP_V8.md). -->
+      <a class="legacy" href="./legacy/">{i18n.t('menu.legacy')}</a>
     </div>
   {/snippet}
 </Dropdown>
@@ -202,6 +181,8 @@
 <style>
   .menu {
     display: grid;
+    /* Each block keeps its full height: a list must never be squeezed (V7: rows were clipped). */
+    grid-auto-rows: max-content;
     gap: 12px;
     max-height: min(80dvh, 640px);
     overflow-y: auto;
@@ -225,9 +206,13 @@
   .list {
     background: var(--surface-2);
   }
-  .rename {
-    display: flex;
-    gap: 8px;
+  .pref select {
+    min-height: 40px;
+  }
+  .legacy {
+    padding: 2px 4px;
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
   }
   .danger {
     color: var(--danger);

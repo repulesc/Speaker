@@ -122,7 +122,7 @@
 <div class="field">
   <label for={id}>{label}</label>
   {#if help}<p class="help" id="{id}-help">{help}</p>{/if}
-  <div class="row">
+  <div class="input-row" class:solo={!chips}>
     <input
       {id}
       class="input"
@@ -162,15 +162,20 @@
     color: var(--ink-muted);
     font-size: var(--text-md);
   }
-  .row {
+  .input-row {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     align-items: flex-start;
   }
-  .row .input {
+  .input-row .input {
     flex: 0 1 11rem;
     min-width: 8rem;
+  }
+  /* Without the certainty chips the input takes the field's width (Set up's row of three). */
+  .solo .input {
+    flex: 1 1 auto;
+    min-width: 0;
   }
   .error {
     color: var(--danger);

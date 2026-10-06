@@ -1,112 +1,112 @@
 /*
- * Design tokens: quiet, system-native (owner feedback after R5: "less, like Apple").
- * Light by default, dark when the system or the user asks for it. Every text colour meets
- * WCAG AA on the surfaces it is used on.
+ * Design tokens (V8, docs/ROADMAP_V8.md §3): ink on paper, one accent. The accent is the deep green
+ * at the best end of the heat scale, so the map and the interface speak one colour. Light by
+ * default, dark when the system or the user asks for it. Every text colour meets WCAG AA on the
+ * surfaces it is used on. Heat colours: RAMPS and NOT_A_SPOT in map/heat.ts (tested).
  */
 :root {
-  --bg: #f5f2ec;
-  --surface: #fffefb;
-  --surface-2: #f0ece4;
-  --panel: #fffefb;
-  --ink: #1f1d1a;
-  --ink-muted: #6a655d;
-  --line: #3a3a3c;
-  --grid: #e9e3d8;
-  --grid-strong: #d6cfc2;
-  --fill: rgb(120 105 85 / 0.1);
-  --accent: #0058b0;
-  --accent-fill: #0071e3;
+  --bg: #f3efe6;
+  --surface: #fbf9f4;
+  --surface-2: #ece7dc;
+  --panel: #fbf9f4;
+  --ink: #1d221f;
+  --ink-muted: #5d635d;
+  --line: #2c322e;
+  --grid: #e2dccf;
+  --grid-strong: #cdc5b5;
+  --fill: rgb(60 70 55 / 0.07);
+  --accent: #2b6b55;
+  --accent-fill: #2b6b55;
   --on-accent: #ffffff;
-  --ok: #1e7b34;
-  --caution: #a25000;
-  --danger: #c4001a;
-  --shadow: 0 1px 2px rgb(60 45 25 / 0.06), 0 8px 24px rgb(60 45 25 / 0.08);
-  /* Soft cards on the warm page: one radius, one shadow, everywhere (V7). */
-  --card-shadow: 0 1px 2px rgb(60 45 25 / 0.05), 0 6px 18px rgb(60 45 25 / 0.06);
-  /* The selected segment: white on grey in light, a lighter grey on dark (as the platform). */
-  --thumb: #ffffff;
-  --thumb-ink: #1d1d1f;
-  /* The plan: speaker cabinets (front bar lighter) and the room's soft shadow. */
-  --speaker: #34302b;
-  --speaker-baffle: #aeaeb2;
-  --plan-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
-  /* Heat ramp, poorer → better: sand to deep green, lightness-ordered (RAMPS in map/heat.ts). */
+  --ok: #2f6b3a;
+  --caution: #9a4f1c;
+  --danger: #b3261e;
+  --shadow: 0 1px 2px rgb(40 45 35 / 0.06), 0 10px 28px rgb(40 45 35 / 0.1);
+  --card-shadow: 0 0 0 1px rgb(40 45 35 / 0.06), 0 2px 8px rgb(40 45 35 / 0.04);
+  --thumb: #fbf9f4;
+  --thumb-ink: #1d221f;
+  --speaker: #262b27;
+  --speaker-baffle: #9aa098;
+  --wall: #1d221f;
+  --plan-shadow: none;
   --heat-0: #f0e4c6;
   --heat-1: #dcdcb0;
   --heat-2: #a9c89a;
   --heat-3: #64a37f;
   --heat-4: #22735a;
-  --heat-none: #f4f2ee;
-  --heat-none-line: #d9d4ca;
+  --heat-none: #f6f3ec;
+  --heat-none-line: #d8d1c3;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #121110;
-    --surface: #1f1d1b;
-    --surface-2: #2b2825;
-    --panel: #1f1d1b;
-    --ink: #f4f1ec;
-    --ink-muted: #aaa49b;
-    --line: #d1d1d6;
-    --grid: #37332e;
-    --grid-strong: #4a453e;
-    --fill: rgb(150 135 115 / 0.18);
-    --accent: #4da3ff;
-    --accent-fill: #0071e3;
+    --bg: #121513;
+    --surface: #1a1e1b;
+    --surface-2: #242a26;
+    --panel: #1a1e1b;
+    --ink: #e9ece6;
+    --ink-muted: #a2a9a1;
+    --line: #d3d9d1;
+    --grid: #2c332e;
+    --grid-strong: #414a44;
+    --fill: rgb(200 225 205 / 0.07);
+    --accent: #8ccfb1;
+    --accent-fill: #2f7a60;
     --on-accent: #ffffff;
-    --ok: #4cd964;
-    --caution: #ffb340;
-    --danger: #ff6961;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.5);
-    --card-shadow: 0 0 0 1px rgb(255 245 230 / 0.05), 0 6px 18px rgb(0 0 0 / 0.35);
-    --thumb: #4a4640;
+    --ok: #7fd18f;
+    --caution: #f0a868;
+    --danger: #ff8a80;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px rgb(0 0 0 / 0.5);
+    --card-shadow: 0 0 0 1px rgb(225 240 228 / 0.07), 0 2px 8px rgb(0 0 0 / 0.25);
+    --thumb: #39413b;
     --thumb-ink: #ffffff;
-    --speaker: #34302b;
-    --speaker-baffle: #8a847a;
-    --plan-shadow: 0 2px 16px rgb(0 0 0 / 0.7);
+    --speaker: #262b27;
+    --speaker-baffle: #8d958c;
+    --wall: #7f8a82;
+    --plan-shadow: none;
     --heat-0: #3b352a;
     --heat-1: #4c5841;
     --heat-2: #5f8763;
     --heat-3: #82bb8a;
     --heat-4: #bdeabf;
-    --heat-none: #26241f;
-    --heat-none-line: #3d3a33;
+    --heat-none: #1d211e;
+    --heat-none-line: #343b36;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #121110;
-  --surface: #1f1d1b;
-  --surface-2: #2b2825;
-  --panel: #1f1d1b;
-  --ink: #f4f1ec;
-  --ink-muted: #aaa49b;
-  --line: #d1d1d6;
-  --grid: #37332e;
-  --grid-strong: #4a453e;
-  --fill: rgb(150 135 115 / 0.18);
-  --accent: #4da3ff;
-  --accent-fill: #0071e3;
+  --bg: #121513;
+  --surface: #1a1e1b;
+  --surface-2: #242a26;
+  --panel: #1a1e1b;
+  --ink: #e9ece6;
+  --ink-muted: #a2a9a1;
+  --line: #d3d9d1;
+  --grid: #2c332e;
+  --grid-strong: #414a44;
+  --fill: rgb(200 225 205 / 0.07);
+  --accent: #8ccfb1;
+  --accent-fill: #2f7a60;
   --on-accent: #ffffff;
-  --ok: #4cd964;
-  --caution: #ffb340;
-  --danger: #ff6961;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.5);
-  --card-shadow: 0 0 0 1px rgb(255 245 230 / 0.05), 0 6px 18px rgb(0 0 0 / 0.35);
-  --thumb: #4a4640;
+  --ok: #7fd18f;
+  --caution: #f0a868;
+  --danger: #ff8a80;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px rgb(0 0 0 / 0.5);
+  --card-shadow: 0 0 0 1px rgb(225 240 228 / 0.07), 0 2px 8px rgb(0 0 0 / 0.25);
+  --thumb: #39413b;
   --thumb-ink: #ffffff;
-  --speaker: #34302b;
-  --speaker-baffle: #8a847a;
-  --plan-shadow: 0 2px 16px rgb(0 0 0 / 0.7);
+  --speaker: #262b27;
+  --speaker-baffle: #8d958c;
+  --wall: #7f8a82;
+  --plan-shadow: none;
   --heat-0: #3b352a;
   --heat-1: #4c5841;
   --heat-2: #5f8763;
   --heat-3: #82bb8a;
   --heat-4: #bdeabf;
-  --heat-none: #26241f;
-  --heat-none-line: #3d3a33;
+  --heat-none: #1d211e;
+  --heat-none-line: #343b36;
   color-scheme: dark;
 }

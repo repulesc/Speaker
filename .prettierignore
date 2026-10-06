@@ -4,3 +4,4 @@ package-lock.json
 docs
 tools/reference/fixtures
 tests/fixtures/*.json
+public/legacy

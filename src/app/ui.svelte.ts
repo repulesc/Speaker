@@ -28,18 +28,17 @@ let heatScale = $state<'room' | 'absolute'>('room');
 let glide = $state(false);
 let before = $state<{ speakers: Placement['speakers']; listener: Vec3 } | null>(null);
 let beforeTimer: ReturnType<typeof setTimeout> | undefined;
-/** The side panel is hidden on a wide screen, so the room fills the window. */
-let panelHidden = $state(false);
 /** The first-run survey is open (a new project without a room). */
 let survey = $state(false);
 /** The room fades in once, right after the survey (the "reveal"). */
 let reveal = $state(false);
-/** The result panel's tab (docs/ROADMAP_V5.md, V6): the answer, the reasons, the tips. */
-export type ResultTab = 'result' | 'why' | 'tips';
-let tab = $state<ResultTab>('result');
-/** The "Your room" sheet: every setting on one page, opened from the header. */
-let roomOpen = $state(false);
-/** The group of the sheet to scroll to when it opens (a section id), or null. */
+/**
+ * The panel's three steps (docs/ROADMAP_V8.md §2), named after what you do: describe the room and
+ * the speakers, see where they go, and judge the result by ear.
+ */
+export type PanelStep = 'setup' | 'place' | 'listen';
+let tab = $state<PanelStep>('place');
+/** The group of the Set up page to scroll to when it opens (a section id), or null. */
 let roomTarget = $state<string | null>(null);
 const SECTION_IDS = ['room', 'surfaces', 'furnishing', 'speakers', 'goals'];
 /** The Speakers page's "More details" stays open once opened, for this visit. */
@@ -50,46 +49,45 @@ export const ui = {
     return step;
   },
   /**
-   * Where to go. Since V6 the sections are groups of the one "Your room" sheet, and Why, Bass and
-   * the tips are tabs of the result panel; only Listening notes is still a page of its own. Callers
-   * keep naming the place they want; this works out how to show it.
+   * Where to go. Since V8 everything is one of three steps: the sections are groups of Set up, the
+   * reasons and the bass are part of Place, the tips and the notes part of Listen. Callers keep
+   * naming the place they want; this works out which step shows it.
    */
   set step(value: StepId) {
+    step = 'results';
     if (SECTION_IDS.includes(value)) {
-      roomOpen = true;
+      tab = 'setup';
       roomTarget = value;
-      step = 'results';
       candidate = null;
       return;
     }
-    roomOpen = false;
-    if (value === 'why' || value === 'bass' || value === 'treat') {
-      tab = value === 'treat' ? 'tips' : 'why';
-      step = 'results';
+    roomTarget = null;
+    if (value === 'treat' || value === 'listen') {
+      tab = 'listen';
+      candidate = null;
       return;
     }
-    step = value;
-    // A preview belongs to the result; leaving it ends the preview.
-    if (value !== 'results') candidate = null;
+    tab = 'place';
   },
   get tab() {
     return tab;
   },
-  set tab(value: ResultTab) {
+  set tab(value: PanelStep) {
     tab = value;
+    roomTarget = null;
+    // A preview belongs to Place; leaving it ends the preview.
+    if (value !== 'place') candidate = null;
   },
+  /** Whether Set up is showing (kept for the callers that think of it as "the room sheet"). */
   get roomOpen() {
-    return roomOpen;
+    return tab === 'setup';
   },
-  /** Opens or closes the "Your room" sheet (closing returns to the result). */
   set roomOpen(value: boolean) {
-    roomOpen = value;
-    if (!value) roomTarget = null;
-    else candidate = null;
+    this.tab = value ? 'setup' : 'place';
   },
-  /** Opens the sheet at one group ("ready" is the treatment box). */
+  /** Opens Set up at one group ("ready" is the treatment box). */
   openRoom(target: string | null = null) {
-    roomOpen = true;
+    tab = 'setup';
     roomTarget = target;
     candidate = null;
   },
@@ -152,12 +150,6 @@ export const ui = {
     glide = true;
     setTimeout(() => (glide = false), 700);
     beforeTimer = setTimeout(() => (before = null), 3600);
-  },
-  get panelHidden() {
-    return panelHidden;
-  },
-  set panelHidden(value: boolean) {
-    panelHidden = value;
   },
   get survey() {
     return survey;

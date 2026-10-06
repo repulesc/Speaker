@@ -9,8 +9,6 @@
   import { applyCandidate, cabinet } from '../plan/placement';
   import { analysis, showNotice, workspace } from '../session.svelte';
   import { goalOf, type Goal } from '../state/goal';
-  import { liveWithItShown, rememberBefore } from '../listen/liveWithIt';
-  import LiveWithIt from './LiveWithIt.svelte';
   import MoodFace from './MoodFace.svelte';
   import PlacementOptions from './PlacementOptions.svelte';
   import { ui } from '../ui.svelte';
@@ -136,11 +134,7 @@
     const placement = $state.snapshot(shown);
     const now = $state.snapshot(project.variants.find((v) => v.id === project.activeVariantId)!);
     ui.showChange({ speakers: now.speakers, listener: now.listener.ears });
-    const scoreBefore = ok?.current.score ?? 0;
-    workspace.edit((p) => {
-      rememberBefore(p, scoreBefore);
-      applyCandidate(p, placement);
-    });
+    workspace.edit((p) => void applyCandidate(p, placement));
     ui.candidate = null;
     showNotice('success', i18n.t('suggest.applied'), { undo: true });
   }
@@ -198,35 +192,32 @@
 </script>
 
 <div class="result">
-  <section class="card verdict" aria-labelledby="result-title">
-    <h2 id="result-title">
-      {i18n.t('result.title')}
-      {#if ok}
+  <!-- The question that shapes the answer comes first: what may move. -->
+  <PlacementOptions parts={['moves']} plain />
+
+  <section class="verdict" aria-labelledby="result-title">
+    <h2 id="result-title" class="visually-hidden">{i18n.t('result.title')}</h2>
+    {#if !analysis.result}
+      <p class="caption" role="status">{i18n.t('results.calculating')}</p>
+    {:else if !ok}
+      <p class="caption">{i18n.t('results.needRoom')}</p>
+    {:else}
+      <div class="headline">
+        <p class="brief" data-share="verdict" data-testid="brief">{brief}</p>
         <MoodFace
           word={scoreWord(ok.current.score)}
           label={i18n.t('suggest.mood', {
             word: i18n.t(`results.score.${scoreWord(ok.current.score)}`),
           })}
         />
-      {/if}
-      {#if analysis.busy}<span
-          class="spinner"
-          role="status"
-          aria-label={i18n.t('analysis.updating')}
-        ></span>{/if}
-    </h2>
+        {#if analysis.busy}<span
+            class="spinner"
+            role="status"
+            aria-label={i18n.t('analysis.updating')}
+          ></span>{/if}
+      </div>
 
-    {#if !analysis.result}
-      <p class="caption" role="status">{i18n.t('results.calculating')}</p>
-    {:else if !ok}
-      <p class="caption">{i18n.t('results.needRoom')}</p>
-    {:else}
-      <p class="brief" data-share="verdict" data-testid="brief">{brief}</p>
-      {#if areaLine}<p class="caption area" data-testid="area">{areaLine}</p>{/if}
-      <p class="found" data-testid="found">
-        <span class="found-label">{i18n.t('found.label')}</span>
-        {roomFound(ok, prefs.numbers)}
-      </p>
+      {#if areaLine}<p class="caption" data-testid="area">{areaLine}</p>{/if}
       {#if prefs.numbers}
         <p class="caption" data-testid="score-numbers">
           {i18n.t('result.scores', {
@@ -235,7 +226,6 @@
           })}
         </p>
       {/if}
-      <PlacementOptions parts={['moves']} plain />
       <span class="visually-hidden" data-testid="score-current"
         >{i18n.t(`results.score.${scoreWord(ok.current.score)}`)}</span
       >
@@ -247,21 +237,17 @@
     {/if}
   </section>
 
-  {#if ok && liveWithItShown(project)}
-    <LiveWithIt scoreNow={ok.current.score} />
-  {/if}
-
   {#if ok}
     {#if allFixed}
-      <p class="card caption">{i18n.t('why.allFixed')}</p>
+      <p class="caption">{i18n.t('why.allFixed')}</p>
     {:else}
-      <section class="card" aria-labelledby="suggest-title">
-        <h3 id="suggest-title" class="card-title">{i18n.t('suggest.title')}</h3>
+      <section class="answer" aria-labelledby="suggest-title">
+        <h3 id="suggest-title" class="overline">{i18n.t('suggest.title')}</h3>
         {#if !shown}
           <p class="caption">{i18n.t('suggest.nothing')}</p>
         {:else}
           {#if move}<p class="say" data-testid="say">{sentence.join(' ')}</p>{/if}
-          <dl class="answer" data-testid="suggestion">
+          <dl class="figures" data-testid="suggestion">
             <div>
               <dt>{i18n.t('suggest.speakers')}</dt>
               <dd>
@@ -285,22 +271,20 @@
               </dd>
             </div>
             {#if bass}
-              <div class="bass-row">
+              <div>
                 <dt>{i18n.t('suggest.bass')}</dt>
                 <dd class="bass">
-                  <button type="button" class="spark" onclick={() => (ui.step = 'bass')}>
-                    <span>
-                      {prefs.numbers
-                        ? i18n.t(`suggest.bassWord.${bass.word}`, {
-                            frequency: formatFrequency(bass.worst.f, i18n.locale, true),
-                          })
-                        : i18n.t(`suggest.bassPlain.${bass.word}`)}
-                    </span>
-                    <svg width={SPARK_W} height={SPARK_H} aria-hidden="true">
-                      <line x1="0" x2={SPARK_W} y1={SPARK_H / 2} y2={SPARK_H / 2} class="mid" />
-                      <path d={sparkPath} />
-                    </svg>
-                  </button>
+                  <span>
+                    {prefs.numbers
+                      ? i18n.t(`suggest.bassWord.${bass.word}`, {
+                          frequency: formatFrequency(bass.worst.f, i18n.locale, true),
+                        })
+                      : i18n.t(`suggest.bassPlain.${bass.word}`)}
+                  </span>
+                  <svg width={SPARK_W} height={SPARK_H} aria-hidden="true">
+                    <line x1="0" x2={SPARK_W} y1={SPARK_H / 2} y2={SPARK_H / 2} class="mid" />
+                    <path d={sparkPath} />
+                  </svg>
                 </dd>
               </div>
             {/if}
@@ -319,7 +303,7 @@
             </p>
           {/if}
 
-          <div class="card-actions actions">
+          <div class="actions">
             <button type="button" class="btn primary" onclick={apply}
               >{i18n.t('suggest.apply')}</button
             >
@@ -347,15 +331,20 @@
       </section>
     {/if}
 
+    <p class="found" data-testid="found">
+      <span class="overline">{i18n.t('found.label')}</span>
+      {roomFound(ok, prefs.numbers)}
+    </p>
+
     {#if picks.length}
-      <section class="card" aria-labelledby="idea-title" data-testid="idea">
-        <h3 id="idea-title" class="card-title">{i18n.t('result.idea')}</h3>
+      <section class="idea-block" aria-labelledby="idea-title" data-testid="idea">
+        <h3 id="idea-title" class="overline">{i18n.t('result.idea')}</h3>
         {#each picks as idea (idea.messageKey)}
           <p class="idea">
             {prefs.numbers ? adviceText(idea, system) : advicePlainText(idea, system)}
           </p>
         {/each}
-        <button type="button" class="card-link" onclick={() => (ui.tab = 'tips')}
+        <button type="button" class="card-link" onclick={() => (ui.tab = 'listen')}
           >{i18n.t('result.moreTips')} ›</button
         >
       </section>
@@ -366,54 +355,140 @@
 <style>
   .result {
     display: grid;
-    gap: 12px;
+    gap: 24px;
   }
-  .verdict {
-    gap: 14px;
-    padding-top: 18px;
-  }
-  .answer {
-    display: grid;
-    gap: 6px;
-    margin: 0;
-  }
-  .answer div {
-    display: grid;
-    gap: 2px;
-  }
-  dt,
-  .caption {
+  .caption,
+  dt {
     color: var(--ink-muted);
     font-size: var(--text-sm);
   }
-  /* The sentence is the answer; the exact numbers sit below it, small (owner decision). */
+  /* "Best placement", "What we found": one small label style for the parts of the page. */
+  .overline {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .verdict {
+    display: grid;
+    gap: 8px;
+  }
+  .headline {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 12px;
+  }
+  .headline :global(.face) {
+    margin-top: 4px;
+  }
+  .headline .spinner {
+    position: absolute;
+    top: -14px;
+    right: 6px;
+  }
+  /* The verdict is the page's headline, in the serif. */
+  .brief {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  /* The answer: the one block with a frame, because it holds the one main action. */
+  .answer {
+    display: grid;
+    gap: 12px;
+    padding: 18px 18px 16px;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--card-shadow);
+  }
   .say {
-    margin: -4px 0 0;
+    margin: 0;
     font-size: var(--text-md);
-    line-height: 1.45;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .figures {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--grid);
+  }
+  .figures div {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    align-items: baseline;
+    gap: 8px;
   }
   dd {
     margin: 0;
     font-size: var(--text-sm);
     line-height: 1.4;
   }
-  .answer div:not(.bass-row) {
-    grid-template-columns: 6.5rem 1fr;
-    align-items: baseline;
-    gap: 8px;
+  .bass {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
-  h2 {
+  .bass svg {
+    flex: none;
+  }
+  .bass path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+  .bass .mid {
+    stroke: var(--grid-strong);
+    stroke-dasharray: 2 3;
+  }
+  .note {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--fill);
+    font-size: var(--text-sm);
+  }
+  .actions {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding-top: 4px;
   }
-  h2 :global(.face) {
-    order: 2;
-    margin-left: auto;
+  .actions .primary {
+    flex: 1;
+  }
+  .alts label {
+    min-width: 44px;
+    padding: 0 10px;
+  }
+  .found {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+  .idea-block {
+    display: grid;
+    gap: 6px;
+  }
+  .idea {
+    margin: 0;
+    font-size: var(--text-md);
+    line-height: 1.5;
   }
   .spinner {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border: 2px solid var(--grid-strong);
     border-top-color: var(--accent-fill);
     border-radius: 50%;
@@ -428,80 +503,5 @@
     .spinner {
       animation-duration: 2.4s;
     }
-  }
-  .spark {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    min-height: 44px;
-    margin: -8px 0;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    text-align: start;
-    cursor: pointer;
-  }
-  .spark svg {
-    flex: none;
-  }
-  .spark path {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 1.5;
-    stroke-linejoin: round;
-  }
-  .spark .mid {
-    stroke: var(--grid-strong);
-    stroke-dasharray: 2 3;
-  }
-  .note {
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: var(--fill);
-    font-size: var(--text-sm);
-  }
-  .actions {
-    flex-wrap: nowrap;
-  }
-  .actions .primary {
-    flex: 1;
-  }
-  .alts label {
-    min-width: 40px;
-    padding: 0 10px;
-  }
-  .area {
-    margin: -8px 0 0;
-  }
-  /* What we found: a quiet line about the room itself, apart from the verdict. */
-  .found {
-    margin: 0;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: var(--surface-2);
-    font-size: var(--text-sm);
-    line-height: 1.45;
-  }
-  .found-label {
-    display: block;
-    color: var(--ink-muted);
-    font-weight: 600;
-  }
-  /* Three text styles only (owner feedback): the title, the answer in body text (the brief in
-     bold), and quiet captions for the numbers. */
-  .brief {
-    margin: -6px 0 0;
-    font-size: var(--text-md);
-    font-weight: 600;
-    line-height: 1.45;
-  }
-  .idea {
-    margin: 0;
-    font-size: var(--text-md);
-    line-height: 1.45;
   }
 </style>
