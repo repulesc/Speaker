@@ -64,10 +64,8 @@
     workspace.edit((p) => void (done = tryExperiment(p, e)));
     if (!done) showNotice('error', i18n.t('listen.noLonger'));
   }
-  let note = $state('');
-  $effect(() => {
-    note = check?.note ?? '';
-  });
+  // Follows the saved note; typing overrides it until the change is saved.
+  let note = $derived(check?.note ?? '');
 </script>
 
 <div class="listen">
