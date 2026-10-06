@@ -53,7 +53,7 @@ test('phone: every visible control is at least 44 × 44 px', async ({ page }) =>
 test('phone: home, result pages and the bass-note bar keep 44 px targets', async ({ page }) => {
   await goStep(page, 'Results');
   expect(await smallControls(page), 'home').toEqual([]);
-  for (const row of ['Why this result', 'Improve the room', 'Listening notes']) {
+  for (const row of ['Why this result', 'Improve the room', 'Listening check']) {
     await openSection(page, row);
     expect(await smallControls(page), row).toEqual([]);
   }
@@ -77,9 +77,8 @@ test('phone: one drawing at a time, switchable between top and side view', async
 });
 
 test('phone: every section fits the screen without sideways scrolling', async ({ page }) => {
-  for (const step of ['Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results', 'Listen']) {
-    if (step === 'Listen') await openSection(page, 'Listening notes');
-    else await goStep(page, step);
+  for (const step of ['Room', 'Speakers', 'Positions', 'Goals', 'Results', 'Listening check']) {
+    await goStep(page, step);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

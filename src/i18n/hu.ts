@@ -1259,6 +1259,21 @@ export const hu: Messages = {
     note: 'Egy üres doboz fizikai modellje: kiindulópont, nem mérés.',
     more: 'Mit tud',
   },
+  variant: {
+    current: 'Jelenlegi',
+  },
+  dock: {
+    room: 'Helyiség',
+    side: 'Oldalnézet',
+  },
+  nav: {
+    bass: 'Basszus az ülőhelyeden',
+    notSet: 'Nincs megadva',
+  },
+  sheet: {
+    expand: 'Több mutatása',
+    collapse: 'Kevesebb mutatása',
+  },
   about: {
     title: 'Névjegy',
     body: 'Az alkalmazás bevált teremakusztikai ismeretek alapján javasol hangfal- és ülőhely-elrendezést, és megmondja, mennyire biztos benne. Útmutatás, nem garancia.',

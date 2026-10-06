@@ -99,11 +99,9 @@
     font-size: var(--text-sm);
     font-weight: 500;
     letter-spacing: 0.08em;
-    opacity: 0.7;
   }
   [aria-selected='true'] .num {
     color: var(--accent);
-    opacity: 1;
   }
   @media (prefers-reduced-motion: reduce) {
     button::after {

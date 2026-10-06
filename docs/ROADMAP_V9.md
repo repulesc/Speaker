@@ -11,7 +11,7 @@ and be radically transparent about what a geometric model can know. V8 stays rea
 | Owner's point | Finding | V9 |
 |---|---|---|
 | Archive V8 first. | — | **Done.** `/legacy/` lists V8 and V7, each with its own storage keys. |
-| Weak logo; "Saved on this device" next to it; the room name 3× larger than the brand. | A sprig icon and a serif word; the save badge competes; the name is 26 px serif. | A geometric **NODO wordmark** drawn on a 4-unit grid (bars, circles, a half circle; the last O carries a dot: the *node*, the listening point), deep muted green. Saving is silent; only a failure is shown. The room name drops to the body title size (17 px, semibold). §3. |
+| Weak logo; "Saved on this device" next to it; the room name 3× larger than the brand. | A sprig icon and a serif word; the save badge competes; the name is 26 px serif. | A geometric **NODO wordmark** drawn on a 4-unit grid (bars, circles, a half circle; the last O carries a dot: the *node*, the listening point), deep muted green. Saving is silent; only a failure is shown. The room name drops to the body size (15 px, semibold). §3. |
 | Typography looks better, but the whole should be Bauhaus-coherent. | A serif display face beside a geometric mark reads as two brands. | Display face **Jost** (OFL, a Futura revival: the New Typography of the Bauhaus years), self-hosted; Newsreader goes. Body stays the system face. |
 | Map caption left, toggle crammed top right. | Two separate absolutely placed blocks. | One centred header above the room: the Speakers · Seat switch, then the caption, both on the room's axis. |
 | "Show numbers" in Hungarian breaks the sidebar padding. | **Confirmed:** a long Hungarian word in the numbers line ("leggyengébb") sets the result card's minimum width; the grid item had `min-width: auto` and grew 15 px past the panel edge. | Every panel grid track is `minmax(0, 1fr)` and children `min-width: 0`; long words break (`overflow-wrap: anywhere`) inside numbers lines. An e2e check measures it in both languages with numbers on. |
@@ -62,7 +62,7 @@ Placement step's "find the best place for" and the speaker zone say it).
   dot. Deep muted green (`#24503f`, dark mode `#9fd6bd`). Also the app icon.
 - **Type:** Jost for the wordmark's companions (verdict, section titles, figures on the drawing);
   the system face for everything else. Three sizes in the panel (13, 15, 22) plus the verdict (26).
-- **Header:** ☰ · NODO · undo/redo. Below: the room name (17 px, click to rename) and its size.
+- **Header:** ☰ · NODO · undo/redo. Below: the room name (15 px semibold, click to rename) and its size.
 
 ## 4. Credibility
 

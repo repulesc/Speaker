@@ -56,7 +56,7 @@ test('dialogs', async ({ page }) => {
   await expectAccessible(page);
 });
 
-const STEPS = ['Room', 'Surfaces', 'Furnishing', 'Speakers', 'Goals', 'Results'];
+const STEPS = ['Room', 'Speakers', 'Positions', 'Goals', 'Results'];
 
 for (const scheme of ['light', 'dark'] as const) {
   test.describe(`every section, ${scheme} theme`, () => {
@@ -65,32 +65,18 @@ for (const scheme of ['light', 'dark'] as const) {
       await page.addInitScript((theme) => localStorage.setItem('spa:theme', theme), scheme);
     });
 
-    test('with a filled room, a patch and an object', async ({ page }) => {
-      test.setTimeout(90_000); // seven full accessibility scans
+    test('with a filled room, every fold open', async ({ page }) => {
+      test.setTimeout(90_000); // six full accessibility scans
       await openApp(page);
       await fillRoom(page, '4', '5', '2.5');
-
-      // Give the later steps something to show: a patch and an object.
-      await goStep(page, 'Surfaces');
-      await page.getByText('Add something on a wall').click();
-      await page.getByRole('radio', { name: /^Left wall/ }).check({ force: true });
-      await page.getByRole('button', { name: '+ Shelf or CD wall' }).click();
-      await goStep(page, 'Furnishing');
-      await page.getByRole('button', { name: '+ Bed' }).click();
 
       for (const step of STEPS) {
         await goStep(page, step);
         await expectAccessible(page);
       }
       await goStep(page, 'Goals');
-      await page
-        .getByRole('radiogroup', { name: 'Wide soundstage' })
-        .getByRole('radio', { name: 'Important' })
-        .check();
-      await page
-        .getByRole('radiogroup', { name: 'Precise imaging' })
-        .getByRole('radio', { name: 'Important' })
-        .check();
+      await page.getByRole('button', { name: 'Wide soundstage' }).click();
+      await page.getByRole('button', { name: 'Precise imaging' }).click();
       await expectAccessible(page); // conflict notice visible
     });
   });
@@ -107,7 +93,7 @@ test('Place, its details, Listen with experiments, and the bass-note explorer', 
   await expectAccessible(page);
   await openSection(page, 'Improve the room');
   await expectAccessible(page);
-  await openSection(page, 'Listening notes');
+  await openSection(page, 'Listening check');
   const bass = page.getByRole('group', { name: 'Bass', exact: true });
   await bass.getByRole('button', { name: 'Boomy' }).click();
   await page.getByTestId('experiment').first().waitFor();

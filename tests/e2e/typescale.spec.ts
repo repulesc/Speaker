@@ -39,17 +39,15 @@ test('the sidebar keeps to one type scale on every page', async ({ page }) => {
   const pages: Array<() => Promise<void>> = [
     () => goHome(page),
     () => openSection(page, 'Room'),
-    () => openSection(page, 'Surfaces'),
-    () => openSection(page, 'Furniture'),
     async () => {
       await openSection(page, 'Speakers');
       await openSpeakerDetails(page);
     },
-    () => openSection(page, 'Goals'),
+    () => openSection(page, 'Positions'),
     () => openSection(page, 'Why this result'),
     () => openSection(page, 'Improve the room'),
     () => openSection(page, 'Bass at your seat'),
-    () => openSection(page, 'Listening notes'),
+    () => openSection(page, 'Listening check'),
   ];
   for (const open of pages) {
     await open();
@@ -77,13 +75,11 @@ test('no sidebar page runs out of its panel, in English or Hungarian', async ({ 
     });
   const sections = [
     'Room',
-    'Surfaces',
-    'Furniture',
     'Speakers',
-    'Goals',
+    'Positions',
     'Why this result',
     'Improve the room',
-    'Listening notes',
+    'Listening check',
   ];
   for (const lang of ['EN', 'HU']) {
     for (const section of sections) {
@@ -103,4 +99,32 @@ test('no sidebar page runs out of its panel, in English or Hungarian', async ({ 
       }
     }
   }
+});
+
+test('with the numbers shown, in Hungarian, nothing reaches into the panel padding (V9 bug)', async ({
+  page,
+}) => {
+  await openApp(page);
+  await fillRoom(page, '4.2', '5.8', '2.6');
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('radio', { name: 'HU', exact: true }).check({ force: true });
+  await page
+    .getByRole('radiogroup', { name: 'Számok mutatása' })
+    .getByRole('radio', { name: 'Be' })
+    .check({ force: true });
+  await page.keyboard.press('Escape');
+  await goHome(page);
+  await expect(page.getByTestId('suggestion')).toBeVisible();
+  const outside = await page.locator('#step-panel').evaluate((body) => {
+    const box = body.getBoundingClientRect();
+    const right = box.right - parseFloat(getComputedStyle(body).paddingRight) + 1;
+    return [...body.querySelectorAll('*')]
+      .filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.right > right;
+      })
+      .map((el) => `${el.tagName.toLowerCase()}.${el.className}`)
+      .slice(0, 5);
+  });
+  expect(outside).toEqual([]);
 });

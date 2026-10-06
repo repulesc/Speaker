@@ -69,7 +69,7 @@
     background: none;
     color: var(--ink);
     font-family: var(--font-sans);
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     font-weight: 600;
     line-height: 1.25;
     text-align: start;

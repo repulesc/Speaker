@@ -96,36 +96,40 @@ const TABS: Record<string, 'Why' | 'Tips'> = {
   'Improve the room': 'Tips',
 };
 
-/** Where a section of the old settings lives in Set up: a group, or a fold inside one. */
+/** Where a section of the old settings lives on Room & speakers (V9): a group, or its one fold. */
 const SECTION_FOLD: Record<string, string | null> = {
   Room: null,
-  Surfaces: '#setup-room-more',
-  Furniture: '#setup-room-more',
-  Speakers: null,
-  Goals: '#setup-listen-more',
+  Surfaces: null,
+  Speakers: '#setup-speakers details.fold',
+  Goals: null,
+  Positions: '#setup-exact',
 };
 
-/** Opens a section: a group of Set up, a part of Place or Listen, or the listening check. */
+/** Opens a section: a group of Room & speakers, a part of Placement, or the listening check. */
 export async function openSection(page: Page, name: string) {
   if (TABS[name]) return openTab(page, TABS[name]);
-  if (name === 'Listening notes') return openStep(page, 'listen');
+  if (name === 'Listening check') return openStep(page, 'listen');
   await openSettings(page);
   const fold = SECTION_FOLD[name];
   if (fold) await unfold(page, fold);
-  // The old Speakers page had every speaker field: open the fold that holds the rest.
-  if (name === 'Speakers') await unfold(page, '#setup-speakers details.more');
 }
 
-/** Step names from the old wizard, kept so the journeys read the same: "Results" is the home page. */
+/** Step names from the old wizard, kept so the journeys read the same: "Results" is Placement. */
 export async function goStep(page: Page, name: string) {
   if (name === 'Results') return goHome(page);
-  await openSection(page, name === 'Furnishing' ? 'Furniture' : name);
+  await openSection(page, name);
 }
 
-/** Set up keeps drivers, stands, exact sizes and the speaker file under "More about your speakers". */
+/** "From the manual": drivers, exact sizes, lowest note, controls. */
 export async function openSpeakerDetails(page: Page) {
   await openSettings(page);
-  await unfold(page, '#setup-speakers details.more');
+  await unfold(page, '#setup-speakers details.fold');
+}
+
+/** "Exact positions": where the speakers and the seat stand, typed. */
+export async function openPositions(page: Page) {
+  await openSettings(page);
+  await unfold(page, '#setup-exact');
 }
 
 /** Back to the home page from a section. */
@@ -156,7 +160,7 @@ export function mapChoice(page: Page, name: 'Speakers' | 'Seat') {
     .getByRole('radio', { name, exact: true });
 }
 
-/** Opens Set up (every setting, in three groups). */
+/** Opens Room & speakers (every setting, in three groups). */
 export async function openSettings(page: Page) {
   await openStep(page, 'setup');
 }
@@ -170,19 +174,13 @@ export async function setMoves(page: Page, value: 'Both' | 'Speakers' | 'Seat') 
     .check({ force: true });
 }
 
-/** A group of Set up (or the fold that holds an old section), so same-named fields stay apart. */
-export function group(
-  page: Page,
-  name: 'room' | 'surfaces' | 'furnishing' | 'speakers' | 'goals' | 'place' | 'ready',
-) {
+/** A group of Room & speakers, so same-named fields stay apart. */
+export function group(page: Page, name: 'room' | 'speakers' | 'listen' | 'goals') {
   const at: Record<typeof name, string> = {
     room: '#setup-room',
-    surfaces: '#setup-room-more',
-    furnishing: '#setup-room-more',
     speakers: '#setup-speakers',
-    goals: '#setup-listen-more',
-    place: '#setup-listen',
-    ready: '#setup-listen-more',
+    listen: '#setup-listen',
+    goals: '#setup-goals',
   };
   return page.locator(at[name]);
 }

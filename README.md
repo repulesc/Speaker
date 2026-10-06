@@ -8,9 +8,9 @@ A free, open-source web app that helps anyone place loudspeakers and choose a li
 
 What it does:
 
-- Type or drag your room, walls, furniture, speakers and seat. Rough values are fine: say when you are unsure.
-- See a map of good and poor seats, the best spots for speakers and seat, and why, in plain words. Every statement carries its evidence level: 🔴 physics, 🟠 strong guideline, 🟡 heuristic, 🟣 your own ears.
-- Get treatment and speaker-setting advice in order of usefulness, explore where single bass notes are loud or silent, compare setups, keep a listening log, and print a tape-measure sheet.
+- Describe your room, its materials, how full it is, your speakers and where you sit. Rough values are fine.
+- See a map of good and poor spots for the speakers or the seat, the best placement, and why, in plain words. Every statement carries its evidence level: 🔴 physics, 🟠 strong guideline, 🟡 heuristic, 🟣 your own ears.
+- Say how it sounds (bass, centre, width, treble, clarity) and get one change at a time to try, free moves first, then the speakers' own controls, then the room. Explore where single bass notes are loud or silent, share a link, print a tape-measure sheet.
 
 What it does not do: measure anything (no microphone), model non-rectangular rooms, or promise results. It is a guide; your ears have the last word.
 
@@ -18,7 +18,7 @@ What it does not do: measure anything (no microphone), model non-rectangular roo
 
 ### Magyarul
 
-Ingyenes, nyílt forráskódú webalkalmazás, amely a teremakusztika alapján segít megtalálni a hangfalak és a hallgatási pont jó helyét egy téglalap alakú szobában. Add meg (vagy húzd a helyére) a szobát, a falakat, a bútorokat, a hangfalakat és az ülőhelyet; az app térképen mutatja a jó és a gyenge helyeket, és egyszerű szavakkal elmondja, miért. Minden állítás mellett ott a bizonyítottsága: fizika, erős irányelv, ökölszabály vagy a saját füled. Nem mér semmit, és nem ígér eredményt: iránymutatás, a végső szó a füledé. Az adataid nem hagyják el az eszközödet.
+Ingyenes, nyílt forráskódú webalkalmazás, amely a teremakusztika alapján segít megtalálni a hangfalak és a hallgatási pont jó helyét egy téglalap alakú szobában. Add meg a szobát, az anyagait, mennyire van berendezve, a hangfalakat és az ülőhelyet; az app térképen mutatja a jó és a gyenge helyeket, és egyszerű szavakkal elmondja, miért. Minden állítás mellett ott a bizonyítottsága: fizika, erős irányelv, ökölszabály vagy a saját füled. Nem mér semmit, és nem ígér eredményt: iránymutatás, a végső szó a füledé. Az adataid nem hagyják el az eszközödet.
 
 ## Where to read first
 

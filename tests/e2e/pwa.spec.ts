@@ -48,3 +48,16 @@ test('after the first visit the app opens offline, with the saved project', asyn
   );
   await context.setOffline(false);
 });
+
+test('earlier versions stay reachable from the menu, each with its own storage', async ({
+  page,
+}) => {
+  await page.goto('/legacy/');
+  await expect(page.getByRole('link', { name: /^V8/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^V7/ })).toBeVisible();
+  await page.getByRole('link', { name: /^V8/ }).click();
+  await expect(page).toHaveTitle(/V8 \(previous version\)/);
+  await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
+  const keys = await page.evaluate(() => Object.keys(localStorage));
+  expect(keys.every((k) => !k.startsWith('spa:'))).toBe(true);
+});

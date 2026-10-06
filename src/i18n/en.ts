@@ -1233,6 +1233,21 @@ export const en = {
     note: 'A physics model of an empty box: a starting point, not a measurement.',
     more: 'What it knows',
   },
+  variant: {
+    current: 'Current',
+  },
+  dock: {
+    room: 'Room',
+    side: 'Side view',
+  },
+  nav: {
+    bass: 'Bass at your seat',
+    notSet: 'Not set',
+  },
+  sheet: {
+    expand: 'Show more',
+    collapse: 'Show less',
+  },
   about: {
     title: 'About',
     body: 'This app uses established room acoustics to suggest speaker and seat positions, and tells you how sure it is. It is guidance, not a guarantee.',

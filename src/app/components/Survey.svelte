@@ -183,8 +183,8 @@
           />
           {#if goal === 'speakers'}
             <fieldset>
-              <legend>{i18n.t('speakers.limits.zone.legend')}</legend>
-              <div class="seg" role="radiogroup" aria-label={i18n.t('speakers.limits.zone.legend')}>
+              <legend>{i18n.t('setup.listen.zone')}</legend>
+              <div class="seg" role="radiogroup" aria-label={i18n.t('setup.listen.zone')}>
                 {#each ZONES as zone (zone ?? 'any')}
                   <label>
                     <input
@@ -197,7 +197,7 @@
                           else p.constraints.speakerZone = zone;
                         })}
                     />
-                    {zone === null ? i18n.t('speakers.limits.zone.any') : fmt(zone)}
+                    {zone === null ? i18n.t('setup.listen.anywhere') : fmt(zone)}
                   </label>
                 {/each}
               </div>
