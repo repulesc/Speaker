@@ -82,7 +82,7 @@ describe('the listening check', () => {
     expect(ids(tryFor(wide, { width: 'narrow' }).list)).not.toContain('L05.wider');
   });
 
-  it('at most five changes, two per aspect, most likely to help first', () => {
+  it('two changes per aspect, for every aspect that has one, most likely to help first', () => {
     const all: ListeningAnswers = {
       bass: 'boomy',
       evenness: 'uneven',
@@ -92,7 +92,8 @@ describe('the listening check', () => {
       clarity: 'echoey',
     };
     const list = tryFor(makeProject({ clearance: 0.2 }), all).list;
-    expect(list.length).toBeLessThanOrEqual(5);
+    // Every aspect that has a fix gets one: each list sits under its own answer (V9).
+    expect(new Set(list.map((e) => e.aspect)).size).toBeGreaterThanOrEqual(5);
     const per = new Map<string, number>();
     for (const e of list) per.set(e.aspect, (per.get(e.aspect) ?? 0) + 1);
     expect(Math.max(...per.values())).toBeLessThanOrEqual(2);

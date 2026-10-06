@@ -426,21 +426,9 @@ exports[`golden scenarios > seat fixed against the back wall: red flag, and the 
 }
 `;
 
-exports[`golden scenarios > the busy room: wall-setting reminder, passive speaker, dead room → treble lift to try 1`] = `
+exports[`golden scenarios > the busy room: wall-setting reminder, dead room → treble lift to try 1`] = `
 {
   "candidates": [
-    {
-      "score": 0.8,
-      "seat": [
-        1.8,
-        3.15,
-      ],
-      "speakersX": [
-        0.75,
-        2.85,
-      ],
-      "speakersY": 0.75,
-    },
     {
       "score": 0.8,
       "seat": [
@@ -454,29 +442,38 @@ exports[`golden scenarios > the busy room: wall-setting reminder, passive speake
       "speakersY": 0.4,
     },
     {
-      "score": 0.78,
+      "score": 0.79,
       "seat": [
         1.8,
-        3.5,
+        3.15,
       ],
       "speakersX": [
         0.75,
         2.85,
       ],
-      "speakersY": 1.2,
+      "speakersY": 0.75,
+    },
+    {
+      "score": 0.77,
+      "seat": [
+        1.8,
+        3.6,
+      ],
+      "speakersX": [
+        0.7,
+        2.9,
+      ],
+      "speakersY": 1.15,
     },
   ],
   "current": 0.6,
   "findings": [
-    "caution P09.dip",
-    "caution G03.surfaces",
     "caution G04.caution",
-    "caution G10.passiveSpeaker",
     "info P02.lowestModes",
     "info P04.frontWall",
     "info P04.aligned",
     "info P05.low",
-    "info P06.scattering",
+    "info P06.sideWall",
     "info P06.floor",
     "info P06.ceiling",
     "info P06.sideWall",
@@ -485,10 +482,12 @@ exports[`golden scenarios > the busy room: wall-setting reminder, passive speake
     "info P07.transition",
     "info P08.dead",
     "info P09.peak",
+    "info P09.dip",
     "info P10.ratio",
     "info P11.ituPass",
     "info G01.widthNode",
     "info G07.matchSetting",
+    "info G09.bothSchools",
     "info G09.bothSchools",
     "info H01.overlay",
     "info H02.overlay",

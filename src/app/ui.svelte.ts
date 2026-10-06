@@ -1,23 +1,17 @@
-import type { BoundaryId, LayerId, Placement, Vec3 } from '../engine/types';
+import type { LayerId, Placement, Vec3 } from '../engine/types';
 import type { StepId } from './session.svelte';
 
 /** What the user is currently looking at or has selected. Not saved with the project. */
 export type Selection =
-  | { kind: 'none' }
-  | { kind: 'speaker'; side: 'left' | 'right' }
-  | { kind: 'seat' }
-  | { kind: 'object'; id: string };
+  { kind: 'none' } | { kind: 'speaker'; side: 'left' | 'right' } | { kind: 'seat' };
 
 let step = $state<StepId>('room');
 let selection = $state<Selection>({ kind: 'none' });
-let boundary = $state<BoundaryId>('left');
 let view = $state<'top' | 'side'>('top');
 /** A seat layer, or 'speakers': where the speakers would score best, the seat staying put. */
 let layer = $state<LayerId | 'speakers'>('goals');
 /** The bass note shown by the room-mode explorer (Hz), or null when it is off. */
 let modeFrequency = $state<number | null>(null);
-/** The other setup drawn over the bass chart (Compare), or null. */
-let compareId = $state<string | null>(null);
 /** Index of the best-spot candidate being previewed on the map, or null for the current setup. */
 let candidate = $state<number | null>(null);
 /** The side view is hidden until asked for (docs/REVAMP_PLAN.md). */
@@ -100,13 +94,6 @@ export const ui = {
   select(value: Selection) {
     selection = value;
   },
-  /** The wall, floor or ceiling shown in the Surfaces step. */
-  get boundary() {
-    return boundary;
-  },
-  set boundary(value: BoundaryId) {
-    boundary = value;
-  },
   get layer() {
     return layer;
   },
@@ -118,12 +105,6 @@ export const ui = {
   },
   set modeFrequency(value: number | null) {
     modeFrequency = value;
-  },
-  get compareId() {
-    return compareId;
-  },
-  set compareId(value: string | null) {
-    compareId = value;
   },
   get candidate() {
     return candidate;

@@ -268,15 +268,12 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - Never a red flag. The disagreement is real and documented: the LEDE / reflection-free-zone approach [DAV80] vs. listener-preference research summarised in [TOOLE].
 - **Sources:** [TOOLE], [DAV80].
 
-### G10 · Objects close to or between the speakers and you
+### G10 · Objects close to or between the speakers and you (removed in V9)
 
-- **In plain words:** Anything between a speaker and your ears blocks or scatters the sound. Large hard objects right beside a speaker (another speaker, a cabinet side, a monitor) add early reflections that blur the image.
-- **Logic:**
-  - an object intersecting the direct path from a speaker to the listener (top view and height check) → red flag;
-  - a hard object within 0.3 m of a speaker's side or front → caution (🟡 threshold);
-  - other loudspeakers nearby (switched off): caution "passive speakers can resonate along. We can't predict how much; test by ear (cover or move them)" → 🟡 / 🟣. No source claims a magnitude; the app says so.
-  - **(R0)** one finding per object, for the nearer speaker (before R0 an object near both speakers gave two).
-- **Sources:** the physics of reflection (P06) and of a blocked direct path; [TOOLE] discusses nearby-object reflections (chapter not checked, R5). No number in this rule comes from a source: the 0.3 m threshold is 🟡.
+V9 removed placing furniture (owner decision, docs/ROADMAP_V9.md §1): the rule checked objects the
+user drew on the plan. Its effect on the result was small (an object in the line of sight, a hard
+surface beside a cabinet) and people see it for themselves; the absorption of furniture is carried
+by "How full is the room?". Older projects are cleaned on load (`app/state/tidy.ts`).
 
 ### G11 · The speakers must be in front of you (V7)
 
@@ -285,13 +282,24 @@ Physics rules (🔴) are exact **for the idealised model** (rigid rectangular bo
 - **Sources:** [ITU775] (the stereo pair at ±30° in front of the listener), [TOOLE]. The 0.5 m margin and the cap are design choices, not from a source.
 - **Test case:** `tests/engine/trust.test.ts`: speakers 1 m behind the seat → Poor with this red flag; beside the seat → Poor; a normal setup → untouched.
 
+### G12 · The reflection off the desk top (V9)
+
+- **When:** you listen at a desk (Desk, or close listening).
+- **In plain words:** the desk top is a mirror between the speakers and your ears. The bounced sound arrives a fraction of a millisecond late and cuts a dip in the midrange.
+- **Formula (🔴 geometry, image source [KUT]):** with d the horizontal distance from the tweeter to the ears and hₛ, hₑ the tweeter and ear heights above the desk top,
+  Δ = √(d² + (hₛ + hₑ)²) − √(d² + (hₑ − hₛ)²); delay = Δ / c; first dip at c / (2Δ) (and at odd multiples above it).
+  The reflection point lies d · hₛ / (hₛ + hₑ) from the speaker; it hits the desk only between its back and front edges (desk 0.7 m deep, front edge 0.35 m in front of the ears: 🟡 typical, `presets/listeningArea.ts`). The desk top is the speakers' base when they stand on the desk, else 0.75 m (🟡).
+- **Says:** onDesk (caution) with the delay and the dip, and that its depth depends on how much sound the speaker sends downward, which we do not know; clear (info) when the reflection lands off the desk. The bass model and the map do not include the desk: said in the text.
+- **Not claimed:** how deep the dip is (speaker directivity), or any number for absorptive mats.
+- **Tests:** `tests/engine/desk.test.ts` (independent recomputation of delay and dip; off-desk; not at a desk).
+
 ### C01–C03 · Contextual tips (V7)
 
 Tips that speak only in one situation, never as advice for everyone (owner decision, docs/ROADMAP_V7.md). Each has a plain sentence and the detailed one under Details or with "Show the numbers".
 
 | Rule | When | Says | Level | Sources |
 |---|---|---|---|---|
-| C01 | You listen at a desk (Desk, or close listening) | The desk top reflects sound to the ears just after the direct sound; raise the speakers and aim them at the ears, or set them at the back edge. | 🟠 (the reflection is geometry, as P06; no size claimed) | [KUT], [TOOLE] (chapter not checked) |
+| C01 | You listen at a desk (Desk, or close listening) | The desk top reflects sound to the ears just after the direct sound; raise the speakers and aim them down at the ears, so less sound goes towards the desk. **(V9)** No longer says "or set them at the back edge": a longer path over the desk does not weaken the reflection (G12's geometry). | 🟠 (the reflection is geometry, as G12; no size claimed) | [KUT], [TOOLE] (chapter not checked) |
 | C02 | You told us about the speakers, and their −6 dB point is at least 1.5 × the room's deepest resonance | That resonance is barely excited (output below f6 falls 12–24 dB per octave, as in P09); the ones they reach are already in the map. | 🔴 | [KUT], [TOOLE] |
 | C03 | You listen in bed | Ears are lower than seated; lower or tilt the speakers so the tweeters point at the pillow. No angle is computed (the pillow height is unknown). | 🟠 | [ITU1116], [TOOLE] |
 
@@ -441,7 +449,7 @@ Octave bands 125 / 250 / 500 / 1k / 2k / 4k Hz. Values are typical published fig
 | Bookshelf / CD or record wall | 0.15 | 0.20 | 0.25 | 0.30 | 0.35 | 0.35 | diffusive · **low confidence** (no standard data) | no row to compare: estimate |
 | Canvas painting on wall | wall value +0.05 above 500 Hz | | | | | | reflective · **low confidence** | estimate |
 
-Objects (absorption area, m² sabins, per object, mid bands):
+Objects (absorption area, m² sabins, per object, mid bands). **V9:** placed objects were removed; the table stays as the record of what "How full is the room?" was anchored against:
 
 | Object | ≈ A (500 Hz–1 kHz) | Confidence |
 |---|---|---|

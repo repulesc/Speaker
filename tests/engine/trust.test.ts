@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { analyze } from '../../src/engine/analyze';
 import { buildContext, currentPlacement } from '../../src/engine/context';
 import { explainPoint, explainSpeakerSpot } from '../../src/engine/explain';
-import { isObstructed } from '../../src/engine/rules/G10-objects';
 import { speakerHeatmap } from '../../src/engine/scoring/heatmaps';
 import { makeScorer } from '../../src/engine/scoring/search';
 import { THRESHOLDS } from '../../src/engine/scoring/thresholds';
@@ -106,29 +105,5 @@ describe('one word, one number', () => {
     const ears = p.variants[0]!.listener.ears;
     const spot = explainSpeakerSpot(p, { x: ears.x - 0.8, y: ears.y + 0.5 })!;
     expect(spot.stereo).toBe(false);
-  });
-});
-
-describe('a low seat does not block the sound (checked, it never did)', () => {
-  const sofa = {
-    id: 'sofa',
-    kind: 'sofa' as const,
-    position: { x: 1, y: 2.6, z: 0 },
-    size: { x: 2, y: 0.9, z: 0.85 },
-    hard: false,
-  };
-  it('the sound passes over a sofa to a seat behind it', () => {
-    const p = makeProject({});
-    p.variants[0]!.objects = [sofa];
-    const ctx = buildContext(p)!;
-    const { speakers } = currentPlacement(ctx);
-    expect(isObstructed(ctx, speakers, { x: 2, y: 3.8, z: 1.1 })).toBeNull();
-  });
-  it('a wardrobe in the same place does block it', () => {
-    const p = makeProject({});
-    p.variants[0]!.objects = [{ ...sofa, id: 'w', kind: 'wardrobe', size: { x: 2, y: 0.6, z: 2 } }];
-    const ctx = buildContext(p)!;
-    const { speakers } = currentPlacement(ctx);
-    expect(isObstructed(ctx, speakers, { x: 2, y: 3.8, z: 1.1 })).not.toBeNull();
   });
 });

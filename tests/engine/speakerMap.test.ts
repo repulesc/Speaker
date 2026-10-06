@@ -31,34 +31,3 @@ describe('the speaker map', () => {
     expect(ms).toBeLessThan(6000);
   });
 });
-
-describe('furniture does not hide the maps', () => {
-  const project = makeProject({ W: 5, L: 5 });
-  project.variants[0]!.objects = [
-    {
-      id: 'sofa',
-      kind: 'sofa',
-      position: { x: 0.2, y: 0.2, z: 0 },
-      size: { x: 1.2, y: 1.2, z: 0.8 },
-      hard: false,
-    },
-  ];
-  const a = analyze(project) as AnalysisOk;
-
-  it('speaker map: spots on furniture are scored and flagged, not left blank', () => {
-    const g = a.heatmap.speakers;
-    const at = (x: number, y: number) =>
-      Math.round((y - g.y0) / g.step) * g.nx + Math.round((x - g.x0) / g.step);
-    const k = at(0.7, 0.7); // inside the sofa
-    expect(Number.isFinite(g.values[k]!)).toBe(true);
-    expect(g.redFlag![k]).toBe(true);
-    const free = at(1.8, 0.7);
-    expect(g.redFlag![free]).toBe(false);
-  });
-
-  it('seat map: cells on furniture are scored too', () => {
-    const l = a.layers;
-    const k = Math.round((2 - l.y0) / l.step) * l.nx + Math.round((0.7 - l.x0) / l.step);
-    expect(Number.isFinite(l.values.overall[k]!)).toBe(true);
-  });
-});

@@ -3,6 +3,8 @@
 Status: **decisions locked after brainstorming. Phase 0 specification written, awaiting owner review.**
 Audience: Claude sessions working on this project, and the project owner.
 
+> **Decisions the owner changed later.** V9 (docs/ROADMAP_V9.md): no placing furniture or things on walls ("How full is the room?" carries the furnishing), no JSON export and import (one room, shared by link), no listening notes. The display face is Jost and the brand is the NODO wordmark. Where this brief says otherwise, the roadmap wins.
+
 Phase 0 documents:
 
 - [RULE_CATALOGUE](RULE_CATALOGUE.md)

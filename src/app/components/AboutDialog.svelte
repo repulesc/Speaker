@@ -14,6 +14,9 @@
   <div class="body">
     <h2 id="about-title">{i18n.t('about.title')}: {APP_NAME}</h2>
     <p>{i18n.t('about.body')}</p>
+    <h3>{i18n.t('about.knowsTitle')}</h3>
+    <p>{i18n.t('about.knows')}</p>
+    <p>{i18n.t('about.cannot')}</p>
     <p>{i18n.t('about.sources')}</p>
     {#if SUPPORT_URL}
       <p>

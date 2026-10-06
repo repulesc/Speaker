@@ -2,43 +2,44 @@
   import {
     ASPECT_ANSWERS,
     ASPECTS,
+    aspectOf,
     type Aspect,
     type Experiment,
     type ListeningAnswers,
   } from '../../engine/listening';
-  import type { ListeningState } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { formatLength } from '../../units/format';
-  import {
-    pendingTry,
-    putBack,
-    setAnswer,
-    setNote,
-    setOverall,
-    setTryResult,
-    tryExperiment,
-  } from '../listen/check';
+  import { pendingTry, putBack, setAnswer, setTryResult, tryExperiment } from '../listen/check';
   import { analysis, showNotice, workspace } from '../session.svelte';
+  import PlacementOptions from './PlacementOptions.svelte';
   import TreatPanel from './TreatPanel.svelte';
 
   /**
-   * Listen (docs/ROADMAP_V8.md §4): say what you hear, then try one change at a time, the way a
-   * sound engineer works by ear. The app never claims to know the speaker: each change says how
-   * sure it is, and for moves what the room model thinks; the ears decide.
+   * 03 Listening check (docs/ROADMAP_V9.md §5): one row per aspect of the sound, and the fixes for
+   * a complaint right under it, free moves first, then the speaker's own controls (only "if yours
+   * has one"), then the room. Each says how sure it is; the ears decide.
    */
   const project = $derived(workspace.project);
   const check = $derived(project.listening);
   const answers = $derived<ListeningAnswers>(check?.answers ?? {});
   const ok = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
   const experiments = $derived(ok?.listening ?? []);
-  const asked = $derived(
-    Object.values(answers).some(
-      (a) => a !== undefined && !['right', 'even', 'focused', 'clear'].includes(a),
-    ),
-  );
   const pending = $derived(pendingTry(project));
+  const pendingAspect = $derived(pending ? aspectOf(pending.experiment) : undefined);
   const tried = $derived((check?.tries ?? []).slice().reverse());
-  const OVERALL = [1, 2, 3, 4, 5] as const;
+
+  const FINE = ['right', 'even', 'focused', 'clear'];
+  /** The order on screen: the "fine" answer sits where it reads naturally on each scale. */
+  const ORDER: { [A in Aspect]: readonly NonNullable<ListeningAnswers[A]>[] } = {
+    ...ASPECT_ANSWERS,
+    centre: ['focused', 'vague', 'left', 'right'],
+    clarity: ['clear', 'some', 'echoey'],
+  };
+  const complaint = (aspect: Aspect) => {
+    const a = answers[aspect];
+    return a !== undefined && !FINE.includes(a);
+  };
+  const fixesFor = (aspect: Aspect) => experiments.filter((e) => e.aspect === aspect);
 
   /** "20 cm" for moves, "5°" for toe-in. */
   function amount(e: Pick<Experiment, 'change' | 'params'>): string {
@@ -64,67 +65,11 @@
     workspace.edit((p) => void (done = tryExperiment(p, e)));
     if (!done) showNotice('error', i18n.t('listen.noLonger'));
   }
-  // Follows the saved note; typing overrides it until the change is saved.
-  let note = $derived(check?.note ?? '');
 </script>
 
-<div class="listen">
-  <section class="check" aria-labelledby="listen-title">
-    <h2 id="listen-title">{i18n.t('listen.title')}</h2>
-    <p class="intro">{i18n.t('listen.intro')}</p>
-
-    {#each ASPECTS as aspect (aspect)}
-      <div class="aspect" role="group" aria-labelledby="aspect-{aspect}">
-        <span class="label" id="aspect-{aspect}">{i18n.t(`listen.aspect.${aspect}.label`)}</span>
-        <div class="options">
-          {#each ASPECT_ANSWERS[aspect] as value (value)}
-            <button
-              type="button"
-              class="option"
-              class:good={['right', 'even', 'focused', 'clear'].includes(value)}
-              aria-pressed={answers[aspect] === value}
-              onclick={() => answer(aspect, value as never)}
-              >{i18n.t(`listen.aspect.${aspect}.${value}`)}</button
-            >
-          {/each}
-        </div>
-      </div>
-    {/each}
-
-    <div class="aspect" role="group" aria-labelledby="aspect-overall">
-      <span class="label" id="aspect-overall">{i18n.t('listen.overall.label')}</span>
-      <div class="scale">
-        {#each OVERALL as v (v)}
-          <button
-            type="button"
-            class="dot"
-            aria-pressed={check?.overall === v}
-            aria-label={i18n.t(`listen.overall.${v}`)}
-            title={i18n.t(`listen.overall.${v}`)}
-            onclick={() => workspace.edit((p) => setOverall(p, v as ListeningState['overall']))}
-            >{v}</button
-          >
-        {/each}
-      </div>
-      <div class="ends" aria-hidden="true">
-        <span>{i18n.t('listen.overall.1')}</span><span>{i18n.t('listen.overall.5')}</span>
-      </div>
-    </div>
-
-    <label class="note">
-      <span class="label">{i18n.t('listen.note')}</span>
-      <textarea
-        class="input"
-        rows="2"
-        bind:value={note}
-        onchange={() => workspace.edit((p) => setNote(p, note))}
-      ></textarea>
-    </label>
-    <p class="local">{i18n.t('listen.local')}</p>
-  </section>
-
+{#snippet howWasIt()}
   {#if pending}
-    <section class="pending" aria-live="polite" data-testid="listen-pending">
+    <div class="pending" aria-live="polite" data-testid="listen-pending">
       <p class="pending-title">{i18n.t('listen.how', { what: triedText(pending) })}</p>
       <div class="results">
         {#each ['better', 'same', 'worse'] as const as r (r)}
@@ -136,34 +81,74 @@
           >
         {/each}
       </div>
-    </section>
+    </div>
   {/if}
+{/snippet}
 
-  {#if experiments.length}
-    <section class="tries" aria-labelledby="try-title">
-      <h2 id="try-title">{i18n.t('listen.tryTitle')}</h2>
-      <p class="intro">{i18n.t('listen.tryIntro')}</p>
-      <ol class="experiments">
-        {#each experiments as e (e.id)}
-          <li class="exp" data-testid="experiment">
-            <p class="do">{doText(e)}</p>
-            <p class="why">{whyText(e)}</p>
-            <p class="meta">
-              <span class="conf {e.level}">{i18n.t(`listen.confidence.${e.level}`)}</span>
-              {#if e.model}<span class="model">{i18n.t(`listen.model.${e.model}`)}</span>{/if}
-            </p>
-            <button type="button" class="btn" disabled={pending !== null} onclick={() => attempt(e)}
-              >{i18n.t(e.change ? 'listen.tryIt' : 'listen.tried')}</button
+<div class="listen">
+  <section class="check" aria-labelledby="listen-title">
+    <h2 id="listen-title">{i18n.t('listen.title')}</h2>
+    <p class="help">{i18n.t('listen.intro')}</p>
+
+    <div class="matrix">
+      {#each ASPECTS as aspect (aspect)}
+        <div
+          class="row"
+          class:wide={ORDER[aspect].length > 3}
+          role="group"
+          aria-labelledby="aspect-{aspect}"
+        >
+          <span class="label" id="aspect-{aspect}">{i18n.t(`listen.aspect.${aspect}.label`)}</span>
+          <div class="scale">
+            {#each ORDER[aspect] as value (value)}
+              <button
+                type="button"
+                class="option"
+                class:fine={FINE.includes(value)}
+                aria-pressed={answers[aspect] === value}
+                title={i18n.t(`listen.aspect.${aspect}.${value}`)}
+                onclick={() => answer(aspect, value as never)}
+                >{i18n.t(`listen.short.${aspect}.${value}`)}</button
+              >
+            {/each}
+          </div>
+        </div>
+        {#if pendingAspect === aspect}{@render howWasIt()}{/if}
+        {#if complaint(aspect)}
+          {@const fixes = fixesFor(aspect)}
+          {#if fixes.length}
+            <ol
+              class="fixes"
+              aria-label={i18n.t('listen.fixesFor', {
+                aspect: i18n.t(`listen.aspect.${aspect}.label`),
+              })}
             >
-          </li>
-        {/each}
-      </ol>
-    </section>
-  {:else if asked}
-    <p class="empty">{i18n.t('listen.nothing')}</p>
-  {:else if Object.keys(answers).length > 0}
-    <p class="empty">{i18n.t('listen.allRight')}</p>
-  {/if}
+              {#each fixes as e (e.id)}
+                <li class="fix" data-testid="experiment">
+                  <p class="do">{doText(e)}</p>
+                  <p class="why">{whyText(e)}</p>
+                  <div class="meta">
+                    <span class="conf {e.level}">{i18n.t(`listen.confidence.${e.level}`)}</span>
+                    {#if e.model}<span class="model">{i18n.t(`listen.model.${e.model}`)}</span>{/if}
+                    <button
+                      type="button"
+                      class="btn quiet try"
+                      disabled={pending !== null}
+                      onclick={() => attempt(e)}
+                      >{i18n.t(e.change ? 'listen.tryIt' : 'listen.tried')}</button
+                    >
+                  </div>
+                </li>
+              {/each}
+            </ol>
+          {:else}
+            <p class="help nothing">{i18n.t('listen.nothing')}</p>
+          {/if}
+        {/if}
+      {/each}
+    </div>
+    {#if pending && pendingAspect === undefined}{@render howWasIt()}{/if}
+  </section>
 
   {#if tried.length}
     <section class="history" aria-labelledby="history-title">
@@ -189,175 +174,119 @@
     </section>
   {/if}
 
-  <details class="room-ideas">
+  <details class="fold room-ideas">
     <summary>
-      <span class="title">{i18n.t('listen.roomIdeas')}</span>
-      <span class="hint">{i18n.t('listen.roomIdeasHint')}</span>
+      <span class="fold-title">{i18n.t('listen.roomIdeas')}</span>
+      <span class="fold-hint">{i18n.t('listen.roomIdeasHint')}</span>
     </summary>
-    <div class="body"><TreatPanel /></div>
+    <div class="fold-body">
+      <PlacementOptions parts={['ready']} plain />
+      <TreatPanel />
+    </div>
   </details>
 </div>
 
 <style>
   .listen {
     display: grid;
-    gap: 32px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
   }
   section {
     display: grid;
-    gap: 14px;
+    gap: 12px;
+    min-width: 0;
   }
-  .intro,
-  .local,
-  .empty {
-    color: var(--ink-muted);
-    font-size: var(--text-sm);
-    line-height: 1.5;
-  }
-  .intro {
-    margin-top: -6px;
-  }
-  .aspect {
+  /* The matrix: aspect on the left, a compact scale on the right; fixes open under their row. */
+  .matrix {
     display: grid;
+    border-top: 1px solid var(--grid);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 9fr);
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--grid);
+  }
+  /* Four answers need the full width: the scale goes under its label. */
+  .row.wide {
+    grid-template-columns: minmax(0, 1fr);
     gap: 6px;
   }
   .label {
     font-size: var(--text-sm);
     font-weight: 600;
+    overflow-wrap: anywhere;
   }
-  /* Two-sided answers: the extremes at the ends, "just right" in the middle, nothing preselected. */
-  .options {
+  .scale {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 9px;
+    background: var(--fill);
   }
   .option {
-    flex: 1 1 auto;
-    min-height: 36px;
-    padding: 0 12px;
-    border: 1px solid var(--grid-strong);
-    border-radius: 999px;
-    background: var(--surface);
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 30px;
+    padding: 2px;
+    overflow-wrap: normal;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
     color: var(--ink);
     font: inherit;
     font-size: var(--text-sm);
+    line-height: 1.15;
     cursor: pointer;
   }
   .option:hover {
-    border-color: var(--ink-muted);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
   }
   .option[aria-pressed='true'] {
-    border-color: var(--accent-fill);
     background: var(--accent-fill);
     color: var(--on-accent);
     font-weight: 600;
   }
-  .option.good[aria-pressed='true'] {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent-fill) 14%, var(--surface));
-    color: var(--ink);
+  .option.fine[aria-pressed='true'] {
+    background: var(--thumb);
+    color: var(--thumb-ink);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.16);
   }
-  .scale {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-  }
-  .dot {
-    min-height: 36px;
-    border: 1px solid var(--grid-strong);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--ink);
-    font-family: var(--font-display);
-    font-size: var(--text-md);
-    cursor: pointer;
-  }
-  .dot[aria-pressed='true'] {
-    border-color: var(--accent-fill);
-    background: var(--accent-fill);
-    color: var(--on-accent);
-  }
-  .ends {
-    display: flex;
-    justify-content: space-between;
-    color: var(--ink-muted);
-    font-size: var(--text-xs);
-  }
-  .note {
-    display: grid;
-    gap: 6px;
-  }
-  textarea {
-    min-height: 64px;
-    padding: 10px 12px;
-    resize: vertical;
-  }
-  /* "How was it?": the one thing waiting for you after a try. */
-  .pending {
-    gap: 10px;
-    padding: 16px;
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    box-shadow:
-      inset 3px 0 0 var(--accent-fill),
-      var(--card-shadow);
-  }
-  .pending-title {
-    font-weight: 600;
-    line-height: 1.35;
-  }
-  .results {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .experiments {
+  .fixes {
     display: grid;
     gap: 0;
     margin: 0;
-    padding: 0;
+    padding: 4px 0 8px 14px;
+    border-bottom: 1px solid var(--grid);
+    border-left: 2px solid var(--accent-fill);
     list-style: none;
-    counter-reset: exp;
   }
-  .exp {
-    position: relative;
+  .fix {
     display: grid;
-    gap: 6px;
-    padding: 16px 0 16px 34px;
-    border-top: 1px solid var(--grid);
-    counter-increment: exp;
+    gap: 4px;
+    padding: 10px 0;
   }
-  .exp::before {
-    content: counter(exp);
-    position: absolute;
-    left: 0;
-    top: 15px;
-    width: 22px;
-    height: 22px;
-    border: 1px solid var(--accent);
-    border-radius: 50%;
-    color: var(--accent);
-    font-family: var(--font-display);
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 20px;
-    text-align: center;
+  .fix + .fix {
+    border-top: 1px solid var(--grid);
   }
   .do {
-    font-size: var(--text-md);
     font-weight: 600;
     line-height: 1.4;
   }
   .why {
     color: var(--ink-muted);
     font-size: var(--text-sm);
-    line-height: 1.5;
+    line-height: 1.45;
   }
   .meta {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 4px 12px;
-    font-size: var(--text-xs);
+    font-size: var(--text-sm);
   }
   .conf {
     font-weight: 600;
@@ -373,10 +302,36 @@
   .model {
     color: var(--ink-muted);
   }
-  .exp .btn {
-    justify-self: start;
-    min-height: 36px;
-    margin-top: 4px;
+  .try {
+    margin-left: auto;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--grid-strong);
+  }
+  .nothing {
+    padding: 8px 0 10px 16px;
+    border-bottom: 1px solid var(--grid);
+  }
+  /* "How was it?": the one thing waiting for you after a try, under the answer it belongs to. */
+  .pending {
+    display: grid;
+    gap: 10px;
+    margin: 8px 0;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow:
+      inset 3px 0 0 var(--accent-fill),
+      var(--card-shadow);
+  }
+  .pending-title {
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .history ul {
     display: grid;
@@ -417,37 +372,15 @@
     font-weight: 600;
     cursor: pointer;
   }
-  .room-ideas {
-    border-top: 1px solid var(--grid);
-  }
-  summary {
-    display: grid;
-    gap: 2px;
-    min-height: 44px;
-    padding-top: 14px;
-    cursor: pointer;
-    list-style: none;
-  }
-  summary::-webkit-details-marker {
-    display: none;
-  }
-  summary .title {
-    color: var(--accent);
-    font-weight: 600;
-  }
-  summary .hint {
-    color: var(--ink-muted);
-    font-size: var(--text-sm);
-  }
-  .room-ideas .body {
-    padding-top: 16px;
-  }
   @media (pointer: coarse), (max-width: 1023px) {
     .option,
-    .dot,
-    .exp .btn {
+    .try,
+    .link {
       min-height: 44px;
-      min-width: 44px;
+    }
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 6px;
     }
   }
 </style>

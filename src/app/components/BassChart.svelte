@@ -1,9 +1,8 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
   import { formatFrequency } from '../../units/format';
-  import { analysis, variantLabel, workspace } from '../session.svelte';
+  import { analysis, workspace } from '../session.svelte';
   import { probe } from '../state/probe.svelte';
-  import { setups } from '../state/setups.svelte';
   import { ui } from '../ui.svelte';
 
   const result = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
@@ -36,17 +35,6 @@
         if (mine === ticket)
           spotCurve = r && 'explanation' in r ? (r.explanation?.bassResponse ?? null) : null;
       });
-  });
-
-  // The other setup chosen in Compare, at its own seat.
-  const compared = $derived(
-    ui.compareId && ui.compareId !== workspace.project.activeVariantId
-      ? workspace.project.variants.find((v) => v.id === ui.compareId)
-      : undefined,
-  );
-  const comparedCurve = $derived(compared ? (setups.views[compared.id]?.bass ?? null) : null);
-  $effect(() => {
-    if (compared) void setups.refresh($state.snapshot(workspace.project));
   });
 
   const fMin = $derived(result?.bassResponse.f[0] ?? 20);
@@ -105,11 +93,6 @@
       {#if ui.candidate !== null && spotCurve}
         <li><i class="spot"></i>{i18n.t('chart.spot', { letter: LETTERS[ui.candidate]! })}</li>
       {/if}
-      {#if compared && comparedCurve}
-        <li>
-          <i class="other"></i>{i18n.t('compare.legend', { name: variantLabel(compared.name) })}
-        </li>
-      {/if}
       {#if probe.explanation}
         <li><i class="probe"></i>{i18n.t('probe.title', { front: '…' }).split('·')[0]}</li>
       {/if}
@@ -145,7 +128,6 @@
         {#if probe.explanation}
           <path class="line probe" d={path(probe.explanation.bassResponse)} />
         {/if}
-        {#if comparedCurve}<path class="line other" d={path(comparedCurve)} />{/if}
         {#if spotCurve}<path class="line spot" d={path(spotCurve)} />{/if}
         <path class="line now" d={path(result.bassResponse)} />
       </svg>
@@ -198,14 +180,6 @@
   .line.spot {
     background: var(--heat-4);
     stroke: var(--heat-4);
-  }
-  i.other,
-  .line.other {
-    background: var(--ink-muted);
-    stroke: var(--ink-muted);
-  }
-  .line.other {
-    stroke-dasharray: 6 4;
   }
   i.probe,
   .line.probe {

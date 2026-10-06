@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createDefaultProject } from '../../src/app/state/defaults';
 import { SIZE_LIMITS } from '../../src/app/state/limits';
-import {
-  exportFileName,
-  parseProjectJson,
-  readProject,
-  serializeProject,
-} from '../../src/app/state/projectFile';
+import { parseProjectJson, readProject, serializeProject } from '../../src/app/state/projectFile';
 import type { Project } from '../../src/engine/types';
 import { busyRoom } from '../fixtures/busy-room';
 import { makeProject } from '../fixtures/projects';
@@ -21,17 +16,43 @@ describe('project files', () => {
     expect(result.ok && result.project).toEqual(p);
   });
 
+  it('a project from an older version is tidied: no hidden furniture, patches, notes or setups', () => {
+    const old = makeProject() as unknown as Record<string, unknown> & Project;
+    const legacy = old as unknown as {
+      variants: Record<string, unknown>[];
+      surfaces: Record<string, unknown>;
+      room: Record<string, unknown>;
+      notes: unknown[];
+    };
+    legacy.variants[0]!.objects = [{ id: 'o', kind: 'sofa' }];
+    legacy.variants.push({ ...legacy.variants[0]!, id: 'v2' });
+    legacy.surfaces.patches = [{ id: 'p', boundary: 'left', preset: 'glass' }];
+    legacy.room.construction = 'lightweight';
+    legacy.notes = [{ id: 'n' }];
+    old.surfaces.base.left = 'curtain-heavy';
+    old.room.temperatureC = { value: 26, certainty: 'measured' };
+    old.room.outOfModel = ['alcove', 'slanted-ceiling'];
+    old.constraints.listenerYRange = [1, 3];
+    const result = readProject(JSON.parse(JSON.stringify(old)));
+    if (!result.ok) throw new Error('expected the old project to read');
+    const p = result.project as unknown as Record<string, unknown> & Project;
+    expect(p.variants).toHaveLength(1);
+    expect('objects' in p.variants[0]!).toBe(false);
+    expect('patches' in p.surfaces).toBe(false);
+    expect('construction' in p.room).toBe(false);
+    expect('notes' in p).toBe(false);
+    expect(p.surfaces.base.left).toBe('plaster-brick');
+    expect(p.surfaces.baseCertainty.left).toBe('unknown');
+    expect(p.room.temperatureC.value).toBeNull();
+    expect(p.room.outOfModel.sort()).toEqual(['non-rectangular', 'open-plan-connection']);
+    expect(p.constraints.listenerYRange).toBeUndefined();
+  });
+
   it('fully filled projects (Room R and the busy room) round-trip', () => {
     for (const p of [makeProject(), busyRoom()]) {
       const result = parseProjectJson(serializeProject(p));
       expect(result.ok && result.project).toEqual(p);
     }
-  });
-
-  it('can leave the notes out', () => {
-    const p = { ...fresh(), notes: [{ id: 'n', createdAt: 'x', variantId: 'v', symptoms: [] }] };
-    const out = JSON.parse(serializeProject(p, { includeNotes: false }));
-    expect(out.notes).toEqual([]);
   });
 
   it.each([
@@ -87,46 +108,9 @@ describe('project files', () => {
     });
   });
 
-  it('rejects oversized lists (hostile files cannot make the engine crawl)', () => {
-    const p = makeProject();
-    const patch = {
-      id: 'p',
-      boundary: 'left',
-      u: 0,
-      v: 0,
-      width: 1,
-      height: 1,
-      preset: 'glass',
-    } as const;
-    p.surfaces.patches = Array.from({ length: SIZE_LIMITS.patches + 1 }, () => patch);
-    expect(readProject(JSON.parse(JSON.stringify(p)))).toMatchObject({
-      ok: false,
-      reason: 'invalid',
-    });
-  });
-
   describe('rejects well-formed files that would break the app (R0 audit C3, H5)', () => {
-    const object = {
-      id: 'o',
-      kind: 'table',
-      position: { x: 1, y: 3, z: 0 },
-      size: { x: 1, y: 0.6, z: 0.75 },
-      hard: true,
-    } as const;
-    const patch = { id: 'p', boundary: 'left', u: 0, v: 0, width: 1, height: 1 } as const;
-    const note = { id: 'n', createdAt: 'x', variantId: 'v1', symptoms: [] };
     const cases: [string, (p: Project) => void][] = [
       ['two setups with one id', (p) => p.variants.push({ ...p.variants[0]!, name: 'Copy' })],
-      ['two objects with one id', (p) => (p.variants[0]!.objects = [object, { ...object }])],
-      [
-        'two surface patches with one id',
-        (p) =>
-          (p.surfaces.patches = [
-            { ...patch, preset: 'glass' },
-            { ...patch, preset: 'curtain-heavy' },
-          ]),
-      ],
-      ['two notes with one id', (p) => (p.notes = [note, { ...note }])],
       ['no setups at all', (p) => (p.variants = [])],
       [
         'a surface map without the floor',
@@ -135,29 +119,6 @@ describe('project files', () => {
       [
         'a certainty map without the ceiling',
         (p) => delete (p.surfaces.baseCertainty as Partial<Record<string, string>>).ceiling,
-      ],
-      [
-        'custom absorption with two bands instead of six',
-        (p) =>
-          p.surfaces.patches.push({
-            ...patch,
-            preset: 'custom',
-            customAbsorption: [
-              0.5, 0.5,
-            ] as unknown as Project['surfaces']['patches'][0]['customAbsorption'],
-          }),
-      ],
-      [
-        'an absorption range with one value',
-        (p) =>
-          p.variants[0]!.objects.push({
-            ...object,
-            absorptionRange: [5] as unknown as [number, number],
-          }),
-      ],
-      [
-        'an absorption range from high to low',
-        (p) => p.variants[0]!.objects.push({ ...object, absorptionRange: [3, 1] }),
       ],
       ['a seat range from far to near', (p) => (p.constraints.listenerYRange = [4, 1])],
       [
@@ -173,12 +134,5 @@ describe('project files', () => {
         reason: 'invalid',
       });
     });
-  });
-
-  it('file names are safe', () => {
-    expect(exportFileName({ ...fresh(), name: 'Living room: v2/final' })).toBe(
-      'Living room- v2-final.speaker.json',
-    );
-    expect(exportFileName({ ...fresh(), name: '   ' })).toBe('project.speaker.json');
   });
 });

@@ -16,13 +16,11 @@ import type {
   BoundaryId,
   Busyness,
   GoalId,
-  ObjectKind,
   Project,
   SurfacePresetId,
 } from '../../src/engine/types';
 import { adviceText, findingText } from '../../src/app/findings/text';
 import { speakerFromChoices } from '../../src/app/state/defaults';
-import { OBJECT_DEFAULTS } from '../../src/app/plan/placement';
 import { i18n } from '../../src/i18n/locale.svelte';
 import { estimated, makeProject } from '../fixtures/projects';
 
@@ -34,7 +32,6 @@ import { estimated, makeProject } from '../fixtures/projects';
 
 beforeAll(() => vi.stubGlobal('document', { documentElement: {} }));
 
-const KINDS = Object.keys(OBJECT_DEFAULTS) as ObjectKind[];
 const PRESETS = Object.keys(SURFACE_PRESETS) as SurfacePresetId[];
 const BOUNDARIES: BoundaryId[] = ['front', 'back', 'left', 'right', 'floor', 'ceiling'];
 const BUSY: Busyness[] = ['bare', 'some', 'busy', 'very-busy'];
@@ -74,15 +71,6 @@ const projectArb = fc
     fixedSpeakers: fc.boolean(),
     dsp: fc.boolean(),
     toeIn: fc.integer({ min: 0, max: 30 }),
-    objects: fc.array(
-      fc.record({
-        kind: fc.constantFrom(...KINDS),
-        x: unit,
-        y: unit,
-        material: fc.constantFrom(undefined, 'hard', 'soft', 'absorbent'),
-      }),
-      { maxLength: 4 },
-    ),
   })
   .map((r): Project => {
     const speaker = speakerFromChoices(r.choices);
@@ -117,18 +105,6 @@ const projectArb = fc
     p.constraints.speakersFixed = r.fixedSpeakers;
     p.variants[0]!.speakers.left.toeInDeg = r.toeIn;
     p.variants[0]!.speakers.right.toeInDeg = r.toeIn;
-    p.variants[0]!.objects = r.objects.map((o, i) => {
-      const d = OBJECT_DEFAULTS[o.kind];
-      const size = { x: Math.min(d.x, r.W), y: Math.min(d.y, r.L), z: Math.min(d.z, r.H) };
-      return {
-        id: `o${i}`,
-        kind: o.kind,
-        position: { x: o.x * (r.W - size.x), y: o.y * (r.L - size.y), z: 0 },
-        size,
-        hard: o.material ? o.material === 'hard' : d.hard,
-        ...(o.material ? { material: o.material } : {}),
-      };
-    });
     return p;
   });
 

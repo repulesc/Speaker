@@ -16,7 +16,6 @@
   import { fitFrame, toPx, toWorld } from '../plan/frame';
   import {
     cabinet,
-    moveObject,
     moveSeat,
     moveSpeaker,
     setSpeakerClearance,
@@ -79,19 +78,12 @@
       : [],
   );
   const seat = $derived(variant && known ? variant.listener : null);
-  const objects = $derived(variant && known ? variant.objects : []);
   /** What the listener sits on: a chair unless the room sheet says sofa, desk or bed. */
   const seatKind = $derived<SeatKind | null>(
     seat
       ? (seat.area ?? (project.constraints.listeningDistance === 'near' ? 'desk' : 'chair'))
       : null,
   );
-  const reflectionRings = $derived(
-    ui.step === 'surfaces' && analysis.result?.status === 'ok'
-      ? analysis.result.findings.filter((f) => f.ruleId === 'P06' && f.location)
-      : [],
-  );
-
   const selected = $derived(ui.selection);
 
   // ── Map layers, best spots, probe ────────────────────────────────────────
@@ -318,7 +310,6 @@
 
   const speakerName = (side: 'left' | 'right') =>
     i18n.t(side === 'left' ? 'plan.speakerLeft' : 'plan.speakerRight');
-  const objectName = (kind: string, label?: string) => label || i18n.t(`object.${kind}`);
 
   function speakerLabel(side: 'left' | 'right') {
     const b = variant!.speakers[side].base;
@@ -433,39 +424,6 @@
         {/each}
       {/if}
 
-      <!-- Walls: the selected one (Surfaces step) is highlighted. -->
-      <line
-        class="wall"
-        class:active={ui.step === 'surfaces' && ui.boundary === 'left'}
-        x1={px(0)}
-        y1={py(0)}
-        x2={px(0)}
-        y2={py(L)}
-      />
-      <line
-        class="wall"
-        class:active={ui.step === 'surfaces' && ui.boundary === 'right'}
-        x1={px(W)}
-        y1={py(0)}
-        x2={px(W)}
-        y2={py(L)}
-      />
-      <line
-        class="wall"
-        class:active={ui.step === 'surfaces' && ui.boundary === 'back'}
-        x1={px(0)}
-        y1={py(L)}
-        x2={px(W)}
-        y2={py(L)}
-      />
-      <line
-        class="front"
-        class:active={ui.step === 'surfaces' && ui.boundary === 'front'}
-        x1={px(0)}
-        y1={py(0)}
-        x2={px(W)}
-        y2={py(0)}
-      />
       <text class="label" x={px(W / 2)} y={py(0) - 10} text-anchor="middle"
         >{i18n.t('plan.frontWall')}</text
       >
@@ -527,57 +485,6 @@
           </g>
         {/if}
 
-        {#each objects as o (o.id)}
-          {@const isSelected = selected.kind === 'object' && selected.id === o.id}
-          <g
-            class="item object"
-            class:selected={isSelected}
-            role="button"
-            tabindex="0"
-            aria-label={i18n.t('plan.item.object', {
-              name: objectName(o.kind, o.label),
-              hint: i18n.t('plan.item.hint'),
-            })}
-            onfocus={() => ui.select({ kind: 'object', id: o.id })}
-            onpointerdown={(e) => {
-              ui.select({ kind: 'object', id: o.id });
-              drag(
-                e,
-                { x: o.position.x, y: o.position.y },
-                `object-${o.id}`,
-                (x, y) => workspace.project && moveObject(workspace.project, o.id, { x, y }),
-              );
-            }}
-            onkeydown={(e) =>
-              onKey(e, `object-${o.id}`, (dx, dy) =>
-                moveObject(
-                  workspace.project,
-                  o.id,
-                  { x: o.position.x + dx, y: o.position.y + dy },
-                  { grid: false },
-                ),
-              )}
-          >
-            <rect
-              x={px(o.position.x)}
-              y={py(o.position.y)}
-              width={o.size.x * frame.scale}
-              height={o.size.y * frame.scale}
-              rx="4"
-              class="body"
-              class:hard={o.hard}
-            />
-            {#if o.size.x * frame.scale > 56 && o.size.y * frame.scale > 20}
-              <text
-                class="item-label"
-                x={px(o.position.x + o.size.x / 2)}
-                y={py(o.position.y + o.size.y / 2) + 4}
-                text-anchor="middle">{objectName(o.kind, o.label)}</text
-              >
-            {/if}
-          </g>
-        {/each}
-
         {#if showHeat && !speakerGrid && !field && speakers.length === 2}
           <!-- In front of the speakers' line no seat is scored: the map fades out there. -->
           {@const noteY = Math.max(speakers[0]!.p.base.y, speakers[1]!.p.base.y) + cab.d / 2 + 0.28}
@@ -603,10 +510,6 @@
             <circle cx={px(r.at.x)} cy={py(r.at.y)} r="11" />
             <text x={px(r.at.x)} y={py(r.at.y) + 4} text-anchor="middle">{r.n}</text>
           </g>
-        {/each}
-
-        {#each reflectionRings as f (f.messageKey + String(f.params.speaker) + String(f.params.boundary))}
-          <circle class="ring" cx={px(f.location!.x)} cy={py(f.location!.y)} r="9" />
         {/each}
 
         {#if zoneRadius !== null}
@@ -1125,21 +1028,6 @@
     stroke-width: 1;
   }
   /* The room outline is the wall; only the front wall (where the speakers stand) is drawn heavier. */
-  .wall {
-    stroke: transparent;
-    stroke-width: 1;
-  }
-  /* The front wall is part of the band; it is only drawn on its own when selected. */
-  .front {
-    stroke: transparent;
-    stroke-width: 1;
-  }
-  .wall.active,
-  .front.active {
-    stroke: var(--accent);
-    stroke-width: 4;
-    stroke-linecap: round;
-  }
   .label {
     fill: var(--ink-muted);
     font-size: 10.5px;
@@ -1283,12 +1171,6 @@
     opacity: 0.4;
     pointer-events: none;
   }
-  .ring {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 2;
-    pointer-events: none;
-  }
 
   /* Items: movable things. Pointer and keyboard focus both show a clear outline. */
   .item {
@@ -1303,21 +1185,6 @@
     fill: var(--bg);
     stroke: var(--ink);
     stroke-width: 1.5;
-  }
-  /* Furniture: soft, see-through, neutral, so the map shows what it is like to sit there too. */
-  .object .body {
-    fill: color-mix(in srgb, var(--ink) 7%, transparent);
-    stroke: color-mix(in srgb, var(--ink) 28%, transparent);
-    stroke-width: 1;
-  }
-  .object .body.hard {
-    fill: color-mix(in srgb, var(--ink) 13%, transparent);
-  }
-  .item-label {
-    fill: var(--ink);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    pointer-events: none;
   }
   /* Speakers: dark graphite with a white ring, so they read on every heat colour (V7). */
   .cabinet {

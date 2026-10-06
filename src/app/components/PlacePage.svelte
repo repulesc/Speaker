@@ -28,6 +28,7 @@
 <style>
   .place {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
   .details {

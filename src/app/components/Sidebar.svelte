@@ -4,12 +4,14 @@
   import { roomSize } from '../plan/placement';
   import { analysis, workspace } from '../session.svelte';
   import { ui } from '../ui.svelte';
+  import Colophon from './Colophon.svelte';
   import ListenPage from './ListenPage.svelte';
   import PlacePage from './PlacePage.svelte';
   import ProjectName from './ProjectName.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
   import SetupPage from './SetupPage.svelte';
   import Steps from './Steps.svelte';
+  import Wordmark from './Wordmark.svelte';
 
   /**
    * The panel (docs/ROADMAP_V8.md §2): a masthead with the app, the project's name (edit it where
@@ -18,8 +20,6 @@
   interface Props {
     onshare: () => void;
     onimage: () => void;
-    onexport: () => void;
-    onimport: () => void;
     onprint: () => void;
     onabout: () => void;
   }
@@ -27,6 +27,9 @@
 
   const project = $derived(workspace.project);
   const room = $derived(roomSize(project));
+  const saveProblem = $derived(
+    workspace.saveState === 'unavailable' || workspace.saveState === 'failed',
+  );
   const roomValue = $derived(
     room
       ? [room.W, room.L, room.H]
@@ -60,18 +63,12 @@
   <header class="mast">
     <div class="bar">
       <SettingsMenu {...props} />
-      <span class="brand" aria-hidden="true">
-        <svg viewBox="0 0 20 20" width="18" height="18">
-          <rect x="2.5" y="3" width="4" height="3.4" rx="0.8" />
-          <rect x="13.5" y="3" width="4" height="3.4" rx="0.8" />
-          <circle cx="10" cy="15.5" r="1.9" />
-          <path d="M4.5 7.6 10 13.4 15.5 7.6" />
-        </svg>
-        Nodo
-      </span>
-      <span class="save" role="status" data-state={workspace.saveState}>
-        {i18n.t(`project.${workspace.saveState}`)}
-      </span>
+      <span class="brand"><Wordmark height={17} /></span>
+      <!-- Saving is silent (V9); only a failure is shown, under the bar. -->
+      {#if !saveProblem}
+        <span class="visually-hidden" role="status">{i18n.t(`project.${workspace.saveState}`)}</span
+        >
+      {/if}
       <div class="history">
         <button
           type="button"
@@ -101,6 +98,9 @@
         </button>
       </div>
     </div>
+    {#if saveProblem}
+      <p class="save-problem" role="status">{i18n.t(`project.${workspace.saveState}`)}</p>
+    {/if}
     <div class="project">
       <ProjectName />
       <p class="meta">{roomValue}</p>
@@ -130,6 +130,7 @@
       <p class="error" role="alert">{i18n.t('analysis.error')}</p>
     {/if}
   </div>
+  <Colophon place="panel" onabout={props.onabout} />
 </div>
 
 <style>
@@ -152,34 +153,14 @@
     min-height: 44px;
   }
   .brand {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 7px;
-    margin-left: 2px;
-    font-family: var(--font-display);
-    font-size: 19px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    margin: 0 auto 0 8px;
   }
-  .brand svg {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 1.3;
-    stroke-linejoin: round;
-  }
-  .brand rect,
-  .brand circle {
-    fill: var(--accent);
-    stroke: none;
-  }
-  .save {
-    margin-left: auto;
-    color: var(--ink-muted);
-    font-size: var(--text-sm);
-  }
-  .save[data-state='unavailable'],
-  .save[data-state='failed'] {
+  .save-problem {
+    margin: -6px 0 0 10px;
     color: var(--caution);
+    font-size: var(--text-sm);
   }
   .history {
     display: flex;
@@ -232,8 +213,10 @@
     background: var(--bg);
   }
   .body {
+    flex: 1;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    overflow-wrap: break-word;
     align-content: start;
     gap: 22px;
     padding: 24px 20px 40px;

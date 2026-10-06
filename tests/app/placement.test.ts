@@ -2,11 +2,8 @@ import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import {
   activeVariant,
-  defaultObjectPosition,
-  moveObject,
   moveSeat,
   moveSpeaker,
-  rotateObject,
   setEarHeight,
   applyCandidate,
   setSpeakerClearance,
@@ -117,45 +114,6 @@ describe('moveSeat', () => {
     activeVariant(p).listener.area = 'sofa';
     moveSeat(p, { x: 1.5, y: 3.0 });
     expect(activeVariant(p).listener.area).toBe('sofa');
-  });
-});
-
-describe('objects', () => {
-  const withBed = () => {
-    const p = project();
-    activeVariant(p).objects = [
-      {
-        id: 'bed',
-        kind: 'bed',
-        position: { x: 0.2, y: 3, z: 0 },
-        size: { x: 1.6, y: 2, z: 0.5 },
-        hard: false,
-      },
-    ];
-    return p;
-  };
-
-  it('moves by the minimum corner and stays inside', () => {
-    const p = withBed();
-    moveObject(p, 'bed', { x: 9, y: 9 });
-    expect(activeVariant(p).objects[0]!.position).toEqual({ x: 2.4, y: 3, z: 0 });
-  });
-
-  it('rotates by swapping the footprint, staying inside', () => {
-    const p = withBed();
-    moveObject(p, 'bed', { x: 2.4, y: 3 });
-    rotateObject(p, 'bed');
-    const o = activeVariant(p).objects[0]!;
-    expect(o.size).toEqual({ x: 2, y: 1.6, z: 0.5 });
-    expect(o.position.x + o.size.x).toBeLessThanOrEqual(4 + 1e-9);
-  });
-
-  it('a new object goes to a free spot along the back wall', () => {
-    const p = withBed();
-    const pos = defaultObjectPosition(p, { x: 0.8, y: 0.8 });
-    expect(pos.y).toBeCloseTo(4.2, 6);
-    const clash = pos.x < 1.8 && pos.x + 0.8 > 0.2 && pos.y < 5 && pos.y + 0.8 > 3;
-    expect(clash).toBe(false);
   });
 });
 

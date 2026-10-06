@@ -4,7 +4,6 @@
   import type { Certainty, Known } from '../../engine/types';
   import { formatLength, type LengthKind, type LengthSystem } from '../../units/format';
   import { parseLength, type BareUnit } from '../../units/parse';
-  import CertaintyChips from './CertaintyChips.svelte';
 
   interface Props {
     id: string;
@@ -19,24 +18,11 @@
     usual?: { min: number; max: number };
     /** What is shown when the value is unknown (e.g. a default that will be assumed). */
     unknownNote?: string;
-    /** Show the "how sure are you" chips (hidden in the first-run survey, to keep it short). */
-    chips?: boolean;
     onchange: (next: Known<number>) => void;
   }
 
-  let {
-    id,
-    label,
-    help,
-    kind,
-    value,
-    system,
-    limits,
-    usual,
-    unknownNote,
-    chips = true,
-    onchange,
-  }: Props = $props();
+  let { id, label, help, kind, value, system, limits, usual, unknownNote, onchange }: Props =
+    $props();
 
   const locale = $derived(i18n.locale);
   const format = (metres: number) => formatLength(metres, system, kind, locale);
@@ -47,11 +33,6 @@
   let text = $state('');
   let error = $state<string | null>(null);
   let editing = $state(false);
-  /** A certainty picked before any number was typed; applied when the number arrives. */
-  let chosen = $state<Certainty | null>(null);
-  const shownCertainty = $derived<Certainty>(
-    value.value === null && chosen && chosen !== 'unknown' ? chosen : value.certainty,
-  );
 
   // Show the stored value, reformatted, whenever it (or the units or language) changes.
   // `editing` is read untracked: finishing an edit must not reset a rejected entry or its message.
@@ -89,27 +70,9 @@
       return;
     }
     error = null;
-    const certainty: Certainty =
-      chosen && chosen !== 'unknown'
-        ? chosen
-        : value.certainty === 'unknown'
-          ? 'estimated'
-          : value.certainty;
-    chosen = null;
+    const certainty: Certainty = value.certainty === 'unknown' ? 'estimated' : value.certainty;
     onchange({ value: result.metres, certainty });
     text = format(result.metres);
-  }
-
-  function setCertainty(certainty: Certainty) {
-    if (certainty === 'unknown') {
-      error = null;
-      chosen = null;
-      onchange({ value: null, certainty });
-    } else if (value.value !== null) {
-      onchange({ value: value.value, certainty });
-    } else {
-      chosen = certainty;
-    }
   }
 
   const describedBy = $derived(
@@ -122,7 +85,7 @@
 <div class="field">
   <label for={id}>{label}</label>
   {#if help}<p class="help" id="{id}-help">{help}</p>{/if}
-  <div class="input-row" class:solo={!chips}>
+  <div class="input-row">
     <input
       {id}
       class="input"
@@ -137,9 +100,6 @@
       onblur={commit}
       onkeydown={(e) => e.key === 'Enter' && commit()}
     />
-    {#if chips}
-      <CertaintyChips name="{id}-certainty" value={shownCertainty} onchange={setCertainty} />
-    {/if}
   </div>
   {#if error}<p class="error" id="{id}-error" role="alert">{error}</p>{/if}
   {#if unusual && usual}
@@ -169,11 +129,6 @@
     align-items: flex-start;
   }
   .input-row .input {
-    flex: 0 1 11rem;
-    min-width: 8rem;
-  }
-  /* Without the certainty chips the input takes the field's width (Set up's row of three). */
-  .solo .input {
     flex: 1 1 auto;
     min-width: 0;
   }

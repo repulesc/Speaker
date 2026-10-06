@@ -10,8 +10,6 @@ export function trebleCharacter(ctx: AnalysisContext): 'lift' | 'cut' | null {
   const { surfaces } = ctx.project;
   const described =
     Object.values(surfaces.baseCertainty).some((c) => c !== 'unknown') ||
-    surfaces.patches.length > 0 ||
-    ctx.variant.objects.length > 0 ||
     (ctx.variant.busyness !== undefined && ctx.variant.busyness.certainty !== 'unknown');
   if (!described) return null;
   const t = ctx.t60.treble;

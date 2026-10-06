@@ -123,7 +123,6 @@
             {system}
             limits={ROOM_LIMITS[dim]}
             usual={USUAL_ROOM_RANGE[dim]}
-            chips={false}
             onchange={(next) => workspace.edit((p) => void (p.room[dim] = next))}
           />
         {/each}
@@ -159,7 +158,7 @@
           {#if goal === 'speakers'}
             <LengthInput
               id="survey-seat"
-              label={i18n.t('speakers.placement.seat')}
+              label={i18n.t('setup.listen.seat')}
               value={variant.listener.ears.y}
               {system}
               limits={{ min: 0.1, max: room.L - 0.1 }}
@@ -168,7 +167,7 @@
           {/if}
           <LengthInput
             id="survey-clearance"
-            label={i18n.t('speakers.placement.clearance')}
+            label={i18n.t('setup.listen.clearance')}
             value={variant.speakers.left.base.y - cab.d / 2}
             {system}
             limits={{ min: 0, max: room.L / 2 }}
@@ -176,7 +175,7 @@
           />
           <LengthInput
             id="survey-spacing"
-            label={i18n.t('speakers.placement.spacing')}
+            label={i18n.t('setup.listen.spacing')}
             value={variant.speakers.right.base.x - variant.speakers.left.base.x}
             {system}
             limits={{ min: 0.3, max: room.W - cab.w }}
@@ -184,8 +183,8 @@
           />
           {#if goal === 'speakers'}
             <fieldset>
-              <legend>{i18n.t('speakers.limits.zone.legend')}</legend>
-              <div class="seg" role="radiogroup" aria-label={i18n.t('speakers.limits.zone.legend')}>
+              <legend>{i18n.t('setup.listen.zone')}</legend>
+              <div class="seg" role="radiogroup" aria-label={i18n.t('setup.listen.zone')}>
                 {#each ZONES as zone (zone ?? 'any')}
                   <label>
                     <input
@@ -198,7 +197,7 @@
                           else p.constraints.speakerZone = zone;
                         })}
                     />
-                    {zone === null ? i18n.t('speakers.limits.zone.any') : fmt(zone)}
+                    {zone === null ? i18n.t('setup.listen.anywhere') : fmt(zone)}
                   </label>
                 {/each}
               </div>

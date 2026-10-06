@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test';
-import { readFileSync } from 'node:fs';
 import { encodeShare } from '../../src/app/state/share';
 import { messageKeys, MESSAGES, translate } from '../../src/i18n/translate';
 import { makeProject } from '../fixtures/projects';
@@ -68,7 +67,7 @@ test('journey 5 — language: Hungarian shows no English UI text', async ({ page
   await page.getByRole('radio', { name: 'HU' }).check({ force: true });
   await page.keyboard.press('Escape');
   await expect(page.locator('html')).toHaveAttribute('lang', 'hu');
-  await expect(page.getByRole('heading', { name: 'A szoba', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Szoba', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Beállítások' }).click();
   const text = await page.locator('body').innerText();
@@ -122,39 +121,6 @@ test('a crafted share link is refused, and the app still works after a reload', 
   await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
   expect(errors).toEqual([]);
   await context.close();
-});
-
-test('journey 7 — export and import round-trip; a corrupt file is rejected without harm', async ({
-  page,
-  browser,
-}) => {
-  await fillRoom(page, '4', '5.2', '2.6');
-  await openMenu(page);
-  const [download] = await Promise.all([
-    page.waitForEvent('download'),
-    page.getByRole('button', { name: 'Export file' }).click(),
-  ]);
-  expect(download.suggestedFilename()).toBe('Untitled room.speaker.json');
-  const path = await download.path();
-  const exported = JSON.parse(readFileSync(path, 'utf8'));
-  expect(exported.room.width.value).toBe(4);
-
-  const fresh = await browser.newContext({ locale: 'en-GB' });
-  const other = await fresh.newPage();
-  await other.goto('/');
-  await other.locator('input[type=file]').setInputFiles(path);
-  await openSection(other, 'Room'); // an opened project shows its results first
-  await expect(other.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
-
-  // In memory: Playwright ignores file paths that contain characters like the em dash in test-results.
-  await other.locator('input[type=file]').setInputFiles({
-    name: 'bad.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from('{ "not": "a project" '),
-  });
-  await expect(other.getByRole('alert')).toContainText('not a readable project file');
-  await expect(other.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
-  await fresh.close();
 });
 
 test('journey 8 — blocked storage: the app works and says nothing is saved', async ({
@@ -214,7 +180,7 @@ test('confidence meter explains what would improve things', async ({ page }) => 
   await expect(page.getByText(/Tell us more about/)).toBeVisible();
 });
 
-test('projects: new, switch, rename and delete', async ({ page }) => {
+test('the room: rename it where it is shown, start over with an empty one', async ({ page }) => {
   const header = page.locator('#panel header');
   await fillRoom(page, '4', '5', '2.5');
   // The name is renamed where it is shown (V8): click it, type, Enter.
@@ -223,23 +189,18 @@ test('projects: new, switch, rename and delete', async ({ page }) => {
   await page.getByLabel('Project name').press('Enter');
   await expect(header).toContainText('Living room');
 
+  // One room (V9): no project list; starting over replaces it after asking.
+  page.once('dialog', (d) => void d.accept());
   await openMenu(page);
-  await page.getByRole('button', { name: 'New project' }).click();
-  // A new project starts with the survey.
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Living room', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Start over' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible(); // the first-run survey again
   await page.getByRole('button', { name: 'Start', exact: true }).click();
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('');
   await page.getByRole('button', { name: 'Skip' }).click();
-
-  await openMenu(page);
-  await page.getByRole('button', { name: 'Living room' }).click();
-  await openSection(page, 'Room');
-  await expect(page.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
-
-  page.once('dialog', (d) => void d.accept());
-  await openMenu(page);
-  await page.getByRole('button', { name: 'Delete' }).click();
   await expect(header).toContainText('Untitled room');
+  await openMenu(page);
+  await expect(page.getByText('Rooms on this device')).toHaveCount(0);
 });
 
 test('first run: the survey asks four questions, then shows the answer', async ({ page }) => {
@@ -256,8 +217,9 @@ test('first run: the survey asks four questions, then shows the answer', async (
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled(); // a room size first
   await fillRoom(page, '4.2', '5.5', '2.6', 'Where to put my speakers');
   // fillRoom skips after the goal; start again to walk all four screens.
+  page.once('dialog', (d) => void d.accept());
   await openMenu(page);
-  await page.getByRole('button', { name: 'New project' }).click();
+  await page.getByRole('button', { name: 'Start over' }).click();
   await page.getByRole('button', { name: 'Start', exact: true }).click();
   await page.getByLabel('Width', { exact: true }).fill('4.2');
   await page.getByLabel('Length', { exact: true }).fill('5.5');
@@ -273,8 +235,8 @@ test('first run: the survey asks four questions, then shows the answer', async (
   await expect(page.getByLabel('What kind of speakers?')).toHaveValue('monitor');
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByLabel('Seat to the front wall').fill('3.2');
-  await page.getByLabel('Distance between the speakers').fill('1.8');
-  await page.getByLabel('Distance between the speakers').blur();
+  await page.getByLabel('Between the speakers', { exact: true }).fill('1.8');
+  await page.getByLabel('Between the speakers', { exact: true }).blur();
   await page.getByRole('button', { name: 'Show me' }).click();
   await expect(survey).toHaveCount(0);
 
@@ -289,9 +251,8 @@ test('first run: the survey asks four questions, then shows the answer', async (
   await expect(mapChoice(page, 'Speakers')).toBeChecked(); // the map follows the goal
 });
 
-test('the support link is in the menu and opens in a new tab', async ({ page }) => {
-  await openMenu(page);
-  const link = page.getByRole('link', { name: /Support this project/ });
+test('the support link stays in view under the map and opens in a new tab', async ({ page }) => {
+  const link = page.getByRole('link', { name: /Support Nodo/ });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('rel', /noopener/);

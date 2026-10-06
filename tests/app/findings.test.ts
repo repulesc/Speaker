@@ -78,6 +78,7 @@ const SAMPLE: Record<string, Record<string, number | string>> = {
     surfaceClass: 'reflective',
   },
   'P07.transition': { frequency: 179, low: 150, high: 210 },
+  'G12.onDesk': { delayMs: 0.5, frequency: 980 },
   'P08.*': { t60: 0.4, low: 0.3, high: 0.6, method: 'sabine' },
   'P09.peak': { frequency: 68.6, db: 9.1 },
   'P09.dip': { frequency: 90, db: -14.5 },

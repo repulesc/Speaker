@@ -355,6 +355,7 @@
 <style>
   .result {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
   }
   .caption,
@@ -377,7 +378,7 @@
   .headline {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
     gap: 12px;
   }
@@ -422,7 +423,7 @@
   }
   .figures div {
     display: grid;
-    grid-template-columns: 6.5rem 1fr;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
     align-items: baseline;
     gap: 8px;
   }
@@ -431,11 +432,16 @@
     font-size: var(--text-sm);
     line-height: 1.4;
   }
+  /* The words first; the sparkline drops under them when they need the width. */
   .bass {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 4px 12px;
+  }
+  .bass span {
+    flex: 1 1 8rem;
   }
   .bass svg {
     flex: none;

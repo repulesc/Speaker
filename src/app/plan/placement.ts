@@ -1,13 +1,5 @@
 import { DEFAULTS } from '../../engine/presets/defaults';
-import type {
-  Certainty,
-  ObjectKind,
-  Placement,
-  Project,
-  RoomObject,
-  SetupVariant,
-} from '../../engine/types';
-import { newId } from '../state/ids';
+import type { Certainty, Placement, Project, SetupVariant } from '../../engine/types';
 
 /**
  * Moving things in the room. All functions mutate the project they are given, so they are meant
@@ -138,34 +130,6 @@ export function moveSeat(project: Project, to: Target, options: MoveOptions = {}
   return true;
 }
 
-/** Moves an object by its minimum corner, keeping it inside the room. */
-export function moveObject(
-  project: Project,
-  id: string,
-  to: Target,
-  options: MoveOptions = {},
-): boolean {
-  const room = roomSize(project);
-  const object = activeVariant(project).objects.find((o) => o.id === id);
-  if (!room || !object) return false;
-  const fit = snapper(options);
-  object.position = {
-    x: round(clamp(fit(to.x ?? object.position.x), 0, room.W - object.size.x)),
-    y: round(clamp(fit(to.y ?? object.position.y), 0, room.L - object.size.y)),
-    z: object.position.z,
-  };
-  return true;
-}
-
-/** Swaps an object's footprint (the v1 rotation: 0° or 90°) and keeps it inside the room. */
-export function rotateObject(project: Project, id: string): boolean {
-  const object = activeVariant(project).objects.find((o) => o.id === id);
-  if (!object) return false;
-  object.size = { x: object.size.y, y: object.size.x, z: object.size.z };
-  moveObject(project, id, {}, { grid: false });
-  return true;
-}
-
 /** Moves the speakers and the seat to a best-spot candidate (heights and toe-in stay as they are). */
 export function applyCandidate(project: Project, placement: Placement): void {
   const variant = activeVariant(project);
@@ -234,86 +198,4 @@ export function setToeIn(project: Project, degrees: number): void {
   right.toeInDeg = value;
   left.certainty = certaintyAfter(left.certainty, EXACT);
   right.certainty = certaintyAfter(right.certainty, EXACT);
-}
-
-// ── Objects ────────────────────────────────────────────────────────────────
-
-/** Typical footprints (x width, y depth, z height) in metres for the palette. */
-export const OBJECT_DEFAULTS: Record<
-  RoomObject['kind'],
-  { x: number; y: number; z: number; hard: boolean }
-> = {
-  bed: { x: 1.6, y: 2.0, z: 0.5, hard: false },
-  sofa: { x: 2.0, y: 0.9, z: 0.85, hard: false },
-  armchair: { x: 0.8, y: 0.8, z: 0.85, hard: false },
-  table: { x: 1.2, y: 0.7, z: 0.75, hard: true },
-  cabinet: { x: 1.0, y: 0.45, z: 1.2, hard: true },
-  shelf: { x: 0.8, y: 0.3, z: 1.8, hard: false },
-  radiator: { x: 0.8, y: 0.1, z: 0.6, hard: true },
-  'other-speaker': { x: 0.25, y: 0.3, z: 0.9, hard: true },
-  tv: { x: 1.2, y: 0.1, z: 0.7, hard: true },
-  desk: { x: 1.4, y: 0.7, z: 0.75, hard: true },
-  wardrobe: { x: 1.2, y: 0.6, z: 2.0, hard: true },
-  bookcase: { x: 0.9, y: 0.3, z: 2.0, hard: false },
-  piano: { x: 1.5, y: 0.65, z: 1.2, hard: true },
-  rack: { x: 0.5, y: 0.45, z: 0.8, hard: true },
-  plant: { x: 0.5, y: 0.5, z: 1.2, hard: false },
-  fireplace: { x: 1.2, y: 0.4, z: 1.1, hard: true },
-  lamp: { x: 0.35, y: 0.35, z: 1.6, hard: true },
-  subwoofer: { x: 0.4, y: 0.4, z: 0.45, hard: true },
-  custom: { x: 0.6, y: 0.6, z: 0.6, hard: false },
-};
-
-/** Where a new object goes: the first free spot along the back wall, shifted aside if needed. */
-export function defaultObjectPosition(project: Project, size: { x: number; y: number }) {
-  const room = roomSize(project) ?? { W: 4, L: 5, H: 2.5 };
-  const objects = activeVariant(project).objects;
-  const y = Math.max(0, room.L - size.y);
-  for (let x = 0; x + size.x <= room.W + 1e-9; x += 0.2) {
-    const clash = objects.some(
-      (o) =>
-        x < o.position.x + o.size.x &&
-        x + size.x > o.position.x &&
-        y < o.position.y + o.size.y &&
-        y + size.y > o.position.y,
-    );
-    if (!clash) return { x: round(x), y: round(y) };
-  }
-  return { x: round(Math.max(0, (room.W - size.x) / 2)), y: round(y) };
-}
-
-/** Adds an object of the given kind at a free spot and returns its id (null if the room size is unknown). */
-export function addObject(project: Project, kind: ObjectKind): string | null {
-  const room = roomSize(project);
-  if (!room) return null;
-  const d = OBJECT_DEFAULTS[kind];
-  const size = { x: Math.min(d.x, room.W), y: Math.min(d.y, room.L), z: Math.min(d.z, room.H) };
-  const { x, y } = defaultObjectPosition(project, size);
-  const object: RoomObject = {
-    id: newId(),
-    kind,
-    position: { x, y, z: 0 },
-    size,
-    hard: d.hard,
-  };
-  activeVariant(project).objects.push(object);
-  return object.id;
-}
-
-export function removeObject(project: Project, id: string): void {
-  const variant = activeVariant(project);
-  variant.objects = variant.objects.filter((o) => o.id !== id);
-}
-
-/** Resizes an object (exact values) and keeps it inside the room. */
-export function resizeObject(project: Project, id: string, size: Target): boolean {
-  const room = roomSize(project);
-  const object = activeVariant(project).objects.find((o) => o.id === id);
-  if (!room || !object) return false;
-  object.size = {
-    x: clamp(size.x ?? object.size.x, 0.05, room.W),
-    y: clamp(size.y ?? object.size.y, 0.05, room.L),
-    z: clamp(size.z ?? object.size.z, 0.05, room.H),
-  };
-  return moveObject(project, id, {}, { grid: false });
 }

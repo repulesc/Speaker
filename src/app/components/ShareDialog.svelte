@@ -5,11 +5,10 @@
 
   let dialog = $state<HTMLDialogElement>();
   let link = $state('');
-  let includeNotes = $state(false);
   let copied = $state<'none' | 'ok' | 'failed'>('none');
 
   async function refresh() {
-    const hash = await encodeShare($state.snapshot(workspace.project), { includeNotes });
+    const hash = await encodeShare($state.snapshot(workspace.project));
     link = `${location.origin}${location.pathname}${hash}`;
   }
 
@@ -34,17 +33,6 @@
   <div class="body">
     <h2 id="share-title">{i18n.t('share.title')}</h2>
     <p class="privacy">{i18n.t('share.privacy')}</p>
-    <label class="choice">
-      <input
-        type="checkbox"
-        bind:checked={includeNotes}
-        onchange={() => {
-          copied = 'none';
-          void refresh();
-        }}
-      />
-      {i18n.t('share.includeNotes')}
-    </label>
     <label class="link-label" for="share-link">{i18n.t('share.linkLabel')}</label>
     <input
       id="share-link"
@@ -76,17 +64,6 @@
   .privacy {
     color: var(--ink-muted);
     font-size: 15px;
-  }
-  .choice {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 44px;
-  }
-  .choice input {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--accent);
   }
   .link-label {
     font-weight: 600;

@@ -2,21 +2,97 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Nodo · V7 (previous version)</title>
-    <meta
-      name="description"
-      content="Find good positions for your speakers and your seat, based on room acoustics."
-    />
-    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
-    
-    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <script type="module" crossorigin src="./assets/index-Buhrdgsa.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DzO5qpve.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nodo · previous versions</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="../icon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --bg: #f3efe6;
+        --ink: #1d221f;
+        --muted: #5d635d;
+        --rule: #d8d1c3;
+        --accent: #2b6b55;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #121513;
+          --ink: #e9ece6;
+          --muted: #a3aaa4;
+          --rule: #343b36;
+          --accent: #8ccfb1;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 48px 16px;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          15px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Arial,
+          sans-serif;
+      }
+      main {
+        max-width: 34rem;
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 22px;
+        font-weight: 600;
+      }
+      p {
+        margin: 0 0 24px;
+        color: var(--muted);
+      }
+      ol {
+        margin: 0 0 32px;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--rule);
+      }
+      li {
+        border-bottom: 1px solid var(--rule);
+      }
+      a {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      li a {
+        display: grid;
+        gap: 2px;
+        padding: 14px 0;
+        text-decoration: none;
+      }
+      li span {
+        color: var(--muted);
+        font-weight: 400;
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <main>
+      <h1>Previous versions · Korábbi változatok</h1>
+      <p>
+        Frozen copies, kept as they were. Each keeps its own rooms on this device.<br />
+        Változatlan másolatok. Mindegyik a saját szobáit tárolja ezen az eszközön.
+      </p>
+      <ol>
+        <li>
+          <a href="./v8/">V8 <span>Set up · Place · Listen, the listening check</span></a>
+        </li>
+        <li>
+          <a href="./v7/">V7 <span>Result, Why and Tips tabs, one settings sheet</span></a>
+        </li>
+      </ol>
+      <a href="../">← Current version · Jelenlegi változat</a>
+    </main>
   </body>
 </html>

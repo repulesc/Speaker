@@ -4,6 +4,7 @@ import type { Finding, Placement } from '../types';
 import {
   applyChange,
   measure,
+  type Aspect,
   type Experiment,
   type ListeningAnswers,
   type ListeningRule,
@@ -21,8 +22,10 @@ export type { Aspect, Change, Experiment, ListeningAnswers } from './check';
 
 export const LISTENING_RULES: readonly ListeningRule[] = [L01, L02, L03, L04, L05, L06, L07];
 
-/** At most this many changes at a time, and two per aspect: one thing at a time is the method. */
-const MAX = 5;
+/**
+ * Two changes per aspect at most, shown under the answer they belong to (V9): one thing at a time
+ * is the method, and the first two are the likeliest to help.
+ */
 const PER_ASPECT = 2;
 /** Score differences smaller than this are "about the same" for the model (its own noise). */
 const SAME = 0.02;
@@ -58,13 +61,16 @@ export function listeningExperiments(
   }
   all.sort((a, b) => b.priority - a.priority);
   const count = new Map<string, number>();
-  return all
-    .filter((e) => {
-      const n = count.get(e.aspect) ?? 0;
-      count.set(e.aspect, n + 1);
-      return n < PER_ASPECT;
-    })
-    .slice(0, MAX);
+  return all.filter((e) => {
+    const n = count.get(e.aspect) ?? 0;
+    count.set(e.aspect, n + 1);
+    return n < PER_ASPECT;
+  });
+}
+
+/** The aspect an experiment answers ("L01.out" → bass), from the rule that made it. */
+export function aspectOf(experimentId: string): Aspect | undefined {
+  return LISTENING_RULES.find((r) => experimentId.startsWith(`${r.id}.`))?.aspect;
 }
 
 /** Every i18n key the listening check can use, for the translation checks. */

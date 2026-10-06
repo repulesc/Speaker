@@ -68,11 +68,10 @@
     border-radius: 6px;
     background: none;
     color: var(--ink);
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 500;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    font-weight: 600;
+    line-height: 1.25;
     text-align: start;
     cursor: text;
   }

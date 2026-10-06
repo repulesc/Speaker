@@ -2,28 +2,28 @@
   import { i18n } from '../../i18n/locale.svelte';
   import { LOCALES } from '../../i18n/translate';
   import type { Locale } from '../../i18n/types';
-  import { SUPPORT_URL } from '../config';
   import { prefs, type ThemePref } from '../prefs.svelte';
   import { projectLabel, workspace } from '../session.svelte';
   import Dropdown from './Dropdown.svelte';
 
-  /** One place for everything that is not the room itself: language, units, look, projects, files. */
+  /**
+   * Everything that is not the room itself: language, units, look, sharing, starting over (V9: one
+   * room, no files; other rooms are listed only when a shared link added one).
+   */
   interface Props {
     onshare: () => void;
     onimage: () => void;
-    onexport: () => void;
-    onimport: () => void;
     onprint: () => void;
     onabout: () => void;
   }
-  let { onshare, onimage, onexport, onimport, onprint, onabout }: Props = $props();
+  let { onshare, onimage, onprint, onabout }: Props = $props();
 
   const themes: ThemePref[] = ['auto', 'light', 'dark'];
   const project = $derived(workspace.project);
 
-  function remove(close: () => void) {
-    if (confirm(i18n.t('project.deleteConfirm', { name: projectLabel(project.name) }))) {
-      workspace.remove(project.id);
+  function startOver(close: () => void) {
+    if (confirm(i18n.t('menu.startOverConfirm'))) {
+      workspace.startOver();
       close();
     }
   }
@@ -102,64 +102,8 @@
         (o) => (prefs.numbers = o === 'on'),
       )}
 
-      <p class="group-title">{i18n.t('project.switcher')}</p>
       <ul class="list">
-        {#each workspace.index as entry (entry.id)}
-          <li>
-            <button
-              type="button"
-              class="row"
-              aria-current={entry.id === project.id ? 'true' : undefined}
-              onclick={() => {
-                workspace.switchTo(entry.id);
-                close();
-              }}
-            >
-              {projectLabel(entry.id === project.id ? project.name : entry.name)}
-              {#if entry.id === project.id}<span class="value" aria-hidden="true">✓</span>{/if}
-            </button>
-          </li>
-        {/each}
-        {#if SUPPORT_URL}
-          <li>
-            <a class="row" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer"
-              >{i18n.t('menu.support')}</a
-            >
-          </li>
-        {/if}
-      </ul>
-      <ul class="list">
-        <li>
-          <button
-            type="button"
-            class="row"
-            onclick={() => {
-              workspace.newProject();
-              close();
-            }}>{i18n.t('project.new')}</button
-          >
-        </li>
-        <li>
-          <button
-            type="button"
-            class="row"
-            onclick={() => {
-              workspace.duplicate(
-                `${projectLabel(project.name)} (${i18n.t('project.copySuffix')})`,
-              );
-              close();
-            }}>{i18n.t('project.duplicate')}</button
-          >
-        </li>
-        <li>
-          <button type="button" class="row danger" onclick={() => remove(close)}
-            >{i18n.t('project.delete')}</button
-          >
-        </li>
-      </ul>
-
-      <ul class="list">
-        {#each [['menu.share', onshare], ['menu.image', onimage], ['menu.export', onexport], ['menu.import', onimport], ['menu.print', onprint], ['menu.about', onabout]] as const as [key, action] (key)}
+        {#each [['menu.share', onshare], ['menu.image', onimage], ['menu.print', onprint]] as const as [key, action] (key)}
           <li>
             <button
               type="button"
@@ -171,8 +115,48 @@
             >
           </li>
         {/each}
+        <li>
+          <button type="button" class="row danger" onclick={() => startOver(close)}
+            >{i18n.t('menu.startOver')}</button
+          >
+        </li>
       </ul>
-      <!-- V7 stays reachable, frozen (owner decision, docs/ROADMAP_V8.md). -->
+
+      {#if workspace.index.length > 1}
+        <p class="group-title">{i18n.t('project.switcher')}</p>
+        <ul class="list">
+          {#each workspace.index as entry (entry.id)}
+            <li>
+              <button
+                type="button"
+                class="row"
+                aria-current={entry.id === project.id ? 'true' : undefined}
+                onclick={() => {
+                  workspace.switchTo(entry.id);
+                  close();
+                }}
+              >
+                {projectLabel(entry.id === project.id ? project.name : entry.name)}
+                {#if entry.id === project.id}<span class="value" aria-hidden="true">✓</span>{/if}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+
+      <ul class="list">
+        <li>
+          <button
+            type="button"
+            class="row"
+            onclick={() => {
+              close();
+              onabout();
+            }}>{i18n.t('menu.about')}</button
+          >
+        </li>
+      </ul>
+      <!-- Earlier versions stay reachable, frozen (docs/ROADMAP_V9.md). -->
       <a class="legacy" href="./legacy/">{i18n.t('menu.legacy')}</a>
     </div>
   {/snippet}

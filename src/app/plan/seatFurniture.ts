@@ -1,5 +1,5 @@
+import { DESK } from '../../engine/presets/listeningArea';
 import type { ListeningAreaKind, Vec3 } from '../../engine/types';
-import { OBJECT_DEFAULTS } from './placement';
 
 /**
  * The furniture you listen from, drawn at its typical size around the seat (owner feedback after
@@ -8,10 +8,18 @@ import { OBJECT_DEFAULTS } from './placement';
  */
 export type SeatKind = 'chair' | ListeningAreaKind;
 
+/** Typical footprints (x across, y deep) in metres. */
+const SIZE = {
+  chair: { x: 0.8, y: 0.8 },
+  sofa: { x: 2.0, y: 0.9 },
+  bed: { x: 1.6, y: 2.0 },
+  desk: { x: DESK.width, y: DESK.depth },
+} as const;
+
 /** How far behind the ears the furniture's back edge is, in metres (head against the backrest). */
 const BEHIND = { chair: 0.25, sofa: 0.25, bed: 0.3 } as const;
 /** A desk stands in front of the listener: the gap between the ears and its back edge. */
-const DESK_GAP = 0.35;
+const DESK_GAP = DESK.gap;
 
 export interface Footprint {
   x: number;
@@ -22,10 +30,10 @@ export interface Footprint {
 
 export function seatFurniture(kind: SeatKind, ears: Vec3): Footprint {
   if (kind === 'desk') {
-    const { x: width, y: depth } = OBJECT_DEFAULTS.desk;
+    const { x: width, y: depth } = SIZE.desk;
     return { x: ears.x - width / 2, y: ears.y - DESK_GAP - depth, width, depth };
   }
-  const { x: width, y: depth } = OBJECT_DEFAULTS[kind === 'chair' ? 'armchair' : kind];
+  const { x: width, y: depth } = SIZE[kind];
   const behind = BEHIND[kind];
   return { x: ears.x - width / 2, y: ears.y + behind - depth, width, depth };
 }

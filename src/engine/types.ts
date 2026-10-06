@@ -31,6 +31,7 @@ export interface Vec3 {
 
 export type WallId = 'front' | 'back' | 'left' | 'right';
 export type BoundaryId = WallId | 'floor' | 'ceiling';
+/** Derived from the wall material (V9: no longer asked), see `constructionOf`. */
 export type ConstructionType = 'solid' | 'lightweight' | 'unknown';
 export type OutOfModelFeature =
   'open-doorway' | 'open-plan-connection' | 'alcove' | 'slanted-ceiling' | 'non-rectangular';
@@ -39,7 +40,6 @@ export interface Room {
   width: Known<number>;
   length: Known<number>;
   height: Known<number>;
-  construction: ConstructionType;
   temperatureC: Known<number>;
   outOfModel: OutOfModelFeature[];
 }
@@ -65,70 +65,18 @@ export type SurfaceClass = 'reflective' | 'absorptive' | 'diffusive';
 /** Octave bands 125, 250, 500, 1k, 2k, 4k Hz. */
 export type BandValues = [number, number, number, number, number, number];
 
-/**
- * A rectangle on a boundary. (u, v) are room coordinates along the boundary's axes:
- * front/back walls → (x, z); left/right walls → (y, z); floor/ceiling → (x, y).
- */
-export interface SurfacePatch {
-  id: string;
-  boundary: BoundaryId;
-  u: number;
-  v: number;
-  width: number;
-  height: number;
-  preset: SurfacePresetId;
-  customAbsorption?: BandValues;
-  label?: string;
-}
-
 export interface Surfaces {
   base: Record<BoundaryId, SurfacePresetId>;
   /** Base surfaces the user did not choose explicitly (defaults in use). */
   baseCertainty: Record<BoundaryId, Certainty>;
-  patches: SurfacePatch[];
 }
 
-// ── Objects ───────────────────────────────────────────────────────────────
+// ── Furnishing ────────────────────────────────────────────────────────────
 
-export type ObjectKind =
-  | 'bed'
-  | 'sofa'
-  | 'armchair'
-  | 'table'
-  | 'cabinet'
-  | 'shelf'
-  | 'radiator'
-  | 'other-speaker'
-  | 'tv'
-  | 'desk'
-  | 'wardrobe'
-  | 'bookcase'
-  | 'piano'
-  | 'rack'
-  | 'plant'
-  | 'fireplace'
-  | 'lamp'
-  | 'subwoofer'
-  | 'custom';
-
-/** What an object is made of, as far as sound goes: how much sound it takes up. */
-export type ObjectMaterial = 'hard' | 'soft' | 'absorbent';
-
-/** Axis-aligned box. `position` is the min corner; `size` is the extent along x, y, z. */
-export interface RoomObject {
-  id: string;
-  kind: ObjectKind;
-  position: Vec3;
-  size: Vec3;
-  /** Absorption area range (m² sabins, mid bands). Defaults by kind when absent. */
-  absorptionRange?: [number, number];
-  /** The user's choice of material; when set, the absorption follows from the object's surface. */
-  material?: ObjectMaterial;
-  hard: boolean;
-  label?: string;
-}
-
-/** How full the room is: a shortcut for the furniture, as absorption per m² of floor. */
+/**
+ * How full the room is, as absorption per m² of floor: the one furnishing input (V9 removed
+ * placing furniture, docs/ROADMAP_V9.md).
+ */
 export type Busyness = 'bare' | 'some' | 'busy' | 'very-busy';
 
 // ── Speakers ──────────────────────────────────────────────────────────────
@@ -239,23 +187,6 @@ export interface Goals {
   weights: Partial<Record<GoalId, GoalWeight>>;
 }
 
-export type SymptomId = 'S01' | 'S02' | 'S03' | 'S04' | 'S05' | 'S06' | 'S07';
-
-export interface ListeningNote {
-  id: string;
-  createdAt: string;
-  variantId: string;
-  symptoms: SymptomId[];
-  rating?: 1 | 2 | 3 | 4 | 5;
-  listenedHours?: number;
-  text?: string;
-  experimentId?: string;
-  /** Fingerprint of the setup as it stood when the note was written (positions, objects). */
-  setupKey?: string;
-  /** A "Live with it" face: this position, the one before Apply, or the speakers overall (V7). */
-  about?: 'position' | 'before' | 'speakers';
-}
-
 // ── Project ───────────────────────────────────────────────────────────────
 
 export interface SetupVariant {
@@ -263,14 +194,8 @@ export interface SetupVariant {
   name: string;
   speakers: { left: SpeakerPlacement; right: SpeakerPlacement };
   listener: Listener;
-  objects: RoomObject[];
-  /** How full the room is; placed objects can raise this estimate, never lower it. */
+  /** How full the room is. */
   busyness?: Known<Busyness>;
-  /**
-   * The arrangement before the last Apply (V7, "Live with it"): its fingerprint and the app's
-   * score for it, so the listener can rate both and see the two side by side.
-   */
-  previous?: { key: string; score: number; at: string; hidden?: boolean };
 }
 
 export interface Project {
@@ -287,7 +212,6 @@ export interface Project {
   goals: Goals;
   variants: SetupVariant[];
   activeVariantId: string;
-  notes: ListeningNote[];
   /** The listening check and what was tried (V8, docs/ROADMAP_V8.md §4). Kept on the device. */
   listening?: ListeningState;
 }
@@ -295,12 +219,7 @@ export interface Project {
 /** One listening check: the answers, given for the setup as it stood (its fingerprint). */
 export interface ListeningState {
   answers: ListeningAnswers;
-  /** Overall, against what you expect from these speakers: 1 (far below) to 5 (better). */
-  overall?: 1 | 2 | 3 | 4 | 5;
   at: string;
-  /** The setup the answers were given for; after a change, the check asks again. */
-  setupKey?: string;
-  note?: string;
   tries: ListeningTry[];
 }
 

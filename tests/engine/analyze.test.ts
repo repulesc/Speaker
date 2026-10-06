@@ -8,7 +8,6 @@ import { listenerHeatmap } from '../../src/engine/scoring/heatmaps';
 import { makeScorer } from '../../src/engine/scoring/search';
 import { scoringSettings } from '../../src/engine/scoring/settings';
 import { Scorer } from '../../src/engine/scoring/scorer';
-import { hypotheses } from '../../src/engine/subjective';
 import type { AnalysisOk, Certainty, GoalId, Project } from '../../src/engine/types';
 import { busyRoom } from '../fixtures/busy-room';
 import { makeProject } from '../fixtures/projects';
@@ -72,11 +71,9 @@ describe('analyze()', () => {
     expect(coincident.some((f) => Math.abs(Number(f.params.frequencyA) - 68.6) < 0.1)).toBe(true);
   });
 
-  it('busy room: rear-port wall setting reminder, passive-speaker caution, low-confidence CD wall', () => {
+  it('busy room: rear-port wall setting reminder', () => {
     const keys = busy.findings.map((f) => f.messageKey);
     expect(keys).toContain('finding.G07.matchSetting');
-    expect(keys).toContain('finding.G10.passiveSpeaker');
-    expect(busy.confidence.caps.map((c) => c.reason)).toContain('lowConfidenceSurface');
   });
 
   it('runs fast enough for a worker (generous CI margin)', () => {
@@ -164,22 +161,13 @@ describe('invariants', () => {
     );
   });
 
-  it('confidence caps apply for lightweight walls and non-rectangular rooms', () => {
+  it('confidence caps apply for lightweight (plasterboard) walls and non-rectangular rooms', () => {
     const p = makeProject();
-    p.room.construction = 'lightweight';
+    for (const w of ['front', 'back', 'left', 'right'] as const) p.surfaces.base[w] = 'gypsum-stud';
     expect(confidence(p, buildContext(p)).perOutput.bass).toBeLessThanOrEqual(0.6);
     p.room.outOfModel = ['non-rectangular'];
     const report = confidence(p, buildContext(p));
     Object.values(report.perOutput).forEach((v) => expect(v).toBeLessThanOrEqual(0.3));
-  });
-});
-
-describe('subjective rules', () => {
-  it('ranks hypotheses supported by the room data first', () => {
-    const p = makeProject({ listenerY: 4.8 });
-    const a = ok(p);
-    const result = hypotheses(['S01'], a.findings);
-    expect(result[0]).toMatchObject({ id: 'backWallClose', supported: true });
   });
 });
 

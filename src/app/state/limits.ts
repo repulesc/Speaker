@@ -18,9 +18,7 @@ export const SIZE_LIMITS = {
   shareChars: 20_000,
   name: 200,
   text: 2_000,
-  patches: 200,
-  objects: 200,
   variants: 20,
-  notes: 1_000,
+  tries: 1_000,
   projects: 50,
 } as const;

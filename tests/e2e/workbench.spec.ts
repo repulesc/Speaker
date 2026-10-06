@@ -220,25 +220,20 @@ test('panels and bass traps stay out of sight until you say you are ready to inv
 }) => {
   await withResults(page);
   await goStep(page, 'Goals');
-  await page
-    .getByRole('radiogroup', { name: 'Precise imaging' })
-    .getByRole('radio', { name: 'Important' })
-    .check({ force: true });
+  await page.getByRole('button', { name: 'Precise imaging' }).click();
   const heavy = /absorb|panel|bass traps|absorber/i;
   await goHome(page);
   expect(await page.getByTestId('idea').innerText()).not.toMatch(heavy);
   await openSection(page, 'Improve the room');
   expect(await page.locator('#panel').innerText()).not.toMatch(/porous panel|in the corners/i);
   await expect(page.getByTestId('held-back')).toContainText('bigger options');
-  // The hint opens the settings, where the box is.
+  // The hint turns it on; the box sits right above the ideas.
   await page.getByRole('button', { name: 'Turn it on' }).click();
-  await expect(page.locator('#setup-listen-more')).toHaveAttribute('open', '');
-  await page.getByRole('checkbox', { name: /ready to invest/ }).check();
+  await expect(page.getByRole('checkbox', { name: /ready to invest/ })).toBeChecked();
   expect((await savedProject(page)).constraints.treatmentReady).toBe(true);
   await openSection(page, 'Improve the room');
   await expect(page.getByTestId('held-back')).toHaveCount(0);
   await expect(page.getByText('Bigger investment').first()).toBeVisible();
-  await openSection(page, 'Goals');
   await page.getByRole('checkbox', { name: /ready to invest/ }).uncheck();
   expect((await savedProject(page)).constraints.treatmentReady).toBeUndefined();
 });
@@ -278,24 +273,11 @@ test('the bass-note explorer shows a pressure pattern and the resonances near th
   await expect(page.getByText('Poorer')).toBeVisible();
 });
 
-test('furniture: a bigger palette and a material for any object', async ({ page }) => {
-  await withResults(page);
-  await goStep(page, 'Furnishing');
-  await page.getByRole('button', { name: '+ Piano' }).click();
-  await page.getByRole('button', { name: '+ Bookcase' }).click();
-  const material = page.getByLabel('Material');
-  await expect(material).toBeVisible();
-  await material.selectOption('absorbent');
-  await expect(material).toHaveValue('absorbent');
-  await page.getByRole('button', { name: '+ Other object' }).click();
-  await expect(page.getByLabel('Material')).toHaveValue('soft');
-});
-
 test('the listening check turns what you hear into one change to try, and can put it back', async ({
   page,
 }) => {
   await withResults(page);
-  await openSection(page, 'Listening notes');
+  await openSection(page, 'Listening check');
   await expect(page.getByRole('heading', { name: 'How does it sound?' })).toBeVisible();
   await expect(page.getByTestId('experiment')).toHaveCount(0);
 
@@ -320,9 +302,15 @@ test('the listening check turns what you hear into one change to try, and can pu
     expect(after.variants[0].speakers).toEqual(before.variants[0].speakers);
     expect(after.variants[0].listener).toEqual(before.variants[0].listener);
   }
-  await page.getByLabel('A note for yourself (optional)').fill('after an evening');
-  await page.getByLabel('A note for yourself (optional)').blur();
-  expect((await savedProject(page)).listening.note).toBe('after an evening');
+  // The fixes sit right under the answer they belong to.
+  const row = page.locator('[aria-labelledby="aspect-bass"]');
+  const fixes = page.getByRole('list', { name: 'What to try for: Bass' });
+  expect(
+    await row.evaluate(
+      (r, f) => r.compareDocumentPosition(f!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      await fixes.elementHandle(),
+    ),
+  ).toBeTruthy();
 });
 
 test('the print sheet has the tape-measure numbers', async ({ page }) => {
