@@ -109,7 +109,8 @@ never deciding the numbers.
 
 0. Freeze V7 at `/legacy/` — **done**.
 1. Identity and shell: tokens, Newsreader, header (name, small undo/redo), menu, map toolbar without
-   setups and panel toggle, legend under the room, drawing style.
-2. The three steps and the new Set up page.
-3. The listening check: engine rules with tests, the Listen step, try / keep / undo.
+   setups and panel toggle, legend under the room, drawing style — **done**.
+2. The three steps and the new Set up page — **done**.
+3. The listening check: engine rules with tests, the Listen step, try / keep / undo — **done**
+   (rules L01–L07 in `docs/RULE_CATALOGUE.md`).
 4. Review: every gate, screenshots (desktop light and dark, Hungarian, phone) before the PR.
