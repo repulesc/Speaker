@@ -309,6 +309,9 @@ export interface ListeningTry {
   id: string;
   experiment: string;
   at: string;
+  /** The amount the change named (metres, or degrees for toe-in), to say it again later. */
+  by?: number;
+  degrees?: boolean;
   /** Where things stood before, so "worse" can put them back. */
   before?: { speakers: { left: SpeakerPlacement; right: SpeakerPlacement }; listener: Vec3 };
   result?: 'better' | 'same' | 'worse';

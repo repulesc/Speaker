@@ -680,22 +680,153 @@ export const en = {
     numbers: 'Reverberation {t60} s; deepest resonance {note}, {f}.',
     letters: 'C,C♯,D,D♯,E,F,F♯,G,G♯,A,A♯,B',
   },
-  live: {
-    title: 'Live with it',
+  listen: {
+    title: 'How does it sound?',
     intro:
-      'Give it a few evenings. A quick listen can mislead; after a few days you hear more. Then tell yourself how it feels.',
-    position: 'This position',
-    before: 'The one before',
-    speakers: 'Your speakers, overall',
-    face: { 1: 'Not really', 3: 'It’s fine', 5: 'Love it' },
-    compare: {
-      agree: 'You like this one more, and so does the app.',
-      disagree:
-        'You liked the one before more. The app scores this one higher, but your ears decide: give it a few more evenings, then trust what you hear.',
-      same: 'You like both about the same. In your room, the difference may simply be small.',
+      'Play a song you know well and listen from your seat for a minute or two. Then say what you hear. Not sure? Leave it.',
+    aspect: {
+      bass: { label: 'Bass', thin: 'Thin', right: 'Just right', boomy: 'Boomy' },
+      evenness: { label: 'Bass notes', even: 'Even', uneven: 'Some boom or vanish' },
+      centre: {
+        label: 'Voices in the middle',
+        vague: 'Vague',
+        focused: 'Focused',
+        left: 'Pulled left',
+        right: 'Pulled right',
+      },
+      width: { label: 'Width', narrow: 'Narrow', right: 'Just right', wide: 'Hole in the middle' },
+      treble: { label: 'Treble', dull: 'Dull', right: 'Just right', bright: 'Bright, harsh' },
+      clarity: { label: 'Clarity', clear: 'Clear', some: 'A little echo', echoey: 'Echoey' },
     },
+    overall: {
+      label: 'Overall, for these speakers',
+      1: 'Disappointing',
+      2: 'Below what I hoped',
+      3: 'As I expected',
+      4: 'Good',
+      5: 'Better than I hoped',
+    },
+    note: 'A note for yourself (optional)',
     local: 'Kept on this device only.',
-    hide: 'Hide',
+    tryTitle: 'What to try',
+    tryIntro: 'One change at a time. Listen to the same song after each, at the same volume.',
+    confidence: {
+      physics: 'Usually helps',
+      guideline: 'Often helps',
+      heuristic: 'Sometimes helps',
+      subjective: 'By ear: depends on the speaker',
+    },
+    model: {
+      better: 'The room model expects it to help.',
+      same: 'The room model expects about the same.',
+      worse: 'The room model expects it to be worse; your ears may disagree.',
+    },
+    tryIt: 'Try it',
+    tried: 'I tried it',
+    how: 'You tried: {what} How was it?',
+    result: { better: 'Better', same: 'The same', worse: 'Worse', open: 'Not rated yet' },
+    putBack: 'Put it back',
+    history: 'What you tried',
+    nothing:
+      'Nothing to move for that here. Check the ideas for the room below, or trust your ears.',
+    allRight: 'Everything sounds right. Enjoy it, and come back when something bothers you.',
+    noLonger: 'That change no longer fits the room as it is now.',
+    roomIdeas: 'Ideas for the room',
+    roomIdeasHint: 'Rugs, curtains and, if you want to invest, treatment',
+    exp: {
+      L01: {
+        out: 'Move both speakers {by} further from the wall behind them.',
+        seatForward: 'Sit {by} further forward, away from the back wall.',
+        inward: 'Move each speaker {by} away from its side wall.',
+        plug: 'If your speakers came with foam plugs for the bass port, try them in.',
+        control: 'If your speakers or amplifier have a bass control, turn it down one step.',
+      },
+      L02: {
+        closer: 'Move both speakers {by} closer to the wall behind them.',
+        seatOffMiddle: 'Move your seat {by} away from the middle of the room.',
+        small: 'Small speakers stop early in the bass: that is their size, not your room.',
+        control: 'If your speakers or amplifier have a bass control, turn it up one step.',
+      },
+      L03: {
+        seatStep: 'Move your seat {by}, listen to the same song, then try {by} the other way.',
+        speakerStep: 'Move both speakers {by} further from the wall, then listen again.',
+      },
+      L04: {
+        centreSeat: 'Move your seat {by} sideways, to the middle between the speakers.',
+        toeIn: 'Turn both speakers {by} more towards you.',
+        height: 'Bring the tweeters to the height of your ears.',
+        swap: 'Swap the left and right cables at the amplifier.',
+      },
+      L05: {
+        wider: 'Move the speakers {by} further apart.',
+        narrower: 'Move the speakers {by} closer together.',
+        sitCloser: 'Sit {by} closer to the speakers.',
+        sitBack: 'Sit {by} further back.',
+        lessToeIn: 'Turn the speakers {by} less towards you.',
+        moreToeIn: 'Turn the speakers {by} more towards you.',
+      },
+      L06: {
+        lessToeIn: 'Turn the speakers {by} less towards you.',
+        moreToeIn: 'Turn the speakers {by} more towards you.',
+        height: 'Bring the tweeters to the height of your ears.',
+        soften: 'Put something soft on a hard surface: a rug, a throw, curtains.',
+        trebleDown: 'If your speakers or amplifier have a treble control, turn it down one step.',
+        trebleUp: 'If your speakers or amplifier have a treble control, turn it up one step.',
+      },
+      L07: {
+        sitCloser: 'Sit {by} closer to the speakers.',
+        soften: 'Put soft things on hard surfaces: a rug, curtains, cushions.',
+      },
+    },
+    why: {
+      L01: {
+        out: 'A wall close behind a speaker adds bass; a little more space takes some of it away.',
+        seatForward: 'Right against the back wall, every bass resonance is at its loudest.',
+        inward: 'A side wall or a corner close by adds bass too.',
+        plug: 'Makers include them for exactly this: boomy bass near a wall. Not every speaker has them.',
+        control: 'A small step is enough. Listen for a while before you decide.',
+      },
+      L02: {
+        closer: 'A wall behind a speaker adds bass. The bass port keeps the space it needs.',
+        seatOffMiddle: 'Halfway down a room, the deepest bass notes cancel out.',
+        small: 'Closer to the wall gives a little back; beyond that it is the speaker’s limit.',
+        control: 'Go easy: more bass also asks more of small speakers.',
+      },
+      L03: {
+        seatStep:
+          'The room’s bass resonances change over short distances: one spot is often smoother than the next.',
+        speakerStep: 'Moving the speakers also changes which bass notes the room lifts.',
+      },
+      L04: {
+        centreSeat: 'The nearer speaker pulls the voice towards it; a few centimetres are enough.',
+        toeIn:
+          'Pointing them at you often firms up the centre. It depends on the speaker: trust your ears.',
+        height: 'A stand, a few books under the speakers, or a slight tilt towards you.',
+        swap: 'If the voice moves to the other side, the cause is the source or the amplifier. If not, swap the speakers: if it follows a speaker, it is that speaker; if neither, it is the room.',
+      },
+      L05: {
+        wider:
+          'Wider apart, the stage opens. The usual setup has them 60° apart, seen from your seat.',
+        narrower: 'Too far apart, the middle of the stage empties out.',
+        sitCloser: 'Closer, the two speakers spread wider around you.',
+        sitBack: 'Further away, the two speakers meet in the middle again.',
+        lessToeIn:
+          'Pointing a little past you can widen the stage. It depends on the speaker: trust your ears.',
+        moreToeIn: 'More toe-in fills the middle. It depends on the speaker: trust your ears.',
+      },
+      L06: {
+        lessToeIn: 'Most speakers are a little softer in the treble away from straight ahead.',
+        moreToeIn: 'Most speakers are brightest straight ahead.',
+        height: 'The treble is clearest when the tweeters point at your ears.',
+        soften: 'Bare floors and walls make a room bright; soft things calm it. Use what you have.',
+        trebleDown: 'A small step. Listen for a few days before you decide.',
+        trebleUp: 'A small step. Listen for a few days before you decide.',
+      },
+      L07: {
+        sitCloser: 'Closer, you hear more of the speakers and less of the room’s echo.',
+        soften: 'They shorten the room’s echo. Use what you already have.',
+      },
+    },
   },
   result: {
     title: 'Your result',
@@ -1125,80 +1256,6 @@ export const en = {
     H06: {
       lift: 'The room’s high frequencies die away quickly ({t60}). A small treble lift ({suggestDb}) may help: try it and listen.',
       cut: 'The room’s high frequencies ring on ({t60}). A small treble cut ({suggestDb}) may help: try it and listen.',
-    },
-  },
-  listen: {
-    title: 'Listen and note',
-    intro:
-      'Your ears are the final test. Change one thing, listen, and write down what you hear. Notes never change what the app calculates.',
-    protocolTitle: 'How to test a change',
-    protocol: {
-      one: 'Change one thing only, for example move the seat 10 cm.',
-      two: 'Play the same three tracks each time: a centred voice, a bass-heavy track and a wide orchestral or ambient recording.',
-      three: 'Keep the volume the same, then rate it.',
-    },
-    adapt: 'Ears adapt over hours. Judge after some time, and compare at the same volume.',
-    formTitle: 'A note for “{setup}”',
-    rating: {
-      legend: 'How did this setup sound?',
-      scale: '1 = poor, 5 = great',
-      value: '{n} of 5',
-    },
-    symptoms: 'What do you hear? (optional)',
-    duration: {
-      legend: 'How long have you listened to this setup?',
-      short: 'Under an hour',
-      hours: 'A few hours',
-      days: 'Days',
-    },
-    text: 'Your note (optional)',
-    save: 'Save note',
-    listTitle: 'Notes for “{setup}”',
-    empty: 'No notes for this setup yet.',
-    delete: 'Delete note',
-    tryThis: 'Try this',
-    earlier:
-      'Rated before the setup last changed, so it no longer counts in the comparison with the app.',
-    symptom: {
-      S01: {
-        name: 'Boomy, heavy bass',
-        try: 'Move your seat about 20 cm forward, or the speakers about 10 cm further from the wall. If your speakers have a wall-compensation setting, turn it on.',
-      },
-      S02: {
-        name: 'Thin, weak bass',
-        try: 'Move your seat 15 cm to either side, or forward or back. If your speakers have a front-wall option, try the “near” and “far” settings.',
-      },
-      S03: {
-        name: 'Vague centre, lacks focus',
-        try: 'Measure the distance from each speaker to your seat with a tape and make them equal. Try turning the speakers in towards you.',
-      },
-      S04: {
-        name: 'Narrow soundstage',
-        try: 'Move each speaker about 10 cm further apart, and turn them in a little less.',
-      },
-      S05: {
-        name: 'Harsh, bright treble',
-        try: 'Turn the speakers in a little less, soften one reflection point with a rug or curtain, or lower the treble by 0.5 dB if you can.',
-      },
-      S06: {
-        name: 'Dull, closed-in',
-        try: 'Check that the tweeters are at ear height, remove anything between the speakers and your seat, or raise the treble by 0.5 dB if you can.',
-      },
-      S07: {
-        name: 'Sound pulls to one side',
-        try: 'Check the balance control first. Then swap the left and right cables at the amplifier: if the pull moves to the other side, the cause is before the speakers (source, amplifier, cable). If it stays, swap the two speakers: if the pull moves with a speaker, it is that speaker; if it stays, it is the room.',
-      },
-    },
-    agreement: {
-      title: 'Your ears and the app',
-      notEnough:
-        'Rate at least two different setups, and the app will tell you whether your ears and its ranking agree.',
-      agree:
-        'So far your ratings agree with the app’s ranking: the setups you liked more are the ones it scores higher.',
-      mixed:
-        'Your ratings agree with the app’s ranking for some pairs of setups and not for others. A few more notes will show a pattern.',
-      disagree:
-        'You liked “{ears}” best, but the app scores “{app}” higher. The app uses a simplified model, so trust your ears here. It may mean that something in the room differs from what you entered (surfaces, furniture, speaker details), so it is worth checking those.',
     },
   },
   compare: {

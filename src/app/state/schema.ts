@@ -245,6 +245,8 @@ export const projectSchema: Check = obj({
           id: str(SIZE_LIMITS.name),
           experiment: str(SIZE_LIMITS.name),
           at: str(40),
+          by: optional(num(0, 100)),
+          degrees: optional(bool),
           before: optional(
             obj({ speakers: obj({ left: placement, right: placement }), listener: vec3 }),
           ),

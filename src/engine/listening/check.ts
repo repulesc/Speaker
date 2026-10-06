@@ -101,7 +101,8 @@ export function measure(ctx: AnalysisContext, p: Placement): Measures {
 /** The placement after a change (pure), or null when it would leave the room or break a limit. */
 export function applyChange(ctx: AnalysisContext, p: Placement, change: Change): Placement | null {
   const c = ctx.project.constraints;
-  const moved = structuredClone(p);
+  // A plain copy: the placement may come from reactive state, which structuredClone refuses.
+  const moved = JSON.parse(JSON.stringify(p)) as Placement;
   const { left, right } = moved.speakers;
   switch (change.kind) {
     case 'speakersOut': {

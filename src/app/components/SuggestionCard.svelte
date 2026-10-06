@@ -9,8 +9,6 @@
   import { applyCandidate, cabinet } from '../plan/placement';
   import { analysis, showNotice, workspace } from '../session.svelte';
   import { goalOf, type Goal } from '../state/goal';
-  import { liveWithItShown, rememberBefore } from '../listen/liveWithIt';
-  import LiveWithIt from './LiveWithIt.svelte';
   import MoodFace from './MoodFace.svelte';
   import PlacementOptions from './PlacementOptions.svelte';
   import { ui } from '../ui.svelte';
@@ -136,11 +134,7 @@
     const placement = $state.snapshot(shown);
     const now = $state.snapshot(project.variants.find((v) => v.id === project.activeVariantId)!);
     ui.showChange({ speakers: now.speakers, listener: now.listener.ears });
-    const scoreBefore = ok?.current.score ?? 0;
-    workspace.edit((p) => {
-      rememberBefore(p, scoreBefore);
-      applyCandidate(p, placement);
-    });
+    workspace.edit((p) => void applyCandidate(p, placement));
     ui.candidate = null;
     showNotice('success', i18n.t('suggest.applied'), { undo: true });
   }
@@ -246,10 +240,6 @@
       {/if}
     {/if}
   </section>
-
-  {#if ok && liveWithItShown(project)}
-    <LiveWithIt scoreNow={ok.current.score} />
-  {/if}
 
   {#if ok}
     {#if allFixed}
