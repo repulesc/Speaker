@@ -837,7 +837,7 @@ export const en = {
       same: '{now} now. The placement below fine-tunes it.',
     },
     idea: 'Also worth trying',
-    moreTips: 'More in Tips',
+    moreTips: 'Listen and fine-tune',
     scores: 'Score now {now}, at its best {best}, out of 1.00.',
     area: {
       even: {

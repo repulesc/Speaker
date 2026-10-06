@@ -863,7 +863,7 @@ export const hu: Messages = {
       same: 'Most: {now}. Az alábbi elhelyezés még finomít rajta.',
     },
     idea: 'Ezt is érdemes kipróbálni',
-    moreTips: 'További tippek',
+    moreTips: 'Hallgasd meg és finomhangold',
     scores: 'Pontszám most {now}, a legjobb helyen {best}, 1,00-ből.',
     area: {
       even: {
