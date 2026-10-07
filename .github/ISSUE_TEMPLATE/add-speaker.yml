@@ -1,0 +1,44 @@
+name: Add a speaker to the list
+description: Suggest a stereo speaker by sending the link to its spec page. We read the numbers from it and check them.
+labels: ['speaker data']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The list holds facts only (size, port, bass limit, driver layout) with a link to where each came from. Stereo speakers only: no soundbars, Bluetooth boxes or smart speakers.
+  - type: input
+    id: model
+    attributes:
+      label: Brand and model
+      placeholder: For example, Brand Model II
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link to the maker's spec page or manual (https)
+      description: The maker's own page is best. A shop page is fine if the maker has none. No link, no entry.
+      placeholder: https://
+    validations:
+      required: true
+  - type: dropdown
+    id: unusual
+    attributes:
+      label: Is it unusual?
+      description: The room model describes ordinary box speakers with round drivers best.
+      options:
+        - An ordinary box speaker
+        - Ribbon, AMT or planar tweeter
+        - Dipole or open baffle
+        - Horn
+        - Vintage
+        - Not sure
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Before you send
+      options:
+        - label: I am sending a link, not copied text, pictures or tables.
+          required: true
+        - label: It is a stereo speaker (one of a pair).
+          required: true

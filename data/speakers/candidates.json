@@ -1,0 +1,491 @@
+{
+  "note": "Candidate models only: names and the expected kind, no specs. Names are from general knowledge and each is checked against the maker's page before anything is recorded. See docs/SPEAKER_DATA.md.",
+  "speakers": [
+    {
+      "id": "kef-lsx-ii",
+      "brand": "KEF",
+      "model": "LSX II",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "kef-ls50-wireless-ii",
+      "brand": "KEF",
+      "model": "LS50 Wireless II",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "kef-ls60-wireless",
+      "brand": "KEF",
+      "model": "LS60 Wireless",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "floorstander"
+    },
+    {
+      "id": "buchardt-audio-a500",
+      "brand": "Buchardt Audio",
+      "model": "A500",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "dynaudio-xeo-20",
+      "brand": "Dynaudio",
+      "model": "Xeo 20",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "klipsch-the-fives",
+      "brand": "Klipsch",
+      "model": "The Fives",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "klipsch-the-sevens",
+      "brand": "Klipsch",
+      "model": "The Sevens",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "audioengine-hd6",
+      "brand": "Audioengine",
+      "model": "HD6",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "audioengine-a2-wireless",
+      "brand": "Audioengine",
+      "model": "A2+ Wireless",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "desktop"
+    },
+    {
+      "id": "edifier-s3000pro",
+      "brand": "Edifier",
+      "model": "S3000Pro",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "elac-navis-arb-51",
+      "brand": "Elac",
+      "model": "Navis ARB-51",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "bowers-and-wilkins-formation-duo",
+      "brand": "Bowers & Wilkins",
+      "model": "Formation Duo",
+      "batch": "pilot",
+      "category": "all-in-one",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "genelec-8030c",
+      "brand": "Genelec",
+      "model": "8030C",
+      "batch": "pilot",
+      "category": "active",
+      "kind": "monitor"
+    },
+    {
+      "id": "genelec-8020d",
+      "brand": "Genelec",
+      "model": "8020D",
+      "batch": "pilot",
+      "category": "active",
+      "kind": "monitor"
+    },
+    {
+      "id": "neumann-kh-80-dsp",
+      "brand": "Neumann",
+      "model": "KH 80 DSP",
+      "batch": "pilot",
+      "category": "active",
+      "kind": "monitor"
+    },
+    {
+      "id": "adam-audio-t7v",
+      "brand": "Adam Audio",
+      "model": "T7V",
+      "batch": "pilot",
+      "category": "active",
+      "kind": "monitor"
+    },
+    {
+      "id": "yamaha-hs5",
+      "brand": "Yamaha",
+      "model": "HS5",
+      "batch": "pilot",
+      "category": "active",
+      "kind": "monitor"
+    },
+    {
+      "id": "jbl-305p-mkii",
+      "brand": "JBL",
+      "model": "305P MkII",
+      "batch": "pilot",
+      "category": "active",
+      "kind": "monitor"
+    },
+    {
+      "id": "kali-audio-lp-6",
+      "brand": "Kali Audio",
+      "model": "LP-6",
+      "batch": "pilot",
+      "category": "active",
+      "kind": "monitor"
+    },
+    {
+      "id": "edifier-r1280dbs",
+      "brand": "Edifier",
+      "model": "R1280DBs",
+      "batch": "pilot",
+      "category": "active",
+      "kind": "desktop"
+    },
+    {
+      "id": "kef-ls50-meta",
+      "brand": "KEF",
+      "model": "LS50 Meta",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "kef-q350",
+      "brand": "KEF",
+      "model": "Q350",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "kef-r3-meta",
+      "brand": "KEF",
+      "model": "R3 Meta",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "buchardt-audio-s400",
+      "brand": "Buchardt Audio",
+      "model": "S400",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "wharfedale-linton",
+      "brand": "Wharfedale",
+      "model": "Linton",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "wharfedale-diamond-12-1",
+      "brand": "Wharfedale",
+      "model": "Diamond 12.1",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "q-acoustics-3020i",
+      "brand": "Q Acoustics",
+      "model": "3020i",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "q-acoustics-5020",
+      "brand": "Q Acoustics",
+      "model": "5020",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "elac-debut-reference-dbr62",
+      "brand": "Elac",
+      "model": "Debut Reference DBR62",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "klipsch-rp-600m-ii",
+      "brand": "Klipsch",
+      "model": "RP-600M II",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "monitor-audio-silver-100",
+      "brand": "Monitor Audio",
+      "model": "Silver 100",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "dali-oberon-1",
+      "brand": "Dali",
+      "model": "Oberon 1",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "dali-spektor-1",
+      "brand": "Dali",
+      "model": "Spektor 1",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "dynaudio-evoke-10",
+      "brand": "Dynaudio",
+      "model": "Evoke 10",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "harbeth-p3esr",
+      "brand": "Harbeth",
+      "model": "P3ESR",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "spendor-a1",
+      "brand": "Spendor",
+      "model": "A1",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "bowers-and-wilkins-606-s3",
+      "brand": "Bowers & Wilkins",
+      "model": "606 S3",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "bowers-and-wilkins-607-s3",
+      "brand": "Bowers & Wilkins",
+      "model": "607 S3",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "focal-aria-906",
+      "brand": "Focal",
+      "model": "Aria 906",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "jbl-stage-a130",
+      "brand": "JBL",
+      "model": "Stage A130",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "polk-audio-signature-elite-es20",
+      "brand": "Polk Audio",
+      "model": "Signature Elite ES20",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "svs-prime-bookshelf",
+      "brand": "SVS",
+      "model": "Prime Bookshelf",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "triangle-borea-br03",
+      "brand": "Triangle",
+      "model": "Borea BR03",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "sonus-faber-lumina-i",
+      "brand": "Sonus Faber",
+      "model": "Lumina I",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "kef-r7-meta",
+      "brand": "KEF",
+      "model": "R7 Meta",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "floorstander"
+    },
+    {
+      "id": "wharfedale-diamond-12-3",
+      "brand": "Wharfedale",
+      "model": "Diamond 12.3",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "floorstander"
+    },
+    {
+      "id": "q-acoustics-3050i",
+      "brand": "Q Acoustics",
+      "model": "3050i",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "floorstander"
+    },
+    {
+      "id": "klipsch-rp-6000f-ii",
+      "brand": "Klipsch",
+      "model": "RP-6000F II",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "floorstander"
+    },
+    {
+      "id": "monitor-audio-bronze-200",
+      "brand": "Monitor Audio",
+      "model": "Bronze 200",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "floorstander"
+    },
+    {
+      "id": "dali-oberon-5",
+      "brand": "Dali",
+      "model": "Oberon 5",
+      "batch": "pilot",
+      "category": "passive",
+      "kind": "floorstander"
+    },
+    {
+      "id": "ess-amt-model-to-be-confirmed",
+      "brand": "ESS",
+      "model": "AMT (model to be confirmed)",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "bookshelf",
+      "special": "amt",
+      "note": "A friend owns a pair; the exact model is read off its label before a source is looked for."
+    },
+    {
+      "id": "jbl-l100",
+      "brand": "JBL",
+      "model": "L100",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "floorstander"
+    },
+    {
+      "id": "klipsch-heresy",
+      "brand": "Klipsch",
+      "model": "Heresy",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "floorstander",
+      "special": "horn"
+    },
+    {
+      "id": "klipsch-la-scala",
+      "brand": "Klipsch",
+      "model": "La Scala",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "floorstander",
+      "special": "horn"
+    },
+    {
+      "id": "acoustic-research-ar-3a",
+      "brand": "Acoustic Research",
+      "model": "AR-3a",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "rogers-ls3-5a",
+      "brand": "Rogers",
+      "model": "LS3/5A",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "spendor-bc1",
+      "brand": "Spendor",
+      "model": "BC1",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "bookshelf"
+    },
+    {
+      "id": "quad-esl-57",
+      "brand": "Quad",
+      "model": "ESL-57",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "floorstander",
+      "special": "dipole"
+    },
+    {
+      "id": "magnepan-planar-models-which-one-to-be-chosen",
+      "brand": "Magnepan",
+      "model": "Planar models (which one to be chosen)",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "floorstander",
+      "special": "planar"
+    },
+    {
+      "id": "advent-large",
+      "brand": "Advent",
+      "model": "Large",
+      "batch": "vintage",
+      "category": "passive",
+      "kind": "floorstander"
+    }
+  ]
+}

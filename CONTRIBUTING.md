@@ -23,7 +23,7 @@ The engine is pure TypeScript in metres, with no UI imports. Run `npm run lint`,
 
 ## Speaker data
 
-There is no speaker database in v1. If you describe a speaker for others (a shared speaker file), use the manufacturer's spec sheet or manual, or a published measurement, and name the source. Never use remembered specs.
+The speaker list is described in [docs/SPEAKER_DATA.md](docs/SPEAKER_DATA.md). To suggest a speaker, open the "Add a speaker to the list" issue and send a link to its spec page. Numbers come from the maker's own page or manual, with a link; never from memory, and never copied text, pictures or tables.
 
 ## Translations
 
