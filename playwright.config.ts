@@ -37,7 +37,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run build -- --mode e2e && npm run preview -- --port 4173 --strictPort',
+    // Its own folder: the site that gets published (dist) must never hold the invented speakers.
+    command:
+      'npm run build -- --mode e2e --outDir dist-e2e && npm run preview -- --outDir dist-e2e --port 4173 --strictPort',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
