@@ -293,7 +293,7 @@ test('the menu is a drawer over the panel: preferences, sharing, about', async (
 });
 
 test('the support link stays in view under the map and opens in a new tab', async ({ page }) => {
-  const link = page.getByRole('link', { name: /Support Nodo/ });
+  const link = page.getByRole('link', { name: /Support NODO/ });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('rel', /noopener/);

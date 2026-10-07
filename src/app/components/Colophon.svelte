@@ -17,7 +17,7 @@
   </p>
   {#if SUPPORT_URL}
     <a class="support" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer"
-      >{i18n.t('menu.support', { app: APP_NAME })}</a
+      >{i18n.t('menu.support', { app: APP_NAME.toUpperCase() })}</a
     >
   {/if}
 </footer>
