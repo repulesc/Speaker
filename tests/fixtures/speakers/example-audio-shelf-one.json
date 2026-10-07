@@ -1,0 +1,46 @@
+{
+  "id": "example-audio-shelf-one",
+  "brand": "Example Audio",
+  "model": "Shelf One",
+  "aka": ["Shelf 1"],
+  "status": "current",
+  "category": "passive",
+  "kind": "bookshelf",
+  "sizeMm": {
+    "value": {
+      "w": 180,
+      "h": 300,
+      "d": 250
+    },
+    "url": "https://example.com/example-audio/shelf-one",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://example.com/example-audio/shelf-one",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "two-way",
+    "url": "https://example.com/example-audio/shelf-one",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 45,
+      "db": 3
+    },
+    "url": "https://example.com/example-audio/shelf-one",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "port": {
+    "value": "rear",
+    "url": "https://example.com/example-audio/shelf-one",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  }
+}

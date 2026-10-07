@@ -1,0 +1,39 @@
+{
+  "id": "example-audio-shelf-one-mk-ii",
+  "brand": "Example Audio",
+  "model": "Shelf One Mk II",
+  "status": "current",
+  "category": "passive",
+  "kind": "bookshelf",
+  "sizeMm": {
+    "value": {
+      "w": 185,
+      "h": 310,
+      "d": 260
+    },
+    "url": "https://example.com/example-audio/shelf-one-mk-ii",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "sealed",
+    "url": "https://example.com/example-audio/shelf-one-mk-ii",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "coaxial",
+    "url": "https://example.com/example-audio/shelf-one-mk-ii",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 55,
+      "db": 6
+    },
+    "url": "https://example.com/example-audio/shelf-one-mk-ii",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  }
+}

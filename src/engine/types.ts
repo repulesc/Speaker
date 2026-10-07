@@ -101,6 +101,22 @@ export interface DspControls {
   subOut?: boolean;
 }
 
+export interface ListedSpeaker {
+  /** The entry's id in the list. */
+  id: string;
+  /** The maker's page the size was read on, and the newest date any value was read. */
+  url: string;
+  retrieved: string;
+  /** The port position was seen on the maker's photos, not read in a text. */
+  photoPort?: boolean;
+  /** The maker gives no bass figure: the bass limit is the kind's typical value (🟡). */
+  bassFromKind?: boolean;
+  /** A design the box model describes less well (an AMT tweeter, planar, dipole, horn). */
+  special?: 'amt' | 'planar' | 'dipole' | 'horn';
+  /** The user changed a value after picking it. */
+  edited?: boolean;
+}
+
 export interface SpeakerProfile {
   id: string;
   brand: string;
@@ -125,6 +141,11 @@ export interface SpeakerProfile {
   designedForCorner?: boolean;
   /** The answers to the speaker questions the typical values came from (V7); none = not asked. */
   choices?: SpeakerChoices;
+  /**
+   * Picked from the speaker list (docs/SPEAKER_DATA.md): the values above are a copy taken then,
+   * not a live link, so a saved room never changes under the user.
+   */
+  listed?: ListedSpeaker;
   manufacturerNotes: { text: string; source: SourceRef }[];
   provenance: { sources: SourceRef[]; verified: boolean; lastReviewed?: string };
 }

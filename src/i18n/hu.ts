@@ -278,6 +278,51 @@ export const hu: Messages = {
       },
     },
   },
+  speakerList: {
+    find: 'Keresd meg a hangfaladat',
+    placeholder: 'Márka vagy típus',
+    brands: 'Vagy böngéssz márka szerint',
+    models: '{n} típus',
+    model: '1 típus',
+    found: '{n} találat',
+    none: 'Nincs találat erre: „{q}”. Írj kevesebb betűt, vagy írd le a hangfalaidat.',
+    notListed: 'Nincs a listán? Írd le inkább',
+    useList: 'Inkább megkeresem a listán',
+    change: 'Csere',
+    cancel: 'Marad: {name}',
+    source: 'A gyártó oldaláról, olvasva: {date}',
+    edited: 'A gyártó oldaláról, olvasva: {date}. Te módosítottad.',
+    photoPort: 'A nyílás helye a gyártó fotóiról van. Nézd meg a sajátod hátulját.',
+    special: {
+      amt: 'Az AMT (légmozgató) magassugárzót a szobamodell nem ismeri: a magashang-tanácsokat vedd kevésbé biztosnak.',
+      planar:
+        'A panelhangfal hátrafelé is sugároz: a térkép dobozos hangfalakat modellez, ezért itt kevésbé biztos.',
+      dipole:
+        'A dipól hátrafelé is sugároz: a térkép dobozos hangfalakat modellez, ezért itt kevésbé biztos.',
+      horn: 'A tölcséres hangfalakat a szobamodell nem ismeri: a térkép tanácsait vedd kevésbé biztosnak.',
+    },
+    details: 'Részletek szerkesztése',
+    kind: {
+      bookshelf: 'Polchangfal',
+      floorstander: 'Álló hangfal',
+      monitor: 'Stúdiómonitor',
+      desktop: 'Asztali',
+      wall: 'Fali',
+    },
+    category: { passive: 'passzív', active: 'aktív', 'all-in-one': 'mindent-egyben' },
+    port: {
+      front: 'elülső reflexnyílás',
+      rear: 'hátsó reflexnyílás',
+      down: 'lefelé néző reflexnyílás',
+      side: 'oldalsó reflexnyílás',
+      ported: 'reflexes',
+      sealed: 'zárt',
+      'passive-radiator': 'passzív membrán',
+      'open-baffle': 'nyitott hangfal',
+    },
+    f6: '−6 dB: {hz} Hz',
+    f6About: '−6 dB: kb. {hz} Hz',
+  },
   goals: {
     goal: {
       'wide-stage': { name: 'Széles hangszínpad', help: 'A zene a hangfalakon túlra is kiterjed.' },
@@ -361,6 +406,7 @@ export const hu: Messages = {
     speaker: {
       title: 'Mesélj a hangfalaidról',
       help: 'Arra válaszolj, amit tudsz. A „Nem tudom” is jó válasz.',
+      find: 'Keresd meg a típusodat a listán, vagy írd le, ha nincs rajta.',
     },
   },
   guess: {

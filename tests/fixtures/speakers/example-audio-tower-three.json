@@ -1,0 +1,51 @@
+{
+  "id": "example-audio-tower-three",
+  "brand": "Example Audio",
+  "model": "Tower Three",
+  "status": "discontinued",
+  "category": "passive",
+  "kind": "floorstander",
+  "sizeMm": {
+    "value": {
+      "w": 200,
+      "h": 1000,
+      "d": 320
+    },
+    "url": "https://example.com/example-audio/tower-three",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://example.com/example-audio/tower-three",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "three-way",
+    "url": "https://example.com/example-audio/tower-three",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 32,
+      "db": 6
+    },
+    "url": "https://example.com/example-audio/tower-three",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "port": {
+    "value": "front",
+    "url": "https://example.com/example-audio/tower-three",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "tweeterMm": {
+    "value": 900,
+    "url": "https://example.com/example-audio/tower-three",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  }
+}

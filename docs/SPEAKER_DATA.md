@@ -76,6 +76,28 @@ the reason. Passed-but-uncertain fields are flagged for a person.
 `node tools/speakers/check-draft.ts draft.json page.txt [--write]` runs it by hand; the tests use
 an invented page, never a real product (`tests/engine/speakerData.test.ts`).
 
+## On the site (owner's choices, 7 Oct 2026)
+
+- **Survey, screen 3:** search first. "Not listed? Describe it instead" swaps in the three
+  questions; "Find it in the list instead" brings the search back. While the shipped list is empty
+  the search is hidden and the questions are all there is.
+- **Search** (`src/engine/speakers/search.ts`): empty, it lists the brands to browse; a brand lists
+  its models. Case, accents, punctuation and word order do not matter; a word may be cut short; one
+  slip is forgiven from 4 letters, two from 8, none in plain numbers (8020 is not 8030). "Mk II",
+  "MkII", "Mark 2", "mk2" and "II" are the same; "LS50" and "LS 50" too. `aka` names count.
+  ARIA combobox with an always-visible listbox; 44 px rows.
+- **Card** (Room & speakers and the survey): name, one facts line (kind · cabinet · −6 dB point),
+  "From the maker's page, read on <date>" linking to the size's source, Change, "They stand on",
+  and the fold renamed "Edit details". A value changed by hand adds "Changed by you." A port from
+  the maker's photos adds a quiet "Check the back of yours."; a special design (AMT, planar, dipole,
+  horn) says the advice is less certain. No bass figure from the maker: the line leaves bass out.
+- **What a pick stores** (`src/app/state/speakerList.ts`): a copy of the values, not a link
+  (`speaker.listed` holds the id, source and date). Stated values are `measured`; a photo-confirmed
+  port, a bass figure with no stated level and the driver heights (unless the tweeter height is
+  stated) are `estimated`. The bass figure goes to −6 dB with `f6From`.
+- **Tests:** the e2e build (`vite build --mode e2e`) uses invented entries from
+  `tests/fixtures/speakers`; the site build never includes them (checked by grepping `dist`).
+
 ## Order of work
 
 1. Format, checker, tests, issue form, candidate list: **done**. Tiers, photo-confirmed port,
