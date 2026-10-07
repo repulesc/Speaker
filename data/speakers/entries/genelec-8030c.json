@@ -1,0 +1,45 @@
+{
+  "id": "genelec-8030c",
+  "brand": "Genelec",
+  "model": "8030C",
+  "status": "current",
+  "category": "active",
+  "kind": "monitor",
+  "sizeMm": {
+    "value": {
+      "w": 189,
+      "h": 299,
+      "d": 178
+    },
+    "url": "https://www.genelec.com/8030c",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://www.genelec.com/8030c",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "two-way",
+    "url": "https://www.genelec.com/8030c",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 47,
+      "db": 6
+    },
+    "url": "https://www.genelec.com/8030c",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "positionSetting": {
+    "value": true,
+    "url": "https://www.genelec.com/8030c",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  }
+}

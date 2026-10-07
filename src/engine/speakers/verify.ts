@@ -170,7 +170,7 @@ const KEYWORDS: {
   },
   port: {
     front: /front[- ]?(?:firing|facing|ported|port)|front.{0,24}\bports?\b|\bports?\b.{0,24}front/,
-    rear: /rear[- ]?(?:firing|facing|ported|port)|rear.{0,24}\bports?\b|\bports?\b.{0,24}rear|back.{0,16}\bports?\b/,
+    rear: /rear[- ]?(?:firing|facing|ported|port)|rear.{0,24}\bports?\b|\bports?\b.{0,24}rear|back.{0,16}\bports?\b|reflex tube.{0,80}\brear\b/,
     down: /down[- ]?firing|downward|bottom.{0,16}\bports?\b|\bports?\b.{0,24}(?:bottom|base)/,
     side: /side[- ]?(?:firing|facing|ported)|side.{0,16}\bports?\b|\bports?\b.{0,24}side/,
     none: /sealed|closed|no port|acoustic suspension|passive radiator/,
@@ -258,9 +258,7 @@ const checks = {
         }) as Check<boolean>,
   controls: ((v, q) => {
     const c = clean(q);
-    const missing = (['bass', 'treble'] as const).filter(
-      (k) => v[k] && !new RegExp(`${k}`).test(c),
-    );
+    const missing = (['bass', 'treble'] as const).filter((k) => v[k] && !CONTROL_WORDS[k].test(c));
     if (!v.bass && !v.treble)
       return { ok: false, reason: 'record controls only when there are some' };
     return missing.length
@@ -276,6 +274,12 @@ const checks = {
       ? { ok: true }
       : { ok: false, reason: 'the quote does not give this tweeter height' }) as Check<number>,
 };
+
+/** How makers name a tone control: "treble", "HF trim" or "high shelf"; "bass", "LF" or "low shelf". */
+const CONTROL_WORDS = {
+  bass: /bass|low[- ]frequency|\blf\b|low shelf/,
+  treble: /treble|high[- ]frequency|\bhf\b|high shelf/,
+} as const;
 
 const REQUIRED = ['sizeMm', 'enclosure', 'drivers'] as const;
 const OPTIONAL = [

@@ -1,0 +1,51 @@
+{
+  "id": "genelec-8020d",
+  "brand": "Genelec",
+  "model": "8020D",
+  "status": "current",
+  "category": "active",
+  "kind": "monitor",
+  "sizeMm": {
+    "value": {
+      "w": 148,
+      "h": 242,
+      "d": 142
+    },
+    "url": "https://www.genelec.com/8020d",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://www.genelec.com/8020d",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "two-way",
+    "url": "https://www.genelec.com/8020d",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 56,
+      "db": 6
+    },
+    "url": "https://www.genelec.com/8020d",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "port": {
+    "value": "rear",
+    "url": "https://www.genelec.com/8020d",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "positionSetting": {
+    "value": true,
+    "url": "https://www.genelec.com/8020d",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  }
+}

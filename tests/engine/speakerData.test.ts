@@ -234,6 +234,56 @@ describe('the optional facts (tier B and C)', () => {
     expect(r.entry?.tweeterMm?.value).toBe(220);
   });
 
+  it('reads a port from a "reflex tube" on the rear, and "HF trim" as a treble control', () => {
+    const page = `${PAGE}
+The reflex tube ends in a flare on the rear of the enclosure.
+An HF trim switch adjusts the high-frequency response.
+High Shelf EQ > 5 kHz: -2 dB, 0 dB, +2 dB. Low Shelf EQ < 300 Hz: -2 dB, 0 dB, +2 dB.`;
+    const r = checkDraft(
+      draft({
+        port: {
+          value: 'rear',
+          quote: 'The reflex tube ends in a flare on the rear of the enclosure.',
+        },
+        controls: {
+          value: { bass: false, treble: true },
+          quote: 'An HF trim switch adjusts the high-frequency response.',
+        },
+      }),
+      page,
+    );
+    expect(r.rejected).toEqual([]);
+    expect(r.entry?.port?.value).toBe('rear');
+    expect(r.entry?.controls?.value).toEqual({ bass: false, treble: true });
+    const shelves = checkDraft(
+      draft({
+        controls: {
+          value: { bass: true, treble: true },
+          quote:
+            'High Shelf EQ > 5 kHz: -2 dB, 0 dB, +2 dB. Low Shelf EQ < 300 Hz: -2 dB, 0 dB, +2 dB.',
+        },
+      }),
+      page,
+    );
+    expect(shelves.entry?.controls?.value).toEqual({ bass: true, treble: true });
+    // A front-facing tube is not read as a rear port.
+    const front = checkDraft(
+      draft({ port: { value: 'rear', quote: 'Rear-firing bass reflex port' } }),
+      PAGE,
+    );
+    expect(front.rejected).toEqual([]);
+    const wrong = checkDraft(
+      draft({
+        port: {
+          value: 'front',
+          quote: 'The reflex tube ends in a flare on the rear of the enclosure.',
+        },
+      }),
+      page,
+    );
+    expect(wrong.rejected.some((f) => f.field === 'port')).toBe(true);
+  });
+
   it('refuses a control the quote does not name, and a tweeter above the cabinet', () => {
     const r = checkDraft(
       draft({

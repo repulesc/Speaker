@@ -5,3 +5,5 @@ docs
 tools/reference/fixtures
 tests/fixtures/*.json
 public/legacy
+# Written by tools/speakers/check-draft.ts; the tool owns the format.
+data/speakers/entries/
