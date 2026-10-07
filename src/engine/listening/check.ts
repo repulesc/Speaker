@@ -1,33 +1,81 @@
 import { acousticCentre, type AnalysisContext } from '../context';
+import { placedOnOf, type PlacedOn } from '../presets/speakerKinds';
 import { isValidPlacement } from '../scoring/search';
 import type { EvidenceLevel, Finding, Placement } from '../types';
 
 /**
- * The listening check (docs/ROADMAP_V8.md §4): what the listener hears, on two-sided scales, turned
- * into one change at a time to try. The ears are the judge; the rules only say what usually moves
- * the sound in the direction asked for, with how sure that is and where it comes from.
+ * The listening check (docs/ROADMAP_V8.md §4, V10 §3): what the listener hears, on short scales,
+ * turned into one change at a time to try. The ears are the judge; the rules only say what usually
+ * moves the sound in the direction asked for, with how sure that is and where it comes from, and
+ * they read the room page so the advice fits the room (V10).
  */
-export type Aspect = 'bass' | 'evenness' | 'centre' | 'width' | 'treble' | 'clarity';
+export type Aspect =
+  | 'bass'
+  | 'low'
+  | 'evenness'
+  | 'voices'
+  | 'treble'
+  | 'centre'
+  | 'width'
+  | 'depth'
+  | 'spot'
+  | 'clarity';
 
-/** The answers, aspect by aspect. "right" (just right) and missing answers ask for nothing. */
+/** The answers, aspect by aspect. The fine answer (`FINE`) and missing answers ask for nothing. */
 export interface ListeningAnswers {
   bass?: 'thin' | 'right' | 'boomy';
+  /** The lowest octave (organ pedals, synth bass): there, or missing. */
+  low?: 'there' | 'missing';
   evenness?: 'even' | 'uneven';
-  centre?: 'vague' | 'focused' | 'left' | 'right';
-  width?: 'narrow' | 'right' | 'wide';
+  /** Voices and the midrange: clear, or muffled (boxy, recessed). */
+  voices?: 'clear' | 'muffled';
+  /** "bright" covers harsh treble and hissing S sounds (sibilance). */
   treble?: 'dull' | 'right' | 'bright';
+  centre?: 'vague' | 'focused' | 'left' | 'right';
+  /** "wide": so wide there is a hole in the middle. */
+  width?: 'narrow' | 'right' | 'wide';
+  /** Front to back: layered, or flat. */
+  depth?: 'deep' | 'flat';
+  /** The sweet spot: wide enough, or only one spot sounds right. */
+  spot?: 'wide' | 'small';
   clarity?: 'clear' | 'some' | 'echoey';
 }
 
 export const ASPECT_ANSWERS: { [A in Aspect]: readonly NonNullable<ListeningAnswers[A]>[] } = {
   bass: ['thin', 'right', 'boomy'],
+  low: ['there', 'missing'],
   evenness: ['even', 'uneven'],
+  voices: ['clear', 'muffled'],
+  treble: ['dull', 'right', 'bright'],
   centre: ['vague', 'focused', 'left', 'right'],
   width: ['narrow', 'right', 'wide'],
-  treble: ['dull', 'right', 'bright'],
+  depth: ['deep', 'flat'],
+  spot: ['wide', 'small'],
   clarity: ['clear', 'some', 'echoey'],
 };
 export const ASPECTS = Object.keys(ASPECT_ANSWERS) as Aspect[];
+
+/** The answer on each scale that asks for nothing. */
+export const FINE: { [A in Aspect]: NonNullable<ListeningAnswers[A]> } = {
+  bass: 'right',
+  low: 'there',
+  evenness: 'even',
+  voices: 'clear',
+  treble: 'right',
+  centre: 'focused',
+  width: 'right',
+  depth: 'deep',
+  spot: 'wide',
+  clarity: 'clear',
+};
+
+/** The rows on screen, grouped. */
+export const ASPECT_GROUPS = [
+  { id: 'bass', aspects: ['bass', 'low', 'evenness'] },
+  { id: 'tone', aspects: ['voices', 'treble'] },
+  { id: 'image', aspects: ['centre', 'width', 'depth', 'spot'] },
+  { id: 'room', aspects: ['clarity'] },
+] as const satisfies readonly { id: string; aspects: readonly Aspect[] }[];
 
 /**
  * A change the app can make for you (and undo). Distances in metres: speakers further from the
@@ -56,6 +104,26 @@ export interface Experiment {
   params: Record<string, number | string>;
 }
 
+/** What the room page says, as the listening rules need it (V10: advice that fits the room). */
+export interface Setting {
+  /** "How full is it?": busy or very busy. A full room is not short of soft things. */
+  full: boolean;
+  /** The floor is hard (wood, stone, tiles), or not described. */
+  hardFloor: boolean;
+  /** The user said the floor is wooden boards (a floor that can resonate, unlike a slab). */
+  woodFloor: boolean;
+  /** "Open to another room". */
+  open: boolean;
+  /** "Not a plain rectangle": the box model does not hold. */
+  odd: boolean;
+  /** The controls the user ticked on the speaker page. */
+  controls: { treble: boolean; bass: boolean; wall: boolean };
+  /** What the speakers stand on. */
+  placedOn: PlacedOn;
+  /** Listening at a desk (Desk, or close listening). */
+  desk: boolean;
+}
+
 /** What a rule needs to know about the setup, measured once. */
 export interface Measures {
   /** Rear panel to the front wall (m), the nearer speaker. */
@@ -71,6 +139,31 @@ export interface Measures {
   /** Angle between the two speakers seen from the seat (degrees). */
   angle: number;
   toeIn: number;
+  setting: Setting;
+}
+
+const HARD_FLOORS = new Set(['wood-floor', 'plaster-concrete']);
+
+export function settingOf(ctx: AnalysisContext): Setting {
+  const { project, variant } = ctx;
+  const busy = variant.busyness?.certainty === 'unknown' ? null : variant.busyness?.value;
+  const floorKnown = project.surfaces.baseCertainty.floor !== 'unknown';
+  const floor = project.surfaces.base.floor;
+  const dsp = project.speaker.dsp;
+  return {
+    full: busy === 'busy' || busy === 'very-busy',
+    hardFloor: !floorKnown || HARD_FLOORS.has(floor),
+    woodFloor: floorKnown && floor === 'wood-floor',
+    open: project.room.outOfModel.includes('open-plan-connection'),
+    odd: project.room.outOfModel.includes('non-rectangular'),
+    controls: {
+      treble: Boolean(dsp.treble),
+      bass: Boolean(dsp.bass),
+      wall: Boolean(dsp.wallDistanceSetting),
+    },
+    placedOn: placedOnOf(project.speaker.choices ?? {}),
+    desk: project.constraints.listeningDistance === 'near' || variant.listener.area === 'desk',
+  };
 }
 
 export function measure(ctx: AnalysisContext, p: Placement): Measures {
@@ -95,6 +188,7 @@ export function measure(ctx: AnalysisContext, p: Placement): Measures {
     dRight,
     angle: (Math.acos(Math.max(-1, Math.min(1, cos))) * 180) / Math.PI,
     toeIn: (left.toeInDeg + right.toeInDeg) / 2,
+    setting: settingOf(ctx),
   };
 }
 

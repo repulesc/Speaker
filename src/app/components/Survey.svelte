@@ -2,31 +2,24 @@
   import { tick } from 'svelte';
   import { i18n } from '../../i18n/locale.svelte';
   import { LOCALES } from '../../i18n/translate';
-  import { APP_NAME } from '../config';
   import { formatLength } from '../../units/format';
-  import {
-    activeVariant,
-    cabinet,
-    moveSeat,
-    roomSize,
-    setSpeakerClearance,
-    setSpeakerSpacing,
-  } from '../plan/placement';
+  import { roomSize } from '../plan/placement';
   import { workspace } from '../session.svelte';
   import { GOALS, goalOf, setGoal } from '../state/goal';
   import { ROOM_LIMITS, USUAL_ROOM_RANGE } from '../state/limits';
   import { ui } from '../ui.svelte';
   import LengthField from './LengthField.svelte';
-  import LengthInput from './LengthInput.svelte';
   import SpeakerQuestions from './SpeakerQuestions.svelte';
+  import Wordmark from './Wordmark.svelte';
 
   /**
-   * First run: four calm questions on one card, then the room is revealed (owner decisions,
-   * docs/DESIGN_BRIEF_V4.md). Everything asked here can be changed later in the sidebar; "Skip"
-   * keeps the answers so far.
+   * First run: three calm questions on one card, then the room is revealed (owner decisions,
+   * docs/DESIGN_BRIEF_V4.md). No tape measure (V10, docs/ROADMAP_V10.md §2): the speakers and the
+   * seat start at a rule-of-thumb guess, and a note on the map invites you to drag them. Everything
+   * asked here can be changed later; "Skip" keeps the answers so far.
    */
-  const TOTAL = 4;
-  const STEPS = [1, 2, 3, 4];
+  const TOTAL = 3;
+  const STEPS = [1, 2, 3];
   /** 0 is the welcome: what this is, that it is free, and the language. */
   let screen = $state(0);
   let card = $state<HTMLElement>();
@@ -35,10 +28,6 @@
   const room = $derived(roomSize(project));
   const system = $derived(project.units);
   const goal = $derived(goalOf(project));
-  const variant = $derived(activeVariant(project));
-  const cab = $derived(cabinet(project));
-  const ZONES = [0.25, 0.5, 1, null] as const;
-  const fmt = (m: number) => formatLength(m, system, 'position', i18n.locale);
   const dims = ['width', 'length', 'height'] as const;
 
   /** A typical ceiling, assumed when it is left empty (the analysis needs one). */
@@ -79,7 +68,7 @@
           {#each STEPS as n (n)}<span class:on={n <= screen}></span>{/each}
         </div>
       {:else}
-        <span class="brand">{APP_NAME}</span>
+        <span class="brand"><Wordmark height={15} /></span>
         <span class="grow"></span>
       {/if}
       <div class="lang" role="radiogroup" aria-label={i18n.t('language.label')}>
@@ -144,67 +133,10 @@
           </label>
         {/each}
       </div>
-    {:else if screen === 3}
+    {:else}
       <h2 id="survey-title" tabindex="-1">{i18n.t('survey.speaker.title')}</h2>
       <p class="help">{i18n.t('survey.speaker.help')}</p>
       <SpeakerQuestions questions={['kind', 'size', 'port']} idPrefix="survey" />
-    {:else}
-      <h2 id="survey-title" tabindex="-1">{i18n.t('survey.where.title')}</h2>
-      {#if goal === 'both' || !room}
-        <p class="help">{i18n.t('survey.where.both')}</p>
-      {:else}
-        <p class="help">{i18n.t('survey.where.help')}</p>
-        <div class="fields">
-          {#if goal === 'speakers'}
-            <LengthInput
-              id="survey-seat"
-              label={i18n.t('setup.listen.seat')}
-              value={variant.listener.ears.y}
-              {system}
-              limits={{ min: 0.1, max: room.L - 0.1 }}
-              onchange={(y) => workspace.edit((p) => void moveSeat(p, { y }, { grid: false }))}
-            />
-          {/if}
-          <LengthInput
-            id="survey-clearance"
-            label={i18n.t('setup.listen.clearance')}
-            value={variant.speakers.left.base.y - cab.d / 2}
-            {system}
-            limits={{ min: 0, max: room.L / 2 }}
-            onchange={(v) => workspace.edit((p) => void setSpeakerClearance(p, v))}
-          />
-          <LengthInput
-            id="survey-spacing"
-            label={i18n.t('setup.listen.spacing')}
-            value={variant.speakers.right.base.x - variant.speakers.left.base.x}
-            {system}
-            limits={{ min: 0.3, max: room.W - cab.w }}
-            onchange={(v) => workspace.edit((p) => void setSpeakerSpacing(p, v))}
-          />
-          {#if goal === 'speakers'}
-            <fieldset>
-              <legend>{i18n.t('setup.listen.zone')}</legend>
-              <div class="seg" role="radiogroup" aria-label={i18n.t('setup.listen.zone')}>
-                {#each ZONES as zone (zone ?? 'any')}
-                  <label>
-                    <input
-                      type="radio"
-                      name="survey-zone"
-                      checked={project.constraints.speakerZone === (zone ?? undefined)}
-                      onchange={() =>
-                        workspace.edit((p) => {
-                          if (zone === null) delete p.constraints.speakerZone;
-                          else p.constraints.speakerZone = zone;
-                        })}
-                    />
-                    {zone === null ? i18n.t('setup.listen.anywhere') : fmt(zone)}
-                  </label>
-                {/each}
-              </div>
-            </fieldset>
-          {/if}
-        </div>
-      {/if}
     {/if}
 
     <div class="actions">
@@ -260,8 +192,7 @@
     font-size: var(--text-sm);
   }
   .brand {
-    font-weight: 600;
-    color: var(--ink);
+    display: flex;
   }
   .grow {
     flex: 1;
@@ -387,20 +318,6 @@
   .choice-sub {
     color: var(--ink-muted);
     font-size: var(--text-sm);
-  }
-  fieldset {
-    display: grid;
-    gap: 6px;
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-  legend {
-    padding: 0;
-    font-weight: 600;
-  }
-  fieldset .seg {
-    display: flex;
   }
   .actions {
     display: flex;

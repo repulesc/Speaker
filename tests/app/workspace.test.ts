@@ -6,6 +6,7 @@ import {
   applyDefaultPlacement,
   createDefaultProject,
   defaultPlacement,
+  FIRST_GUESS,
 } from '../../src/app/state/defaults';
 import { genericSpeaker, makeProject } from '../fixtures/projects';
 
@@ -160,10 +161,12 @@ describe('default placement', () => {
       p.room.length = { value: 5, certainty: 'measured' };
     });
     const v = () => ws.project.variants[0]!;
-    expect(v().speakers.left.base.x).toBeCloseTo(1.0, 6);
-    expect(v().speakers.right.base.x).toBeCloseTo(3.0, 6);
+    const centre = () => (v().speakers.left.base.x + v().speakers.right.base.x) / 2;
+    expect(centre()).toBeCloseTo(2.0, 6);
     ws.edit(setWidth(6));
-    expect(v().speakers.left.base.x).toBeCloseTo(2.0, 6);
+    expect(centre()).toBeCloseTo(3.0, 6);
+    expect(v().listener.ears.x).toBeCloseTo(3.0, 6);
+    const left = v().speakers.left.base.x;
     // Once placed by the user, the speakers stay where they are.
     ws.edit(
       (p) =>
@@ -173,16 +176,54 @@ describe('default placement', () => {
         }),
     );
     ws.edit(setWidth(8));
-    expect(v().speakers.left.base.x).toBeCloseTo(2.0, 6);
+    expect(v().speakers.left.base.x).toBeCloseTo(left, 6);
   });
 
-  it('forms an equilateral triangle and puts the axis at ear height', () => {
+  it('first guess: the seat at 38 % of the length, an equilateral triangle from the baffles', () => {
     const speaker = genericSpeaker();
+    const depth = speaker.dimensions.d.value!;
     const p = defaultPlacement({ W: 4, L: 5 }, speaker);
     const spacing = p.right.base.x - p.left.base.x;
-    const distance = Math.hypot(p.ears.x - p.left.base.x, p.ears.y - p.left.base.y);
-    expect(distance).toBeCloseTo(spacing, 6);
+    const baffle = p.left.base.y + depth / 2;
+    expect(p.ears.y).toBeCloseTo(0.38 * 5, 6);
+    expect(Math.hypot(p.ears.x - p.left.base.x, p.ears.y - baffle)).toBeCloseTo(spacing, 6);
+    expect(p.left.base.y - depth / 2).toBeCloseTo(FIRST_GUESS.rearGap, 6);
     expect(p.left.base.z + 0.2).toBeCloseTo(p.ears.z, 6);
+  });
+
+  it('first guess: the triangle wins when the room cannot hold both rules', () => {
+    const speaker = genericSpeaker();
+    const depth = speaker.dimensions.d.value!;
+    const triangle = (W: number, L: number) => {
+      const p = defaultPlacement({ W, L }, speaker);
+      const spacing = p.right.base.x - p.left.base.x;
+      const distance = Math.hypot(p.ears.x - p.left.base.x, p.ears.y - p.left.base.y - depth / 2);
+      return { p, spacing, distance };
+    };
+    // Short room: the pair keeps its minimum width, the seat moves back from 38 %.
+    const short = triangle(4, 3.5);
+    expect(short.spacing).toBeCloseTo(FIRST_GUESS.minSpacing, 6);
+    expect(short.distance).toBeCloseTo(short.spacing, 6);
+    expect(short.p.ears.y).toBeGreaterThan(0.38 * 3.5);
+    // Long, narrow room: the width limits the pair, the seat comes forward from 38 %.
+    const narrow = triangle(2.6, 9);
+    expect(narrow.spacing).toBeCloseTo(2.6 - 2 * FIRST_GUESS.sideClearance, 6);
+    expect(narrow.distance).toBeCloseTo(narrow.spacing, 6);
+    expect(narrow.p.ears.y).toBeLessThan(0.38 * 9);
+    // Never against the back wall, never behind the speakers, whatever the size.
+    for (const [W, L] of [
+      [1.5, 1.5],
+      [30, 30],
+      [2, 8],
+    ] as const) {
+      const { p } = triangle(W, L);
+      expect(p.ears.y).toBeLessThanOrEqual(
+        Math.max(L - FIRST_GUESS.backClearance, p.left.base.y + depth / 2 + 0.3) + 1e-9,
+      );
+      expect(p.ears.y).toBeGreaterThan(p.left.base.y);
+      expect(p.left.base.x).toBeGreaterThan(0);
+      expect(p.right.base.x).toBeLessThan(W);
+    }
   });
 
   it('does nothing while the room size is unknown', () => {

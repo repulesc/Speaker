@@ -44,15 +44,46 @@ export function speakerFromChoices(choices: SpeakerChoices = {}): SpeakerProfile
   };
 }
 
-/** Where a first-time project's speakers and seat go until the user places them. */
+/**
+ * The first guess (docs/ROADMAP_V10.md §2), until the user drags things where they really are:
+ * the seat at 38 % of the room's length (H01, a folk rule that keeps clear of the first two length
+ * resonances' nulls, P03) and the speakers and seat in an equilateral triangle (±30°, [ITU775]).
+ */
+export const FIRST_GUESS = {
+  /** The ears' distance from the front wall, as a share of the length. */
+  seatShare: 0.38,
+  /** Rear panel to the front wall (m). */
+  rearGap: 0.5,
+  /** Each speaker's centre to its side wall, at least (m). */
+  sideClearance: 0.6,
+  /** The narrowest pair the guess proposes (m). */
+  minSpacing: 1.0,
+  /** The ears to the back wall, at least (m). */
+  backClearance: 0.5,
+} as const;
+
+/**
+ * Where a first-time project's speakers and seat go. The triangle is measured from the front
+ * baffles (where the tweeters are). When the room cannot hold both rules, the triangle wins: the
+ * spacing stays within what the width allows and the seat moves with it.
+ */
 export function defaultPlacement(room: { W: number; L: number }, speaker: SpeakerProfile) {
   const depth = speaker.dimensions.d.value ?? DEFAULTS.speakerDepth;
   const axis = speaker.acousticAxisHeight.value ?? DEFAULTS.acousticAxisHeight;
   const earZ = DEFAULTS.earHeight;
-  const half = Math.max(0.5, Math.min(1.0, room.W / 2 - 0.6));
-  const y = 0.5 + depth / 2;
-  // Equilateral triangle: listening distance equals the speaker spacing.
-  const listenerY = Math.min(y + 2 * half * Math.sin(Math.PI / 3), room.L - 0.4);
+  const g = FIRST_GUESS;
+  const y = g.rearGap + depth / 2;
+  const baffle = y + depth / 2;
+  const height = Math.sin(Math.PI / 3); // the triangle's height per metre of spacing
+  const widest = Math.max(0.3, room.W - 2 * g.sideClearance);
+  const spacing = Math.min(
+    widest,
+    Math.max(g.minSpacing, (g.seatShare * room.L - baffle) / height),
+  );
+  const listenerY = Math.max(
+    baffle + 0.3,
+    Math.min(baffle + spacing * height, room.L - g.backClearance),
+  );
   const standZ = Math.max(0, earZ - axis);
   const speakerAt = (x: number) => ({
     base: { x, y, z: standZ },
@@ -60,8 +91,8 @@ export function defaultPlacement(room: { W: number; L: number }, speaker: Speake
     certainty: 'unknown' as Certainty,
   });
   return {
-    left: speakerAt(room.W / 2 - half),
-    right: speakerAt(room.W / 2 + half),
+    left: speakerAt(room.W / 2 - spacing / 2),
+    right: speakerAt(room.W / 2 + spacing / 2),
     ears: { x: room.W / 2, y: listenerY, z: earZ },
   };
 }

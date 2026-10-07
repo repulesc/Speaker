@@ -399,26 +399,34 @@ Rules for S-rules:
 - Each experiment changes **one** thing, by a stated amount, with the same three reference tracks, and asks for a rating. Results are logged per setup variant.
 - If the user's rating after a physics-backed change contradicts the physics (for example they prefer a position at a predicted null), the app records it and says so honestly. It doesn't argue, it doesn't change the model, and it notes that preference is valid.
 
-### Listening check L01–L07 (V8, replaces S01–S07 in the app)
+### Listening check L01–L11 (V8; V10: ten rows, read in context)
 
-Code: `src/engine/listening/`, tests `tests/engine/listening.test.ts`. The user answers on two-sided scales (bass thin / just right / boomy, and so on, `ASPECT_ANSWERS` in `check.ts`); each rule proposes **one change at a time**. Ears are the judge: the app offers to make a move and to put it back, and it records "better / the same / worse". It never changes the computed scores.
+Code: `src/engine/listening/`, tests `tests/engine/listening.test.ts`. The user answers on short scales (`ASPECT_ANSWERS` in `check.ts`), in four groups: Bass (how much, lowest notes, evenness), Tone (voices, treble), Stereo image (voice in the middle, width, depth, sweet spot), Room (echo). Each rule proposes **one change at a time**. Ears are the judge: the app offers to make a move and to put it back, and it records "better / the same / worse". It never changes the computed scores.
 
-- **Feasibility.** A move is offered only if it fits the room and the user's limits (`applyChange`: fixed speakers or seat, the seat range, how far the speakers may come into the room, minimum spacing, toe-in 0–35°, and `isValidPlacement`). Otherwise it is dropped.
-- **The model's second opinion.** For moves other than toe-in, the room model's score before and after is shown as "expects it to help / about the same / to be worse" (threshold 0.02 on the 0–1 score). Toe-in has no model view, because the model does not score it.
-- **Ordering.** Priority is a 🟡 ordering only: physics-backed moves first, then guidelines, then by-ear tries. At most two per aspect and five in all.
-- **Tuning is optional.** Tone controls, port plugs and similar are always worded "if your speakers or amplifier have …". Many speakers have none and need none (owner, V8).
+- **Feasibility.** A move is offered only if it fits the room and the user's limits (`applyChange`). Otherwise it is dropped.
+- **The model's second opinion.** For moves other than toe-in, the room model's score before and after ("expects it to help / about the same / to be worse", threshold 0.02). **(V10)** Withheld for every move when the room is "not a plain rectangle", and for bass moves when it is "open to another room": the box model cannot judge those.
+- **Context (V10).** Every rule reads the room page through `settingOf()` in `check.ts`: how full the room is, the floor material, the tone controls and wall switch ticked, the room's shape answers, what the speakers stand on, and listening at a desk. A ticked control is named directly ("Turn your treble control down a notch") and ranks above the room; unticked, it stays "if yours has one".
+- **Ordering.** Priority is a 🟡 ordering only. At most two per row.
 
 | ID | Answer | Experiments (condition) | Evidence | Sources |
 |---|---|---|---|---|
-| L01 | Bass boomy | Speakers 20 cm out (rear clearance < 0.6 m) · seat 20 cm forward (seat < 1 m from back wall) · speakers 10 cm inward each (side wall < 0.4 m) · port plugs (ported, rear or front port) · bass control down one step | 🔴 🔴 🔴 🟡 🟠 | [ALL74], [KUT], [manufacturer] |
-| L02 | Bass thin | Speakers up to 20 cm closer to the front wall, never nearer than 15 cm or the rear-port minimum (G07) · seat off the room's middle (within 0.3 m of it, or G01 fired) · small speakers stop early (f6 ≥ 60 Hz): says so · bass control up one step | 🔴 🔴 🔴 🟠 | [ALL74], [KUT], [manufacturer] |
-| L03 | Some notes boom or vanish | Seat 15 cm further from the room's middle · speakers 10 cm out | 🔴 | [KUT] |
-| L04 | Centre vague, or pulled left or right | Seat to the centre line (unequal distances, G05) · more toe-in (vague, toe-in < 25°) · tweeters at ear height (G08) · swap test (pulled with equal distances) | 🔴 🟣 🟠 🟣 | [WALL49], [TOOLE], [ITU1116] |
+| L01 | Bass boomy | Speakers 20 cm out (rear clearance < 0.6 m) · seat 20 cm forward (seat < 1 m from back wall) · speakers 10 cm inward each (side wall < 0.4 m) · **wall switch (ticked)** · port plugs (ported, rear or front port) · bass control down (named when ticked) · **something heavy and solid under them** (on a desk, on stands, or floor-standing on a wooden floor) | 🔴 🔴 🔴 🟠 🟡 🟠 🟡 | [ALL74], [KUT], [manufacturer], practice |
+| L02 | Bass thin | Speakers up to 20 cm closer to the front wall (never nearer than 15 cm or the rear-port minimum) · seat off the room's middle (within 0.3 m of it, or G01 caution: **V10 fix**, it used to fire on any G01 finding) · **close the door to the next room (open room)**: an opening absorbs like an open window · small speakers (f6 ≥ 60 Hz): says so · bass control up | 🔴 🔴 🔴 🔴 🟠 | [ALL74], [KUT], [SAB], [manufacturer] |
+| L03 | Bass notes uneven | Seat 15 cm further from the room's middle · speakers 10 cm out | 🔴 | [KUT] |
+| L04 | Centre vague, or pulled | Seat to the centre line (unequal distances) · **polarity: red to red, black to black** (vague; superposition: two equal signals of opposite sign cancel) · more toe-in (vague) · tweeters at ear height (G08) · **balance control** (pulled) · swap test (pulled) | 🔴 🔴 🟣 🟠 🟠 🟣 | [WALL49], [KUT], [TOOLE], [ITU1116], [manufacturer] |
 | L05 | Width narrow, or a hole in the middle | Wider or narrower pair (angle < 58° or > 62°) · sit closer or further back · less or more toe-in | 🟠 🟠 🟣 | [ITU775], [TOOLE] |
-| L06 | Treble bright or dull | Less or more toe-in · tweeters at ear height · soften a hard surface (bright, mid T60 > 0.45 s) · treble control one step | 🟣 🟠 🟠 🟠 | [TOOLE], [ITU1116], [EVP], [manufacturer] |
-| L07 | Clarity: a little echo, or echoey | Sit closer (nearer speaker > 1.4 m, P10) · soft things on hard surfaces (P08) | 🔴 🟠 | [KUT], [SAB], [EVP] |
+| L06 | Treble harsh (or S sounds hiss), or dull | Less or more toe-in · tweeters at ear height (dull) · **bare or partly furnished room** with mid T60 > 0.45 s: soft things where the sound first bounces, a rug only on a hard or undescribed floor (else the walls) · **busy room**: find the one hard, shiny surface near the path · treble control one step (named when ticked) | 🟣 🟠 🟠 🟠 🟠 | [TOOLE], [ITU1116], [EVP], [manufacturer] |
+| L07 | Echo: a little, or echoey | Sit closer (nearer speaker > 1.4 m, P10) · **clap test for flutter echo** between two bare parallel surfaces (first in a busy room) · **busy room**: a little more toe-in; **otherwise**: soft things on hard surfaces (rug only on a hard floor). Never cushions for a full room (owner's V10 case) | 🔴 🔴 🟣 🟠 | [KUT], [EVP], [TOOLE], [SAB] |
+| L08 | **Lowest notes missing** (V10) | Front-wall dip at the seat (P04) in 35–100 Hz: speakers to 0.3 m from the wall, so it rises out of the bass · seat off the middle · or a little further back (length resonances peak at the back wall; not against it, G02) · close the door (open room) · speakers with f6 ≥ 50 Hz: says so | 🔴 🔴 🔴 🔴 🔴 | [ALL74], [KUT], [SAB] |
+| L09 | **Voices muffled** (V10) | At a desk with G12's caution: speakers to the desk's front edge, tilted up · tweeters at ear height (G08) · fix a boomy bass first (upward spread of masking) · something solid under desk speakers · sit closer (nearer speaker > 2.2 m, P10) | 🔴 🟠 🟠 🟡 🔴 | [KUT], [ITU1116], [TOOLE], [FAS07], practice |
+| L10 | **Depth flat** (V10) | 20 cm more space behind the speakers (clearance < 0.8 m) · 5° less toe-in (toe-in ≥ 10°) · clear big hard objects from between them. All by ear: depth is mostly in the recording, and no study we can cite sizes these | 🟣 🟣 🟣 | practice |
+| L11 | **Sweet spot tiny** (V10) | Toe-in so the aims cross 0.5 m in front of the ears (computed from the plan; offered when it needs ≥ 3° more and ≤ 35°): time–intensity trading, needs a speaker that is quieter off axis · sit 30 cm further back (a step sideways changes the two distances less; the stage narrows) | 🟡 🔴 | practice, [TOOLE], [WALL49] |
 
 The distances (20 cm, 10 cm, one control step) are typical first steps, 🟡: small enough to hear as one change and large enough to hear at all.
+
+**Stand coupling (V10 call).** The owner suggested checking stand coupling for a room that rings or sounds harsh. Furniture vibrating with a speaker colours the bass and lower midrange (a resonant panel radiating along); it does not make a room ring. So it is offered for boomy bass (L01) and muffled voices (L09), not for echo.
+
+**Test sounds (V10).** `src/app/listen/sounds.ts`: left, right and centre pink noise, a polarity check (A in phase, B with the right channel inverted: A should sound fuller and centred, superposition, 🔴 [KUT]) and a 35–180 Hz bass sweep (the room's resonances at the seat, P02/P03 🔴). Signals for the ears, not measurements: nothing is recorded. Quiet (about −20 dBFS), with fades, low-passed noise, nothing below 35 Hz, one at a time.
 
 ---
 
@@ -484,5 +492,7 @@ Object values are ranges. The engine uses the midpoint and propagates the range 
 | [PRA] | pyroomacoustics 0.10.1, `materials.json` (absorption database), MIT licence, from PyPI. A compilation of published tables. | ✓ used to cross-check Appendix A (R5) |
 | [DWELL] | Surveys of furnished dwellings, as summarised in the introduction of *Applied Sciences* 11(6), 2709 (2021): Bradley (602 Canadian homes, about 0.4 s, 100–4000 Hz), Burgess et al. (47 living rooms, 0.33 s at 500 Hz), Jackson et al. (50 living rooms, 0.51 s at 1 kHz), Parkin et al. (about 0.5 s). | ✓ secondary summary (R5); originals not checked |
 | [WELTI06] | Welti, T. & Devantier, A. "Low-Frequency Optimization Using Multiple Subwoofers." *J. Audio Eng. Soc.* 54(5), 2006. | not used in v1 |
+| [FAS07] | Fastl, H. & Zwicker, E. *Psychoacoustics: Facts and Models*, 3rd ed. Springer, 2007. | ✓ book (V10): upward spread of masking (loud low sounds mask higher ones). Chapter not checked; no number in the engine depends on it |
+| practice | Widely used by ear, with no study we can cite. Used only for 🟡 or 🟣 listening experiments, never scored, and always said as "by ear". | pseudo-source (V10) |
 | [manufacturer] | The speaker's or amplifier's own manual: port plugs, bass and treble controls. Used only as "if yours has one". | generic; nothing is claimed about a specific product |
 | [CARDAS] | Cardas Audio, speaker placement guide (web page). | not used: H03 is not implemented (its numbers stay unverified) |

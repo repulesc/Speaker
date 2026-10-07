@@ -3,8 +3,11 @@ import type { ListeningRule, Suggestion } from './check';
 /**
  * L01 · The bass is boomy. A wall close behind a speaker (or beside it, or a corner) raises the
  * bass it radiates: boundary gain ([ALL74], [KUT]), 🔴. A seat close to the back wall sits where
- * every length resonance is loudest (P03, G02), 🔴. A port plug or a bass control is the maker's
- * remedy ([manufacturer]), only if the speaker has one. Distances are typical first steps (🟡).
+ * every length resonance is loudest (P03, G02), 🔴. The maker's own remedies come next: the wall
+ * switch, a port plug, the bass control ([manufacturer]); a control the user ticked is named
+ * directly and comes first (V10). Furniture under the speakers can boom along with them
+ * (structure-borne vibration of a hollow panel: a desk, a light stand, a suspended wooden floor);
+ * how much varies too widely to promise, so it is 🟡 practice. Distances are typical first steps.
  */
 export const L01: ListeningRule = {
   id: 'L01',
@@ -12,6 +15,7 @@ export const L01: ListeningRule = {
   suggest(ctx, _p, m, answers) {
     if (answers.bass !== 'boomy') return [];
     const s = ctx.speaker;
+    const { controls, placedOn, woodFloor } = m.setting;
     const out: Suggestion[] = [];
     if (m.clearance < 0.6) {
       out.push({
@@ -43,6 +47,15 @@ export const L01: ListeningRule = {
         params: { by: 0.1 },
       });
     }
+    if (controls.wall) {
+      out.push({
+        id: 'L01.wallSwitch',
+        level: 'guideline',
+        sources: ['manufacturer'],
+        priority: 0.7,
+        params: {},
+      });
+    }
     if (s.enclosure === 'ported' && (s.portLocation === 'rear' || s.portLocation === 'front')) {
       out.push({
         id: 'L01.plug',
@@ -52,13 +65,34 @@ export const L01: ListeningRule = {
         params: {},
       });
     }
-    out.push({
-      id: 'L01.control',
-      level: 'guideline',
-      sources: ['manufacturer'],
-      priority: 0.35,
-      params: {},
-    });
+    out.push(
+      controls.bass
+        ? {
+            id: 'L01.controlKnown',
+            level: 'guideline',
+            sources: ['manufacturer'],
+            priority: 0.55,
+            params: {},
+          }
+        : {
+            id: 'L01.control',
+            level: 'guideline',
+            sources: ['manufacturer'],
+            priority: 0.35,
+            params: {},
+          },
+    );
+    const base =
+      placedOn === 'desk'
+        ? 'L01.onDesk'
+        : placedOn === 'stand'
+          ? 'L01.onStand'
+          : woodFloor
+            ? 'L01.onFloor'
+            : null;
+    if (base) {
+      out.push({ id: base, level: 'heuristic', sources: ['practice'], priority: 0.4, params: {} });
+    }
     return out;
   },
 };

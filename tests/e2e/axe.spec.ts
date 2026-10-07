@@ -44,7 +44,7 @@ for (const scheme of ['light', 'dark'] as const) {
 test('Hungarian', async ({ page }) => {
   await openApp(page);
   await openMenu(page);
-  await page.getByRole('radio', { name: 'HU' }).check({ force: true });
+  await page.getByRole('radio', { name: 'Magyar' }).check({ force: true });
   await page.keyboard.press('Escape');
   await expectAccessible(page);
 });
@@ -94,7 +94,7 @@ test('Place, its details, Listen with experiments, and the bass-note explorer', 
   await openSection(page, 'Improve the room');
   await expectAccessible(page);
   await openSection(page, 'Listening check');
-  const bass = page.getByRole('group', { name: 'Bass', exact: true });
+  const bass = page.getByRole('group', { name: 'How much', exact: true });
   await bass.getByRole('button', { name: 'Boomy' }).click();
   await page.getByTestId('experiment').first().waitFor();
   await expectAccessible(page); // answers and the experiments

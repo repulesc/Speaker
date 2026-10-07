@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { LayerId } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
-  import { formatLength } from '../../units/format';
+  import { formatFrequency, formatLength } from '../../units/format';
   import { scoreLabel, scoreWord } from '../findings/text';
   import { visibleAdvice } from '../findings/visible';
   import {
@@ -16,11 +16,19 @@
   import { fitFrame, toPx, toWorld } from '../plan/frame';
   import {
     cabinet,
+    confirmPlacement,
+    isFirstGuess,
+    clamp,
     moveSeat,
     moveSpeaker,
     setSpeakerClearance,
     setSpeakerSpacing,
+    setToeIn,
   } from '../plan/placement';
+  import { aims, wallDip } from '../plan/aim';
+  import { FIRST_GUESS } from '../state/defaults';
+  import { DEFAULTS } from '../../engine/presets/defaults';
+  import { speedOfSound } from '../../engine/rules/P01-speed-of-sound';
   import { analysis, workspace } from '../session.svelte';
   import { preview } from '../state/preview.svelte';
   import { probe } from '../state/probe.svelte';
@@ -85,6 +93,84 @@
       : null,
   );
   const selected = $derived(ui.selection);
+
+  // ── The speakers' aim and the wall behind them (docs/ROADMAP_V10.md §7) ───
+
+  /** Where each speaker points and where the two aims cross, relative to the seat. */
+  const aim = $derived(
+    variant && seat && speakers.length === 2
+      ? aims(variant.speakers, cab.d, seat.ears, { W, L })
+      : null,
+  );
+  /** The speaker being handled: its aim handle, the crossing and its wall dip are shown. */
+  const handled = $derived(selected.kind === 'speaker' && variant && seat ? selected.side : null);
+  /**
+   * While a speaker or the seat is in hand: the toe-in and where the aims cross, and the front-wall
+   * dip heard at the seat (P04), live as things move.
+   */
+  const readout = $derived.by(() => {
+    const side = handled ?? (selected.kind === 'seat' ? 'left' : null);
+    if (!side || !variant || !seat || !aim || field) return null;
+    const b = variant.speakers[side].base;
+    const height = project.speaker.wooferCentreHeight.value ?? DEFAULTS.wooferCentreHeight;
+    const dip = wallDip(
+      { x: b.x, y: b.y + cab.d / 2, z: b.z + height },
+      seat.ears,
+      speedOfSound(20),
+    );
+    return {
+      aim: i18n.t('map.aim', {
+        deg: `${variant.speakers[side].toeInDeg}°`,
+        where: i18n.t(`map.cross.${aim.where}`),
+      }),
+      dip: Number.isFinite(dip.hz)
+        ? i18n.t('map.dip', {
+            f: formatFrequency(dip.hz, locale),
+            band: i18n.t(`map.band.${dip.band}`),
+          })
+        : null,
+    };
+  });
+  /** The aim handle: on the speaker's axis, a finger's reach in front of the cabinet. */
+  const HANDLE_PX = 46;
+  const TOE_MAX = 40;
+  let rotations = 0;
+  /** A turn ends with a click on the floor (the pointer has left the handle): not a deselect. */
+  let turned = false;
+  function rotate(event: PointerEvent, side: 'left' | 'right') {
+    if (event.button !== 0 && event.pointerType === 'mouse') return;
+    event.preventDefault();
+    event.stopPropagation();
+    const gesture = `toe-${++rotations}`;
+    const onMove = (e: PointerEvent) => {
+      const b = variant!.speakers[side].base;
+      const w = world(e.clientX, e.clientY);
+      const across = (w.a - b.x) * (side === 'left' ? 1 : -1);
+      const along = w.b - b.y;
+      if (along < 0.02) return; // behind the cabinet: no aim to read
+      const deg = clamp(Math.round((Math.atan2(across, along) * 180) / Math.PI), 0, TOE_MAX);
+      turned = true;
+      workspace.edit((p) => setToeIn(p, deg), { coalesce: gesture });
+    };
+    const stop = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+      // The click that follows comes before this runs; later clicks count again.
+      setTimeout(() => (turned = false));
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+  }
+  function rotateKey(event: KeyboardEvent) {
+    const step = event.shiftKey ? 5 : 1;
+    const by = { ArrowRight: step, ArrowUp: step, ArrowLeft: -step, ArrowDown: -step }[event.key];
+    if (by === undefined || !variant) return;
+    event.preventDefault();
+    const next = clamp(variant.speakers.left.toeInDeg + by, 0, TOE_MAX);
+    workspace.edit((p) => setToeIn(p, next), { coalesce: 'toe-key' });
+  }
 
   // ── Map layers, best spots, probe ────────────────────────────────────────
 
@@ -188,6 +274,14 @@
   });
 
   const showHeat = $derived(known && layers !== null);
+  /**
+   * The first guess (docs/ROADMAP_V10.md §2): say so, and invite a drag. Gone once everything has
+   * been moved, or at "Looks right".
+   */
+  const guessing = $derived(known && !ui.survey && isFirstGuess(project));
+  const share = $derived(
+    new Intl.NumberFormat(locale, { style: 'percent' }).format(FIRST_GUESS.seatShare),
+  );
   /** The speaker zone, drawn around speakers the user has placed, when they may move. */
   const zoneRadius = $derived.by(() => {
     const zone = project.constraints.speakerZone;
@@ -211,7 +305,8 @@
   }
 
   function onFloorClick(event: MouseEvent) {
-    if (!known || (event.target as Element).closest('.item, .pin')) return;
+    if (turned) return;
+    if (!known || (event.target as Element).closest('.item, .pin, .handle')) return;
     const w = world(event.clientX, event.clientY);
     if (w.a >= 0 && w.a <= W && w.b >= 0 && w.b <= L) probe.pin(w.a, w.b);
     else probe.clear();
@@ -528,6 +623,24 @@
           {/each}
         {/if}
 
+        {#if aim && seat && !field}
+          <!-- Where the speakers point, and where their aims cross (docs/ROADMAP_V10.md §7). -->
+          <g class="aims" aria-hidden="true">
+            {#each aim.beams as beam (beam.side)}
+              <line
+                class="beam"
+                x1={px(beam.from.x)}
+                y1={py(beam.from.y)}
+                x2={px(beam.to.x)}
+                y2={py(beam.to.y)}
+              />
+            {/each}
+            {#if aim.cross && aim.cross.y <= seat.ears.y + 0.4}
+              <circle class="cross" cx={px(aim.cross.x)} cy={py(aim.cross.y)} r="4" />
+            {/if}
+          </g>
+        {/if}
+
         {#each speakers as s (s.side)}
           {@const isSelected = selected.kind === 'speaker' && selected.side === s.side}
           {@const angle = (s.side === 'left' ? -1 : 1) * s.p.toeInDeg}
@@ -560,9 +673,8 @@
                 ),
               )}
           >
-            <!-- Top-down cabinet; the light bar is the front (baffle), the dashed line its aim. -->
+            <!-- Top-down cabinet; the light bar is the front (baffle). Its aim is drawn above. -->
             <g transform="rotate({angle})">
-              <line class="axis" x1="0" y1={d / 2} x2="0" y2={d / 2 + 26} />
               <rect
                 class="body cabinet"
                 class:default={s.isDefault}
@@ -636,6 +748,37 @@
             <!-- The listener faces the front wall (the speakers). -->
             <path class="facing" d="M -4.5 2 L 0 -3 L 4.5 2" />
           </g>
+        {/if}
+
+        {#if handled && variant && !field}
+          <!-- Turn the speakers by their aim: both turn, mirrored (a slider for keyboards). -->
+          {@const p = variant.speakers[handled]}
+          {@const t = ((handled === 'left' ? 1 : -1) * p.toeInDeg * Math.PI) / 180}
+          {@const reach = (cab.d * frame.scale) / 2}
+          {@const cx = px(p.base.x)}
+          {@const cy = py(p.base.y)}
+          <line
+            class="handle-stem"
+            x1={cx + Math.sin(t) * reach}
+            y1={cy + Math.cos(t) * reach}
+            x2={cx + Math.sin(t) * (reach + HANDLE_PX)}
+            y2={cy + Math.cos(t) * (reach + HANDLE_PX)}
+          />
+          <circle
+            class="handle"
+            role="slider"
+            tabindex="0"
+            aria-label={i18n.t('map.toeIn')}
+            aria-valuemin="0"
+            aria-valuemax={TOE_MAX}
+            aria-valuenow={p.toeInDeg}
+            aria-valuetext="{p.toeInDeg}°"
+            cx={cx + Math.sin(t) * (reach + HANDLE_PX)}
+            cy={cy + Math.cos(t) * (reach + HANDLE_PX)}
+            r="9"
+            onpointerdown={(e) => rotate(e, handled)}
+            onkeydown={rotateKey}
+          />
         {/if}
 
         {#if ui.before && !field}
@@ -866,6 +1009,34 @@
         onclose={() => probe.clear()}
       />
     {/if}
+    {#if readout && seat}
+      <div
+        class="readout"
+        data-testid="aim-readout"
+        style="left:{px(seat.ears.x)}px; top:{py(seat.ears.y) + 46}px"
+      >
+        <p>{readout.aim}</p>
+        {#if readout.dip}<p>{readout.dip}</p>{/if}
+      </div>
+    {/if}
+    {#if guessing}
+      <div
+        class="guess"
+        role="status"
+        data-testid="first-guess"
+        style="left:{px(W / 2)}px; top:{py(L * 0.8)}px; max-width:{Math.max(
+          240,
+          Math.min(420, W * frame.scale - 16),
+        )}px"
+      >
+        <p>{i18n.t(viewport.compact ? 'guess.short' : 'guess.note', { share })}</p>
+        <button
+          type="button"
+          class="btn small primary"
+          onclick={() => workspace.edit((p) => confirmPlacement(p))}>{i18n.t('guess.ok')}</button
+        >
+      </div>
+    {/if}
     {#if !known}
       <p class="placeholder-text">{i18n.t('plan.placeholder')}</p>
     {/if}
@@ -921,6 +1092,81 @@
   .walls.placeholder {
     stroke: var(--grid-strong);
     stroke-dasharray: 10 6;
+  }
+  /* Where the speakers point: thin accent lines, and a ring where they cross. */
+  .beam {
+    stroke: var(--accent-fill);
+    stroke-width: 1.25;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .cross {
+    fill: none;
+    stroke: var(--accent-fill);
+    stroke-width: 1.5;
+    pointer-events: none;
+  }
+  .handle-stem {
+    stroke: var(--accent-fill);
+    stroke-width: 1.5;
+    pointer-events: none;
+  }
+  .handle {
+    fill: var(--surface);
+    stroke: var(--accent-fill);
+    stroke-width: 2;
+    cursor: grab;
+    touch-action: none;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25));
+  }
+  .handle:active {
+    cursor: grabbing;
+  }
+  .handle:focus-visible {
+    outline: none;
+    stroke-width: 3;
+  }
+  /* The live reading under the seat while something is in hand. */
+  .readout {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    gap: 2px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.22);
+    color: var(--ink);
+    font-size: var(--text-xs);
+    line-height: 1.35;
+    text-align: center;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  /* The first-guess note: a quiet card in the back of the room, away from the speakers and seat. */
+  .guess {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 14px;
+    width: max-content;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--card-shadow);
+    color: var(--ink);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    text-align: center;
+    transform: translate(-50%, -50%);
+  }
+  .guess p {
+    flex: 1 1 220px;
+    margin: 0;
   }
   .legend-slot {
     position: absolute;
@@ -1145,13 +1391,15 @@
     flex-wrap: wrap;
     gap: 8px;
   }
-  .spot .small {
+  .spot .small,
+  .guess .small {
     min-height: 36px;
     padding: 0 12px;
     font-size: var(--text-sm);
   }
   @media (pointer: coarse) {
-    .spot .small {
+    .spot .small,
+    .guess .small {
       min-height: 44px;
     }
   }
@@ -1204,12 +1452,6 @@
   .body.default,
   .seat.default {
     stroke-dasharray: 3 3;
-  }
-  .axis {
-    stroke: var(--ink-muted);
-    stroke-width: 1;
-    stroke-dasharray: 2 3;
-    opacity: 0.7;
   }
   .seat {
     fill: var(--surface);

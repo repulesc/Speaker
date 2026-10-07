@@ -3,9 +3,12 @@ import type { ListeningRule, Suggestion } from './check';
 /**
  * L04 · Voices in the middle are vague, or pulled to one side. A phantom centre needs both
  * speakers at the same distance: a few centimetres move it (precedence, [WALL49]; G05), 🔴 for the
- * geometry. Turning the speakers towards you often firms it up; how much is a matter of the speaker
- * and the room, so it is "by ear" ([TOOLE]), 🟣. Ears below or above the tweeters blur it too (G08,
- * [ITU1116]). Pulled to one side with equal distances: the swap test tells room from equipment.
+ * geometry. One speaker wired + to − (reversed polarity) blurs the centre and thins the bass: two
+ * equal signals of opposite sign cancel wherever their paths are nearly equal (superposition,
+ * [KUT]), 🔴; the test sounds have a check (V10). Turning the speakers towards you often firms the
+ * centre up; how much is a matter of the speaker and the room, so it is "by ear" ([TOOLE]), 🟣.
+ * Ears below or above the tweeters blur it too (G08, [ITU1116]). Pulled to one side with equal
+ * distances: the balance control first, then the swap test tells room from equipment.
  */
 export const L04: ListeningRule = {
   id: 'L04',
@@ -27,6 +30,13 @@ export const L04: ListeningRule = {
       });
     }
     if (c === 'vague') {
+      out.push({
+        id: 'L04.polarity',
+        level: 'physics',
+        sources: ['KUT'],
+        priority: 0.7,
+        params: {},
+      });
       if (m.toeIn < 25) {
         out.push({
           id: 'L04.toeIn',
@@ -49,13 +59,22 @@ export const L04: ListeningRule = {
         });
       }
     } else if (!unequal) {
-      out.push({
-        id: 'L04.swap',
-        level: 'subjective',
-        sources: ['TOOLE'],
-        priority: 0.7,
-        params: {},
-      });
+      out.push(
+        {
+          id: 'L04.balance',
+          level: 'guideline',
+          sources: ['manufacturer'],
+          priority: 0.75,
+          params: {},
+        },
+        {
+          id: 'L04.swap',
+          level: 'subjective',
+          sources: ['TOOLE'],
+          priority: 0.7,
+          params: {},
+        },
+      );
     }
     return out;
   },

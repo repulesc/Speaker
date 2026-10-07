@@ -53,10 +53,11 @@ test('earlier versions stay reachable from the menu, each with its own storage',
   page,
 }) => {
   await page.goto('/legacy/');
-  await expect(page.getByRole('link', { name: /^V8/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: /^V7/ })).toBeVisible();
-  await page.getByRole('link', { name: /^V8/ }).click();
-  await expect(page).toHaveTitle(/V8 \(previous version\)/);
+  for (const v of ['V9', 'V8', 'V7']) {
+    await expect(page.getByRole('link', { name: new RegExp(`^${v}`) })).toBeVisible();
+  }
+  await page.getByRole('link', { name: /^V9/ }).click();
+  await expect(page).toHaveTitle(/V9 \(previous version\)/);
   await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
   const keys = await page.evaluate(() => Object.keys(localStorage));
   expect(keys.every((k) => !k.startsWith('spa:'))).toBe(true);

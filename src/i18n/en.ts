@@ -39,9 +39,6 @@ export const en = {
     new: 'New project',
     duplicate: 'Duplicate',
     rename: 'Rename',
-    renameLabel: 'Project name',
-    renameHint: 'Click to rename',
-    renameButton: 'Rename “{name}”',
     delete: 'Delete',
     deleteConfirm: 'Delete “{name}”? This cannot be undone.',
     saved: 'Saved on this device',
@@ -50,10 +47,17 @@ export const en = {
     failed: 'Could not save: storage may be full. Share a link to keep your work.',
   },
   menu: {
+    label: 'Menu',
+    close: 'Close the menu',
+    room: 'This room',
+    name: 'Name',
+    namePlaceholder: 'For example: living room',
+    nameHelp: 'Optional. It shows at the top once you give one.',
+    prefs: 'Preferences',
+    more: 'More',
     legacy: 'Previous versions',
     image: 'Share as image',
-    label: 'Menu',
-    support: 'Support Nodo ☕',
+    support: 'Support {app} ☕',
     undo: 'Undo',
     redo: 'Redo',
     share: 'Share link',
@@ -154,7 +158,7 @@ export const en = {
       shape: {
         'open-plan-connection': 'Open to another room',
         'non-rectangular': 'Not a plain rectangle (L-shape, sloped ceiling)',
-        help: 'The model assumes a closed rectangular box: either of these makes its bass less certain.',
+        help: 'The model assumes a closed rectangular box: either of these makes its bass less certain, and the listening check adjusts its advice.',
       },
     },
     speakers: {
@@ -320,9 +324,6 @@ export const en = {
       seatSide: 'Seat. {front} from the front wall, ears {height} above the floor. {hint}',
     },
   },
-  settings: {
-    label: 'Settings',
-  },
   survey: {
     start: 'Start',
     welcome: {
@@ -330,7 +331,7 @@ export const en = {
       body: 'Answer a few quick questions about your room, and we show you where to put your speakers and where to sit, before anything else.',
       free: 'Free, with no sign-up and no email.',
       private: 'Your room stays on this device.',
-      short: 'Four short questions, about a minute.',
+      short: 'Three short questions, under a minute.',
     },
     step: '{n} of {total}',
     skip: 'Skip',
@@ -352,11 +353,11 @@ export const en = {
       title: 'Tell us about your speakers',
       help: 'Answer what you know. “Not sure” is a fine answer.',
     },
-    where: {
-      title: 'Where are things now?',
-      help: 'Rough is fine. You can drag everything on the map later.',
-      both: 'Nothing to measure: we look for the best spot for both.',
-    },
+  },
+  guess: {
+    note: 'We’ve placed a first suggestion: your seat {share} into the room, the speakers in an equilateral triangle with it. Drag them on the map to match your room.',
+    short: 'A first guess. Drag the speakers and the seat to where they really are.',
+    ok: 'Looks right',
   },
   suggest: {
     title: 'Best placement',
@@ -430,27 +431,77 @@ export const en = {
     title: 'How does it sound?',
     intro:
       'Play a song you know well and listen from your seat for a minute or two. Then say what you hear. Not sure? Leave it.',
+    group: { bass: 'Bass', tone: 'Tone', image: 'Stereo image', room: 'Room' },
     aspect: {
-      bass: { label: 'Bass', thin: 'Thin', right: 'Just right', boomy: 'Boomy' },
-      evenness: { label: 'Bass notes', even: 'Even', uneven: 'Some boom or vanish' },
+      bass: { label: 'How much', thin: 'Thin', right: 'Just right', boomy: 'Boomy' },
+      low: {
+        label: 'Lowest notes',
+        there: 'There',
+        missing: 'Missing: no organ pedals, no deep synth bass',
+      },
+      evenness: { label: 'Evenness', even: 'Even', uneven: 'Some boom or vanish' },
+      voices: { label: 'Voices', clear: 'Clear', muffled: 'Muffled, boxy or far away' },
+      treble: {
+        label: 'Treble',
+        dull: 'Dull',
+        right: 'Just right',
+        bright: 'Harsh, or S sounds hiss',
+      },
       centre: {
-        label: 'Voices in the middle',
+        label: 'Voice in the middle',
         vague: 'Vague',
-        focused: 'Focused',
+        focused: 'Firm',
         left: 'Pulled left',
         right: 'Pulled right',
       },
       width: { label: 'Width', narrow: 'Narrow', right: 'Just right', wide: 'Hole in the middle' },
-      treble: { label: 'Treble', dull: 'Dull', right: 'Just right', bright: 'Bright, harsh' },
-      clarity: { label: 'Clarity', clear: 'Clear', some: 'A little echo', echoey: 'Echoey' },
+      depth: { label: 'Depth', deep: 'Layered, front to back', flat: 'Flat, all in one line' },
+      spot: { label: 'Sweet spot', wide: 'Wide enough', small: 'Only one spot sounds right' },
+      clarity: { label: 'Echo', clear: 'Clear', some: 'A little echo', echoey: 'Echoey' },
     },
     short: {
       bass: { thin: 'Thin', right: 'OK', boomy: 'Boomy' },
+      low: { there: 'There', missing: 'Missing' },
       evenness: { even: 'Even', uneven: 'Uneven' },
+      voices: { clear: 'Clear', muffled: 'Muffled' },
+      treble: { dull: 'Dull', right: 'OK', bright: 'Harsh' },
       centre: { vague: 'Vague', focused: 'Firm', left: '◂ Left', right: 'Right ▸' },
       width: { narrow: 'Narrow', right: 'OK', wide: 'Hole' },
-      treble: { dull: 'Dull', right: 'OK', bright: 'Harsh' },
+      depth: { deep: 'Deep', flat: 'Flat' },
+      spot: { wide: 'Wide', small: 'Tiny' },
       clarity: { clear: 'Clear', some: 'Some echo', echoey: 'Echoey' },
+    },
+    sounds: {
+      title: 'Test sounds',
+      hint: 'Left, right, centre, polarity and a bass sweep, through your speakers',
+      safety:
+        'Turn the volume down first, then up to a normal level. This device has to play through your speakers. Nothing is recorded.',
+      phase: 'Now: {phase}',
+      left: {
+        name: 'Left',
+        listen:
+          'It should come from the left speaker alone. From the right? The channels are swapped.',
+      },
+      right: {
+        name: 'Right',
+        listen:
+          'It should come from the right speaker alone. From the left? The channels are swapped.',
+      },
+      centre: {
+        name: 'Centre',
+        listen:
+          'Both speakers, the same sound: it should sit as one narrow point in the middle. Vague or off to one side? Answer the Voice in the middle row.',
+      },
+      polarity: {
+        name: 'Polarity',
+        listen:
+          'A, then B with one side flipped. A should sound fuller and more centred. If B does, one speaker is wired + to −: swap its two wires.',
+      },
+      sweep: {
+        name: 'Bass sweep',
+        listen:
+          'A slow tone from 35 to 180 Hz. Notes that jump out or drop away are the room’s resonances: answer the Evenness row.',
+      },
     },
     fixesFor: 'What to try for: {aspect}',
     confidence: {
@@ -480,14 +531,21 @@ export const en = {
         out: 'Move both speakers {by} further from the wall behind them.',
         seatForward: 'Sit {by} further forward, away from the back wall.',
         inward: 'Move each speaker {by} away from its side wall.',
+        wallSwitch: 'Set the speakers’ wall switch to match how close they stand to the wall.',
         plug: 'If your speakers came with foam plugs for the bass port, try them in.',
         control: 'If your speakers or amplifier have a bass control, turn it down one step.',
+        controlKnown: 'Turn your bass control down a notch (about 2 dB).',
+        onDesk: 'Put something heavy and solid under each speaker, or try them on stands.',
+        onStand: 'If the stands are light or hollow, try heavier ones, or fill them.',
+        onFloor: 'Give the speakers firm footing on the wooden floor: spikes, or a heavy base.',
       },
       L02: {
         closer: 'Move both speakers {by} closer to the wall behind them.',
         seatOffMiddle: 'Move your seat {by} away from the middle of the room.',
+        door: 'If the opening to the next room has a door, close it and listen again.',
         small: 'Small speakers stop early in the bass: that is their size, not your room.',
         control: 'If your speakers or amplifier have a bass control, turn it up one step.',
+        controlKnown: 'Turn your bass control up a notch (about 2 dB).',
       },
       L03: {
         seatStep: 'Move your seat {by}, listen to the same song, then try {by} the other way.',
@@ -495,8 +553,10 @@ export const en = {
       },
       L04: {
         centreSeat: 'Move your seat {by} sideways, to the middle between the speakers.',
+        polarity: 'Check the wiring: red to red and black to black, on both speakers.',
         toeIn: 'Turn both speakers {by} more towards you.',
         height: 'Bring the tweeters to the height of your ears.',
+        balance: 'Check that the amplifier’s balance control sits in the middle.',
         swap: 'Swap the left and right cables at the amplifier.',
       },
       L05: {
@@ -511,13 +571,48 @@ export const en = {
         lessToeIn: 'Turn the speakers {by} less towards you.',
         moreToeIn: 'Turn the speakers {by} more towards you.',
         height: 'Bring the tweeters to the height of your ears.',
-        soften: 'Put something soft on a hard surface: a rug, a throw, curtains.',
+        soften:
+          'Put something soft where the sound first bounces: a rug between you and the speakers, curtains.',
+        softenWalls: 'Put something soft on the bare walls beside you: curtains, a wall hanging.',
+        surface:
+          'Look for one hard, shiny surface near the sound’s path: a glass table, a bare desk top, a window. Move it, angle it, or cover it.',
         trebleDown: 'If your speakers or amplifier have a treble control, turn it down one step.',
         trebleUp: 'If your speakers or amplifier have a treble control, turn it up one step.',
+        trebleDownKnown: 'Turn your treble control down a notch (about 1 dB).',
+        trebleUpKnown: 'Turn your treble control up a notch (about 1 dB).',
       },
       L07: {
         sitCloser: 'Sit {by} closer to the speakers.',
+        flutter:
+          'Clap once where you sit. A fast, ringing “zing” after it is flutter echo: put one thing on one of the two bare walls it rings between.',
+        toeIn: 'Turn the speakers {by} more towards you.',
         soften: 'Put soft things on hard surfaces: a rug, curtains, cushions.',
+        softenWalls: 'Put soft things on the bare walls and windows: curtains, a wall hanging.',
+      },
+      L08: {
+        dip: 'Move both speakers {by} closer to the wall behind them.',
+        seatOffMiddle: 'Move your seat {by} away from the middle of the room.',
+        seatBack: 'Sit {by} further back, but not right against the wall.',
+        door: 'If the opening to the next room has a door, close it and listen again.',
+        small: 'Your speakers reach down to about {hz}: the lowest notes are below what they play.',
+      },
+      L09: {
+        desk: 'Bring the speakers to the front edge of the desk and tilt them up towards your ears.',
+        height: 'Bring the tweeters to the height of your ears.',
+        bassFirst: 'Tame the boomy bass first (see Bass above).',
+        onDesk: 'Put something heavy and solid under each speaker, or try them on stands.',
+        closer: 'Sit {by} closer to the speakers.',
+      },
+      L10: {
+        out: 'Move both speakers {by} further from the wall behind them.',
+        lessToeIn: 'Turn the speakers {by} less towards you.',
+        clear:
+          'Clear big, hard things from between the speakers (a TV is the usual one), or move them back.',
+      },
+      L11: {
+        crossFront:
+          'Turn the speakers {by} more towards you, so their aims cross just in front of you.',
+        sitBack: 'Sit {by} further back.',
       },
     },
     why: {
@@ -525,14 +620,25 @@ export const en = {
         out: 'A wall close behind a speaker adds bass; a little more space takes some of it away.',
         seatForward: 'Right against the back wall, every bass resonance is at its loudest.',
         inward: 'A side wall or a corner close by adds bass too.',
+        wallSwitch:
+          'You said your speakers have one: it trims exactly the bass a nearby wall adds. The manual says which setting is which.',
         plug: 'Makers include them for exactly this: boomy bass near a wall. Not every speaker has them.',
         control: 'A small step is enough. Listen for a while before you decide.',
+        controlKnown:
+          'You said your speakers or amplifier have one. A small step is enough; listen for a while.',
+        onDesk: 'A hollow desk can boom along with the speakers. How much varies a lot: listen.',
+        onStand: 'A light stand can ring along with the speaker. How much varies a lot: listen.',
+        onFloor:
+          'A wooden floor can boom along with floor-standing speakers. How much varies a lot: listen.',
       },
       L02: {
         closer: 'A wall behind a speaker adds bass. The bass port keeps the space it needs.',
         seatOffMiddle: 'Halfway down a room, the deepest bass notes cancel out.',
+        door: 'An opening lets bass out like an open window. If closing it fills the bass out, that was it.',
         small: 'Closer to the wall gives a little back; beyond that it is the speaker’s limit.',
         control: 'Go easy: more bass also asks more of small speakers.',
+        controlKnown:
+          'You said your speakers or amplifier have one. Go easy: more bass asks more of small speakers.',
       },
       L03: {
         seatStep:
@@ -541,9 +647,12 @@ export const en = {
       },
       L04: {
         centreSeat: 'The nearer speaker pulls the voice towards it; a few centimetres are enough.',
+        polarity:
+          'One speaker wired the other way round cancels the middle and the bass. The polarity check in Test sounds tells you in ten seconds.',
         toeIn:
           'Pointing them at you often firms up the centre. It depends on the speaker: trust your ears.',
         height: 'A stand, a few books under the speakers, or a slight tilt towards you.',
+        balance: 'The simplest cause of a voice off to one side.',
         swap: 'If the voice moves to the other side, the cause is the source or the amplifier. If not, swap the speakers: if it follows a speaker, it is that speaker; if neither, it is the room.',
       },
       L05: {
@@ -560,13 +669,57 @@ export const en = {
         lessToeIn: 'Most speakers are a little softer in the treble away from straight ahead.',
         moreToeIn: 'Most speakers are brightest straight ahead.',
         height: 'The treble is clearest when the tweeters point at your ears.',
-        soften: 'Bare floors and walls make a room bright; soft things calm it. Use what you have.',
+        soften:
+          'Bare floors and walls make a room bright; soft things where the sound first bounces calm it. Use what you have.',
+        softenWalls:
+          'Your floor is already soft; the bare walls are what is left. Use what you have.',
+        surface:
+          'Your room is already full of soft things, so it is not short of them. A single hard surface close to the path sends the treble straight back at you.',
         trebleDown: 'A small step. Listen for a few days before you decide.',
         trebleUp: 'A small step. Listen for a few days before you decide.',
+        trebleDownKnown:
+          'You said your speakers or amplifier have one. A small step; listen for a few days.',
+        trebleUpKnown:
+          'You said your speakers or amplifier have one. A small step; listen for a few days.',
       },
       L07: {
         sitCloser: 'Closer, you hear more of the speakers and less of the room’s echo.',
+        flutter:
+          'A full room that still rings is rarely short of cushions: sound is bouncing back and forth between two bare, parallel surfaces. One thing on one of them breaks it.',
+        toeIn:
+          'Less of their sound reaches the side walls first. It depends on the speaker: trust your ears.',
         soften: 'They shorten the room’s echo. Use what you already have.',
+        softenWalls: 'They shorten the room’s echo. Your floor is already soft.',
+      },
+      L08: {
+        dip: 'The wall behind them sends back a copy that cancels around {hz}, right in the deep bass. Close to the wall, the dip rises out of the bass and the wall adds weight instead.',
+        seatOffMiddle: 'Halfway down a room, the lowest notes cancel out.',
+        seatBack:
+          'Every length resonance is loudest at the back wall, so the lowest notes grow as you sit further back.',
+        door: 'An opening lets the lowest notes out like an open window.',
+        small: 'That is their size, not your room. Closer to the wall gives a little back.',
+      },
+      L09: {
+        desk: 'The desk top reflects the voice range into your ears just after the direct sound, and the two partly cancel. At the front edge, the reflection misses the desk.',
+        height: 'Voices are clearest when the tweeters point at your ears.',
+        bassFirst:
+          'Too much bass covers the lower part of voices: fix that and voices often come back on their own.',
+        onDesk:
+          'A hollow desk resonates along and adds a boxy colour. How much varies a lot: listen.',
+        closer: 'Far from the speakers, more of the voice arrives late, from the room.',
+      },
+      L10: {
+        out: 'Space behind the speakers often helps the stage open up in depth. By ear: no study we can cite says how much.',
+        lessToeIn:
+          'A little more of the room’s sound can add depth. It depends on the speaker: trust your ears.',
+        clear:
+          'Big objects between and near the speakers reflect sound early and flatten the image. Most depth is in the recording itself.',
+      },
+      L11: {
+        crossFront:
+          'Lean towards one speaker and you also move off its aim, so it gets quieter as it gets closer, and the voice stays in the middle. Works best with speakers that are quieter off axis: listen.',
+        sitBack:
+          'Further back, a step to the side changes the two distances less. The stage gets a little narrower.',
       },
     },
   },
@@ -603,8 +756,19 @@ export const en = {
     done: 'Done',
   },
   map: {
+    toeIn: 'Toe-in',
+    aim: 'Toe-in {deg}: {where}',
+    cross: {
+      front: 'the aims cross in front of you',
+      at: 'the aims cross at you',
+      behind: 'the aims cross behind you',
+      parallel: 'the speakers point straight ahead',
+    },
+    dip: 'Front-wall dip here: {f}, {band}',
+    band: { deep: 'deep bass', upper: 'upper bass', above: 'above the bass' },
     dimmed: 'Advised against',
-    bestHere: 'Best here: {word}',
+    bestPlacement: 'Best placement: {word}',
+    bestSeat: 'Best seat: {word}',
     withScore: '{word} · {score}',
     absolute: 'Absolute scale',
     hidePanel: 'Hide the side panel',
@@ -1242,21 +1406,21 @@ export const en = {
   },
   nav: {
     bass: 'Bass at your seat',
-    notSet: 'Not set',
   },
   sheet: {
     expand: 'Show more',
     collapse: 'Show less',
   },
   about: {
-    title: 'About',
-    body: 'This app uses established room acoustics to suggest speaker and seat positions, and tells you how sure it is. It is guidance, not a guarantee.',
-    knowsTitle: 'What the model knows, and what it cannot',
+    title: 'About {app}',
+    lead: 'A starting point grounded in physics, so you spend the evening listening instead of guessing.',
+    knowsTitle: 'What a box can tell you',
     knows:
-      'It treats your room as a closed rectangular box with the materials you chose and the furnishing you described. From that it computes the room’s resonances, the sound bouncing off the walls next to the speakers, the reflections reaching your seat and the stereo geometry.',
-    cannot:
-      'It cannot see how widely your speakers spread sound, your actual furniture, your desk, doors and openings, or what a microphone at your seat would show. Its numbers are estimates with ranges, not a measurement. Use it to find a good starting point; the last few centimetres are for your ears.',
-    sources: 'Every rule and its sources are documented in the project’s rule catalogue.',
-    support: 'Support this project ☕ (opens in a new tab)',
+      'Treating your room as a rectangular box, {app} predicts the big, slow things: the room’s bass resonances, the dips from sound bouncing back off the walls near your speakers, the first reflections that reach your seat, and the stereo triangle between you and your speakers.',
+    earsTitle: 'What needs your ears',
+    ears: 'A plan can’t hear how your speakers spread their sound, how a sofa or a bookcase scatters it, or how unevenly your room soaks it up. A measurement microphone can show those; your ears can judge them.',
+    judge:
+      'Every room is different. Let {app} get you close, then move one thing at a time, play music you know by heart, and trust what you hear.',
+    sources: 'Every rule, with its formula and sources, is in the project’s rule catalogue.',
   },
 } as const;

@@ -73,7 +73,7 @@ test.describe('with a room', () => {
     await page.keyboard.press('Shift+ArrowDown');
     expect(await seatDistance(page)).toBeCloseTo(original + 0.2, 2);
 
-    await page.locator('h2').first().click(); // leave the drawing so the shortcut acts on the project
+    await page.locator('#panel .mast').click(); // leave the drawing so the shortcut acts on the project
     await page.keyboard.press('Control+z');
     expect(await seatDistance(page)).toBeCloseTo(original, 2); // both moves were one undo step
     await page.keyboard.press('Control+Shift+z');
@@ -95,7 +95,7 @@ test.describe('with a room', () => {
     const after = await seatDistance(page);
     expect(after).toBeGreaterThan(before + 0.15);
 
-    await page.locator('h2').first().click();
+    await page.locator('#panel .mast').click();
     await page.keyboard.press('Control+z');
     expect(await seatDistance(page)).toBeCloseTo(before, 2);
   });

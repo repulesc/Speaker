@@ -7,6 +7,7 @@ import {
   openApp,
   openMenu,
   openSection,
+  openStep,
   openSettings,
   openWhy,
   savedProject,
@@ -22,6 +23,8 @@ async function withResults(page: Page) {
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Results');
   await expect(page.getByTestId('suggestion')).toBeVisible();
+  // The first guess stands for the user's room (V10): confirm it, as a user would.
+  await page.getByTestId('first-guess').getByRole('button', { name: 'Looks right' }).click();
 }
 
 test('the map shows a heatmap, layers that say what they mean, and a legend', async ({ page }) => {
@@ -38,7 +41,12 @@ test('the map shows a heatmap, layers that say what they mean, and a legend', as
   await expect(page.getByText('Physics', { exact: false }).first()).toBeVisible();
   await expect(page.getByText('Poorer')).toBeVisible();
   await reasons.getByRole('button', { name: 'Bass holes' }).click(); // back to the seat map
-  await expect(page.getByTestId('best-here')).toHaveText(/^Best here: (Poor|Fair|Good|Very good)$/);
+  // The legend names what it rates: the best seat here, the best placement on the speaker map.
+  await expect(page.getByTestId('best-here')).toHaveText(/^Best seat: (Poor|Fair|Good|Very good)$/);
+  await mapChoice(page, 'Speakers').check({ force: true });
+  await expect(page.getByTestId('best-here')).toHaveText(
+    /^Best placement: (Poor|Fair|Good|Very good)$/,
+  );
 });
 
 test('the side view stays hidden until asked for', async ({ page }) => {
@@ -168,7 +176,7 @@ test('on the speaker map, a click offers to move the speakers there', async ({ p
   const box = (await plan.boundingBox())!;
   const before = (await savedProject(page)).variants[0].speakers.left.base;
   // Upper left of the room, where the left speaker could stand.
-  await page.mouse.click(box.x + box.width * 0.33, box.y + box.height * 0.3);
+  await page.mouse.click(box.x + box.width * 0.33, box.y + box.height * 0.22);
   const card = page.getByRole('region', { name: 'Speakers here' });
   await expect(card).toContainText(/Speakers here: (Poor|Fair|Good|Very good)/);
   await card.getByRole('button', { name: 'Move the speakers here' }).click();
@@ -206,7 +214,7 @@ test('click a number on the map to type an exact value', async ({ page }) => {
 test('Hungarian: findings and the map speak Hungarian, with no keys leaking', async ({ page }) => {
   await withResults(page);
   await openMenu(page);
-  await page.getByRole('radio', { name: 'HU' }).check({ force: true });
+  await page.getByRole('radio', { name: 'Magyar' }).check({ force: true });
   await page.keyboard.press('Escape');
   await openTab(page, 'Why');
   await expect(page.getByLabel('Térképréteg')).toBeVisible();
@@ -281,7 +289,7 @@ test('the listening check turns what you hear into one change to try, and can pu
   await expect(page.getByRole('heading', { name: 'How does it sound?' })).toBeVisible();
   await expect(page.getByTestId('experiment')).toHaveCount(0);
 
-  const bass = page.getByRole('group', { name: 'Bass', exact: true });
+  const bass = page.getByRole('group', { name: 'How much', exact: true });
   await bass.getByRole('button', { name: 'Boomy' }).click();
   await expect(bass.getByRole('button', { name: 'Boomy' })).toHaveAttribute('aria-pressed', 'true');
   const first = page.getByTestId('experiment').first();
@@ -304,7 +312,7 @@ test('the listening check turns what you hear into one change to try, and can pu
   }
   // The fixes sit right under the answer they belong to.
   const row = page.locator('[aria-labelledby="aspect-bass"]');
-  const fixes = page.getByRole('list', { name: 'What to try for: Bass' });
+  const fixes = page.getByRole('list', { name: 'What to try for: Bass, how much' });
   expect(
     await row.evaluate(
       (r, f) => r.compareDocumentPosition(f!) & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -361,4 +369,42 @@ test('share as image: the menu saves a picture of the room and the answer', asyn
   const path = await download.path();
   const { size } = await import('node:fs').then((fs) => fs.statSync(path));
   expect(size).toBeGreaterThan(20_000); // a real picture, not an empty canvas
+});
+
+test('the listening check reads the room: a full room that rings gets the clap test, not cushions', async ({
+  page,
+}) => {
+  await withResults(page);
+  await openStep(page, 'setup');
+  await page.getByRole('radio', { name: 'Very busy' }).check({ force: true });
+  await openSection(page, 'Listening check');
+  await page
+    .getByRole('group', { name: 'Echo', exact: true })
+    .getByRole('button', { name: 'Echoey' })
+    .click();
+  const fixes = page.getByRole('list', { name: 'What to try for: Room, echo' });
+  await expect(fixes).toContainText('Clap once');
+  await expect(fixes).not.toContainText('a rug, curtains');
+  // Test sounds are there to help answer, folded until asked for.
+  await page.getByText('Test sounds').click();
+  await expect(page.getByRole('button', { name: 'Polarity' })).toBeVisible();
+});
+
+test('turn the speakers on the map: the aims, a slider for keyboards, the wall dip at the seat', async ({
+  page,
+}) => {
+  await withResults(page);
+  await page.locator('g.item.speaker').first().focus();
+  const handle = page.getByRole('slider', { name: 'Toe-in' });
+  await expect(handle).toHaveAttribute('aria-valuenow', '0');
+  const readout = page.getByTestId('aim-readout');
+  await expect(readout).toContainText('point straight ahead');
+  await expect(readout).toContainText(/Front-wall dip here: \d+\s?Hz/);
+  await handle.focus();
+  await page.keyboard.press('Shift+ArrowRight');
+  await page.keyboard.press('Shift+ArrowRight');
+  await expect(handle).toHaveAttribute('aria-valuenow', '10');
+  await expect(readout).toContainText('Toe-in 10°');
+  const saved = await savedProject(page);
+  expect(saved.variants[0].speakers.right.toeInDeg).toBe(10);
 });

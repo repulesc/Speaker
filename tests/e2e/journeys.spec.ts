@@ -33,7 +33,7 @@ test('journey 4 — units: switch to imperial, type feet and inches, stored in m
 }) => {
   await fillRoom(page, '4', '5', '2.5');
   await openMenu(page);
-  await page.getByRole('radio', { name: 'ft' }).check({ force: true });
+  await page.getByRole('radio', { name: /^Imperial/ }).check({ force: true });
   await page.keyboard.press('Escape');
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('13′\u00a01½″');
 
@@ -64,12 +64,12 @@ test('units: bad input is explained, out-of-range is rejected, unusual is allowe
 
 test('journey 5 — language: Hungarian shows no English UI text', async ({ page }) => {
   await openMenu(page);
-  await page.getByRole('radio', { name: 'HU' }).check({ force: true });
+  await page.getByRole('radio', { name: 'Magyar' }).check({ force: true });
   await page.keyboard.press('Escape');
   await expect(page.locator('html')).toHaveAttribute('lang', 'hu');
   await expect(page.getByRole('heading', { name: 'Szoba', exact: true })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Beállítások' }).click();
+  await page.getByRole('button', { name: 'Menü', exact: true }).click();
   const text = await page.locator('body').innerText();
   const leaks = messageKeys(MESSAGES.en)
     .map((key) => ({ key, en: translate('en', key), hu: translate('hu', key) }))
@@ -118,7 +118,7 @@ test('a crafted share link is refused, and the app still works after a reload', 
   await page.goto('/' + (await encodeShare(project)));
   await expect(page.getByRole('alert')).toContainText('could not be read');
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Settings' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Menu', exact: true })).toBeVisible();
   expect(errors).toEqual([]);
   await context.close();
 });
@@ -165,7 +165,7 @@ test('journey 10 — keyboard only: skip to the panel, type, and open the result
 
 test('undo and redo with the keyboard', async ({ page }) => {
   await fillRoom(page, '4', '5', '2.5');
-  await page.locator('h2').first().click(); // leave the input so shortcuts act on the project
+  await page.locator('#panel .mast').click(); // leave the input so shortcuts act on the project
   await page.keyboard.press('Control+z');
   await expect(page.getByLabel('Ceiling height')).toHaveValue('');
   await page.keyboard.press('Control+Shift+z');
@@ -180,30 +180,41 @@ test('confidence meter explains what would improve things', async ({ page }) => 
   await expect(page.getByText(/Tell us more about/)).toBeVisible();
 });
 
-test('the room: rename it where it is shown, start over with an empty one', async ({ page }) => {
-  const header = page.locator('#panel header');
+test('the room: no name until you give one in the menu, start over with an empty one', async ({
+  page,
+}) => {
+  const header = page.locator('#panel .mast');
   await fillRoom(page, '4', '5', '2.5');
-  // The name is renamed where it is shown (V8): click it, type, Enter.
-  await page.getByRole('button', { name: /^Rename “/ }).click();
-  await page.getByLabel('Project name').fill('Living room');
-  await page.getByLabel('Project name').press('Enter');
+  // V10: the header holds no size and no "Untitled room"; a name shows only once given.
+  await expect(header).not.toContainText('Untitled room');
+  await expect(header).not.toContainText('×');
+  await openMenu(page);
+  const drawer = page.getByRole('dialog', { name: 'Menu' });
+  await drawer.getByLabel('Name').fill('Living room');
+  await drawer.getByLabel('Name').press('Enter');
+  await drawer.getByRole('button', { name: 'Close the menu' }).click();
+  await expect(drawer).toBeHidden();
   await expect(header).toContainText('Living room');
 
   // One room (V9): no project list; starting over replaces it after asking.
   page.once('dialog', (d) => void d.accept());
   await openMenu(page);
-  await expect(page.getByRole('button', { name: 'Living room', exact: true })).toHaveCount(0);
+  await expect(page.getByText('Rooms on this device')).toHaveCount(0);
   await page.getByRole('button', { name: 'Start over' }).click();
-  await expect(page.getByRole('dialog')).toBeVisible(); // the first-run survey again
+  await expect(
+    page
+      .getByRole('dialog', { name: 'How big is your room?' })
+      .or(page.getByRole('dialog', { name: /Where should your speakers go/ })),
+  ).toBeVisible(); // the first-run survey again
   await page.getByRole('button', { name: 'Start', exact: true }).click();
   await expect(page.getByLabel('Width', { exact: true })).toHaveValue('');
   await page.getByRole('button', { name: 'Skip' }).click();
-  await expect(header).toContainText('Untitled room');
-  await openMenu(page);
-  await expect(page.getByText('Rooms on this device')).toHaveCount(0);
+  await expect(header).not.toContainText('Living room');
 });
 
-test('first run: the survey asks four questions, then shows the answer', async ({ page }) => {
+test('first run: three questions, no tape measure, then a first guess to drag', async ({
+  page,
+}) => {
   await page.goto('/');
   const survey = page.getByRole('dialog');
   // The welcome says what this is, that it is free, and lets you pick the language.
@@ -213,7 +224,7 @@ test('first run: the survey asks four questions, then shows the answer', async (
   await expect(survey).toContainText('Ingyenes');
   await survey.getByRole('radio', { name: 'EN' }).check({ force: true });
   await survey.getByRole('button', { name: 'Start' }).click();
-  await expect(survey).toContainText('1 of 4');
+  await expect(survey).toContainText('1 of 3');
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled(); // a room size first
   await fillRoom(page, '4.2', '5.5', '2.6', 'Where to put my speakers');
   // fillRoom skips after the goal; start again to walk all four screens.
@@ -233,22 +244,52 @@ test('first run: the survey asks four questions, then shows the answer', async (
   await page.getByLabel('How big?').selectOption('large');
   await page.getByLabel('Bass port').selectOption('sealed');
   await expect(page.getByLabel('What kind of speakers?')).toHaveValue('monitor');
-  await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByLabel('Seat to the front wall').fill('3.2');
-  await page.getByLabel('Between the speakers', { exact: true }).fill('1.8');
-  await page.getByLabel('Between the speakers', { exact: true }).blur();
   await page.getByRole('button', { name: 'Show me' }).click();
   await expect(survey).toHaveCount(0);
+  // No distances asked: a first guess (seat at 38 % of the length), said on the map.
+  const guess = page.getByTestId('first-guess');
+  await expect(guess).toContainText('first suggestion');
 
   const project = await savedProject(page);
   expect(project.constraints.listenerFixed).toBe(true);
   expect(project.constraints.speakersFixed).toBe(false);
-  expect(project.variants[0].listener.ears.y).toBeCloseTo(3.2, 6);
+  expect(project.variants[0].listener.ears.y).toBeCloseTo(0.38 * 5.5, 6);
+  expect(project.variants[0].listener.certainty).toBe('unknown');
   expect(project.speaker.choices).toEqual({ kind: 'monitor', size: 'large', port: 'sealed' });
   expect(project.speaker.enclosure.value).toBe('sealed');
   expect(project.speaker.dimensions.h).toEqual({ value: 0.4, certainty: 'estimated' });
   await expect(page.getByTestId('suggestion')).toContainText('Stays where it is');
   await expect(mapChoice(page, 'Speakers')).toBeChecked(); // the map follows the goal
+  // "Looks right" makes the guess the user's own placement; the note goes.
+  await guess.getByRole('button', { name: 'Looks right' }).click();
+  await expect(guess).toHaveCount(0);
+  const placed = await savedProject(page);
+  expect(placed.variants[0].listener.certainty).toBe('estimated');
+  expect(placed.variants[0].speakers.left.certainty).toBe('estimated');
+});
+
+test('the menu is a drawer over the panel: preferences, sharing, about', async ({ page }) => {
+  await fillRoom(page, '4', '5', '2.5');
+  await openMenu(page);
+  const drawer = page.locator('#menu-drawer');
+  await expect(drawer).toBeVisible();
+  const panel = (await page.locator('#panel').boundingBox())!;
+  await expect.poll(async () => (await drawer.boundingBox())!.x).toBe(0); // after the slide-in
+  expect(Math.abs((await drawer.boundingBox())!.width - panel.width)).toBeLessThan(2);
+  await drawer.getByRole('radio', { name: 'Magyar' }).check({ force: true });
+  await expect(drawer).toContainText('Beállítások');
+  await drawer.getByRole('radio', { name: 'English' }).check({ force: true });
+  await page.keyboard.press('Escape');
+  await expect(drawer).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Menu', exact: true })).toBeFocused();
+  await openMenu(page);
+  await drawer.getByRole('button', { name: 'About and sources' }).click();
+  const about = page.getByRole('dialog', { name: 'About Nodo' });
+  await expect(about).toBeVisible();
+  await expect(about).toContainText('What needs your ears');
+  await expect(about.getByRole('link')).toHaveCount(0); // no support link, no "new tab"
+  await about.getByRole('button', { name: 'Close' }).click();
+  await expect(about).toBeHidden();
 });
 
 test('the support link stays in view under the map and opens in a new tab', async ({ page }) => {
