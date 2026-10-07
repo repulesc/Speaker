@@ -55,7 +55,11 @@ export async function savedProject(page: Page) {
 }
 
 export async function openMenu(page: Page) {
-  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  // The drawer slides in: wait until it has arrived (colours are checked on the finished frame).
+  await page
+    .locator('#menu-drawer')
+    .evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
 }
 
 /** One of the panel's three steps (docs/ROADMAP_V8.md): Set up, Place, Listen. */

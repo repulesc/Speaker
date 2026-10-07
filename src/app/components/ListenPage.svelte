@@ -1,23 +1,26 @@
 <script lang="ts">
   import {
     ASPECT_ANSWERS,
-    ASPECTS,
+    ASPECT_GROUPS,
     aspectOf,
+    FINE,
     type Aspect,
     type Experiment,
     type ListeningAnswers,
   } from '../../engine/listening';
   import { i18n } from '../../i18n/locale.svelte';
-  import { formatLength } from '../../units/format';
+  import { formatFrequency, formatLength } from '../../units/format';
   import { pendingTry, putBack, setAnswer, setTryResult, tryExperiment } from '../listen/check';
   import { analysis, showNotice, workspace } from '../session.svelte';
   import PlacementOptions from './PlacementOptions.svelte';
+  import TestSounds from './TestSounds.svelte';
   import TreatPanel from './TreatPanel.svelte';
 
   /**
-   * 03 Listening check (docs/ROADMAP_V9.md §5): one row per aspect of the sound, and the fixes for
-   * a complaint right under it, free moves first, then the speaker's own controls (only "if yours
-   * has one"), then the room. Each says how sure it is; the ears decide.
+   * 03 Listening check (docs/ROADMAP_V9.md §5, V10 §3): ten rows in four groups, test sounds to
+   * help you answer, and the fixes for a complaint right under it: free moves first, then the
+   * speaker's own controls, then the room, each fitted to what the room page says. Each says how
+   * sure it is; the ears decide.
    */
   const project = $derived(workspace.project);
   const check = $derived(project.listening);
@@ -28,7 +31,6 @@
   const pendingAspect = $derived(pending ? aspectOf(pending.experiment) : undefined);
   const tried = $derived((check?.tries ?? []).slice().reverse());
 
-  const FINE = ['right', 'even', 'focused', 'clear'];
   /** The order on screen: the "fine" answer sits where it reads naturally on each scale. */
   const ORDER: { [A in Aspect]: readonly NonNullable<ListeningAnswers[A]>[] } = {
     ...ASPECT_ANSWERS,
@@ -37,7 +39,7 @@
   };
   const complaint = (aspect: Aspect) => {
     const a = answers[aspect];
-    return a !== undefined && !FINE.includes(a);
+    return a !== undefined && a !== FINE[aspect];
   };
   const fixesFor = (aspect: Aspect) => experiments.filter((e) => e.aspect === aspect);
 
@@ -47,8 +49,13 @@
     if (e.change?.kind === 'toeIn') return `${by}°`;
     return formatLength(by, project.units, 'position', i18n.locale);
   }
-  const doText = (e: Experiment) => i18n.t(`listen.exp.${e.id}`, { by: amount(e) });
-  const whyText = (e: Experiment) => i18n.t(`listen.why.${e.id}`, { by: amount(e) });
+  /** The numbers a sentence may use: the step, and a frequency (V10, L08). */
+  const values = (e: Experiment) => ({
+    by: amount(e),
+    hz: e.params.hz === undefined ? '' : formatFrequency(Number(e.params.hz), i18n.locale),
+  });
+  const doText = (e: Experiment) => i18n.t(`listen.exp.${e.id}`, values(e));
+  const whyText = (e: Experiment) => i18n.t(`listen.why.${e.id}`, values(e));
   /** A tried change's sentence, from what was kept with it (the list may have moved on). */
   const triedText = (t: { experiment: string; by?: number; degrees?: boolean }) =>
     i18n.t(`listen.exp.${t.experiment}`, {
@@ -90,61 +97,70 @@
     <h2 id="listen-title">{i18n.t('listen.title')}</h2>
     <p class="help">{i18n.t('listen.intro')}</p>
 
+    <TestSounds />
+
     <div class="matrix">
-      {#each ASPECTS as aspect (aspect)}
-        <div
-          class="row"
-          class:wide={ORDER[aspect].length > 3}
-          role="group"
-          aria-labelledby="aspect-{aspect}"
-        >
-          <span class="label" id="aspect-{aspect}">{i18n.t(`listen.aspect.${aspect}.label`)}</span>
-          <div class="scale">
-            {#each ORDER[aspect] as value (value)}
-              <button
-                type="button"
-                class="option"
-                class:fine={FINE.includes(value)}
-                aria-pressed={answers[aspect] === value}
-                title={i18n.t(`listen.aspect.${aspect}.${value}`)}
-                onclick={() => answer(aspect, value as never)}
-                >{i18n.t(`listen.short.${aspect}.${value}`)}</button
-              >
-            {/each}
-          </div>
-        </div>
-        {#if pendingAspect === aspect}{@render howWasIt()}{/if}
-        {#if complaint(aspect)}
-          {@const fixes = fixesFor(aspect)}
-          {#if fixes.length}
-            <ol
-              class="fixes"
-              aria-label={i18n.t('listen.fixesFor', {
-                aspect: i18n.t(`listen.aspect.${aspect}.label`),
-              })}
+      {#each ASPECT_GROUPS as group (group.id)}
+        <p class="group" id="listen-group-{group.id}">{i18n.t(`listen.group.${group.id}`)}</p>
+        {#each group.aspects as aspect (aspect)}
+          <div
+            class="row"
+            class:wide={ORDER[aspect].length > 3}
+            role="group"
+            aria-labelledby="aspect-{aspect}"
+          >
+            <span class="label" id="aspect-{aspect}">{i18n.t(`listen.aspect.${aspect}.label`)}</span
             >
-              {#each fixes as e (e.id)}
-                <li class="fix" data-testid="experiment">
-                  <p class="do">{doText(e)}</p>
-                  <p class="why">{whyText(e)}</p>
-                  <div class="meta">
-                    <span class="conf {e.level}">{i18n.t(`listen.confidence.${e.level}`)}</span>
-                    {#if e.model}<span class="model">{i18n.t(`listen.model.${e.model}`)}</span>{/if}
-                    <button
-                      type="button"
-                      class="btn quiet try"
-                      disabled={pending !== null}
-                      onclick={() => attempt(e)}
-                      >{i18n.t(e.change ? 'listen.tryIt' : 'listen.tried')}</button
-                    >
-                  </div>
-                </li>
+            <div class="scale">
+              {#each ORDER[aspect] as value (value)}
+                <button
+                  type="button"
+                  class="option"
+                  class:fine={value === FINE[aspect]}
+                  aria-pressed={answers[aspect] === value}
+                  title={i18n.t(`listen.aspect.${aspect}.${value}`)}
+                  onclick={() => answer(aspect, value as never)}
+                  >{i18n.t(`listen.short.${aspect}.${value}`)}</button
+                >
               {/each}
-            </ol>
-          {:else}
-            <p class="help nothing">{i18n.t('listen.nothing')}</p>
+            </div>
+          </div>
+          {#if pendingAspect === aspect}{@render howWasIt()}{/if}
+          {#if complaint(aspect)}
+            {@const fixes = fixesFor(aspect)}
+            {#if fixes.length}
+              <ol
+                class="fixes"
+                aria-label={i18n.t('listen.fixesFor', {
+                  aspect: `${i18n.t(`listen.group.${group.id}`)}, ${i18n
+                    .t(`listen.aspect.${aspect}.label`)
+                    .toLowerCase()}`,
+                })}
+              >
+                {#each fixes as e (e.id)}
+                  <li class="fix" data-testid="experiment">
+                    <p class="do">{doText(e)}</p>
+                    <p class="why">{whyText(e)}</p>
+                    <div class="meta">
+                      <span class="conf {e.level}">{i18n.t(`listen.confidence.${e.level}`)}</span>
+                      {#if e.model}<span class="model">{i18n.t(`listen.model.${e.model}`)}</span
+                        >{/if}
+                      <button
+                        type="button"
+                        class="btn quiet try"
+                        disabled={pending !== null}
+                        onclick={() => attempt(e)}
+                        >{i18n.t(e.change ? 'listen.tryIt' : 'listen.tried')}</button
+                      >
+                    </div>
+                  </li>
+                {/each}
+              </ol>
+            {:else}
+              <p class="help nothing">{i18n.t('listen.nothing')}</p>
+            {/if}
           {/if}
-        {/if}
+        {/each}
       {/each}
     </div>
     {#if pending && pendingAspect === undefined}{@render howWasIt()}{/if}
@@ -200,8 +216,16 @@
   /* The matrix: aspect on the left, a compact scale on the right; fixes open under their row. */
   .matrix {
     display: grid;
-    border-top: 1px solid var(--grid);
   }
+  /* A group caption, then its rows between rules. */
+  .group {
+    padding: 14px 0 6px;
+    border-bottom: 1px solid var(--grid);
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
   .row {
     display: grid;
     grid-template-columns: minmax(0, 4fr) minmax(0, 9fr);

@@ -51,7 +51,7 @@ test('the sidebar keeps to one type scale on every page', async ({ page }) => {
   ];
   for (const open of pages) {
     await open();
-    await expect(page.locator('#panel h2').first()).toBeVisible();
+    await expect(page.locator('#step-panel h2').first()).toBeVisible();
     const sizes = await panelSizes(page);
     expect(Object.keys(sizes).length).toBeGreaterThan(1); // the walk found text
     const off = Object.entries(sizes).filter(([size]) => !SCALE.includes(parseFloat(size)));
@@ -86,15 +86,15 @@ test('no sidebar page runs out of its panel, in English or Hungarian', async ({ 
       await goHome(page);
       await openSection(page, section);
       if (lang === 'HU') {
-        await page.getByRole('button', { name: 'Settings' }).click();
-        await page.getByRole('radio', { name: 'HU', exact: true }).check({ force: true });
+        await page.getByRole('button', { name: 'Menu', exact: true }).click();
+        await page.getByRole('radio', { name: 'Magyar', exact: true }).check({ force: true });
         await page.keyboard.press('Escape');
       }
       const result = await overflow();
       expect(result, `${lang}: ${section}`).toEqual({ scroll: 0, wide: [] });
       if (lang === 'HU') {
-        await page.getByRole('button', { name: 'Beállítások' }).click();
-        await page.getByRole('radio', { name: 'EN', exact: true }).check({ force: true });
+        await page.getByRole('button', { name: 'Menü', exact: true }).click();
+        await page.getByRole('radio', { name: 'English', exact: true }).check({ force: true });
         await page.keyboard.press('Escape');
       }
     }
@@ -106,12 +106,9 @@ test('with the numbers shown, in Hungarian, nothing reaches into the panel paddi
 }) => {
   await openApp(page);
   await fillRoom(page, '4.2', '5.8', '2.6');
-  await page.getByRole('button', { name: 'Settings' }).click();
-  await page.getByRole('radio', { name: 'HU', exact: true }).check({ force: true });
-  await page
-    .getByRole('radiogroup', { name: 'Számok mutatása' })
-    .getByRole('radio', { name: 'Be' })
-    .check({ force: true });
+  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  await page.getByRole('radio', { name: 'Magyar', exact: true }).check({ force: true });
+  await page.getByRole('checkbox', { name: 'Számok mutatása' }).check({ force: true });
   await page.keyboard.press('Escape');
   await goHome(page);
   await expect(page.getByTestId('suggestion')).toBeVisible();

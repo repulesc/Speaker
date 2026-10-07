@@ -36,8 +36,11 @@
 <div class="legend">
   <div class="line">
     {#if best !== null}
+      <!-- What is rated, in the result card's words (docs/ROADMAP_V10.md §5). -->
       <p class="best" data-testid="best-here">
-        {i18n.t('map.bestHere', { word: scoreLabel(best, prefs.numbers) })}
+        {i18n.t(none === 'notStereo' ? 'map.bestPlacement' : 'map.bestSeat', {
+          word: scoreLabel(best, prefs.numbers),
+        })}
       </p>
     {/if}
     <div class="scale" aria-hidden="true">

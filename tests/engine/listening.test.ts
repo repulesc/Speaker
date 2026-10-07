@@ -5,6 +5,8 @@ import { buildContext, currentPlacement } from '../../src/engine/context';
 import {
   applyChange,
   ASPECT_ANSWERS,
+  ASPECTS,
+  FINE,
   listeningExperiments,
   listeningMessageKeys,
   type ListeningAnswers,
@@ -65,12 +67,15 @@ describe('the listening check', () => {
     );
   });
 
-  it('a voice pulled to one side: centre the seat when it is off-centre, else the swap test', () => {
+  it('a voice pulled to one side: centre the seat when it is off-centre, else balance, then the swap test', () => {
     const off = makeProject();
     off.variants[0]!.listener.ears.x += 0.15;
     const a = tryFor(off, { centre: 'left' }).list;
     expect(a[0]!.id).toBe('L04.centreSeat');
-    expect(ids(tryFor(makeProject(), { centre: 'left' }).list)).toEqual(['L04.swap']);
+    expect(ids(tryFor(makeProject(), { centre: 'left' }).list)).toEqual([
+      'L04.balance',
+      'L04.swap',
+    ]);
   });
 
   it('a narrow stage: wider apart or sit closer, but only when the angle really is narrow', () => {
@@ -113,10 +118,14 @@ describe('the listening check', () => {
           clearance: fc.double({ min: 0.1, max: 1, noNaN: true }),
           answers: fc.record({
             bass: answer('bass'),
+            low: answer('low'),
             evenness: answer('evenness'),
+            voices: answer('voices'),
+            treble: answer('treble'),
             centre: answer('centre'),
             width: answer('width'),
-            treble: answer('treble'),
+            depth: answer('depth'),
+            spot: answer('spot'),
             clarity: answer('clarity'),
           }),
         }),
@@ -145,6 +154,123 @@ describe('the listening check', () => {
     );
   });
 
+  it('every answer that is not fine has at least one thing to try in the reference room', () => {
+    const p = makeProject({ clearance: 0.3 });
+    for (const aspect of ASPECTS) {
+      for (const value of ASPECT_ANSWERS[aspect]) {
+        if (value === FINE[aspect]) continue;
+        if (aspect === 'evenness' || aspect === 'width') continue; // covered above
+        const list = tryFor(p, { [aspect]: value } as ListeningAnswers).list;
+        expect(list.length, `${aspect}: ${value}`).toBeGreaterThan(0);
+        expect(list.every((e) => e.aspect === aspect)).toBe(true);
+      }
+    }
+  });
+});
+
+/** V10: the advice reads the room page (docs/ROADMAP_V10.md §3). */
+describe('the listening check in context', () => {
+  const busy = (p: Project, value: 'bare' | 'busy' | 'very-busy') => {
+    p.variants[0]!.busyness = { value, certainty: 'estimated' };
+    return p;
+  };
+
+  it('echoey in a full room: flutter echo, not cushions; in a bare room: soft things', () => {
+    const full = ids(tryFor(busy(makeProject(), 'very-busy'), { clarity: 'echoey' }).list);
+    expect(full).toContain('L07.flutter');
+    expect(full.some((id) => id.startsWith('L07.soften'))).toBe(false);
+    const bare = ids(tryFor(busy(makeProject(), 'bare'), { clarity: 'echoey' }).list);
+    expect(bare).toContain('L07.soften');
+    expect(bare).not.toContain('L07.flutter');
+  });
+
+  it('harsh in a full room: one hard surface near the path, never a rug', () => {
+    const p = busy(makeProject({ surfaces: { floor: 'wood-floor' } }), 'busy');
+    p.variants[0]!.speakers.left.toeInDeg = 0;
+    p.variants[0]!.speakers.right.toeInDeg = 0;
+    const all = tryFor(p, { treble: 'bright' });
+    const every = ids(all.list);
+    expect(every).toContain('L06.surface');
+    expect(every).not.toContain('L06.soften');
+  });
+
+  it('a rug only where the floor is hard: on carpet, the walls instead', () => {
+    const p = busy(makeProject({ H: 3.2, surfaces: { floor: 'carpet-heavy' } }), 'bare');
+    p.surfaces.baseCertainty.floor = 'measured';
+    const echo = ids(tryFor(p, { clarity: 'echoey' }).list);
+    expect(echo).not.toContain('L07.soften');
+    expect(echo).toContain('L07.softenWalls');
+  });
+
+  it('a ticked tone control is named directly and comes before the room', () => {
+    const p = makeProject();
+    p.variants[0]!.speakers.left.toeInDeg = 0;
+    p.variants[0]!.speakers.right.toeInDeg = 0;
+    expect(ids(tryFor(p, { treble: 'bright' }).list)).toContain('L06.trebleDown');
+    p.speaker.dsp.treble = { minDb: -3, maxDb: 3, stepDb: 0.5 };
+    const known = ids(tryFor(p, { treble: 'bright' }).list);
+    expect(known).toContain('L06.trebleDownKnown');
+    expect(known).not.toContain('L06.trebleDown');
+    p.speaker.dsp.bass = { minDb: -6, maxDb: 6, stepDb: 0.5 };
+    expect(ids(tryFor(makeProject({ clearance: 0.8 }), { bass: 'thin' }).list)).not.toContain(
+      'L02.controlKnown',
+    );
+    const thin = makeProject({ clearance: 0.12 });
+    thin.speaker.dsp.bass = { minDb: -6, maxDb: 6, stepDb: 0.5 };
+    expect(ids(tryFor(thin, { bass: 'thin' }).list)).toContain('L02.controlKnown');
+  });
+
+  it('a wall switch the user ticked is offered for boomy bass', () => {
+    const p = makeProject({ clearance: 0.8 });
+    p.speaker.dsp.wallDistanceSetting = true;
+    expect(ids(tryFor(p, { bass: 'boomy' }).list)).toContain('L01.wallSwitch');
+  });
+
+  it('a room open to another: the door test, and no model opinion on bass moves', () => {
+    const p = makeProject({ clearance: 0.6, listenerY: 3.4 });
+    p.room.outOfModel = ['open-plan-connection'];
+    const list = tryFor(p, { bass: 'thin', width: 'narrow' }).list;
+    expect(ids(list)).toContain('L02.door');
+    for (const e of list.filter((x) => x.aspect === 'bass')) expect(e.model).toBeUndefined();
+  });
+
+  it('not a plain box: the model gives no opinion on any move', () => {
+    const p = makeProject({ clearance: 0.2, halfSpacing: 0.6, listenerY: 3.6 });
+    p.room.outOfModel = ['non-rectangular'];
+    const list = tryFor(p, { bass: 'boomy', width: 'narrow' }).list;
+    expect(list.some((e) => e.change)).toBe(true);
+    for (const e of list) expect(e.model).toBeUndefined();
+  });
+
+  it('lowest notes missing with the front-wall dip in the deep bass: closer to the wall', () => {
+    const list = tryFor(makeProject({ clearance: 1.2, listenerY: 3.6 }), { low: 'missing' }).list;
+    const dip = list.find((e) => e.id === 'L08.dip')!;
+    expect(dip).toBeDefined();
+    expect(Number(dip.params.hz)).toBeGreaterThanOrEqual(35);
+    expect(Number(dip.params.hz)).toBeLessThanOrEqual(100);
+    expect(dip.change).toEqual({ kind: 'speakersOut', by: -0.9 });
+  });
+
+  it('muffled voices: fix the boomy bass first when it is boomy too', () => {
+    const list = tryFor(makeProject(), { voices: 'muffled', bass: 'boomy' }).list;
+    expect(ids(list)).toContain('L09.bassFirst');
+  });
+
+  it('a tiny sweet spot: toe-in so the aims cross just in front of you', () => {
+    const p = makeProject({ listenerY: 3.4 });
+    const { ctx, p: placed, list } = tryFor(p, { spot: 'small' });
+    const cross = list.find((e) => e.id === 'L11.crossFront')!;
+    expect(cross.change?.kind).toBe('toeIn');
+    const moved = applyChange(ctx, placed, cross.change!)!;
+    // The aims now meet about half a metre in front of the ears.
+    const toe = (moved.speakers.left.toeInDeg * Math.PI) / 180;
+    const front = moved.speakers.left.base.y + ctx.speaker.depth / 2;
+    const half = (moved.speakers.right.base.x - moved.speakers.left.base.x) / 2;
+    expect(moved.listener.y - (front + half / Math.tan(toe))).toBeCloseTo(0.5, 1);
+  });
+});
+
+describe('the listening check: saved answers', () => {
   it('the analysis carries the changes for the saved answers', () => {
     const p = makeProject({ clearance: 0.2 });
     p.listening = { answers: { bass: 'boomy' }, at: '2026-10-06T00:00:00Z', tries: [] };

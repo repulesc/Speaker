@@ -1,21 +1,18 @@
 <script lang="ts">
   import { i18n } from '../../i18n/locale.svelte';
-  import { formatLength } from '../../units/format';
-  import { roomSize } from '../plan/placement';
   import { analysis, workspace } from '../session.svelte';
   import { ui } from '../ui.svelte';
   import Colophon from './Colophon.svelte';
   import ListenPage from './ListenPage.svelte';
+  import MenuDrawer from './MenuDrawer.svelte';
   import PlacePage from './PlacePage.svelte';
-  import ProjectName from './ProjectName.svelte';
-  import SettingsMenu from './SettingsMenu.svelte';
   import SetupPage from './SetupPage.svelte';
   import Steps from './Steps.svelte';
   import Wordmark from './Wordmark.svelte';
 
   /**
-   * The panel (docs/ROADMAP_V8.md §2): a masthead with the app, the project's name (edit it where
-   * it is) and undo / redo, then three steps named after what you do: Set up, Place, Listen.
+   * The panel: a masthead with the menu, the app and undo / redo, then the three steps (V10: the
+   * room's size lives in its own group, and its name shows here only once you give one).
    */
   interface Props {
     onshare: () => void;
@@ -25,17 +22,9 @@
   }
   let props: Props = $props();
 
-  const project = $derived(workspace.project);
-  const room = $derived(roomSize(project));
+  const name = $derived(workspace.project.name);
   const saveProblem = $derived(
     workspace.saveState === 'unavailable' || workspace.saveState === 'failed',
-  );
-  const roomValue = $derived(
-    room
-      ? [room.W, room.L, room.H]
-          .map((m) => formatLength(m, project.units, 'room', i18n.locale, true))
-          .join(' × ')
-      : i18n.t('nav.notSet'),
   );
 
   // A sideways swipe on a touch screen moves between the steps.
@@ -62,8 +51,9 @@
 <div class="sidebar">
   <header class="mast">
     <div class="bar">
-      <SettingsMenu {...props} />
+      <MenuDrawer {...props} />
       <span class="brand"><Wordmark height={17} /></span>
+      {#if name}<span class="room-name" title={name}>{name}</span>{/if}
       <!-- Saving is silent (V9); only a failure is shown, under the bar. -->
       {#if !saveProblem}
         <span class="visually-hidden" role="status">{i18n.t(`project.${workspace.saveState}`)}</span
@@ -101,10 +91,6 @@
     {#if saveProblem}
       <p class="save-problem" role="status">{i18n.t(`project.${workspace.saveState}`)}</p>
     {/if}
-    <div class="project">
-      <ProjectName />
-      <p class="meta">{roomValue}</p>
-    </div>
   </header>
 
   <div class="steps-bar"><Steps /></div>
@@ -140,11 +126,11 @@
     min-height: 100%;
     background: var(--bg);
   }
-  /* The masthead: the app, the project, undo and redo. Quiet; the name carries it. */
+  /* The masthead: the menu, the app, undo and redo; nothing else until you name the room. */
   .mast {
     display: grid;
     gap: 14px;
-    padding: 8px 20px 18px 10px;
+    padding: 8px 20px 14px 10px;
   }
   .bar {
     display: flex;
@@ -154,8 +140,21 @@
   }
   .brand {
     display: flex;
+    flex: none;
     align-items: center;
-    margin: 0 auto 0 8px;
+    margin-left: 8px;
+  }
+  /* The room's name, when it has one: quiet, after a hairline, cut short if long. */
+  .room-name {
+    min-width: 0;
+    margin-left: 12px;
+    padding-left: 12px;
+    overflow: hidden;
+    border-left: 1px solid var(--grid-strong);
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .save-problem {
     margin: -6px 0 0 10px;
@@ -164,7 +163,7 @@
   }
   .history {
     display: flex;
-    margin-right: -10px;
+    margin: 0 -10px 0 auto;
   }
   .icon {
     display: grid;
@@ -196,16 +195,6 @@
       width: 44px;
       height: 44px;
     }
-  }
-  .project {
-    display: grid;
-    gap: 2px;
-    padding-left: 10px;
-  }
-  .meta {
-    color: var(--ink-muted);
-    font-size: var(--text-sm);
-    font-variant-numeric: tabular-nums;
   }
   /* The steps stay in reach while the page scrolls. */
   .steps-bar {

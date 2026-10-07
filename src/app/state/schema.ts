@@ -155,10 +155,14 @@ export const projectSchema: Check = obj({
     obj({
       answers: obj({
         bass: optional(oneOf(ASPECT_ANSWERS.bass)),
+        low: optional(oneOf(ASPECT_ANSWERS.low)),
         evenness: optional(oneOf(ASPECT_ANSWERS.evenness)),
+        voices: optional(oneOf(ASPECT_ANSWERS.voices)),
+        treble: optional(oneOf(ASPECT_ANSWERS.treble)),
         centre: optional(oneOf(ASPECT_ANSWERS.centre)),
         width: optional(oneOf(ASPECT_ANSWERS.width)),
-        treble: optional(oneOf(ASPECT_ANSWERS.treble)),
+        depth: optional(oneOf(ASPECT_ANSWERS.depth)),
+        spot: optional(oneOf(ASPECT_ANSWERS.spot)),
         clarity: optional(oneOf(ASPECT_ANSWERS.clarity)),
       }),
       at: str(40),

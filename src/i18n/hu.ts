@@ -41,9 +41,6 @@ export const hu: Messages = {
     new: 'Új projekt',
     duplicate: 'Másolat készítése',
     rename: 'Átnevezés',
-    renameLabel: 'A projekt neve',
-    renameHint: 'Kattints az átnevezéshez',
-    renameButton: '„{name}” átnevezése',
     delete: 'Törlés',
     deleteConfirm: 'Törlöd ezt: „{name}”? Ez nem vonható vissza.',
     saved: 'Elmentve ezen az eszközön',
@@ -54,10 +51,17 @@ export const hu: Messages = {
       'A mentés nem sikerült, lehet, hogy betelt a tárhely. Ossz meg egy linket, hogy ne vesszen el a munkád.',
   },
   menu: {
+    label: 'Menü',
+    close: 'A menü bezárása',
+    room: 'Ez a szoba',
+    name: 'Név',
+    namePlaceholder: 'Például: nappali',
+    nameHelp: 'Nem kötelező. Ha megadod, fent látszik.',
+    prefs: 'Beállítások',
+    more: 'Egyéb',
     legacy: 'Korábbi változatok',
     image: 'Megosztás képként',
-    label: 'Menü',
-    support: 'A Nodo támogatása ☕',
+    support: 'A {app} támogatása ☕',
     undo: 'Visszavonás',
     redo: 'Újra',
     share: 'Megosztási link',
@@ -165,7 +169,7 @@ export const hu: Messages = {
       shape: {
         'open-plan-connection': 'Nyitott egy másik helyiség felé',
         'non-rectangular': 'Nem egyszerű téglalap (L alakú, ferde mennyezet)',
-        help: 'A modell zárt, téglatest alakú szobát feltételez: ezek bármelyike bizonytalanabbá teszi a basszust.',
+        help: 'A modell zárt, téglatest alakú szobát feltételez: ezek bármelyike bizonytalanabbá teszi a basszust. A fülpróba ehhez igazítja a tanácsait.',
       },
     },
     speakers: {
@@ -329,9 +333,6 @@ export const hu: Messages = {
         'Ülőhely. {front} az elülső faltól, a füled {height} magasan van a padló felett. {hint}',
     },
   },
-  settings: {
-    label: 'Beállítások',
-  },
   survey: {
     start: 'Kezdjük',
     welcome: {
@@ -339,7 +340,7 @@ export const hu: Messages = {
       body: 'Válaszolj néhány gyors kérdésre a szobádról, és megmutatjuk, hová tedd a hangfalaidat és hová ülj, mielőtt bármi mást kérnénk.',
       free: 'Ingyenes, regisztráció és e-mail-cím nélkül.',
       private: 'A szobád adatai ezen az eszközön maradnak.',
-      short: 'Négy rövid kérdés, nagyjából egy perc.',
+      short: 'Három rövid kérdés, nem egészen egy perc.',
     },
     step: '{n} / {total}',
     skip: 'Kihagyom',
@@ -361,11 +362,11 @@ export const hu: Messages = {
       title: 'Mesélj a hangfalaidról',
       help: 'Arra válaszolj, amit tudsz. A „Nem tudom” is jó válasz.',
     },
-    where: {
-      title: 'Hol vannak most a dolgok?',
-      help: 'Elég a durva érték. Később mindent húzhatsz a rajzon.',
-      both: 'Nincs mit lemérni: mindkettőnek a legjobb helyet keressük.',
-    },
+  },
+  guess: {
+    note: 'Elhelyeztünk egy első javaslatot: az ülőhely a szoba hosszának {share}-ánál, a hangfalak vele egyenlő oldalú háromszögben. Húzd őket a térképen oda, ahol nálad vannak.',
+    short: 'Első javaslat. Húzd a hangfalakat és az ülőhelyet oda, ahol nálad vannak.',
+    ok: 'Így jó',
   },
   suggest: {
     title: 'A legjobb elhelyezés',
@@ -439,12 +440,25 @@ export const hu: Messages = {
     title: 'Hogyan szól?',
     intro:
       'Játssz le egy jól ismert dalt, és hallgasd egy-két percig a helyedről. Aztán mondd el, mit hallasz. Nem vagy biztos benne? Hagyd üresen.',
+    group: { bass: 'Basszus', tone: 'Hangszín', image: 'Sztereókép', room: 'Szoba' },
     aspect: {
-      bass: { label: 'Basszus', thin: 'Vékony', right: 'Épp jó', boomy: 'Dörmögő' },
+      bass: { label: 'Mennyi', thin: 'Vékony', right: 'Épp jó', boomy: 'Dörmögő' },
+      low: {
+        label: 'Legmélyebb hangok',
+        there: 'Megvannak',
+        missing: 'Hiányoznak: nincs orgonapedál, nincs mély szintibasszus',
+      },
       evenness: {
-        label: 'Mély hangok',
+        label: 'Egyenletesség',
         even: 'Egyenletesek',
         uneven: 'Néhány kiugrik vagy eltűnik',
+      },
+      voices: { label: 'Énekhang', clear: 'Tiszta', muffled: 'Tompa, dobozos vagy távoli' },
+      treble: {
+        label: 'Magas hangok',
+        dull: 'Tompa',
+        right: 'Épp jó',
+        bright: 'Éles, vagy sziszegnek az sz-ek',
       },
       centre: {
         label: 'Az ének középen',
@@ -454,9 +468,14 @@ export const hu: Messages = {
         right: 'Jobbra húz',
       },
       width: { label: 'Szélesség', narrow: 'Szűk', right: 'Épp jó', wide: 'Lyuk középen' },
-      treble: { label: 'Magas hangok', dull: 'Tompa', right: 'Épp jó', bright: 'Éles, fényes' },
+      depth: {
+        label: 'Mélység',
+        deep: 'Rétegzett, elölről hátra',
+        flat: 'Lapos, minden egy sorban',
+      },
+      spot: { label: 'Jó hely', wide: 'Elég tág', small: 'Csak egy pontban szól jól' },
       clarity: {
-        label: 'Tisztaság',
+        label: 'Visszhang',
         clear: 'Tiszta',
         some: 'Kicsit visszhangos',
         echoey: 'Visszhangos',
@@ -464,11 +483,47 @@ export const hu: Messages = {
     },
     short: {
       bass: { thin: 'Vékony', right: 'Jó', boomy: 'Dörmögő' },
+      low: { there: 'Megvan', missing: 'Hiányzik' },
       evenness: { even: 'Egyenletes', uneven: 'Egyenetlen' },
+      voices: { clear: 'Tiszta', muffled: 'Tompa' },
+      treble: { dull: 'Tompa', right: 'Jó', bright: 'Éles' },
       centre: { vague: 'Elmosódott', focused: 'Pontos', left: '◂ Balra', right: 'Jobbra ▸' },
       width: { narrow: 'Szűk', right: 'Jó', wide: 'Lyukas' },
-      treble: { dull: 'Tompa', right: 'Jó', bright: 'Éles' },
+      depth: { deep: 'Mély', flat: 'Lapos' },
+      spot: { wide: 'Tág', small: 'Szűk' },
       clarity: { clear: 'Tiszta', some: 'Kicsit zeng', echoey: 'Zengő' },
+    },
+    sounds: {
+      title: 'Teszthangok',
+      hint: 'Bal, jobb, közép, polaritás és basszussöprés, a hangfalaidon',
+      safety:
+        'Előbb vedd le a hangerőt, aztán told fel a szokásos szintre. Az eszköznek a hangfalaidon kell szólnia. Semmit nem veszünk fel.',
+      phase: 'Most: {phase}',
+      left: {
+        name: 'Bal',
+        listen:
+          'Csak a bal hangfalból kell szólnia. A jobból szól? Fel vannak cserélve a csatornák.',
+      },
+      right: {
+        name: 'Jobb',
+        listen:
+          'Csak a jobb hangfalból kell szólnia. A balból szól? Fel vannak cserélve a csatornák.',
+      },
+      centre: {
+        name: 'Közép',
+        listen:
+          'Mindkét hangfal ugyanazt szólja: egyetlen keskeny pontnak kell lennie középen. Elmosódott vagy oldalra húz? Válaszolj Az ének középen sorban.',
+      },
+      polarity: {
+        name: 'Polaritás',
+        listen:
+          'Előbb A, aztán B, az egyik oldal megfordítva. Az A-nak teltebbnek és középre összpontosultabbnak kell lennie. Ha a B az, az egyik hangfal + és − fordítva van bekötve: cseréld fel a két vezetékét.',
+      },
+      sweep: {
+        name: 'Basszussöprés',
+        listen:
+          'Lassú hang 35-től 180 Hz-ig. Amelyik hang kiugrik vagy eltűnik, az a szoba rezonanciája: válaszolj az Egyenletesség sorban.',
+      },
     },
     fixesFor: 'Mit próbálj ki: {aspect}',
     confidence: {
@@ -498,14 +553,22 @@ export const hu: Messages = {
         out: 'Húzd mindkét hangfalat {by}-rel messzebb a mögöttük lévő faltól.',
         seatForward: 'Ülj {by}-rel előrébb, távolabb a hátsó faltól.',
         inward: 'Húzd mindkét hangfalat {by}-rel beljebb az oldalfaltól.',
+        wallSwitch: 'Állítsd a hangfalak falkapcsolóját aszerint, milyen közel állnak a falhoz.',
         plug: 'Ha a hangfalaidhoz járt szivacsdugó a basszusnyílásba, próbáld ki.',
         control: 'Ha a hangfalon vagy az erősítőn van mélyszabályzó, vedd le egy lépéssel.',
+        controlKnown: 'Vedd lejjebb egy fokkal a mélyszabályzót (kb. 2 dB).',
+        onDesk: 'Tegyél valami nehezet és tömöret mindkét hangfal alá, vagy próbáld állványon.',
+        onStand:
+          'Ha az állványok könnyűek vagy üregesek, próbálj nehezebbet, vagy töltsd fel őket.',
+        onFloor: 'Adj a hangfalaknak szilárd alátámasztást a fapadlón: tüskéket vagy nehéz talpat.',
       },
       L02: {
         closer: 'Told mindkét hangfalat {by}-rel közelebb a mögöttük lévő falhoz.',
         seatOffMiddle: 'Vidd az ülőhelyed {by}-rel távolabb a szoba közepétől.',
+        door: 'Ha a szomszéd szoba felé nyíló résznek van ajtaja, csukd be, és hallgasd meg újra.',
         small: 'A kis hangfalak basszusa hamar elfogy: ez a méretük, nem a szobád.',
         control: 'Ha a hangfalon vagy az erősítőn van mélyszabályzó, adj rá egy lépést.',
+        controlKnown: 'Adj rá egy fokot a mélyszabályzóra (kb. 2 dB).',
       },
       L03: {
         seatStep:
@@ -514,8 +577,10 @@ export const hu: Messages = {
       },
       L04: {
         centreSeat: 'Mozdítsd az ülőhelyed {by}-rel oldalra, a két hangfal közé középre.',
+        polarity: 'Ellenőrizd a bekötést: piros a pirosra, fekete a feketére, mindkét hangfalon.',
         toeIn: 'Fordítsd mindkét hangfalat {by}-kal jobban feléd.',
         height: 'Hozd a magassugárzókat a füled magasságába.',
+        balance: 'Nézd meg, hogy az erősítő balanszszabályzója középen áll-e.',
         swap: 'Cseréld fel a bal és a jobb kábelt az erősítőn.',
       },
       L05: {
@@ -530,13 +595,49 @@ export const hu: Messages = {
         lessToeIn: 'Fordítsd a hangfalakat {by}-kal kevésbé feléd.',
         moreToeIn: 'Fordítsd a hangfalakat {by}-kal jobban feléd.',
         height: 'Hozd a magassugárzókat a füled magasságába.',
-        soften: 'Tegyél valami puhát egy kemény felületre: szőnyeget, plédet, függönyt.',
+        soften:
+          'Tegyél valami puhát oda, ahol a hang először visszaverődik: szőnyeget közéd és a hangfalak közé, függönyt.',
+        softenWalls:
+          'Tegyél valami puhát a melletted lévő csupasz falakra: függönyt, falikárpitot.',
+        surface:
+          'Keress egy kemény, fényes felületet a hang útja mellett: üvegasztalt, csupasz asztallapot, ablakot. Mozdítsd el, fordítsd el, vagy takard le.',
         trebleDown: 'Ha a hangfalon vagy az erősítőn van magasszabályzó, vedd le egy lépéssel.',
         trebleUp: 'Ha a hangfalon vagy az erősítőn van magasszabályzó, adj rá egy lépést.',
+        trebleDownKnown: 'Vedd lejjebb egy fokkal a magasszabályzót (kb. 1 dB).',
+        trebleUpKnown: 'Adj rá egy fokot a magasszabályzóra (kb. 1 dB).',
       },
       L07: {
         sitCloser: 'Ülj {by}-rel közelebb a hangfalakhoz.',
+        flutter:
+          'Tapsolj egyet a helyeden. Ha utána gyors, csengő „cing” hallatszik, az csörgővisszhang: tegyél egy tárgyat az egyik csupasz falra, amelyek között cseng.',
+        toeIn: 'Fordítsd a hangfalakat {by}-kal jobban feléd.',
         soften: 'Tegyél puha dolgokat a kemény felületekre: szőnyeget, függönyt, párnákat.',
+        softenWalls: 'Tegyél puha dolgokat a csupasz falakra és ablakokra: függönyt, falikárpitot.',
+      },
+      L08: {
+        dip: 'Told mindkét hangfalat {by}-rel közelebb a mögöttük lévő falhoz.',
+        seatOffMiddle: 'Vidd az ülőhelyed {by}-rel távolabb a szoba közepétől.',
+        seatBack: 'Ülj {by}-rel hátrébb, de ne közvetlenül a falhoz.',
+        door: 'Ha a szomszéd szoba felé nyíló résznek van ajtaja, csukd be, és hallgasd meg újra.',
+        small: 'A hangfalaid nagyjából {hz}-ig szólnak le: a legmélyebb hangok ez alatt vannak.',
+      },
+      L09: {
+        desk: 'Hozd a hangfalakat az asztal elülső széléhez, és döntsd őket a füled felé.',
+        height: 'Hozd a magassugárzókat a füled magasságába.',
+        bassFirst: 'Először a dörmögő basszust szelídítsd meg (lásd fent a Basszust).',
+        onDesk: 'Tegyél valami nehezet és tömöret mindkét hangfal alá, vagy próbáld állványon.',
+        closer: 'Ülj {by}-rel közelebb a hangfalakhoz.',
+      },
+      L10: {
+        out: 'Húzd mindkét hangfalat {by}-rel messzebb a mögöttük lévő faltól.',
+        lessToeIn: 'Fordítsd a hangfalakat {by}-kal kevésbé feléd.',
+        clear:
+          'Vidd el a nagy, kemény tárgyakat a hangfalak közül (általában a tévé az), vagy told hátrébb őket.',
+      },
+      L11: {
+        crossFront:
+          'Fordítsd a hangfalakat {by}-kal jobban feléd, hogy a tengelyük épp előtted keresztezze egymást.',
+        sitBack: 'Ülj {by}-rel hátrébb.',
       },
     },
     why: {
@@ -544,15 +645,27 @@ export const hu: Messages = {
         out: 'A hangfal mögötti közeli fal felerősíti a basszust; egy kis hely elvesz belőle.',
         seatForward: 'Közvetlenül a hátsó falnál minden basszusrezonancia a leghangosabb.',
         inward: 'A közeli oldalfal vagy sarok is erősíti a basszust.',
+        wallSwitch:
+          'Azt mondtad, van ilyen a hangfalon: pont azt a basszust veszi vissza, amit a közeli fal hozzáad. A kézikönyv megmondja, melyik állás melyik.',
         plug: 'A gyártók épp erre adják: falközelben dörmögő basszusra. Nem minden hangfalhoz jár.',
         control: 'Egy kis lépés elég. Hallgasd egy ideig, mielőtt döntesz.',
+        controlKnown: 'Azt mondtad, van ilyen. Egy kis lépés elég; hallgasd egy ideig.',
+        onDesk:
+          'Egy üreges asztal együtt düböröghet a hangfalakkal. Hogy mennyire, az nagyon változó: hallgasd meg.',
+        onStand:
+          'Egy könnyű állvány együtt zenghet a hangfallal. Hogy mennyire, az nagyon változó: hallgasd meg.',
+        onFloor:
+          'A fapadló együtt düböröghet az álló hangfalakkal. Hogy mennyire, az nagyon változó: hallgasd meg.',
       },
       L02: {
         closer:
           'A hangfal mögötti fal erősíti a basszust. A basszusnyílás megkapja a szükséges helyet.',
         seatOffMiddle: 'A szoba hosszának felénél a legmélyebb hangok kioltják egymást.',
+        door: 'Egy nyílás úgy engedi ki a basszust, mint egy nyitott ablak. Ha becsukva teltebb, ez volt az.',
         small: 'A falhoz közelebb kicsit visszajön; azon túl ez a hangfal határa.',
         control: 'Óvatosan: a több basszus a kis hangfalakat is jobban terheli.',
+        controlKnown:
+          'Azt mondtad, van ilyen. Óvatosan: a több basszus a kis hangfalakat is jobban terheli.',
       },
       L03: {
         seatStep:
@@ -562,9 +675,12 @@ export const hu: Messages = {
       },
       L04: {
         centreSeat: 'A közelebbi hangfal maga felé húzza a hangot; néhány centi elég.',
+        polarity:
+          'Ha az egyik hangfal fordítva van bekötve, kioltja a középet és a basszust. A Teszthangok polaritáspróbája tíz másodperc alatt megmondja.',
         toeIn:
           'Ha feléd néznek, a közép gyakran határozottabb. A hangfaltól függ: bízz a füledben.',
         height: 'Állvány, néhány könyv a hangfal alá, vagy egy kis döntés feléd.',
+        balance: 'Ez a legegyszerűbb oka annak, ha a hang az egyik oldalra húz.',
         swap: 'Ha a hang átkerül a másik oldalra, a forrás vagy az erősítő az ok. Ha nem, cseréld fel a hangfalakat: ha a hangfallal megy, az a hangfal; ha egyikkel sem, a szoba.',
       },
       L05: {
@@ -582,14 +698,52 @@ export const hu: Messages = {
         moreToeIn: 'A legtöbb hangfal egyenesen előre a legfényesebb.',
         height: 'A magas hang akkor a legtisztább, ha a magassugárzók a füledre néznek.',
         soften:
-          'A csupasz padló és fal fényessé teszi a szobát; a puha dolgok megnyugtatják. Használd, ami van.',
+          'A csupasz padló és fal fényessé teszi a szobát; a puha dolgok ott, ahol a hang először visszaverődik, megnyugtatják. Használd, ami van.',
+        softenWalls: 'A padlód már puha; a csupasz falak maradtak. Használd, ami van.',
+        surface:
+          'A szobád már tele van puha dolgokkal, abból nincs hiány. Egyetlen kemény felület a hang útja mellett egyenesen visszaküldi a magasakat.',
         trebleDown: 'Egy kis lépés. Hallgasd néhány napig, mielőtt döntesz.',
         trebleUp: 'Egy kis lépés. Hallgasd néhány napig, mielőtt döntesz.',
+        trebleDownKnown: 'Azt mondtad, van ilyen. Egy kis lépés; hallgasd néhány napig.',
+        trebleUpKnown: 'Azt mondtad, van ilyen. Egy kis lépés; hallgasd néhány napig.',
       },
       L07: {
         sitCloser:
           'Közelebbről többet hallasz a hangfalakból és kevesebbet a szoba visszhangjából.',
-        soften: 'Rövidítik a szoba utózengését. Használd, ami már megvan.',
+        flutter:
+          'Egy berendezett szoba, amely mégis cseng, ritkán szenved párnahiányban: a hang két csupasz, párhuzamos felület között pattog oda-vissza. Egy tárgy az egyiken megtöri.',
+        toeIn: 'Kevesebb hang jut először az oldalfalakra. A hangfaltól függ: bízz a füledben.',
+        soften: 'Rövidítik a szoba visszhangját. Használd, ami már megvan.',
+        softenWalls: 'Rövidítik a szoba visszhangját. A padlód már puha.',
+      },
+      L08: {
+        dip: 'A mögöttük lévő fal visszaküld egy másolatot, amely {hz} körül kioltja a hangot, épp a mélybasszusban. A falhoz közel a völgy kiemelkedik a basszusból, és a fal inkább súlyt ad.',
+        seatOffMiddle: 'A szoba hosszának felénél a legmélyebb hangok kioltják egymást.',
+        seatBack:
+          'Minden hosszanti rezonancia a hátsó falnál a leghangosabb, így hátrébb ülve nőnek a legmélyebb hangok.',
+        door: 'Egy nyílás úgy engedi ki a legmélyebb hangokat, mint egy nyitott ablak.',
+        small: 'Ez a méretük, nem a szobád. A falhoz közelebb kicsit visszajön.',
+      },
+      L09: {
+        desk: 'Az asztallap a közvetlen hang után rögtön a füledbe veri vissza az énekhang tartományát, és a kettő részben kioltja egymást. Az elülső szélnél a visszaverődés elkerüli az asztalt.',
+        height: 'Az ének akkor a legtisztább, ha a magassugárzók a füledre néznek.',
+        bassFirst:
+          'A túl sok basszus elfedi az énekhang alsó részét: ha azt rendbe teszed, az ének gyakran magától visszajön.',
+        onDesk:
+          'Egy üreges asztal együtt zeng, és dobozos színt ad. Hogy mennyire, az nagyon változó: hallgasd meg.',
+        closer: 'A hangfalaktól messze az ének nagyobb része később, a szobából érkezik.',
+      },
+      L10: {
+        out: 'A hangfalak mögötti hely gyakran segít, hogy a hangkép mélységben kinyíljon. Fül alapján: nincs olyan tanulmány, amely megmondja, mennyire.',
+        lessToeIn: 'Kicsit több szobahang mélységet adhat. A hangfaltól függ: bízz a füledben.',
+        clear:
+          'A hangfalak közti és melletti nagy tárgyak korán visszaverik a hangot, és laposabbá teszik a képet. A mélység nagy része magában a felvételben van.',
+      },
+      L11: {
+        crossFront:
+          'Ha az egyik hangfal felé dőlsz, a tengelyéről is lejjebb kerülsz, így halkabb lesz, miközben közelebb kerül, és az ének középen marad. Azoknál a hangfalaknál működik a legjobban, amelyek oldalt halkabbak: hallgasd meg.',
+        sitBack:
+          'Hátrébb egy oldallépés kevésbé változtatja a két távolságot. A hangkép kicsit szűkebb lesz.',
       },
     },
   },
@@ -626,8 +780,19 @@ export const hu: Messages = {
     done: 'Kész',
   },
   map: {
+    toeIn: 'Befelé fordítás',
+    aim: 'Befelé fordítás {deg}: {where}',
+    cross: {
+      front: 'a tengelyek előtted keresztezik egymást',
+      at: 'a tengelyek nálad keresztezik egymást',
+      behind: 'a tengelyek mögötted keresztezik egymást',
+      parallel: 'a hangfalak egyenesen előre néznek',
+    },
+    dip: 'Az elülső fal okozta völgy itt: {f}, {band}',
+    band: { deep: 'mélybasszus', upper: 'felső basszus', above: 'a basszus fölött' },
     dimmed: 'Nem ajánlott',
-    bestHere: 'A legjobb itt: {word}',
+    bestPlacement: 'Legjobb elhelyezés: {word}',
+    bestSeat: 'Legjobb ülőhely: {word}',
     withScore: '{word} · {score}',
     absolute: 'Abszolút skála',
     hidePanel: 'Oldalsáv elrejtése',
@@ -1268,21 +1433,22 @@ export const hu: Messages = {
   },
   nav: {
     bass: 'Basszus az ülőhelyeden',
-    notSet: 'Nincs megadva',
   },
   sheet: {
     expand: 'Több mutatása',
     collapse: 'Kevesebb mutatása',
   },
   about: {
-    title: 'Névjegy',
-    body: 'Az alkalmazás bevált teremakusztikai ismeretek alapján javasol hangfal- és ülőhely-elrendezést, és megmondja, mennyire biztos benne. Útmutatás, nem garancia.',
-    knowsTitle: 'Mit tud a modell, és mit nem',
+    title: 'A {app} névjegye',
+    lead: 'Fizikán alapuló kiindulópont, hogy az estét zenehallgatással töltsd, ne találgatással.',
+    knowsTitle: 'Amit egy doboz elárul',
     knows:
-      'A szobát zárt, téglatest alakú doboznak tekinti a választott anyagokkal és a megadott berendezettséggel. Ebből számolja a szoba rezonanciáit, a hangfalak melletti falakról visszaverődő hangot, az ülőhelyedhez érkező visszaverődéseket és a sztereó geometriát.',
-    cannot:
-      'Nem látja, milyen szélesen sugároznak a hangfalaid, a tényleges bútoraidat, az asztalodat, az ajtókat és nyílásokat, sem azt, amit egy mikrofon mérne a helyeden. A számai becslések tartománnyal, nem mérések. Arra való, hogy jó kiindulópontot találj; az utolsó néhány centiméter a füledé.',
-    sources: 'Minden szabály és forrása dokumentálva van a projekt szabálykatalógusában.',
-    support: 'A projekt támogatása ☕ (új lapon nyílik meg)',
+      'A {app} a szobádat téglatest alakú dobozként kezeli, és ebből a nagy, lassú dolgokat számolja ki: a szoba basszusrezonanciáit, a hangfalak melletti falakról visszaverődő hang okozta völgyeket, az ülőhelyedhez érkező első visszaverődéseket és a közted és a hangfalak közti sztereó háromszöget.',
+    earsTitle: 'Amihez a füled kell',
+    ears: 'Egy alaprajz nem hallja, hogyan szórják szét a hangot a hangfalaid, hogyan veri vissza egy kanapé vagy egy könyvespolc, és mennyire egyenetlenül nyeli el a szobád. Ezeket egy mérőmikrofon megmutatja, a füled pedig meg tudja ítélni.',
+    judge:
+      'Minden szoba más. A {app} közel visz a célhoz; utána egyszerre csak egy dolgot változtass, olyan zenét hallgass, amit kívülről ismersz, és bízz abban, amit hallasz.',
+    sources:
+      'Minden szabály a képletével és a forrásaival együtt a projekt szabálykatalógusában található.',
   },
 };

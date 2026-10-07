@@ -92,9 +92,9 @@ test('phone: every section fits the screen without sideways scrolling', async ({
 });
 
 test('phone: language and units live in the settings menu', async ({ page }) => {
-  await page.getByRole('button', { name: 'Settings' }).click();
-  await expect(page.getByRole('radio', { name: 'HU' })).toBeAttached();
-  await expect(page.getByRole('radio', { name: 'ft' })).toBeAttached();
+  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  await expect(page.getByRole('radio', { name: 'Magyar' })).toBeAttached();
+  await expect(page.getByRole('radio', { name: /^Imperial/ })).toBeAttached();
 });
 
 test('phone: accessible', async ({ page }) => {

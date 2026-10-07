@@ -1,10 +1,12 @@
-import type { ListeningRule, Suggestion } from './check';
+import { flagged, type ListeningRule, type Suggestion } from './check';
 
 /**
  * L02 · The bass is thin. Closer to the wall behind them, speakers gain bass (boundary gain,
  * [ALL74], [KUT]), 🔴; never closer than the rear port needs (G07). A seat near the middle of the
- * room's length sits in the first length resonance's null (P03, G01), 🔴. Small speakers simply
- * stop early; the app says so instead of promising more.
+ * room's length sits in the first length resonance's null (P03, G01), 🔴. A room open to another
+ * lets bass out: an opening absorbs like an open window ([SAB]'s unit of absorption), 🔴, so
+ * closing its door, if it has one, is a free test (V10). Small speakers simply stop early; the app
+ * says so instead of promising more. A ticked bass control is named directly and comes first.
  */
 export const L02: ListeningRule = {
   id: 'L02',
@@ -25,8 +27,7 @@ export const L02: ListeningRule = {
         params: { by: step },
       });
     }
-    const middle =
-      Math.abs(p.listener.y - ctx.room.L / 2) < 0.3 || findings.some((f) => f.ruleId === 'G01');
+    const middle = Math.abs(p.listener.y - ctx.room.L / 2) < 0.3 || flagged(findings, 'G01');
     if (middle) {
       out.push({
         id: 'L02.seatOffMiddle',
@@ -37,16 +38,29 @@ export const L02: ListeningRule = {
         params: { by: 0.25 },
       });
     }
+    if (m.setting.open) {
+      out.push({ id: 'L02.door', level: 'physics', sources: ['SAB'], priority: 0.7, params: {} });
+    }
     if (s.f6 >= 60) {
       out.push({ id: 'L02.small', level: 'physics', sources: ['KUT'], priority: 0.3, params: {} });
     }
-    out.push({
-      id: 'L02.control',
-      level: 'guideline',
-      sources: ['manufacturer'],
-      priority: 0.25,
-      params: {},
-    });
+    out.push(
+      m.setting.controls.bass
+        ? {
+            id: 'L02.controlKnown',
+            level: 'guideline',
+            sources: ['manufacturer'],
+            priority: 0.5,
+            params: {},
+          }
+        : {
+            id: 'L02.control',
+            level: 'guideline',
+            sources: ['manufacturer'],
+            priority: 0.25,
+            params: {},
+          },
+    );
     return out;
   },
 };

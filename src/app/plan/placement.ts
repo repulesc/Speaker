@@ -13,6 +13,8 @@ const CENTRE_SNAP = 0.04;
 /** Left and right speakers keep at least this far from the centreline when mirrored. */
 const MIN_HALF_GAP = 0.1;
 
+const SIDES = ['left', 'right'] as const;
+
 const round = (v: number) => Math.round(v * 1e6) / 1e6;
 export const snap = (value: number, step = GRID): number => round(Math.round(value / step) * step);
 export const clamp = (v: number, min: number, max: number): number =>
@@ -150,11 +152,28 @@ export function applyCandidate(project: Project, placement: Placement): void {
   };
 }
 
+/** Whether the speakers or the seat are still the first guess (nothing placed by the user yet). */
+export function isFirstGuess(project: Project): boolean {
+  const { speakers, listener } = activeVariant(project);
+  return (
+    listener.certainty === 'unknown' ||
+    SIDES.some((side) => (speakers[side].certainty ?? 'estimated') === 'unknown')
+  );
+}
+
+/** "Looks right": the first guess becomes the user's own placement, where it stands. */
+export function confirmPlacement(project: Project): void {
+  const { speakers, listener } = activeVariant(project);
+  for (const side of SIDES) {
+    if ((speakers[side].certainty ?? 'estimated') === 'unknown')
+      speakers[side].certainty = 'estimated';
+  }
+  if (listener.certainty === 'unknown') listener.certainty = 'estimated';
+}
+
 // ── Typed-field setters (step 4): exact values, no grid snapping ───────────
 
 const EXACT: MoveOptions = { grid: false, keepCertainty: true };
-
-const SIDES = ['left', 'right'] as const;
 
 /** Moves both speakers, each keeping its own x (one move covers both when they are mirrored). */
 function moveBoth(project: Project, to: Target): boolean {
