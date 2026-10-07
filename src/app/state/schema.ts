@@ -105,6 +105,7 @@ export const speakerSchema: Check = obj({
       url: text,
       retrieved: str(10),
       photoPort: optional(bool),
+      fromListing: optional(bool),
       bassFromKind: optional(bool),
       special: optional(oneOf(['amt', 'planar', 'dipole', 'horn'])),
       edited: optional(bool),

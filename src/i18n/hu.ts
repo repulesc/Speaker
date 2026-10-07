@@ -292,6 +292,8 @@ export const hu: Messages = {
     cancel: 'Marad: {name}',
     source: 'A gyártó oldaláról, olvasva: {date}',
     edited: 'A gyártó oldaláról, olvasva: {date}. Te módosítottad.',
+    listing: 'A méret egy hirdetésből való, olvasva: {date}. Ellenőrizd a sajátodon.',
+    listingEdited: 'A méret egy hirdetésből való, olvasva: {date}. Te módosítottad.',
     photoPort: 'A nyílás helye a gyártó fotóiról van. Nézd meg a sajátod hátulját.',
     special: {
       amt: 'Az AMT (légmozgató) magassugárzót a szobamodell nem ismeri: a magashang-tanácsokat vedd kevésbé biztosnak.',

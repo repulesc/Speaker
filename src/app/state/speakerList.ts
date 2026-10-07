@@ -76,6 +76,7 @@ export function speakerFromEntry(e: SpeakerEntry, placedOn?: SpeakerChoices['pla
       id: e.id,
       url: e.sizeMm.url,
       retrieved: newest,
+      ...(e.sizeMm.via === 'listing' ? { fromListing: true } : {}),
       ...(e.port?.via === 'photo-confirmed' ? { photoPort: true } : {}),
       ...(bass ? {} : { bassFromKind: true }),
       ...(e.special ? { special: e.special } : {}),
