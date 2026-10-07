@@ -1,0 +1,36 @@
+{
+  "id": "ess-amt-1b-bookshelf",
+  "brand": "ESS",
+  "model": "AMT-1b Bookshelf",
+  "aka": [
+    "AMT-1b",
+    "amt 1b",
+    "1b Bookshelf"
+  ],
+  "status": "vintage",
+  "category": "passive",
+  "kind": "monitor",
+  "special": "amt",
+  "sizeMm": {
+    "value": {
+      "h": 610,
+      "w": 356,
+      "d": 356
+    },
+    "url": "https://stereonomono.blogspot.com/2011/10/ess-amt-1b.html",
+    "retrieved": "2026-10-07",
+    "via": "listing"
+  },
+  "enclosure": {
+    "value": "passive-radiator",
+    "url": "https://stereonomono.blogspot.com/2011/10/ess-amt-1b.html",
+    "retrieved": "2026-10-07",
+    "via": "listing"
+  },
+  "drivers": {
+    "value": "other",
+    "url": "https://stereonomono.blogspot.com/2011/10/ess-amt-1b.html",
+    "retrieved": "2026-10-07",
+    "via": "listing"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "ess-labs-amt-1d-revival",
+  "brand": "ESS Labs",
+  "model": "AMT-1D Revival",
+  "aka": [
+    "AMT 1D",
+    "AMT-1D",
+    "ESS AMT Limited Edition"
+  ],
+  "status": "current",
+  "category": "passive",
+  "kind": "floorstander",
+  "special": "amt",
+  "sizeMm": {
+    "value": {
+      "w": 419,
+      "d": 419,
+      "h": 908
+    },
+    "url": "https://essspeakers.store/products/amt-limited-edition-pair",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "passive-radiator",
+    "url": "https://essspeakers.store/products/amt-limited-edition-pair",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "other",
+    "url": "https://essspeakers.store/products/amt-limited-edition-pair",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  }
+}

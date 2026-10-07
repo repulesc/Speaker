@@ -1,0 +1,50 @@
+{
+  "id": "kef-lsx-ii-lt",
+  "brand": "KEF",
+  "model": "LSX II LT",
+  "aka": [
+    "LSX 2 LT",
+    "LSX II LT Wireless"
+  ],
+  "status": "current",
+  "category": "all-in-one",
+  "kind": "bookshelf",
+  "sizeMm": {
+    "value": {
+      "h": 240,
+      "w": 155,
+      "d": 180
+    },
+    "url": "https://international.kef.com/products/lsx-2-lt",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://international.kef.com/products/lsx-2-lt",
+    "retrieved": "2026-10-07",
+    "via": "owner-confirmed"
+  },
+  "drivers": {
+    "value": "coaxial",
+    "url": "https://international.kef.com/products/lsx-2-lt",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 49,
+      "db": 6,
+      "dependsOnSetting": true
+    },
+    "url": "https://international.kef.com/products/lsx-2-lt",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "port": {
+    "value": "rear",
+    "url": "https://international.kef.com/products/lsx-2-lt",
+    "retrieved": "2026-10-07",
+    "via": "owner-confirmed"
+  }
+}

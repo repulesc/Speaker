@@ -13,7 +13,9 @@ import type { SpeakerKind } from '../presets/speakerKinds';
  * the AI live outside the engine.
  */
 export type DraftField<T> =
-  { value: T; quote: string } | { value: T; seenOnPhotos: true; confirmedBy?: string };
+  | { value: T; quote: string }
+  | { value: T; seenOnPhotos: true; confirmedBy?: string }
+  | { value: T; ownerConfirmed: true };
 
 export interface Draft {
   brand: string;
@@ -26,7 +28,7 @@ export interface Draft {
   /** The page every quote was read on, the day, and whether it is a spec page or a manual. */
   url: string;
   retrieved: string;
-  source: Exclude<Via, 'photo-confirmed'>;
+  source: Exclude<Via, 'photo-confirmed' | 'owner-confirmed'>;
   sizeMm?: DraftField<SizeMm>;
   enclosure?: DraftField<EnclosureType>;
   drivers?: DraftField<DriverLayout>;
@@ -292,6 +294,9 @@ const NOT_FROM_LISTINGS: readonly string[] = [
   'tweeterMm',
 ];
 
+/** Facts the project owner may confirm when the page leaves them out. */
+const OWNER_CONFIRMABLE: readonly string[] = ['enclosure', 'port'];
+
 const REQUIRED = ['sizeMm', 'enclosure', 'drivers'] as const;
 const OPTIONAL = [
   'bass',
@@ -323,6 +328,15 @@ export function checkDraft(draft: Draft, page: string): CheckResult {
         field,
         reason: 'a third-party listing is not trusted for this; use the maker',
       });
+      continue;
+    }
+    if ('ownerConfirmed' in f) {
+      if (!OWNER_CONFIRMABLE.includes(field)) {
+        rejected.push({ field, reason: 'only the cabinet and the port can be owner-confirmed' });
+      } else {
+        kept[field] = { value: f.value, ...source, via: 'owner-confirmed' };
+        review.push({ field, reason: 'confirmed by the owner, not read on the page' });
+      }
       continue;
     }
     if ('seenOnPhotos' in f) {

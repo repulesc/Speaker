@@ -311,6 +311,25 @@ High Shelf EQ > 5 kHz: -2 dB, 0 dB, +2 dB. Low Shelf EQ < 300 Hz: -2 dB, 0 dB, +
     expect(r.entry?.controls).toBeUndefined();
   });
 
+  it('lets the owner confirm the cabinet and the port, and nothing else', () => {
+    const r = checkDraft(
+      draft({
+        enclosure: { value: 'ported', ownerConfirmed: true },
+        port: { value: 'rear', ownerConfirmed: true },
+      }),
+      PAGE,
+    );
+    expect(r.entry?.enclosure.via).toBe('owner-confirmed');
+    expect(r.entry?.port?.via).toBe('owner-confirmed');
+    expect(r.review.some((f) => f.field === 'port')).toBe(true);
+    const bass = checkDraft(
+      draft({ bass: { value: { hz: 40, db: 6 }, ownerConfirmed: true } }),
+      PAGE,
+    );
+    expect(bass.rejected.some((f) => f.field === 'bass')).toBe(true);
+    expect(bass.entry?.bass).toBeUndefined();
+  });
+
   it('refuses a control the quote does not name, and a tweeter above the cabinet', () => {
     const r = checkDraft(
       draft({

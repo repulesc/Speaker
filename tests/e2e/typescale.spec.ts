@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { fillRoom, goHome, openApp, openSection, openSpeakerDetails } from './helpers';
+import { fillRoom, goHome, openApp, openMenu, openSection, openSpeakerDetails } from './helpers';
 
 test.use({ locale: 'en-GB' });
 
@@ -106,7 +106,7 @@ test('with the numbers shown, in Hungarian, nothing reaches into the panel paddi
 }) => {
   await openApp(page);
   await fillRoom(page, '4.2', '5.8', '2.6');
-  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  await openMenu(page);
   await page.getByRole('radio', { name: 'Magyar', exact: true }).check({ force: true });
   await page.getByRole('checkbox', { name: 'Számok mutatása' }).check({ force: true });
   await page.keyboard.press('Escape');
