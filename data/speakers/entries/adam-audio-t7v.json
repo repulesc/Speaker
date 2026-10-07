@@ -1,0 +1,54 @@
+{
+  "id": "adam-audio-t7v",
+  "brand": "ADAM Audio",
+  "model": "T7V",
+  "status": "current",
+  "category": "active",
+  "kind": "monitor",
+  "sizeMm": {
+    "value": {
+      "h": 347,
+      "w": 210,
+      "d": 293
+    },
+    "url": "https://www.adam-audio.com/en/t-series/t7v/",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://www.adam-audio.com/en/t-series/t7v/",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "two-way",
+    "url": "https://www.adam-audio.com/en/t-series/t7v/",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 39,
+      "db": 6
+    },
+    "url": "https://www.adam-audio.com/en/t-series/t7v/",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "port": {
+    "value": "rear",
+    "url": "https://www.adam-audio.com/en/t-series/t7v/",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "controls": {
+    "value": {
+      "bass": true,
+      "treble": true
+    },
+    "url": "https://www.adam-audio.com/en/t-series/t7v/",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  }
+}

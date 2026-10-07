@@ -150,3 +150,24 @@ describe('picking, describing, editing', () => {
     expect(p.speaker.listed!.edited).toBe(true);
   });
 });
+
+describe('the shipped list (data/speakers/entries)', () => {
+  const shipped = new URL('../../data/speakers/entries/', import.meta.url);
+  const files = readdirSync(shipped).filter((f) => f.endsWith('.json'));
+  const entries = files.map(
+    (f) => JSON.parse(readFileSync(new URL(f, shipped), 'utf8')) as SpeakerEntry,
+  );
+
+  it('every entry is believable, sourced and named after its file', () => {
+    expect(entries.length).toBeGreaterThan(0);
+    for (const [i, e] of entries.entries()) {
+      expect(validateEntry(e), e.id).toEqual([]);
+      expect(files[i], e.id).toBe(`${e.id}.json`);
+    }
+    expect(new Set(entries.map((e) => e.id)).size).toBe(entries.length);
+  });
+
+  it('every entry becomes a valid project speaker', () => {
+    for (const e of entries) expect(speakerSchema(speakerFromEntry(e), 'speaker'), e.id).toBeNull();
+  });
+});

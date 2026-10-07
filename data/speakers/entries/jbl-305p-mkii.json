@@ -1,0 +1,58 @@
+{
+  "id": "jbl-305p-mkii",
+  "brand": "JBL",
+  "model": "305P MkII",
+  "aka": [
+    "305P Mk2",
+    "305P MK II"
+  ],
+  "status": "current",
+  "category": "active",
+  "kind": "monitor",
+  "sizeMm": {
+    "value": {
+      "h": 298,
+      "w": 185,
+      "d": 231
+    },
+    "url": "https://jblpro.com/en-US/products/305p-mkii",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://jblpro.com/en-US/products/305p-mkii",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "two-way",
+    "url": "https://jblpro.com/en-US/products/305p-mkii",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 43,
+      "db": 10
+    },
+    "url": "https://jblpro.com/en-US/products/305p-mkii",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "positionSetting": {
+    "value": true,
+    "url": "https://jblpro.com/en-US/products/305p-mkii",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "controls": {
+    "value": {
+      "bass": false,
+      "treble": true
+    },
+    "url": "https://jblpro.com/en-US/products/305p-mkii",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  }
+}

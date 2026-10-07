@@ -1,0 +1,40 @@
+{
+  "id": "buchardt-audio-s400-mk3",
+  "brand": "Buchardt Audio",
+  "model": "S400 MK3",
+  "aka": [
+    "S400",
+    "S400 Mk3"
+  ],
+  "status": "current",
+  "category": "passive",
+  "kind": "bookshelf",
+  "sizeMm": {
+    "value": {
+      "h": 392,
+      "w": 198,
+      "d": 280
+    },
+    "url": "https://buchardtaudio.com/products/s400-mk3",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://buchardtaudio.com/products/s400-mk3",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "two-way",
+    "url": "https://buchardtaudio.com/products/s400-mk3",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  },
+  "minWallMm": {
+    "value": 50,
+    "url": "https://buchardtaudio.com/products/s400-mk3",
+    "retrieved": "2026-10-07",
+    "via": "spec-text"
+  }
+}
