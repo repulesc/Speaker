@@ -25,9 +25,10 @@ export type BassBasis = 3 | 6 | 10 | null;
  * from the maker's photos (only ever with a person's confirmation; no picture is kept), or from a
  * third-party listing (a retailer, an encyclopaedia, a review's spec box): trusted for the size,
  * the cabinet and the driver layout only, never for the bass limit, the port or the settings, and
- * shown to the user as "from a listing, check yours".
+ * shown to the user as "from a listing, check yours". Cabinet type and port position alone may be
+ * confirmed by the project owner when the maker's page leaves them out (`owner-confirmed`).
  */
-export type Via = 'spec-text' | 'manual' | 'photo-confirmed' | 'listing';
+export type Via = 'spec-text' | 'manual' | 'photo-confirmed' | 'listing' | 'owner-confirmed';
 
 /** One fact with its source: the page it was read on, the day, and how. */
 export interface Sourced<T> {

@@ -70,6 +70,7 @@
       { date },
     )}</a
   >
+  {#if listed.ownerFacts}<p class="note">{i18n.t('speakerList.ownerFacts')}</p>{/if}
   {#if listed.photoPort}<p class="note">{i18n.t('speakerList.photoPort')}</p>{/if}
   {#if listed.special}<p class="note">{i18n.t(`speakerList.special.${listed.special}`)}</p>{/if}
 </article>

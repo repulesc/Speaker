@@ -107,6 +107,8 @@ export interface ListedSpeaker {
   /** The maker's page the size was read on, and the newest date any value was read. */
   url: string;
   retrieved: string;
+  /** The cabinet type or the port position is the project owner's word, not read on the page. */
+  ownerFacts?: boolean;
   /** The size comes from a third-party listing, not the maker: the card says "check yours". */
   fromListing?: boolean;
   /** The port position was seen on the maker's photos, not read in a text. */

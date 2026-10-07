@@ -281,6 +281,8 @@ export const en = {
     cancel: 'Keep {name}',
     source: 'From the maker’s page, read on {date}',
     edited: 'From the maker’s page, read on {date}. Changed by you.',
+    ownerFacts:
+      'Cabinet and port are from the project owner, not the maker’s page. Check the back of yours.',
     listing: 'Size from a listing, read on {date}. Check yours.',
     listingEdited: 'Size from a listing, read on {date}. Changed by you.',
     photoPort: 'Port position from the maker’s photos. Check the back of yours.',
