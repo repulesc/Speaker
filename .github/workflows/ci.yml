@@ -30,6 +30,8 @@ jobs:
         run: npx playwright test
         env:
           CI: 'true'
+      - name: The published site holds no invented test speakers
+        run: '! grep -rlE "Example Audio|Sample Labs" dist'
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         with:
