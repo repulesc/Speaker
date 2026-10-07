@@ -281,6 +281,17 @@ const CONTROL_WORDS = {
   treble: /treble|high[- ]frequency|\bhf\b|high shelf/,
 } as const;
 
+/** What a third-party listing is not trusted for: a wrong value here gives wrong advice. */
+const NOT_FROM_LISTINGS: readonly string[] = [
+  'bass',
+  'port',
+  'minWallMm',
+  'positionSetting',
+  'controls',
+  'designedForCorner',
+  'tweeterMm',
+];
+
 const REQUIRED = ['sizeMm', 'enclosure', 'drivers'] as const;
 const OPTIONAL = [
   'bass',
@@ -307,6 +318,13 @@ export function checkDraft(draft: Draft, page: string): CheckResult {
       continue;
     }
     const source = { url: draft.url, retrieved: draft.retrieved };
+    if (draft.source === 'listing' && NOT_FROM_LISTINGS.includes(field)) {
+      rejected.push({
+        field,
+        reason: 'a third-party listing is not trusted for this; use the maker',
+      });
+      continue;
+    }
     if ('seenOnPhotos' in f) {
       if (!FROM_PHOTOS.includes(field)) {
         rejected.push({ field, reason: 'this needs words on a page, not a photo' });

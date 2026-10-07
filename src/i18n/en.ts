@@ -281,6 +281,8 @@ export const en = {
     cancel: 'Keep {name}',
     source: 'From the maker’s page, read on {date}',
     edited: 'From the maker’s page, read on {date}. Changed by you.',
+    listing: 'Size from a listing, read on {date}. Check yours.',
+    listingEdited: 'Size from a listing, read on {date}. Changed by you.',
     photoPort: 'Port position from the maker’s photos. Check the back of yours.',
     special: {
       amt: 'Its air-motion (AMT) tweeter is not part of the room model: take the treble advice as less certain.',

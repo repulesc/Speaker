@@ -59,7 +59,16 @@
   </div>
   {#if facts}<p class="facts">{facts}</p>{/if}
   <a class="source" href={listed.url} target="_blank" rel="noopener noreferrer"
-    >{i18n.t(listed.edited ? 'speakerList.edited' : 'speakerList.source', { date })}</a
+    >{i18n.t(
+      listed.fromListing
+        ? listed.edited
+          ? 'speakerList.listingEdited'
+          : 'speakerList.listing'
+        : listed.edited
+          ? 'speakerList.edited'
+          : 'speakerList.source',
+      { date },
+    )}</a
   >
   {#if listed.photoPort}<p class="note">{i18n.t('speakerList.photoPort')}</p>{/if}
   {#if listed.special}<p class="note">{i18n.t(`speakerList.special.${listed.special}`)}</p>{/if}

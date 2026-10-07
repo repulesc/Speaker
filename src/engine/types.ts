@@ -107,6 +107,8 @@ export interface ListedSpeaker {
   /** The maker's page the size was read on, and the newest date any value was read. */
   url: string;
   retrieved: string;
+  /** The size comes from a third-party listing, not the maker: the card says "check yours". */
+  fromListing?: boolean;
   /** The port position was seen on the maker's photos, not read in a text. */
   photoPort?: boolean;
   /** The maker gives no bass figure: the bass limit is the kind's typical value (🟡). */

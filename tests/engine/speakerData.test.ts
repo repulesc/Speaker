@@ -284,6 +284,33 @@ High Shelf EQ > 5 kHz: -2 dB, 0 dB, +2 dB. Low Shelf EQ < 300 Hz: -2 dB, 0 dB, +
     expect(wrong.rejected.some((f) => f.field === 'port')).toBe(true);
   });
 
+  it('a third-party listing is trusted for size, cabinet and drivers only', () => {
+    const r = checkDraft(
+      draft({
+        source: 'listing',
+        url: 'https://example.com/a-shop/model-one',
+        controls: {
+          value: { bass: true, treble: true },
+          quote: 'Bass and treble controls on the rear panel.',
+        },
+        minWallMm: { value: 200, quote: 'Place at least 20 cm from the wall behind.' },
+      }),
+      PAGE,
+    );
+    expect(r.entry?.sizeMm.via).toBe('listing');
+    expect(r.entry?.enclosure.via).toBe('listing');
+    // The bass figure and the port in the draft are refused too: only the maker may say them.
+    for (const f of ['bass', 'port', 'controls', 'minWallMm']) {
+      expect(
+        r.rejected.some((x) => x.field === f),
+        f,
+      ).toBe(true);
+    }
+    expect(r.entry?.bass).toBeUndefined();
+    expect(r.entry?.port).toBeUndefined();
+    expect(r.entry?.controls).toBeUndefined();
+  });
+
   it('refuses a control the quote does not name, and a tweeter above the cabinet', () => {
     const r = checkDraft(
       draft({
