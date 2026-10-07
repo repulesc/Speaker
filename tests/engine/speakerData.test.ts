@@ -10,12 +10,16 @@ import {
   type Draft,
 } from '../../src/engine/speakers/verify';
 import { speakerId, validateEntry, type SpeakerEntry } from '../../src/engine/speakers/entry';
+import { f6From } from '../../src/engine/speakers/bass';
+import { speakerHighPass } from '../../src/engine/rules/P09-bass-response';
 
 /** An invented spec page: the checker is tested on made-up text, never on a real product. */
 const PAGE = `
 Example Audio Model One — two-way bookshelf speaker
 Dimensions (H x W x D): 305 x 180 x 252 mm (12.0 x 7.1 x 9.9 in)
 Rear-firing bass reflex port. Aluminium dome tweeter on a waveguide.
+Place at least 20 cm from the wall behind. A boundary EQ switch sets wall or free-standing placement.
+Bass and treble controls on the rear panel. Tweeter centre 220 mm above the base.
 Frequency response: 48 Hz – 22 kHz (-6 dB), ±3 dB 55 Hz – 20 kHz
 Weight: 5,2 kg
 `;
@@ -28,6 +32,7 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   kind: 'bookshelf',
   url: 'https://example.com/model-one',
   retrieved: '2026-10-07',
+  source: 'spec-text',
   sizeMm: {
     value: { h: 305, w: 180, d: 252 },
     quote: 'Dimensions (H x W x D): 305 x 180 x 252 mm',
@@ -35,7 +40,6 @@ const draft = (over: Partial<Draft> = {}): Draft => ({
   enclosure: { value: 'ported', quote: 'Rear-firing bass reflex port' },
   port: { value: 'rear', quote: 'Rear-firing bass reflex port' },
   drivers: { value: 'two-way', quote: 'two-way bookshelf speaker' },
-  tweeter: { value: 'dome-waveguide', quote: 'Aluminium dome tweeter on a waveguide' },
   bass: { value: { hz: 48, db: 6 }, quote: 'Frequency response: 48 Hz – 22 kHz (-6 dB)' },
   ...over,
 });
@@ -75,6 +79,7 @@ describe('checking a draft against its page', () => {
       value: { h: 305, w: 180, d: 252 },
       url: 'https://example.com/model-one',
       retrieved: '2026-10-07',
+      via: 'spec-text',
     });
     expect(JSON.stringify(r.entry)).not.toMatch(/quote/);
     expect(JSON.stringify(r.entry)).not.toContain('Aluminium');
@@ -82,12 +87,21 @@ describe('checking a draft against its page', () => {
   });
 
   it('rejects a quote that is not on the page (an invented one)', () => {
-    const r = checkDraft(
+    const required = checkDraft(
+      draft({ enclosure: { value: 'sealed', quote: 'Sealed, acoustic suspension cabinet' } }),
+      PAGE,
+    );
+    expect(required.entry).toBeNull();
+    expect(required.rejected).toEqual([
+      { field: 'enclosure', reason: 'the quote is not in the page' },
+    ]);
+    // An optional fact that fails is left out; the rest of the entry stands.
+    const optional = checkDraft(
       draft({ port: { value: 'front', quote: 'Front-firing bass reflex port' } }),
       PAGE,
     );
-    expect(r.entry).toBeNull();
-    expect(r.rejected).toEqual([{ field: 'port', reason: 'the quote is not in the page' }]);
+    expect(optional.entry?.port).toBeUndefined();
+    expect(optional.rejected).toEqual([{ field: 'port', reason: 'the quote is not in the page' }]);
   });
 
   it('rejects a value the quote does not support', () => {
@@ -96,6 +110,7 @@ describe('checking a draft against its page', () => {
       PAGE,
     );
     expect(wrongPort.rejected[0]?.field).toBe('port');
+    expect(wrongPort.entry?.port).toBeUndefined();
     const wrongSize = checkDraft(
       draft({
         sizeMm: {
@@ -178,8 +193,9 @@ describe('checking a draft against its page', () => {
     expect(checkDraft(draft({ enclosure: undefined }), PAGE).rejected).toEqual([
       { field: 'enclosure', reason: 'missing' },
     ]);
-    const r = checkDraft(draft({ tweeter: undefined, bass: undefined }), PAGE);
-    expect(r.entry?.tweeter).toBeUndefined();
+    const r = checkDraft(draft({ port: undefined, bass: undefined }), PAGE);
+    expect(r.entry?.port).toBeUndefined();
+    expect(r.entry?.bass).toBeUndefined();
   });
 
   it('rejects an unbelievable whole: a floorstander that is 30 cm tall, a sealed box with a port', () => {
@@ -191,6 +207,98 @@ describe('checking a draft against its page', () => {
       `${PAGE}\nbass reflex port, sealed`,
     );
     expect(sealedWithPort.entry).toBeNull();
+  });
+});
+
+describe('the optional facts (tier B and C)', () => {
+  it('reads a minimum wall distance, a position setting, tone controls and a tweeter height', () => {
+    const r = checkDraft(
+      draft({
+        minWallMm: { value: 200, quote: 'Place at least 20 cm from the wall behind.' },
+        positionSetting: {
+          value: true,
+          quote: 'A boundary EQ switch sets wall or free-standing placement.',
+        },
+        controls: {
+          value: { bass: true, treble: true },
+          quote: 'Bass and treble controls on the rear panel.',
+        },
+        tweeterMm: { value: 220, quote: 'Tweeter centre 220 mm above the base.' },
+      }),
+      PAGE,
+    );
+    expect(r.rejected).toEqual([]);
+    expect(r.entry?.minWallMm?.value).toBe(200);
+    expect(r.entry?.positionSetting?.value).toBe(true);
+    expect(r.entry?.controls?.value).toEqual({ bass: true, treble: true });
+    expect(r.entry?.tweeterMm?.value).toBe(220);
+  });
+
+  it('refuses a control the quote does not name, and a tweeter above the cabinet', () => {
+    const r = checkDraft(
+      draft({
+        controls: { value: { bass: true, treble: true }, quote: 'Rear-firing bass reflex port' },
+      }),
+      PAGE,
+    );
+    expect(r.rejected[0]).toEqual({
+      field: 'controls',
+      reason: 'the quote does not name a treble control',
+    });
+    const page = `${PAGE}
+Tweeter centre 400 mm above the base.`;
+    const high = checkDraft(
+      draft({ tweeterMm: { value: 400, quote: 'Tweeter centre 400 mm above the base.' } }),
+      page,
+    );
+    expect(high.entry).toBeNull();
+    expect(high.rejected.some((f) => /within the cabinet/.test(f.reason))).toBe(true);
+  });
+
+  it('a bass figure that depends on a setting has to say so', () => {
+    const r = checkDraft(
+      draft({
+        bass: {
+          value: { hz: 48, db: 6, dependsOnSetting: true },
+          quote: 'Frequency response: 48 Hz – 22 kHz (-6 dB)',
+        },
+      }),
+      PAGE,
+    );
+    expect(r.rejected[0]?.reason).toBe('the quote does not say the figure depends on a setting');
+  });
+});
+
+describe('a port seen only on the maker’s photos', () => {
+  it('is kept only with a person’s confirmation, and says how it was found', () => {
+    const unconfirmed = checkDraft(draft({ port: { value: 'rear', seenOnPhotos: true } }), PAGE);
+    expect(unconfirmed.entry?.port).toBeUndefined();
+    expect(unconfirmed.rejected).toEqual([
+      { field: 'port', reason: 'seen on photos: a person has to confirm it' },
+    ]);
+    const confirmed = checkDraft(
+      draft({ port: { value: 'rear', seenOnPhotos: true, confirmedBy: 'owner' } }),
+      PAGE,
+    );
+    expect(confirmed.entry?.port).toMatchObject({ value: 'rear', via: 'photo-confirmed' });
+    expect(confirmed.review).toContainEqual({
+      field: 'port',
+      reason: "confirmed from the maker's photos by owner",
+    });
+  });
+
+  it('is never enough for a size or a bass figure: those need words on a page', () => {
+    const r = checkDraft(
+      draft({
+        sizeMm: { value: { h: 305, w: 180, d: 252 }, seenOnPhotos: true, confirmedBy: 'owner' },
+      }),
+      PAGE,
+    );
+    expect(r.entry).toBeNull();
+    expect(r.rejected[0]).toEqual({
+      field: 'sizeMm',
+      reason: 'this needs words on a page, not a photo',
+    });
   });
 });
 
@@ -243,5 +351,32 @@ describe('the candidate list', () => {
     }
     const special = speakers.filter((s) => s.special).map((s) => s.brand);
     expect(special).toEqual(expect.arrayContaining(['ESS', 'Quad', 'Magnepan']));
+  });
+});
+
+describe('the bass figure, moved to −6 dB along P09’s own roll-off', () => {
+  const level = (f: number, f6: number, sealed: boolean) =>
+    20 * Math.log10(speakerHighPass(f, f6, sealed));
+
+  it('puts a −3 or −10 dB figure exactly at that level on the curve P09 draws', () => {
+    for (const sealed of [true, false]) {
+      for (const db of [3, 10] as const) {
+        const { f6, assumed } = f6From({ hz: 45, db }, sealed);
+        expect(assumed).toBe(false);
+        expect(level(45, f6, sealed)).toBeCloseTo(-db, 6);
+      }
+    }
+  });
+
+  it('matches the plan’s rule of thumb: ×0.76 sealed, ×0.87 ported from −3 dB', () => {
+    expect(f6From({ hz: 100, db: 3 }, true).f6).toBeCloseTo(76, 0);
+    expect(f6From({ hz: 100, db: 3 }, false).f6).toBeCloseTo(87, 0);
+    expect(f6From({ hz: 100, db: 10 }, true).f6).toBeCloseTo(132, 0);
+    expect(f6From({ hz: 100, db: 10 }, false).f6).toBeCloseTo(115, 0);
+  });
+
+  it('keeps a −6 dB figure, and takes an unstated one as −6 dB but says it assumed so', () => {
+    expect(f6From({ hz: 48, db: 6 }, false)).toEqual({ f6: 48, assumed: false });
+    expect(f6From({ hz: 48, db: null }, false)).toEqual({ f6: 48, assumed: true });
   });
 });

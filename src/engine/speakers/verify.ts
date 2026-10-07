@@ -1,13 +1,5 @@
 import type { DriverLayout, EnclosureType, PortLocation } from '../types';
-import type {
-  BassBasis,
-  Category,
-  SizeMm,
-  Special,
-  SpeakerEntry,
-  Status,
-  Tweeter,
-} from './entry.ts';
+import type { Bass, Category, SizeMm, Special, SpeakerEntry, Status, Via } from './entry.ts';
 import { speakerId, validateEntry } from './entry.ts';
 import type { SpeakerKind } from '../presets/speakerKinds';
 
@@ -16,12 +8,12 @@ import type { SpeakerKind } from '../presets/speakerKinds';
  * `Draft`: each value with the exact words it was read from. Nothing is trusted: the quote must
  * really be in the page, and the value must really be in the quote. What passes becomes an entry
  * with only the value and the link; the quote is used here and then dropped (no copied text kept).
- * Pure functions: the fetching and the AI live outside the engine.
+ * A port position seen only on the maker's photos cannot be quote-checked: it is kept only when a
+ * person confirmed it, and it says so (`via: 'photo-confirmed'`). Pure functions: the fetching and
+ * the AI live outside the engine.
  */
-export interface DraftField<T> {
-  value: T;
-  quote: string;
-}
+export type DraftField<T> =
+  { value: T; quote: string } | { value: T; seenOnPhotos: true; confirmedBy?: string };
 
 export interface Draft {
   brand: string;
@@ -30,15 +22,21 @@ export interface Draft {
   category: Category;
   kind: SpeakerKind;
   special?: Special;
-  /** The page every quote was read on, and the day. */
+  aka?: string[];
+  /** The page every quote was read on, the day, and whether it is a spec page or a manual. */
   url: string;
   retrieved: string;
+  source: Exclude<Via, 'photo-confirmed'>;
   sizeMm?: DraftField<SizeMm>;
   enclosure?: DraftField<EnclosureType>;
-  port?: DraftField<PortLocation>;
   drivers?: DraftField<DriverLayout>;
-  tweeter?: DraftField<Tweeter>;
-  bass?: DraftField<{ hz: number; db: BassBasis }>;
+  bass?: DraftField<Bass>;
+  port?: DraftField<PortLocation>;
+  minWallMm?: DraftField<number>;
+  positionSetting?: DraftField<boolean>;
+  controls?: DraftField<{ bass: boolean; treble: boolean }>;
+  designedForCorner?: DraftField<boolean>;
+  tweeterMm?: DraftField<number>;
 }
 
 export interface Finding {
@@ -49,7 +47,10 @@ export interface Finding {
 export interface CheckResult {
   /** The entry, when every required field passed and the whole thing is believable. */
   entry: SpeakerEntry | null;
-  /** Fields (or the whole entry) that failed: left out, with why. */
+  /**
+   * Fields (or the whole entry) that failed, with why. A failed required field means no entry; a
+   * failed optional one is left out of it.
+   */
   rejected: Finding[];
   /** Passed, but a person should look: something the quote does not settle. */
   review: Finding[];
@@ -160,7 +161,6 @@ const KEYWORDS: {
   enclosure: Record<Exclude<EnclosureType, 'unknown'>, RegExp>;
   port: Record<Exclude<PortLocation, 'unknown'>, RegExp>;
   drivers: Record<Exclude<DriverLayout, 'unknown'>, RegExp>;
-  tweeter: Record<Tweeter, RegExp>;
 } = {
   enclosure: {
     sealed: /sealed|closed[- ]box|closed cabinet|acoustic suspension/,
@@ -182,20 +182,10 @@ const KEYWORDS: {
     'full-range': /full[- ]?range|single[- ]driver/,
     other: /./,
   },
-  tweeter: {
-    dome: /dome|silk|aluminium|aluminum|titanium|beryllium|diamond/,
-    'dome-waveguide': /waveguide/,
-    ribbon: /ribbon/,
-    amt: /\bamt\b|air motion|heil/,
-    horn: /\bhorn\b/,
-    coaxial: /coax|uni-?q|concentric/,
-    planar: /planar|electrostatic|magnetostatic|isodynamic/,
-    other: /./,
-  },
 };
 
 /** The −3 / −6 / −10 dB figure named in a quote, and whether it is a ± tolerance instead. */
-function basisIn(quote: string): { db: BassBasis; tolerance: boolean } {
+function basisIn(quote: string): { db: Bass['db']; tolerance: boolean } {
   const q = clean(quote);
   const m = q.match(/(±|\+\/-)?\s?[-+]?\s?(3|6|10)\s?db/);
   if (!m) return { db: null, tolerance: false };
@@ -233,7 +223,6 @@ const checks = {
   enclosure: keyword(KEYWORDS.enclosure, 'cabinet') as Check<EnclosureType>,
   port: keyword(KEYWORDS.port, 'port') as Check<PortLocation>,
   drivers: keyword(KEYWORDS.drivers, 'drivers') as Check<DriverLayout>,
-  tweeter: keyword(KEYWORDS.tweeter, 'tweeter') as Check<Tweeter>,
   bass: ((v, q) => {
     const c = clean(q);
     if (!/hz/.test(c)) return { ok: false, reason: 'the quote names no hertz' };
@@ -242,27 +231,87 @@ const checks = {
     if (v.db !== null && found.db !== v.db) {
       return { ok: false, reason: `the quote does not say ${v.db} dB` };
     }
+    if (v.dependsOnSetting && !/setting|mode|switch|eq\b|position|wall|desk|extension/.test(c)) {
+      return { ok: false, reason: 'the quote does not say the figure depends on a setting' };
+    }
     if (found.tolerance)
       return { ok: true, review: '± dB is a tolerance band, not the bass limit' };
     return v.db === null
       ? { ok: true, review: 'the quote does not say which dB level' }
       : { ok: true };
-  }) as Check<{ hz: number; db: BassBasis }>,
+  }) as Check<Bass>,
+  minWallMm: ((v, q) =>
+    !mmIn(v, q)
+      ? { ok: false, reason: `${v} mm is not in the quote` }
+      : /wall/.test(clean(q))
+        ? { ok: true }
+        : { ok: false, reason: 'the quote does not mention a wall' }) as Check<number>,
+  positionSetting: ((v, q) =>
+    v &&
+    /(wall|desk|position|placement|boundary|room|corner|free[- ]?standing).{0,40}(switch|setting|mode|eq|compensation)|(switch|setting|mode|eq|compensation).{0,40}(wall|desk|position|placement|boundary|room|corner)/.test(
+      clean(q),
+    )
+      ? { ok: true }
+      : {
+          ok: false,
+          reason: 'the quote does not name a wall or position setting',
+        }) as Check<boolean>,
+  controls: ((v, q) => {
+    const c = clean(q);
+    const missing = (['bass', 'treble'] as const).filter(
+      (k) => v[k] && !new RegExp(`${k}`).test(c),
+    );
+    if (!v.bass && !v.treble)
+      return { ok: false, reason: 'record controls only when there are some' };
+    return missing.length
+      ? { ok: false, reason: `the quote does not name a ${missing.join(' or ')} control` }
+      : { ok: true };
+  }) as Check<{ bass: boolean; treble: boolean }>,
+  designedForCorner: ((v, q) =>
+    v && /corner/.test(clean(q))
+      ? { ok: true }
+      : { ok: false, reason: 'the quote does not mention a corner' }) as Check<boolean>,
+  tweeterMm: ((v, q) =>
+    mmIn(v, q) && /tweeter|treble|coax|uni-?q|high[- ]frequency|hf/.test(clean(q))
+      ? { ok: true }
+      : { ok: false, reason: 'the quote does not give this tweeter height' }) as Check<number>,
 };
 
-const REQUIRED = ['sizeMm', 'enclosure', 'port', 'drivers'] as const;
-const OPTIONAL = ['tweeter', 'bass'] as const;
+const REQUIRED = ['sizeMm', 'enclosure', 'drivers'] as const;
+const OPTIONAL = [
+  'bass',
+  'port',
+  'minWallMm',
+  'positionSetting',
+  'controls',
+  'designedForCorner',
+  'tweeterMm',
+] as const;
+/** Facts a person may confirm from the maker's photos (the others need words on a page). */
+const FROM_PHOTOS: readonly string[] = ['port'];
 
 /** Checks every field of a draft against the page text it was read from. */
 export function checkDraft(draft: Draft, page: string): CheckResult {
   const rejected: Finding[] = [];
   const review: Finding[] = [];
   const kept: Partial<Record<(typeof REQUIRED)[number] | (typeof OPTIONAL)[number], unknown>> = {};
+  const isRequired = (field: string) => (REQUIRED as readonly string[]).includes(field);
   for (const field of [...REQUIRED, ...OPTIONAL]) {
     const f = draft[field] as DraftField<never> | undefined;
     if (!f) {
-      if ((REQUIRED as readonly string[]).includes(field))
-        rejected.push({ field, reason: 'missing' });
+      if (isRequired(field)) rejected.push({ field, reason: 'missing' });
+      continue;
+    }
+    const source = { url: draft.url, retrieved: draft.retrieved };
+    if ('seenOnPhotos' in f) {
+      if (!FROM_PHOTOS.includes(field)) {
+        rejected.push({ field, reason: 'this needs words on a page, not a photo' });
+      } else if (!f.confirmedBy?.trim()) {
+        rejected.push({ field, reason: 'seen on photos: a person has to confirm it' });
+      } else {
+        kept[field] = { value: f.value, ...source, via: 'photo-confirmed' };
+        review.push({ field, reason: `confirmed from the maker's photos by ${f.confirmedBy}` });
+      }
       continue;
     }
     if (!quoteIn(f.quote, page)) {
@@ -272,15 +321,16 @@ export function checkDraft(draft: Draft, page: string): CheckResult {
     const verdict = (checks[field] as Check<never>)(f.value, f.quote);
     if (!verdict.ok) rejected.push({ field, reason: verdict.reason ?? 'does not match its quote' });
     else {
-      kept[field] = { value: f.value, url: draft.url, retrieved: draft.retrieved };
+      kept[field] = { value: f.value, ...source, via: draft.source };
       if (verdict.review) review.push({ field, reason: verdict.review });
     }
   }
-  if (rejected.length) return { entry: null, rejected, review };
+  if (rejected.some((f) => isRequired(f.field))) return { entry: null, rejected, review };
   const entry = {
     id: speakerId(draft.brand, draft.model),
     brand: draft.brand,
     model: draft.model,
+    ...(draft.aka?.length ? { aka: draft.aka } : {}),
     status: draft.status,
     category: draft.category,
     kind: draft.kind,
@@ -291,7 +341,7 @@ export function checkDraft(draft: Draft, page: string): CheckResult {
   if (problems.length) {
     return {
       entry: null,
-      rejected: problems.map((reason) => ({ field: 'entry', reason })),
+      rejected: [...rejected, ...problems.map((reason) => ({ field: 'entry', reason }))],
       review,
     };
   }

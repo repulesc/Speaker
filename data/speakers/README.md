@@ -7,4 +7,4 @@ Facts about stereo speakers, each with a link to where it was read and the day i
 
 How entries are made and checked, and the rules, are in [docs/SPEAKER_DATA.md](../../docs/SPEAKER_DATA.md).
 
-Licence (proposed, the owner decides): dedicated to the public domain, CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/), so anyone can reuse the list. Until the owner confirms, treat it as all rights reserved.
+Licence: dedicated to the public domain under CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/), so anyone can reuse the list. The links point to the makers' own pages, which keep their own terms.
