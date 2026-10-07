@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
+  describeSpeakers,
   fillRoom,
   group,
   goStep,
@@ -19,6 +20,7 @@ test('journey 1 — first answer: room, speaker, then results within 3 seconds',
   await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
+  await describeSpeakers(page);
   await page.getByLabel('What kind of speakers?').selectOption('monitor');
   await page.getByLabel('Drivers', { exact: true }).selectOption('coaxial');
   await goStep(page, 'Results');
@@ -37,6 +39,7 @@ test('journey 2 — edit without restart: change the ceiling, results follow, no
   await openApp(page);
   await fillRoom(page, '4', '5', '2.5');
   await goStep(page, 'Speakers');
+  await describeSpeakers(page);
   await page.getByLabel('What kind of speakers?').selectOption('monitor');
   await page.getByLabel('Drivers', { exact: true }).selectOption('coaxial');
   await goStep(page, 'Results');

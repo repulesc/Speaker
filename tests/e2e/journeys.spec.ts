@@ -3,6 +3,7 @@ import { encodeShare } from '../../src/app/state/share';
 import { messageKeys, MESSAGES, translate } from '../../src/i18n/translate';
 import { makeProject } from '../fixtures/projects';
 import {
+  describeSpeakers,
   fillRoom,
   goHome,
   mapChoice,
@@ -238,7 +239,8 @@ test('first run: three questions, no tape measure, then a first guess to drag', 
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('radio', { name: /^Where to put my speakers/ }).check({ force: true });
   await page.getByRole('button', { name: 'Next' }).click();
-  // Three dropdowns, each starting at "Not sure": kind, size and the bass port.
+  // The list first; without your model, three dropdowns, each starting at "Not sure".
+  await describeSpeakers(page);
   await expect(page.getByLabel('How big?')).toHaveValue('');
   await page.getByLabel('What kind of speakers?').selectOption('monitor');
   await page.getByLabel('How big?').selectOption('large');
@@ -293,7 +295,7 @@ test('the menu is a drawer over the panel: preferences, sharing, about', async (
 });
 
 test('the support link stays in view under the map and opens in a new tab', async ({ page }) => {
-  const link = page.getByRole('link', { name: /Support Nodo/ });
+  const link = page.getByRole('link', { name: /Support NODO/ });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('rel', /noopener/);

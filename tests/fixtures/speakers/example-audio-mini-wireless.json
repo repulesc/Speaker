@@ -1,0 +1,67 @@
+{
+  "id": "example-audio-mini-wireless",
+  "brand": "Example Audio",
+  "model": "Mini Wireless",
+  "status": "current",
+  "category": "all-in-one",
+  "kind": "bookshelf",
+  "sizeMm": {
+    "value": {
+      "w": 160,
+      "h": 240,
+      "d": 180
+    },
+    "url": "https://example.com/example-audio/mini-wireless",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "ported",
+    "url": "https://example.com/example-audio/mini-wireless",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "coaxial",
+    "url": "https://example.com/example-audio/mini-wireless",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "bass": {
+    "value": {
+      "hz": 50,
+      "db": null,
+      "dependsOnSetting": true
+    },
+    "url": "https://example.com/example-audio/mini-wireless",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "port": {
+    "value": "rear",
+    "url": "https://example.com/example-audio/mini-wireless",
+    "retrieved": "2026-10-07",
+    "via": "photo-confirmed"
+  },
+  "minWallMm": {
+    "value": 100,
+    "url": "https://example.com/example-audio/mini-wireless/manual",
+    "retrieved": "2026-10-01",
+    "via": "manual"
+  },
+  "positionSetting": {
+    "value": true,
+    "url": "https://example.com/example-audio/mini-wireless/manual",
+    "retrieved": "2026-10-01",
+    "via": "manual"
+  },
+  "controls": {
+    "value": {
+      "bass": true,
+      "treble": true
+    },
+    "url": "https://example.com/example-audio/mini-wireless/manual",
+    "retrieved": "2026-10-01",
+    "via": "manual"
+  }
+}

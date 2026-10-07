@@ -267,6 +267,51 @@ export const en = {
       },
     },
   },
+  speakerList: {
+    find: 'Find your speaker',
+    placeholder: 'Brand or model',
+    brands: 'Or browse by brand',
+    models: '{n} models',
+    model: '1 model',
+    found: '{n} found',
+    none: 'Nothing matches “{q}”. Try fewer letters, or describe your speakers.',
+    notListed: 'Not listed? Describe it instead',
+    useList: 'Find it in the list instead',
+    change: 'Change',
+    cancel: 'Keep {name}',
+    source: 'From the maker’s page, read on {date}',
+    edited: 'From the maker’s page, read on {date}. Changed by you.',
+    photoPort: 'Port position from the maker’s photos. Check the back of yours.',
+    special: {
+      amt: 'Its air-motion (AMT) tweeter is not part of the room model: take the treble advice as less certain.',
+      planar:
+        'A panel speaker plays backwards too: the map models box speakers, so its advice is less certain here.',
+      dipole:
+        'A dipole plays backwards too: the map models box speakers, so its advice is less certain here.',
+      horn: 'Horns are not part of the room model: take the map’s advice as less certain.',
+    },
+    details: 'Edit details',
+    kind: {
+      bookshelf: 'Bookshelf',
+      floorstander: 'Floor-standing',
+      monitor: 'Studio monitor',
+      desktop: 'Desktop',
+      wall: 'Wall',
+    },
+    category: { passive: 'passive', active: 'active', 'all-in-one': 'all-in-one' },
+    port: {
+      front: 'front port',
+      rear: 'rear port',
+      down: 'down-firing port',
+      side: 'side port',
+      ported: 'ported',
+      sealed: 'sealed',
+      'passive-radiator': 'passive radiator',
+      'open-baffle': 'open baffle',
+    },
+    f6: '−6 dB at {hz} Hz',
+    f6About: '−6 dB at about {hz} Hz',
+  },
   goals: {
     goal: {
       'wide-stage': {
@@ -352,6 +397,7 @@ export const en = {
     speaker: {
       title: 'Tell us about your speakers',
       help: 'Answer what you know. “Not sure” is a fine answer.',
+      find: 'Find your model in the list, or describe it if it is not there.',
     },
   },
   guess: {

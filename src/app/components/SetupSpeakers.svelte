@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DRIVER_CHOICES } from '../../engine/presets/speakerKinds';
+  import { DRIVER_CHOICES, type DriverChoice } from '../../engine/presets/speakerKinds';
   import type { SpeakerProfile } from '../../engine/types';
   import { i18n } from '../../i18n/locale.svelte';
   import { workspace } from '../session.svelte';
@@ -8,19 +8,45 @@
   import LengthField from './LengthField.svelte';
   import LengthInput from './LengthInput.svelte';
   import SelectRow from './SelectRow.svelte';
-  import SpeakerQuestions from './SpeakerQuestions.svelte';
+  import { markEdited } from '../state/speakerList';
+  import SpeakerPicker from './SpeakerPicker.svelte';
 
   /**
-   * The speakers (docs/ROADMAP_V9.md §2): four questions that fill in typical values, and one fold
-   * for the numbers from the manual. Everything here changes the result; brand, model, "made for"
-   * and "spread" were cut because they did not.
+   * The speakers (docs/ROADMAP_V9.md §2): picked from the list, or four questions that fill in
+   * typical values (SpeakerPicker), and one fold for the numbers from the manual. Everything here
+   * changes the result. A value changed by hand on a listed speaker marks its card "changed by
+   * you".
    */
   const project = $derived(workspace.project);
   const speaker = $derived(project.speaker);
   const system = $derived(project.units);
 
   const editSpeaker = (change: (s: SpeakerProfile) => void) =>
-    workspace.edit((p) => change(p.speaker));
+    workspace.edit((p) => {
+      change(p.speaker);
+      markEdited(p.speaker);
+    });
+
+  /** The driver layout: a question for a described speaker, a plain value for a listed one. */
+  const drivers = $derived(
+    speaker.listed
+      ? (DRIVER_CHOICES as readonly string[]).includes(speaker.driverLayout.value ?? '')
+        ? speaker.driverLayout.value!
+        : ''
+      : (speaker.choices?.drivers ?? ''),
+  );
+  function setDrivers(v: string) {
+    if (speaker.listed) {
+      if (v)
+        editSpeaker(
+          (s) => void (s.driverLayout = { value: v as DriverChoice, certainty: 'measured' }),
+        );
+    } else {
+      workspace.edit((p) =>
+        setSpeakerChoice(p, 'drivers', v === '' ? undefined : (v as DriverChoice)),
+      );
+    }
+  }
 
   function toggleDsp(key: 'treble' | 'bass', on: boolean) {
     editSpeaker((s) => {
@@ -62,11 +88,13 @@
 
 <section class="form-group" id="setup-speakers" aria-labelledby="setup-speakers-title">
   <h2 id="setup-speakers-title">{i18n.t('setup.speakers.title')}</h2>
-  <SpeakerQuestions />
+  <SpeakerPicker questions={['kind', 'size', 'port', 'placedOn']} idPrefix="speaker" place />
 
   <details class="fold" bind:open={ui.speakerDetails}>
     <summary>
-      <span class="fold-title">{i18n.t('setup.speakers.manual')}</span>
+      <span class="fold-title"
+        >{i18n.t(speaker.listed ? 'speakerList.details' : 'setup.speakers.manual')}</span
+      >
       <span class="fold-hint">{i18n.t('setup.speakers.manualHint')}</span>
     </summary>
     <!-- Rendered only when open: these fields share names (Width, Height) with the room's. -->
@@ -76,16 +104,13 @@
           <SelectRow
             id="speaker-drivers"
             label={i18n.t('speakers.ask.drivers.label')}
-            value={speaker.choices?.drivers ?? ''}
+            value={drivers}
             unset={i18n.t('setup.notSure')}
             options={DRIVER_CHOICES.map((v) => ({
               value: v,
               label: i18n.t(`speakers.ask.drivers.${v}`),
             }))}
-            onchange={(v) =>
-              workspace.edit((p) =>
-                setSpeakerChoice(p, 'drivers', v === '' ? undefined : (v as never)),
-              )}
+            onchange={setDrivers}
           />
         </div>
         <div class="dims">

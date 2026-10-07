@@ -188,3 +188,9 @@ export function group(page: Page, name: 'room' | 'speakers' | 'listen' | 'goals'
   };
   return page.locator(at[name]);
 }
+
+/** The speaker list comes first; "Not listed? Describe it instead" brings the questions. */
+export async function describeSpeakers(page: Page) {
+  const link = page.getByRole('button', { name: /^Not listed\? Describe it instead/ });
+  if (await link.count()) await link.click();
+}

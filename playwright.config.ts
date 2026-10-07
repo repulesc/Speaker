@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * End-to-end tests run against the production build served by `vite preview`.
+ * End-to-end tests run against the production build served by `vite preview`, built with
+ * `--mode e2e` so the speaker list holds the invented test entries (tests/fixtures/speakers).
  * In CI the browser comes from `npx playwright install chromium`; in sandboxes that ship their own
  * Chromium, point PW_CHROMIUM at it.
  */
@@ -36,7 +37,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run build && npm run preview -- --port 4173 --strictPort',
+    command: 'npm run build -- --mode e2e && npm run preview -- --port 4173 --strictPort',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

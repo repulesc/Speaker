@@ -1,3 +1,4 @@
+import { DEFAULTS } from '../../engine/presets/defaults';
 import { baseHeight, placedOnOf, type SpeakerChoices } from '../../engine/presets/speakerKinds';
 import type { Project } from '../../engine/types';
 import { speakerFromChoices } from './defaults';
@@ -6,8 +7,8 @@ import { speakerFromChoices } from './defaults';
  * Answers one speaker question (undefined = "Not sure") and fills the speaker with the typical
  * values for all answers so far (docs/ROADMAP_V7.md, Phase 2). Brand, model, identity, controls
  * and the maker's wall distance stay; every filled value is an estimate. Where the speakers stand
- * (floor, stand, desk) sets the base height of both speakers in every setup; their position on the
- * floor is not touched.
+ * (floor, stand, desk) changes no speaker value: it sets the base height of both speakers in every
+ * setup; their position on the floor is not touched.
  */
 export function setSpeakerChoice<K extends keyof SpeakerChoices>(
   project: Project,
@@ -18,6 +19,13 @@ export function setSpeakerChoice<K extends keyof SpeakerChoices>(
   const choices: SpeakerChoices = { ...old.choices };
   if (value === undefined) delete choices[key];
   else choices[key] = value;
+  if (key === 'placedOn') {
+    // Where they stand changes no speaker value: keep them (typed, or from the list).
+    old.choices = choices;
+    if (Object.keys(choices).length === 0) delete old.choices;
+    setBaseHeight(project);
+    return;
+  }
   const { id, brand, model, dsp, minWallDistance, designedForCorner, manufacturerNotes } = old;
   project.speaker = {
     ...speakerFromChoices(choices),
@@ -30,12 +38,17 @@ export function setSpeakerChoice<K extends keyof SpeakerChoices>(
     manufacturerNotes,
   };
   if (Object.keys(choices).length === 0) delete project.speaker.choices;
-  // The base height follows the place (and the tweeter height) once the kind or place is known.
-  if (choices.kind || choices.placedOn) {
-    const z = baseHeight(placedOnOf(choices), project.speaker.acousticAxisHeight.value!);
-    for (const v of project.variants) {
-      v.speakers.left.base.z = z;
-      v.speakers.right.base.z = z;
-    }
+  setBaseHeight(project);
+}
+
+/** The base height follows the place (and the tweeter height) once the kind or place is known. */
+export function setBaseHeight(project: Project): void {
+  const choices = project.speaker.choices ?? {};
+  if (!choices.kind && !choices.placedOn) return;
+  const axis = project.speaker.acousticAxisHeight.value ?? DEFAULTS.acousticAxisHeight;
+  const z = baseHeight(placedOnOf(choices), axis);
+  for (const v of project.variants) {
+    v.speakers.left.base.z = z;
+    v.speakers.right.base.z = z;
   }
 }

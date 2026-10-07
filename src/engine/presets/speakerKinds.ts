@@ -141,7 +141,7 @@ export interface SpeakerValues {
  * box has the tweeter near the top and the woofer below; a coaxial driver has both in one place; a
  * tall floorstander has the tweeter about ear height and the bass drivers low.
  */
-function driverHeights(kind: SpeakerKind, drivers: DriverChoice, h: number) {
+export function driverHeights(kind: SpeakerKind, drivers: DriverChoice, h: number) {
   const tall = kind === 'floorstander';
   if (drivers === 'coaxial') {
     const at = tall ? h - 0.15 : 0.6 * h;

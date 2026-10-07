@@ -1,0 +1,31 @@
+{
+  "id": "sample-labs-panel-7",
+  "brand": "Sample Labs",
+  "model": "Panel 7",
+  "status": "vintage",
+  "category": "passive",
+  "kind": "floorstander",
+  "special": "planar",
+  "sizeMm": {
+    "value": {
+      "w": 450,
+      "h": 1400,
+      "d": 90
+    },
+    "url": "https://example.com/sample-labs/panel-7",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "enclosure": {
+    "value": "open-baffle",
+    "url": "https://example.com/sample-labs/panel-7",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  },
+  "drivers": {
+    "value": "other",
+    "url": "https://example.com/sample-labs/panel-7",
+    "retrieved": "2026-10-01",
+    "via": "spec-text"
+  }
+}

@@ -9,7 +9,8 @@
   import { ROOM_LIMITS, USUAL_ROOM_RANGE } from '../state/limits';
   import { ui } from '../ui.svelte';
   import LengthField from './LengthField.svelte';
-  import SpeakerQuestions from './SpeakerQuestions.svelte';
+  import SpeakerPicker from './SpeakerPicker.svelte';
+  import { SPEAKER_LIST } from '../speakers/list';
   import Wordmark from './Wordmark.svelte';
 
   /**
@@ -135,8 +136,10 @@
       </div>
     {:else}
       <h2 id="survey-title" tabindex="-1">{i18n.t('survey.speaker.title')}</h2>
-      <p class="help">{i18n.t('survey.speaker.help')}</p>
-      <SpeakerQuestions questions={['kind', 'size', 'port']} idPrefix="survey" />
+      <p class="help">
+        {i18n.t(SPEAKER_LIST.length ? 'survey.speaker.find' : 'survey.speaker.help')}
+      </p>
+      <SpeakerPicker questions={['kind', 'size', 'port']} idPrefix="survey" />
     {/if}
 
     <div class="actions">

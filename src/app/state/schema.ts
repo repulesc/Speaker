@@ -99,6 +99,17 @@ export const speakerSchema: Check = obj({
       placedOn: optional(oneOf(PLACED_ON)),
     }),
   ),
+  listed: optional(
+    obj({
+      id: str(SIZE_LIMITS.name),
+      url: text,
+      retrieved: str(10),
+      photoPort: optional(bool),
+      bassFromKind: optional(bool),
+      special: optional(oneOf(['amt', 'planar', 'dipole', 'horn'])),
+      edited: optional(bool),
+    }),
+  ),
   manufacturerNotes: arr(
     obj({
       text,
