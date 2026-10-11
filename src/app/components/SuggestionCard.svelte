@@ -6,8 +6,9 @@
   import { prefs } from '../prefs.svelte';
   import { roomFound } from '../findings/roomFacts';
   import { visibleAdvice } from '../findings/visible';
+  import { isConverged } from '../../engine/converged';
   import { applyCandidate, cabinet } from '../plan/placement';
-  import { analysis, showNotice, workspace } from '../session.svelte';
+  import { analysis, showNotice, urlState, workspace } from '../session.svelte';
   import { goalOf, type Goal } from '../state/goal';
   import MoodFace from './MoodFace.svelte';
   import PlacementOptions from './PlacementOptions.svelte';
@@ -21,6 +22,10 @@
   const LETTERS = ['A', 'B', 'C'];
   const project = $derived(workspace.project);
   const ok = $derived(analysis.result?.status === 'ok' ? analysis.result : null);
+  const converged = $derived(isConverged(project));
+  const appliedIdea = $derived(
+    project.variants.find((v) => v.id === project.activeVariantId)?.applied?.idea ?? 'best',
+  );
   const spots = $derived(ok?.candidates.slice(0, 3) ?? []);
   const shown = $derived(spots[ui.candidate ?? 0] ?? null);
   const move = $derived(ok?.topActions.some((a) => a.kind === 'move') ?? false);
@@ -134,9 +139,17 @@
     const placement = $state.snapshot(shown);
     const now = $state.snapshot(project.variants.find((v) => v.id === project.activeVariantId)!);
     ui.showChange({ speakers: now.speakers, listener: now.listener.ears });
-    workspace.edit((p) => void applyCandidate(p, placement));
+    urlState.step(() => workspace.edit((p) => void applyCandidate(p, placement)));
     ui.candidate = null;
     showNotice('success', i18n.t('suggest.applied'), { undo: true });
+  }
+
+  /** "Look again": the converged state ends and the search runs from here. */
+  function lookAgain() {
+    workspace.edit((p) => {
+      const variant = p.variants.find((v) => v.id === p.activeVariantId);
+      if (variant) delete variant.applied;
+    });
   }
 
   // ── Bass at the suggested spot: a word and a small curve ────────────────────
@@ -243,10 +256,24 @@
     {:else}
       <section class="answer" aria-labelledby="suggest-title">
         <h3 id="suggest-title" class="overline">{i18n.t('suggest.title')}</h3>
-        {#if !shown}
+        {#if converged}
+          <!-- Applied and untouched: nothing new is suggested until something moves (V11). -->
+          <p class="say" data-testid="converged">{i18n.t('suggest.locked')}</p>
+          <p class="caption">
+            {i18n.t(`suggest.idea.${appliedIdea}`)}. {i18n.t('suggest.lockedHelp')}
+          </p>
+          <div class="actions">
+            <button type="button" class="btn" onclick={lookAgain}
+              >{i18n.t('suggest.lookAgain')}</button
+            >
+          </div>
+        {:else if !shown}
           <p class="caption">{i18n.t('suggest.nothing')}</p>
         {:else}
           {#if move}<p class="say" data-testid="say">{sentence.join(' ')}</p>{/if}
+          {#if shown.idea}<p class="caption" data-testid="idea-name">
+              {i18n.t(`suggest.idea.${shown.idea}`)}
+            </p>{/if}
           <dl class="figures" data-testid="suggestion">
             <div>
               <dt>{i18n.t('suggest.speakers')}</dt>

@@ -171,3 +171,23 @@ describe('the shipped list (data/speakers/entries)', () => {
     for (const e of entries) expect(speakerSchema(speakerFromEntry(e), 'speaker'), e.id).toBeNull();
   });
 });
+
+describe('the shipped list: brands and notes', () => {
+  const shipped = new URL('../../data/speakers/entries/', import.meta.url);
+  const entries = readdirSync(shipped)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => JSON.parse(readFileSync(new URL(f, shipped), 'utf8')) as SpeakerEntry);
+
+  it('one brand name for ESS, however the maker writes it', () => {
+    const ess = entries.filter((e) => /^ess\b/i.test(e.brand));
+    expect(ess.length).toBeGreaterThan(1);
+    expect(new Set(ess.map((e) => e.brand))).toEqual(new Set(['ESS']));
+  });
+
+  it('only the air-motion designs carry the AMT note; KEF does not', () => {
+    for (const e of entries) {
+      const s = speakerFromEntry(e);
+      expect(s.listed!.special === 'amt', `${e.id}`).toBe(/ess/i.test(e.brand));
+    }
+  });
+});

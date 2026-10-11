@@ -58,6 +58,15 @@ const variant = obj({
     area: optional(oneOf(['sofa', 'desk', 'bed'])),
   }),
   busyness: optional(known(oneOf(['bare', 'some', 'busy', 'very-busy']))),
+  applied: optional(
+    obj({
+      left: vec3,
+      right: vec3,
+      seat: vec3,
+      idea: oneOf(['triangle', 'wall', 'best']),
+      key: str(SIZE_LIMITS.text),
+    }),
+  ),
 });
 
 /** A tone control's range, e.g. −3…+3 dB in 0.5 dB steps. */

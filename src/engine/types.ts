@@ -221,6 +221,18 @@ export interface SetupVariant {
   listener: Listener;
   /** How full the room is. */
   busyness?: Known<Busyness>;
+  /**
+   * Where "Apply" last put the speakers and the seat, with the idea it came from (V11): while
+   * things still stand there, the setup is converged and nothing new is suggested.
+   */
+  applied?: {
+    left: Vec3;
+    right: Vec3;
+    seat: Vec3;
+    idea: PlacementIdea;
+    /** The room and speaker it was made for (engine/converged.ts). */
+    key: string;
+  };
 }
 
 export interface Project {
@@ -307,7 +319,16 @@ export interface ScoreBreakdownItem {
 
 export type ComponentId = 'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6' | 'C7' | 'C8';
 
+/**
+ * The named idea a candidate comes from (docs/ROADMAP_V11.md): the equilateral listening
+ * triangle with the seat near 38 % of the room's length, speakers close to the front wall
+ * (boundary gain), or simply the best result of the whole search.
+ */
+export type PlacementIdea = 'triangle' | 'wall' | 'best';
+
 export interface Candidate extends Placement {
+  /** Which idea this spot comes from (absent on candidates from older analyses). */
+  idea?: PlacementIdea;
   /** Robust score 0..1 (docs/SCORING.md §4). */
   score: number;
   nominalScore: number;
@@ -468,6 +489,8 @@ export interface AnalysisOk extends AnalysisBase {
   c: number;
   modes: Mode[];
   schroederHz: { value: number; low: number; high: number };
+  /** The setup stands where "Apply" put it: no candidates are computed (engine/converged.ts). */
+  converged?: true;
   t60: { bands: BandValues; mid: number; low: number; high: number; method: 'sabine' | 'eyring' };
   /** Smoothed relative response at the current seat, normalised to 0 dB median. */
   bassResponse: { f: number[]; dB: number[] };

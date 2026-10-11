@@ -102,7 +102,7 @@ test('journey 6 — share: a link opens an identical project for someone else', 
   await openSection(other, 'Room'); // an opened project shows its results first
   await expect(other.getByLabel('Width', { exact: true })).toHaveValue('4.00\u00a0m');
   await expect(other.getByLabel('Length', { exact: true })).toHaveValue('5.20\u00a0m');
-  expect(other.url()).not.toContain('#p='); // the link is cleaned from the address bar
+  expect(other.url()).toContain('#p='); // the address is the room (V11)
   await friend.close();
 });
 

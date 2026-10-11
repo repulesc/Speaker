@@ -3,7 +3,7 @@
   import { LOCALES } from '../../i18n/translate';
   import type { Locale } from '../../i18n/types';
   import { prefs, type ThemePref } from '../prefs.svelte';
-  import { projectLabel, workspace } from '../session.svelte';
+  import { urlState, workspace } from '../session.svelte';
   import Segmented from './Segmented.svelte';
   import SelectRow from './SelectRow.svelte';
   import Wordmark from './Wordmark.svelte';
@@ -46,7 +46,7 @@
   }
   function startOver() {
     if (!confirm(i18n.t('menu.startOverConfirm'))) return;
-    workspace.startOver();
+    urlState.step(() => workspace.startOver());
     close();
   }
 </script>
@@ -88,6 +88,7 @@
         </svg>
       </button>
       <span class="brand"><Wordmark height={17} /></span>
+      <span aria-hidden="true"></span>
       <h2 id="menu-title" class="visually-hidden">{i18n.t('menu.label')}</h2>
     </header>
 
@@ -117,31 +118,6 @@
         </li>
       </ul>
     </section>
-
-    {#if workspace.index.length > 1}
-      <!-- Only when a shared link added a second room (V9: one room per device otherwise). -->
-      <section class="form-group" aria-labelledby="menu-rooms">
-        <h2 id="menu-rooms">{i18n.t('project.switcher')}</h2>
-        <ul class="rows actions">
-          {#each workspace.index as entry (entry.id)}
-            {@const current = entry.id === project.id}
-            <li>
-              <button
-                type="button"
-                aria-current={current ? 'true' : undefined}
-                onclick={() => {
-                  workspace.switchTo(entry.id);
-                  close();
-                }}
-              >
-                {projectLabel(current ? project.name : entry.name)}
-                {#if current}<span class="tick" aria-hidden="true">✓</span>{/if}
-              </button>
-            </li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
 
     <section class="form-group" aria-labelledby="menu-prefs">
       <h2 id="menu-prefs">{i18n.t('menu.prefs')}</h2>
@@ -260,16 +236,20 @@
     padding: 8px 20px 40px;
   }
   /* The same spot as the panel's masthead: ✕ where ☰ was, the wordmark beside it. */
+  /* The same spot as the panel's masthead: ✕ where ☰ was, the mark on the centre line. */
   .bar {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: 4px;
     min-height: 44px;
     margin-left: -10px;
   }
+  .bar > .icon {
+    justify-self: start;
+  }
   .brand {
     display: flex;
-    margin-left: 8px;
   }
   .name {
     display: grid;
@@ -304,9 +284,5 @@
   }
   .actions .danger {
     color: var(--danger);
-  }
-  .tick {
-    margin-left: auto;
-    color: var(--accent);
   }
 </style>

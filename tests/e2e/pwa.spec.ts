@@ -9,10 +9,10 @@ test('the page title, manifest and icons all come from the one app-name setting'
   await openApp(page);
   const title = await page.title();
   expect(title.length).toBeGreaterThan(0);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
-
   const manifest = await (await page.request.get('/manifest.webmanifest')).json();
-  expect(manifest.name).toBe(title);
+  // The tab shows the name in capitals, as the wordmark spells it (V11); the rest uses it as is.
+  expect(title).toBe(manifest.name.toUpperCase());
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(manifest.name);
   expect(manifest.display).toBe('standalone');
   for (const icon of manifest.icons) {
     expect((await page.request.get(`/${icon.src}`)).ok(), icon.src).toBe(true);

@@ -1,11 +1,12 @@
 {
-  "id": "ess-labs-amt-1d-revival",
-  "brand": "ESS Labs",
+  "id": "ess-amt-1d-revival",
+  "brand": "ESS",
   "model": "AMT-1D Revival",
   "aka": [
+    "ESS Labs AMT-1D",
     "AMT 1D",
     "AMT-1D",
-    "ESS AMT Limited Edition"
+    "AMT Limited Edition"
   ],
   "status": "current",
   "category": "passive",

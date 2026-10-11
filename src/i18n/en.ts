@@ -34,7 +34,6 @@ export const en = {
   project: {
     untitled: 'Untitled room',
     copySuffix: 'copy',
-    switcher: 'Rooms on this device',
     current: 'Current project',
     new: 'New project',
     duplicate: 'Duplicate',
@@ -84,7 +83,6 @@ export const en = {
       notAProject: 'This file or link does not contain a project.',
       newerVersion: 'This project was made with a newer version of the app.',
       invalid: 'This project could not be read: {detail}',
-      tooMany: 'You have too many saved projects. Delete one first.',
     },
     dismiss: 'Dismiss',
   },
@@ -411,6 +409,14 @@ export const en = {
   },
   suggest: {
     title: 'Best placement',
+    locked: 'Optimised position active',
+    lockedHelp: 'Nothing new to suggest from here. Move a speaker or the seat, or look again.',
+    lookAgain: 'Look again',
+    idea: {
+      triangle: 'Equilateral triangle, seat near 38 %',
+      wall: 'Close to the front wall',
+      best: 'Best overall in this room',
+    },
     move: {
       label: 'Find the best place for',
       both: 'Both',
