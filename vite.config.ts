@@ -7,7 +7,8 @@ import { APP_NAME, APP_SHORT_NAME } from './src/app/config.ts';
 function appName(): Plugin {
   return {
     name: 'app-name',
-    transformIndexHtml: (html) => html.replaceAll('%APP_NAME%', APP_NAME),
+    transformIndexHtml: (html) =>
+      html.replaceAll('%APP_TITLE%', APP_NAME.toUpperCase()).replaceAll('%APP_NAME%', APP_NAME),
     generateBundle() {
       this.emitFile({
         type: 'asset',

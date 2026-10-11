@@ -1,15 +1,13 @@
 import type { Project } from '../../engine/types';
 import { applyDefaultPlacement, createDefaultProject } from './defaults';
-import { newId, nowIso } from './ids';
+import { nowIso } from './ids';
 import { SIZE_LIMITS } from './limits';
 import {
   deleteProject,
   loadActiveId,
-  loadIndex,
   loadProject,
   saveActiveId,
   saveProject,
-  type IndexEntry,
   type KeyValueStore,
 } from './persistence';
 
@@ -31,7 +29,8 @@ export interface WorkspaceOptions {
  */
 export class Workspace {
   project = $state<Project>() as Project;
-  index = $state<IndexEntry[]>([]);
+  /** Called after each save: the address bar follows the room (urlState.svelte.ts). */
+  afterFlush: (() => void) | null = null;
   saveState = $state<SaveState>('saved');
 
   #undo: string[] = [];
@@ -44,7 +43,6 @@ export class Workspace {
     private readonly storage: KeyValueStore | null,
     private readonly options: WorkspaceOptions,
   ) {
-    this.index = storage ? loadIndex(storage) : [];
     const activeId = storage ? loadActiveId(storage) : null;
     const saved = storage && activeId ? loadProject(storage, activeId) : null;
     this.project = saved ?? this.#fresh();
@@ -136,11 +134,14 @@ export class Workspace {
   /** Writes the project now (also called when the page is hidden or closed). */
   flush(): void {
     clearTimeout(this.#timer);
-    if (!this.storage) return;
+    if (!this.storage) {
+      this.afterFlush?.();
+      return;
+    }
     const ok = saveProject(this.storage, $state.snapshot(this.project) as Project);
     if (ok) saveActiveId(this.storage, this.project.id);
     this.saveState = ok ? 'saved' : 'failed';
-    this.index = loadIndex(this.storage);
+    this.afterFlush?.();
   }
 
   #open(project: Project): void {
@@ -162,22 +163,24 @@ export class Workspace {
     const old = this.project.id;
     this.newProject();
     if (this.storage) deleteProject(this.storage, old);
-    this.index = this.storage ? loadIndex(this.storage) : [];
   }
 
-  /** Switches to a saved project. Returns false if it cannot be read. */
-  switchTo(id: string): boolean {
-    if (!this.storage || id === this.project.id) return true;
-    const project = loadProject(this.storage, id);
-    if (!project) return false;
-    this.#open(project);
-    return true;
-  }
-
-  /** Opens an imported or shared project as a new project (never overwrites an existing one). */
-  importProject(project: Project): void {
-    if (this.index.length >= SIZE_LIMITS.projects) return;
-    this.#open({ ...project, id: newId() });
+  /**
+   * Opens a project from a link, the Back button or a file in place of the open one: one room per
+   * device (V11), so the open one is replaced as one undoable step and forgotten by the device.
+   */
+  load(project: Project): void {
+    this.flush();
+    const old = this.project.id;
+    this.#undo.push(this.#snapshot());
+    if (this.#undo.length > HISTORY_LIMIT) this.#undo.shift();
+    this.#redo = [];
+    this.project = project;
+    this.#lastCoalesce = null;
+    this.#historyVersion++;
+    this.#changed();
+    this.flush();
+    if (this.storage && old !== project.id) deleteProject(this.storage, old);
   }
 
   /** An empty name makes the project untitled again. */

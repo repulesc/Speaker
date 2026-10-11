@@ -36,7 +36,6 @@ export const hu: Messages = {
   project: {
     untitled: 'Névtelen helyiség',
     copySuffix: 'másolat',
-    switcher: 'Szobák ezen az eszközön',
     current: 'Aktuális projekt',
     new: 'Új projekt',
     duplicate: 'Másolat készítése',
@@ -88,7 +87,6 @@ export const hu: Messages = {
       notAProject: 'Ebben a fájlban vagy linkben nincs projekt.',
       newerVersion: 'Ezt a projektet az alkalmazás újabb verziója készítette.',
       invalid: 'A projektet nem sikerült beolvasni: {detail}',
-      tooMany: 'Túl sok mentett projekted van. Előbb törölj egyet.',
     },
     dismiss: 'Bezárás',
   },
@@ -420,6 +418,15 @@ export const hu: Messages = {
   },
   suggest: {
     title: 'A legjobb elhelyezés',
+    locked: 'Optimalizált elhelyezés aktív',
+    lockedHelp:
+      'Innen nincs új javaslat. Mozdíts egy hangfalat vagy az ülőhelyet, vagy nézd meg újra.',
+    lookAgain: 'Nézd meg újra',
+    idea: {
+      triangle: 'Egyenlő oldalú háromszög, ülőhely kb. 38 %-nál',
+      wall: 'Közel az elülső falhoz',
+      best: 'A szoba legjobb elhelyezése',
+    },
     move: {
       label: 'Mit helyezzünk el',
       both: 'Mindkettőt',

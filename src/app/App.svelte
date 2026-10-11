@@ -13,11 +13,10 @@
   import Survey from './components/Survey.svelte';
   import { goalOf } from './state/goal';
   import { APP_NAME } from './config';
-  import { analysis, projectLabel, showNotice, workspace } from './session.svelte';
+  import { analysis, projectLabel, showNotice, urlState, workspace } from './session.svelte';
   import { ui } from './ui.svelte';
   import { roomSize } from './plan/placement';
   import { viewport } from './viewport.svelte';
-  import { SIZE_LIMITS } from './state/limits';
   import type { ReadResult } from './state/projectFile';
   import { decodeShare, hasShare } from './state/share';
   import { makeShareImage, shareOrSave } from './shareImage';
@@ -77,7 +76,7 @@
 
   // ── Import, export, share links ──────────────────────────────────────────
 
-  function handleImport(result: ReadResult) {
+  function handleImport(result: ReadResult, announce = true) {
     if (!result.ok) {
       showNotice(
         'error',
@@ -88,19 +87,21 @@
       );
       return;
     }
-    if (workspace.index.length >= SIZE_LIMITS.projects) {
-      showNotice('error', i18n.t('import.error.tooMany'));
-      return;
+    workspace.load(result.project);
+    if (announce) {
+      showNotice('success', i18n.t('import.success', { name: projectLabel(result.project.name) }));
     }
-    workspace.importProject(result.project);
-    showNotice('success', i18n.t('import.success', { name: projectLabel(result.project.name) }));
   }
 
-  async function openFromHash() {
-    if (!hasShare(location.hash)) return;
+  /**
+   * The address is the room: a link (or Back and Forward) that holds a room opens it. A fragment
+   * we wrote ourselves is skipped; one that cannot be read is refused and cleaned away.
+   */
+  async function openFromHash(announce = false) {
+    if (!hasShare(location.hash) || location.hash === urlState.last) return;
     const result = await decodeShare(location.hash);
-    history.replaceState(null, '', location.pathname + location.search);
-    handleImport(result);
+    if (!result.ok) history.replaceState(null, '', location.pathname + location.search);
+    handleImport(result, announce);
   }
 
   /** A clean picture of the room, its map and the answer, to post or send. */
@@ -134,7 +135,7 @@
   }
 
   onMount(() => {
-    void openFromHash();
+    void openFromHash(true);
     const flush = () => workspace.flush();
     const onHide = () => document.visibilityState === 'hidden' && flush();
     document.addEventListener('visibilitychange', onHide);
@@ -155,7 +156,7 @@
   });
 </script>
 
-<svelte:window onkeydown={onKeydown} onhashchange={openFromHash} />
+<svelte:window onkeydown={onKeydown} onhashchange={() => void openFromHash()} />
 
 <!-- A rendering error must never leave a blank page (R0 audit): offer a way out instead. -->
 <svelte:boundary onerror={(error) => console.error(error)}>

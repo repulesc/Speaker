@@ -1,5 +1,6 @@
 import { topActions } from './actions';
 import { confidence } from './confidence';
+import { isConverged } from './converged';
 import { buildContext, currentPlacement } from './context';
 import { RULES } from './rules';
 import { bassCurve } from './rules/P09-bass-response';
@@ -66,7 +67,9 @@ export function analyze(
   });
   const [currentRobust] = robustScores(scorer, [placement], seed);
   const current = withFragility(toCandidate(scorer, placement, currentRobust!));
-  const candidates = findCandidates(scorer, seed).map(withFragility);
+  // Converged (after Apply, nothing moved since): no new suggestion from the new spot (V11).
+  const converged = isConverged(project);
+  const candidates = converged ? [] : findCandidates(scorer, seed).map(withFragility);
   const best = candidates[0];
 
   const areaKind = ctx.variant.listener.area;
@@ -105,6 +108,7 @@ export function analyze(
     topActions: topActions(findings, current, best),
     current,
     candidates,
+    ...(converged ? { converged: true } : {}),
     layers,
     advice: advice(ctx, placement, findings),
     folk: folkComparison(layers, ctx.room.L, placement.listener.x),

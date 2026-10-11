@@ -1,5 +1,12 @@
 import { DEFAULTS } from '../../engine/presets/defaults';
-import type { Certainty, Placement, Project, SetupVariant } from '../../engine/types';
+import { appliedOf } from '../../engine/converged';
+import type {
+  Certainty,
+  Placement,
+  PlacementIdea,
+  Project,
+  SetupVariant,
+} from '../../engine/types';
 
 /**
  * Moving things in the room. All functions mutate the project they are given, so they are meant
@@ -133,7 +140,10 @@ export function moveSeat(project: Project, to: Target, options: MoveOptions = {}
 }
 
 /** Moves the speakers and the seat to a best-spot candidate (heights and toe-in stay as they are). */
-export function applyCandidate(project: Project, placement: Placement): void {
+export function applyCandidate(
+  project: Project,
+  placement: Placement & { idea?: PlacementIdea },
+): void {
   const variant = activeVariant(project);
   for (const side of ['left', 'right'] as const) {
     const base = placement.speakers[side].base;
@@ -150,6 +160,7 @@ export function applyCandidate(project: Project, placement: Placement): void {
     ears: { x: round(ears.x), y: round(ears.y), z: variant.listener.ears.z },
     certainty: 'estimated',
   };
+  variant.applied = appliedOf(project, variant, placement.idea ?? 'best');
 }
 
 /** Whether the speakers or the seat are still the first guess (nothing placed by the user yet). */

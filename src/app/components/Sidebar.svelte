@@ -51,9 +51,11 @@
 <div class="sidebar">
   <header class="mast">
     <div class="bar">
-      <MenuDrawer {...props} />
-      <span class="brand"><Wordmark height={17} /></span>
-      {#if name}<span class="room-name" title={name}>{name}</span>{/if}
+      <div class="lead"><MenuDrawer {...props} /></div>
+      <div class="centre">
+        <span class="brand"><Wordmark height={17} /></span>
+        {#if name}<span class="room-name" title={name}>{name}</span>{/if}
+      </div>
       <!-- Saving is silent (V9); only a failure is shown, under the bar. -->
       {#if !saveProblem}
         <span class="visually-hidden" role="status">{i18n.t(`project.${workspace.saveState}`)}</span
@@ -132,25 +134,31 @@
     gap: 14px;
     padding: 8px 20px 14px 10px;
   }
+  /* Menu left, the mark on the panel's centre line, undo and redo right: equal outer columns. */
   .bar {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: 4px;
     min-height: 44px;
   }
+  .lead {
+    display: flex;
+    justify-self: start;
+  }
+  .centre {
+    display: grid;
+    justify-items: center;
+    min-width: 0;
+  }
   .brand {
     display: flex;
-    flex: none;
     align-items: center;
-    margin-left: 8px;
   }
-  /* The room's name, when it has one: quiet, after a hairline, cut short if long. */
+  /* The room's name, when it has one: quiet, under the mark, cut short if long. */
   .room-name {
-    min-width: 0;
-    margin-left: 12px;
-    padding-left: 12px;
+    max-width: 180px;
     overflow: hidden;
-    border-left: 1px solid var(--grid-strong);
     color: var(--ink-muted);
     font-size: var(--text-sm);
     text-overflow: ellipsis;
@@ -163,7 +171,8 @@
   }
   .history {
     display: flex;
-    margin: 0 -10px 0 auto;
+    justify-self: end;
+    margin-right: -10px;
   }
   .icon {
     display: grid;

@@ -4,10 +4,11 @@ import { seededRandom, symmetric } from '../math/random';
 import { DEFAULTS } from '../presets/defaults';
 import { areaPoints, areaScore } from './area';
 import { MIDPOINT_RED_FLAG, midpointOffsetFraction } from '../rules/G01-room-midpoint';
+import { H01_SEAT_FRACTION } from '../rules/H01-38-percent';
 import { BACK_WALL_RED_FLAG } from '../rules/G02-back-wall';
 import { angleRedFlag, stereoAngleDeg } from '../rules/G04-stereo-angle';
 import { speakerCorner } from '../rules/G06-corners';
-import type { Candidate, Placement, SpeakerPlacement, Vec2, Vec3 } from '../types';
+import type { Candidate, Placement, PlacementIdea, SpeakerPlacement, Vec2, Vec3 } from '../types';
 import { Scorer } from './scorer';
 import { scoringSettings } from './settings';
 import { THRESHOLDS as T } from './thresholds';
@@ -462,7 +463,9 @@ export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate
   const { constraints } = scorer.ctx.project;
   if (constraints.speakersFixed && constraints.listenerFixed) return [];
   const { found, compromise, closer } = searchWithCompromise(scorer);
-  const pool = pickDistinct(found, 0.1, 30);
+  // Named ideas next to the plain best (docs/ROADMAP_V11.md): each is refined by the same scorer.
+  const ideas = compromise || closer ? [] : ideaSpots(scorer);
+  const pool = [...pickDistinct(found, 0.1, 30), ...ideas];
   const robust = robustScores(
     scorer,
     pool.map((t) => t.placement),
@@ -474,10 +477,78 @@ export function findCandidates(scorer: Scorer, seed: number, max = 5): Candidate
   const zoneCost = speakerZoneCost(scorer, found[0]?.score ?? null);
   return pickDistinct(ranked, T.candidateSeparation, max).map((p) => ({
     ...toCandidate(scorer, p.placement, p.robust),
+    idea: ideaOf(p.placement, ideas),
     ...(compromise ? { compromise: true } : {}),
     ...(closer ? { closer: true } : {}),
     ...(zoneCost ? { zoneCost } : {}),
   }));
+}
+
+// ── Named ideas (docs/ROADMAP_V11.md) ─────────────────────────────────────
+
+/** How far (m) an idea may be pulled from its textbook layout while the scorer refines it. */
+const IDEA_REFINE = 0.2;
+
+interface IdeaSpot extends Scored {
+  idea: Exclude<PlacementIdea, 'best'>;
+}
+
+const clip = (bounds: [number, number], lo: number, hi: number): [number, number] | null => {
+  const clipped: [number, number] = [Math.max(bounds[0], lo), Math.min(bounds[1], hi)];
+  return clipped[0] <= clipped[1] + 1e-9 ? clipped : null;
+};
+
+/**
+ * The best spot of each idea, inside the user's limits (red flags, listening distance, the speaker
+ * zone), scored like every other spot:
+ * - 'triangle' · speakers and seat in an equilateral triangle (ITU-R BS.775's ±30°, 🟠 guideline),
+ *   the seat near 38 % of the room's length (H01, 🟡 heuristic) unless the seat is fixed;
+ * - 'wall' · speakers as close to the front wall as the port allows, which adds bass (boundary gain,
+ *   [ALL74], 🔴 physics); the seat and the spread are free.
+ * The "wide stance" layout is left out until its source is verified (docs/ROADMAP_V11.md, S3).
+ * Nothing when a speaker or the seat may not move: there is no layout to choose then.
+ */
+function ideaSpots(scorer: Scorer): IdeaSpot[] {
+  const space = searchSpace(scorer.ctx, true, true);
+  if (space.fixedSpeakers || space.fixedListener) return [];
+  const { depth } = scorer.ctx.speaker;
+  const seat = Math.min(
+    Math.max(H01_SEAT_FRACTION * scorer.ctx.room.L, space.listenerY[0]),
+    space.listenerY[1],
+  );
+  const rear = Math.max(space.clearance[0], 0.5);
+  const half = Math.max(0.5, (seat - (rear + depth)) / Math.sqrt(3));
+  const seeds: { idea: IdeaSpot['idea']; params: Params; around: [number, number, number] }[] = [
+    {
+      idea: 'triangle',
+      params: { clearance: rear, half, y: seat },
+      around: [IDEA_REFINE, IDEA_REFINE, IDEA_REFINE],
+    },
+    {
+      idea: 'wall',
+      params: { clearance: space.clearance[0], half, y: seat },
+      around: [0.1, 0.4, 0.5],
+    },
+  ];
+  const out: IdeaSpot[] = [];
+  for (const { idea, params, around } of seeds) {
+    const clearance = clip(
+      space.clearance,
+      params.clearance - around[0],
+      params.clearance + around[0],
+    );
+    const halfSpacing = clip(space.halfSpacing, params.half - around[1], params.half + around[1]);
+    const listenerY = clip(space.listenerY, params.y - around[2], params.y + around[2]);
+    if (!clearance || !halfSpacing || !listenerY) continue;
+    const best = searchWithin(scorer, { ...space, clearance, halfSpacing, listenerY })[0];
+    if (best) out.push({ ...best, idea });
+  }
+  return out;
+}
+
+/** The idea a chosen spot is (within 5 cm of an idea's spot), or the plain best. */
+function ideaOf(placement: Placement, ideas: IdeaSpot[]): PlacementIdea {
+  return ideas.find((i) => placementDistance(i.placement, placement) < 0.05)?.idea ?? 'best';
 }
 
 /**

@@ -2,12 +2,16 @@ import { i18n } from '../i18n/locale.svelte';
 import { defaultSystem } from '../units/format';
 import { AnalysisRunner } from './state/analysis.svelte';
 import { browserStorage } from './state/persistence';
+import { UrlState } from './state/urlState.svelte';
 import { Workspace } from './state/workspace.svelte';
 
 /** The one open workspace and analysis runner for this page. */
 export const workspace = new Workspace(browserStorage(), {
   system: defaultSystem(navigator.language),
 });
+
+/** The address bar follows the room; "Apply" and "Start over" are the only Back steps. */
+export const urlState = new UrlState(workspace);
 
 /** The name to show for a setup variant: its own, or "Current" in the current language. */
 export function variantLabel(name: string): string {

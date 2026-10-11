@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { KeyValueStore } from '../../src/app/state/persistence';
-import { loadIndex, loadProject } from '../../src/app/state/persistence';
+import { loadProject } from '../../src/app/state/persistence';
 import { Workspace } from '../../src/app/state/workspace.svelte';
 import {
   applyDefaultPlacement,
@@ -92,55 +92,47 @@ describe('Workspace', () => {
     expect(ws.saveState).toBe('saved');
   });
 
-  it('manages rooms: new, switch, rename, start over', () => {
+  it('keeps one room per device: rename, start over, open from a link', () => {
     const store = new MemoryStore();
     const ws = new Workspace(store, options);
     const first = ws.project.id;
     ws.rename('First');
-    ws.newProject();
-    const second = ws.project.id;
-    expect(second).not.toBe(first);
-    expect(ws.canUndo).toBe(false);
-    expect(
-      loadIndex(store)
-        .map((e) => e.id)
-        .sort(),
-    ).toEqual([first, second].sort());
-
-    expect(ws.switchTo(first)).toBe(true);
-    expect(ws.project.name).toBe('First');
+    ws.flush();
+    expect(loadProject(store, first)?.name).toBe('First');
 
     // Start over: an empty room replaces the open one, which is deleted.
     ws.startOver();
     expect(ws.project.id).not.toBe(first);
     expect(ws.project.name).toBe('');
     expect(loadProject(store, first)).toBeNull();
-    expect(ws.index).toHaveLength(2);
   });
 
-  it('switching to a missing project reports failure and changes nothing', () => {
-    const ws = new Workspace(new MemoryStore(), options);
-    const id = ws.project.id;
-    expect(ws.switchTo('missing')).toBe(false);
-    expect(ws.project.id).toBe(id);
-  });
-
-  it('imports as a new project and never overwrites', () => {
-    const ws = new Workspace(new MemoryStore(), options);
-    const original = ws.project.id;
-    const incoming = createDefaultProject({ name: 'Imported', system: 'imperial' });
-    ws.importProject(incoming);
-    expect(ws.project.name).toBe('Imported');
-    expect(ws.project.id).not.toBe(incoming.id);
-    expect(ws.index.map((e) => e.id)).toContain(original);
-  });
-
-  it('a stored project list with a repeated id shows each project once', () => {
+  it('opening a room from a link replaces the open one as one undoable step', () => {
     const store = new MemoryStore();
-    const a = { id: 'a', name: 'A', updatedAt: '2026-01-01' };
-    const b = { id: 'b', name: 'B', updatedAt: '2026-01-02' };
-    store.setItem('spa:index', JSON.stringify([a, { ...a, name: 'A again' }, b]));
-    expect(loadIndex(store).map((e) => e.name)).toEqual(['A', 'B']);
+    const ws = new Workspace(store, options);
+    const original = ws.project.id;
+    ws.rename('Mine');
+    const incoming = createDefaultProject({ name: 'Linked', system: 'imperial' });
+    ws.load(incoming);
+    expect(ws.project.name).toBe('Linked');
+    expect(ws.project.id).toBe(incoming.id); // the link's own id: the address stays the same
+    expect(loadProject(store, original)).toBeNull(); // one room per device
+    expect(loadProject(store, incoming.id)?.name).toBe('Linked');
+    ws.undo();
+    expect(ws.project.name).toBe('Mine');
+  });
+
+  it('tells the address bar after every save (the room is the URL)', () => {
+    const ws = new Workspace(new MemoryStore(), options);
+    const saved = vi.fn();
+    ws.afterFlush = saved;
+    ws.edit(setWidth(4));
+    ws.flush();
+    expect(saved).toHaveBeenCalledTimes(1);
+    const nowhere = new Workspace(null, options);
+    nowhere.afterFlush = saved;
+    nowhere.flush();
+    expect(saved).toHaveBeenCalledTimes(2);
   });
 
   it('never opens a stored project that fails validation (here: two setups with one id)', () => {
